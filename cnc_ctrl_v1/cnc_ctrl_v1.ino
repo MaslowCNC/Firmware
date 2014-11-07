@@ -47,7 +47,7 @@ char sect[22];
 
 
 void setup(){
-	Serial.begin(19200);
+	Serial.begin(9600);
 	x.write(90); y.write(90); z.write(90);
 	Serial.println("ready");
 	Serial.println("gready");
