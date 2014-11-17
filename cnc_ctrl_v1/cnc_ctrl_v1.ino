@@ -47,7 +47,7 @@ char sect[22];
 
 
 void setup(){
-	Serial.begin(9600);
+	Serial.begin(19200);
 	x.write(90); y.write(90); z.write(90);
 	Serial.println("ready");
 	Serial.println("gready");
@@ -143,6 +143,7 @@ void loop(){
 	}
 	
 	if(readString.substring(0, 3) == "G10"){
+		Serial.println("Rezero ");
 		G10(readString);
 		Serial.println("gready");
 		readString = "";

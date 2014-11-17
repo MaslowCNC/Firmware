@@ -711,9 +711,9 @@ int Circle(float radius, int direction, float xcenter, float ycenter, float star
 	float stepMultiplier = 55.0; //prevents the circle from looking like its made up of many small lines. 55 is just a made up number that seems about right.
 	float timeStep = -1.45*speed + 200;
 	
-	Serial.println("Rads: ");
+	/*Serial.println("Rads: ");
 	Serial.println(startrad);
-	Serial.println(endrad);
+	Serial.println(endrad);*/
 	
 	endAngle = (int)(endrad*stepMultiplier*radius);
 	
@@ -734,19 +734,19 @@ int Circle(float radius, int direction, float xcenter, float ycenter, float star
 	}
 	
 	
-	Serial.println("IN CIRCLE: ");
+	/*Serial.println("IN CIRCLE: ");
 	Serial.println(radius);
 	Serial.println(direction);
 	Serial.println(startrad);
-	Serial.println(endrad);
+	Serial.println(endrad);*/
 	
 	
 	i = startrad*stepMultiplier*radius;
 	String stopString = "";
-	Serial.print("Start i: ");
+	/*Serial.print("Start i: ");
 	Serial.println(i);
 	Serial.print("End i: ");
-	Serial.println(endAngle);
+	Serial.println(endAngle);*/
 	
 	
 	while(i<endAngle){ //Actual movement takes place by incrementing the target position along the circle.
@@ -817,8 +817,8 @@ int Circle(float radius, int direction, float xcenter, float ycenter, float star
 			ntime = millis();
 		}
 	}
-	Serial.print("End i: ");
-	Serial.println(i);
+	//Serial.print("End i: ");
+	//Serial.println(i);
 	return(1);
 }
 
