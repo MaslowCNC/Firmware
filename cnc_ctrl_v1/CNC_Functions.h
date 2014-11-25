@@ -540,7 +540,7 @@ int G1(String readString){
 	int j = 0;
 	int begin;
 	int end;
-	char sect[22]; //This whole section is kinda a mess maybe it shuld be done line g1go()?
+	char sect[22]; //This whole section is kinda a mess maybe it should be done like g1go()?
 	while (j < 23){
 		sect[j] = ' ';
 		j++;
@@ -661,9 +661,15 @@ int G1(String readString){
 		i++;
 	}
 	
-	if(gospeed >= 4){ //feedrate is preserved because most function lines of gcode rely on it having been preserved from the previous call.
+	
+	
+	if(gospeed >= 4){ //federate is preserved because most function lines of gcode rely on it having been preserved from the previous call.
 		feedrate = gospeed;
+		if(unitScalor > 15){ //running in inches
+			feedrate = gospeed * 25; //convert to inches
+		}
 	}
+	
 	
 	xgoto = xgoto * unitScalor;
 	ygoto = ygoto * unitScalor;
@@ -679,6 +685,8 @@ int G1(String readString){
 	if( zgoto > 9000 ){
 		zgoto = location.ztarget;
 	}
+	
+	
 	
 	
 	int tempo = Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
@@ -885,8 +893,11 @@ int G2(String readString){
 	fval = atof(fsect);
 	
 	
-	if(fval > 1){
+	if(fval > 4){ //preserves the feedrate for the next call
 		feedrate = fval;
+		if(unitScalor > 15){ //running in inches
+			feedrate = fval * 25; //convert to inches
+		}
 	}
 	
 	float ScaledXLoc = -1*location.xtarget;
