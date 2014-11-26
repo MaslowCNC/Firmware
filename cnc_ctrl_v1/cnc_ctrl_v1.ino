@@ -100,8 +100,8 @@ void estop(){
 		panic = 0;
 		attachInterrupt(5,estop,LOW);  //mischief managed, start watching for trouble again.
 		if (xstate == 1){x.attach(XSERVO);}  // re-enable any servos that were attached
-		if (ystate == 1){x.attach(YSERVO);}
-		if (zstate == 1){x.attach(ZSERVO);}
+		if (ystate == 1){y.attach(YSERVO);}
+		if (zstate == 1){z.attach(ZSERVO);}
 	}
 }
 
