@@ -80,6 +80,7 @@ void setup(){
 
 void estop(){
 	if(panic == 0){
+		panic = 1;
  		detachInterrupt(5);  // the interrupt already fired, we have the con until we give it up
  		Serial.println("ESTOP"); // send a message to groundcontrol
 		x.detach(); //Detach the motors to prevent them from being damaged
