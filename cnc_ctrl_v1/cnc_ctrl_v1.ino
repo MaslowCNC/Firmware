@@ -83,6 +83,9 @@ void estop(){
 		panic = 1;
  		detachInterrupt(5);  // the interrupt already fired, we have the con until we give it up
  		Serial.println("ESTOP"); // send a message to groundcontrol
+		int xstate = x.attached();  //save current servo states
+		int ystate = y.attached();
+		int zstate = z.attached();
 		x.detach(); //Detach the motors to prevent them from being damaged
 		y.detach();
 		z.detach();
@@ -96,6 +99,9 @@ void estop(){
 		Serial.println("ESTOP cleared");  // let ground control know we are clear
 		panic = 0;
 		attachInterrupt(5,estop,LOW);  //mischief managed, start watching for trouble again.
+		if (xstate == 1){x.attach(XSERVO);}  // re-enable any servos that were attached
+		if (ystate == 1){x.attach(YSERVO);}
+		if (zstate == 1){x.attach(ZSERVO);}
 	}
 }
 
