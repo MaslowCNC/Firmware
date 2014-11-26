@@ -25,6 +25,8 @@
 
 
 int spindle = 11;
+int estopswitch = 18;
+int estoppower = 19;
 String readString;
 String prependString;
 long time = millis();
