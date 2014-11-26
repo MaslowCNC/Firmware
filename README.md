@@ -1,3 +1,5 @@
+WARNING!  This is a fork of the official software.  This code does not yet work safely.  Use the official MakesmithTech code unless you are fixing bugs in this version.    -Andrew
+
 MakesmithFirmware
 =================
 
