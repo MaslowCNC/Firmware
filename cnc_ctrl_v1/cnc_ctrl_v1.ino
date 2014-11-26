@@ -27,6 +27,7 @@
 int spindle = 11;
 int estopswitch = 18;
 int estoppower = 19;
+volatile int panic = 0;
 String readString;
 String prependString;
 long time = millis();
@@ -75,7 +76,8 @@ void setup(){
 }
 
 void estop(){
- noInterrupts();  // the interrupt already fired, we have the con until we give it up
+ if(panic == 0){
+ detachInterrupt(5);  // the interrupt already fired, we have the con until we give it up
  Serial.println("ESTOP"); // send a message to groundcontrol
  x.detach(); //Detach the motors to prevent them from being damaged
  y.detach();
@@ -88,7 +90,8 @@ void estop(){
    delay(500);
    }
  Serial.println("ESTOP cleared");  // let ground control know we are clear
- interrupts();  //mischief managed, start watching for trouble again.
+ panic = 0;
+ attachInterrupt(5,estop,LOW);  //mischief managed, start watching for trouble again.
 }
 
 void loop(){
