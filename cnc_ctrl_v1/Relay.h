@@ -30,7 +30,7 @@
 class Relay
 {
   public:
-    Morse(int pin);
+    Relay(int pin);
     void enable();
     void disable();
     int state();
