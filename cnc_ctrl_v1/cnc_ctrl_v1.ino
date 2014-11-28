@@ -20,6 +20,7 @@
 
 #include <Servo.h>
 #include "MyTypes.h"
+#include "Relay.h"
 #include <SPI.h>
 #include "CNC_Functions.h"
 
@@ -61,8 +62,9 @@ void setup(){
 	x.write(90); y.write(90); z.write(90);
 	Serial.println("ready");
 	Serial.println("gready");
-	pinMode(spindle, OUTPUT);           // set pin to input
-	digitalWrite(spindle, LOW);       // turn on pullup resistors
+	//pinMode(spindle, OUTPUT);           // set pin to input
+	//digitalWrite(spindle, LOW);       // turn on pullup resistors
+	Relay S(spindle);
 	analogReference(EXTERNAL);
 	pinMode(xpot, INPUT);
 	pinMode(xpot, INPUT);
@@ -86,9 +88,11 @@ void estop(){
 		int xstate = x.attached();  //save current servo states
 		int ystate = y.attached();
 		int zstate = z.attached();
+		int sstate = s.state();
 		x.detach(); //Detach the motors to prevent them from being damaged
 		y.detach();
 		z.detach();
+		s.disable();
  
 		int estopstate = LOW;  // declare a local variable for manually reading the switch
 		while(estopstate == LOW){
@@ -102,6 +106,7 @@ void estop(){
 		if (xstate == 1){x.attach(XSERVO);}  // re-enable any servos that were attached
 		if (ystate == 1){y.attach(YSERVO);}
 		if (zstate == 1){z.attach(ZSERVO);}
+		if (sstate == 1){s.enable(ZSERVO);}
 	}
 }
 
@@ -207,10 +212,12 @@ void loop(){
 	
 	if(readString[0] == 'S' || readString[0] == 's'){
 		if(readString[1] == '5'){
-			digitalWrite(spindle, HIGH);       
+			//.digitalWrite(spindle, HIGH);       
+			S.enable
 		}
 		if(readString[1] == '0'){
-			digitalWrite(spindle, LOW);
+			//digitalWrite(spindle, LOW);
+			S.disable
 		}
 		Serial.println("gready");
 		readString = "";
