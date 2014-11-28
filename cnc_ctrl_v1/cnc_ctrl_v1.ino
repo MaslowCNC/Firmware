@@ -64,7 +64,6 @@ void setup(){
 	Serial.println("gready");
 	//pinMode(spindle, OUTPUT);           // set pin to input
 	//digitalWrite(spindle, LOW);       // turn on pullup resistors
-	Relay s(spindle);
 	analogReference(EXTERNAL);
 	pinMode(xpot, INPUT);
 	pinMode(xpot, INPUT);
@@ -106,7 +105,7 @@ void estop(){
 		if (xstate == 1){x.attach(XSERVO);}  // re-enable any servos that were attached
 		if (ystate == 1){y.attach(YSERVO);}
 		if (zstate == 1){z.attach(ZSERVO);}
-		if (sstate == 1){s.enable(ZSERVO);}
+		if (sstate == 1){s.enable();}
 	}
 }
 
@@ -213,11 +212,11 @@ void loop(){
 	if(readString[0] == 'S' || readString[0] == 's'){
 		if(readString[1] == '5'){
 			//.digitalWrite(spindle, HIGH);       
-			s.enable
+			s.enable();
 		}
 		if(readString[1] == '0'){
 			//digitalWrite(spindle, LOW);
-			s.disable
+			s.disable();
 		}
 		Serial.println("gready");
 		readString = "";

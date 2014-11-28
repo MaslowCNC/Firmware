@@ -35,6 +35,7 @@
 #define XSERVO 5
 #define YSERVO 6
 #define ZSERVO 7
+#define SPINDLE 11
 
 #define TOLERANCE .3//this sets how close to the target point the tool must be before it moves on.
 
@@ -50,6 +51,8 @@ int initialXspot;
 Servo x;
 Servo y;
 Servo z;
+Relay s(SPINDLE);
+
 int servoDetachFlag = 1;
 int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
 

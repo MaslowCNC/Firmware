@@ -15,6 +15,7 @@
 
         Copyright 2014 Andrew Albinger*/
 
+#include "Relay.h"
 
 Relay::Relay(int pin)
 {
