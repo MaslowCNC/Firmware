@@ -25,6 +25,7 @@
 Relay::Relay(int pin)
 {
   pinMode(pin, OUTPUT);
+  digitalWrite(pin, LOW);  // Start out with relays disabled
   _pin = pin;
 }
 
