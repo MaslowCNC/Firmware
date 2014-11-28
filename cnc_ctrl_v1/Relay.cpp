@@ -15,31 +15,26 @@
 
         Copyright 2014 Andrew Albinger*/
 
-   /* Relay.h provides a class for handling a relay attached to an arduino pin.
-      Provided functions are:
-	void Relay(int) - constructor 
-	void Relay.enable() - energize the relay
-	void Relay.disable() - de-energize the relay
-	int Relay.state() - return the current state of the relay.
-   */
-#ifndef Relay_h
-#define Relay_h
 
-#include "Arduino.h"
-
-class Relay
+Relay::Relay(int pin)
 {
-  public:
-    Morse(int pin);
-    void enable();
-    void disable();
-    int state();
-  private:
-    int _pin;
-};
+  pinMode(pin, OUTPUT);
+  digitalWrite(pin, LOW);  // Start out with relays disabled
+  _pin = pin;
+}
 
-#endif
+void Relay::enable()
+{
+  digitalWrite(_pin, HIGH);
+}
 
+void Relay::disable()
+{
+  digitalWrite(_pin, LOW);
+}
 
-
-
+int Relay::state()
+{
+  int _state = digitalRead(_pin);
+  return(_state); 
+}
