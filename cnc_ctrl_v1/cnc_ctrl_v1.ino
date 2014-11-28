@@ -64,7 +64,7 @@ void setup(){
 	Serial.println("gready");
 	//pinMode(spindle, OUTPUT);           // set pin to input
 	//digitalWrite(spindle, LOW);       // turn on pullup resistors
-	Relay S(spindle);
+	Relay s(spindle);
 	analogReference(EXTERNAL);
 	pinMode(xpot, INPUT);
 	pinMode(xpot, INPUT);
@@ -213,11 +213,11 @@ void loop(){
 	if(readString[0] == 'S' || readString[0] == 's'){
 		if(readString[1] == '5'){
 			//.digitalWrite(spindle, HIGH);       
-			S.enable
+			s.enable
 		}
 		if(readString[1] == '0'){
 			//digitalWrite(spindle, LOW);
-			S.disable
+			s.disable
 		}
 		Serial.println("gready");
 		readString = "";
