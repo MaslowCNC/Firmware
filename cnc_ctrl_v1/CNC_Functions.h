@@ -37,6 +37,7 @@
 #define ZSERVO 7
 
 #define TOLERANCE .3//this sets how close to the target point the tool must be before it moves on.
+#define MOVETOLERANCE .2 //this sets how close the machine must be to the target line at any given moment
 
 
 int stepsize = 1;
@@ -58,8 +59,8 @@ takes this duration and converts it to a ten bit number.*/
 int PWMread(int pin){
 	int duration = 0;
 	
-	duration = pulseIn(pin, HIGH, 2000);
-	duration = (int)((float)duration*1.23); //1.23 scales it to a ten bit number
+	duration = pulseIn(pin, HIGH, 2000); //This returns 
+	duration = (int)((float)duration*1.15); //1.23 scales it to a ten bit number
 	
 	if (duration >= 1023){
 		duration = 1023;
@@ -68,7 +69,6 @@ int PWMread(int pin){
 	if (duration < 10){
 		duration = 0;
 	}
-	
 	return duration;
 }
 
@@ -292,7 +292,6 @@ int SetPos(location_st* position){
 		} 
 		loopCount = 0;
 	}
-	
 }
 
 /*BoostLimit sets the upper and lower bounds of the signals which go to the servos to prevent weird behavior. Valid input to set the servo speed ranges from 0-180, and the Arduino servo library gives strange results if you go outside those limits.*/
@@ -397,6 +396,7 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 	float moveFract;
 	static int shortCount = 0;
 	static int gain = 123;
+	int timeStep = 10;
 	//Serial.println("Length: ");
 	//Serial.println(pathLength);
 	
@@ -448,15 +448,18 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 	}
 	
 	String stopString = "";
-	while(1){ //The movement takes place here
+	while(1){ //The movement takes place in here
 		SetPos(&location);
 		SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, gain);
-		if( millis() - mtime > 10 && abs(location.xpos - location.xtarget) < TOLERANCE && abs(location.ypos - location.ytarget) < TOLERANCE && abs(location.zpos - location.ztarget) < TOLERANCE){ //updates the position if the tool is close to the target and the elapsed time has passed
-			location.xtarget = location.xtarget + xIncmtDist;
-			location.ytarget = location.ytarget + yIncmtDist;
-			location.ztarget = location.ztarget + zIncmtDist;
-			mtime = millis();
+		if( millis() - mtime > timeStep){ 
+			if(abs(location.xpos - location.xtarget) < MOVETOLERANCE && abs(location.ypos - location.ytarget) < MOVETOLERANCE && abs(location.zpos - location.ztarget) < MOVETOLERANCE){ //updates the position if the tool is close to the target and the elapsed time has passed
+				location.xtarget = location.xtarget + xIncmtDist;
+				location.ytarget = location.ytarget + yIncmtDist;
+				location.ztarget = location.ztarget + zIncmtDist;
+				mtime = millis();
+			}
 		}
+		//Serial.println(abs(location.ypos - location.ytarget));
 		if( millis() - ntime > 300){ //Checks to see if the machine is stuck
 			deltaX = abs(tempXpos - location.xpos); //where it was minus where it is now is the change
 			deltaY = abs(tempYpos - location.ypos);
