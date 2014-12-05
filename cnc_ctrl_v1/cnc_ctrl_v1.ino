@@ -186,7 +186,7 @@ void loop(){
 	}
 	
 	if(readString.substring(0, 3) == "G20"){
-		Serial.println("Inches Set");
+		#Serial.println("Inches Set");
 		unitScalor = 20; //there are 20 rotations per inch
 		Serial.println("gready");
 		readString = "";
@@ -253,7 +253,7 @@ void loop(){
 	}
 	
 	if(readString.substring(0, 3) == "B05"){
-		Serial.println("Firmware Version .56");
+		Serial.println("Firmware Version .57");
 		Serial.println("gready");
 	}
 	
