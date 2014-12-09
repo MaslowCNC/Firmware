@@ -789,7 +789,7 @@ int Circle(float radius, int direction, float xcenter, float ycenter, float star
 		}
 		
 		if( millis() - ntime > 300){
-			deltaX = abs(tempXpos - location.xpos); //where it was minus where it is now is the change
+			deltaX = abs(tempXpos - location.xpos); 
 			deltaY = abs(tempYpos - location.ypos);
 			deltaZ = abs(tempZpos - location.zpos);
 			
@@ -914,8 +914,9 @@ int G2(String readString){
 		nval = getAngle(xval, yval, xCenter, yCenter); //computes the ending point on the circle
 	}
 	
+	
 	int CircleReturnVal = 0;
-	if(readString[2] == '2'){
+	if(readString[2] == '2' || readString[1] == '2'){
 		mval = 2 - mval; //flips the direction
 		nval = 2 - nval;
 		CircleReturnVal = Circle(radius, -1, xCenter, yCenter, mval, nval, feedrate);
@@ -923,6 +924,7 @@ int G2(String readString){
 	else{
 		CircleReturnVal = Circle(radius, 1, xCenter, yCenter, mval, nval, feedrate);
 	}
+	
 	
 	if(CircleReturnVal == 1){
 		while( abs(location.xpos + xval) > TOLERANCE or abs(location.ypos - yval) > TOLERANCE){ //This ensures that the circle is completed and that if it is a circle with a VERY large radius and a small angle it isn't neglected
