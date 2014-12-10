@@ -741,7 +741,7 @@ int Circle(float radius, int direction, float xcenter, float ycenter, float star
 		Serial.print("Radius of ");
 		Serial.print(radius);
 		Serial.println(" produced an error");
-		return(0);
+		return(1);
 	}
 	
 	
