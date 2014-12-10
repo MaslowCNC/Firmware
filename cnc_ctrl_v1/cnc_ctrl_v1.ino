@@ -242,6 +242,7 @@ void loop(){
 		//root.openRoot(volume);
 		// list all files in the card with date and size
 		//root.ls(LS_R);
+		readString = "";
 		Serial.println("gready");
 	}
 	
@@ -249,11 +250,13 @@ void loop(){
 		//root.openRoot(volume); 
 		// list all files in the card with date and size
 		//root.ls(LS_R);
+		readString = "";
 		Serial.println("gready");
 	}
 	
 	if(readString.substring(0, 3) == "B05"){
 		Serial.println("Firmware Version .57");
+		readString = "";
 		Serial.println("gready");
 	}
 	
@@ -284,6 +287,7 @@ void loop(){
 			Serial.println(readString);
 			Serial.println("gready");
 		}
+		readString = "";
 	}
 	
 	if( millis() - time > 500){
@@ -306,8 +310,8 @@ void loop(){
 	}
 	
 	if (readString.length() > 0){
-		//Serial.print("Didn't know what to do with: ");
-		//Serial.println(readString);
+		Serial.print("Unrecognized Gcode: ");
+		Serial.println(readString);
 		readString = "";
 		Serial.println("gready");
 	}
