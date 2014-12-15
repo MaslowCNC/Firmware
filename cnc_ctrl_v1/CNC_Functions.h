@@ -1128,6 +1128,16 @@ int testBoth(){
 	}
 }
 
+void centerMotors(){
+	x.write(90);
+	y.write(90);
+	z.write(90);
+	long tmptime = millis();
+	while(millis() - tmptime < 2000){ //This is just a delay which doesn't loose the machine's position.
+		SetPos(&location); 
+	}
+}
+
 /*The G10() function handles the G10 gcode which re-zeroes one of all of the machine's axies.*/
 void G10(String readString){
 	
@@ -1142,5 +1152,44 @@ void G10(String readString){
 	if(readString.indexOf('Z') > 2){
 		location.zpos = 0.0;
 		location.ztarget = 0.0;
+	}
+}
+
+int ManualControl(String readString){
+	String readString2 = readString;
+	int stringLength = readString2.length();
+	while(1){
+		if (Serial.available()){
+			while (Serial.available()) {
+				delay(1);  //delay to allow buffer to fill 
+				if (Serial.available() > 0) {
+					char c = Serial.read();  //gets one byte from serial buffer
+					readString2 += c; //makes the string readString
+				} 
+			}
+		}
+		SetPos(&location);
+		stringLength = readString2.length();
+		if(stringLength > 0){
+			Serial.println(readString2);
+			
+			if(readString2 == "Exit Manual Control"){
+				Serial.println("Test Complete");
+				return(1);
+			}
+			if(readString2.indexOf('X') > 2){
+				x.write((readString2.substring(5)).toInt());
+			}
+			if(readString2.indexOf('Y') > 2){
+				y.write((readString2.substring(5)).toInt());
+			}
+			if(readString2.indexOf('Z') > 2){
+				z.write((readString2.substring(5)).toInt());
+			}
+			
+			Serial.println("gready");
+		}
+		
+		readString2 = "";
 	}
 }

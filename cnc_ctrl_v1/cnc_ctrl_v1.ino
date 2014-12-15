@@ -185,6 +185,11 @@ void loop(){
 		readString = "";
 	}
 	
+	if(readString.substring(0, 3) == "G17"){ //XY plane is the default so no action is taken
+		Serial.println("gready");
+		readString = "";
+	}
+	
 	if(readString.substring(0, 3) == "G20"){
 		//Serial.println("Inches Set");
 		unitScalor = 20; //there are 20 rotations per inch
@@ -199,7 +204,12 @@ void loop(){
 		readString = "";
 	}
 	
-	if(readString.substring(0, 3) == "G90"){
+	if(readString.substring(0, 3) == "G90"){ //G90 is the default so no action is taken
+		Serial.println("gready");
+		readString = "";
+	}
+	
+	if(readString.substring(0, 3) == "M06"){ //Tool change are default so no action is taken
 		Serial.println("gready");
 		readString = "";
 	}
@@ -260,6 +270,16 @@ void loop(){
 		Serial.println("gready");
 	}
 	
+	if(readString.substring(0, 3) == "B06"){
+		Serial.println("speed set recognized");
+		ManualControl(readString);
+		location.xtarget = location.xpos;
+		location.ytarget = location.ypos;
+		location.ztarget = location.zpos;
+		readString = "";
+		Serial.println("gready");
+	}
+	
 	if(readString == "Test Encoders"){
 		testEncoders();
 		readString = "";
@@ -274,6 +294,13 @@ void loop(){
 	
 	if(readString == "Test Both"){
 		testBoth();
+		readString = "";
+		Serial.println("gready");
+	}
+	
+	if(readString == "Center Motors"){
+		Serial.println("center motors test begin");
+		centerMotors();
 		readString = "";
 		Serial.println("gready");
 	}
