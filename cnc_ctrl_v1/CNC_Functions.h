@@ -666,11 +666,12 @@ int G1(String readString){
 	
 	
 	
+	if(unitScalor > 15){ //running in inches
+			gospeed = gospeed * 25; //convert to inches
+	}
+	
 	if(gospeed >= 4){ //federate is preserved because most function lines of gcode rely on it having been preserved from the previous call.
 		feedrate = gospeed;
-		if(unitScalor > 15){ //running in inches
-			feedrate = gospeed * 25; //convert to inches
-		}
 	}
 	
 	
@@ -895,6 +896,9 @@ int G2(String readString){
 	jval = atof(jsect)*unitScalor;
 	fval = atof(fsect);
 	
+	if(unitScalor > 15){ //running in inches
+			fval = fval * 25; //convert to inches
+	}
 	
 	if(fval > 4){ //preserves the feedrate for the next call
 		feedrate = fval;
