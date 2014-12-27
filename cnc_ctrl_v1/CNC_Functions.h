@@ -461,7 +461,7 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 		}
 		//Serial.println(abs(location.ypos - location.ytarget));
 		if( millis() - ntime > 300){ //Checks to see if the machine is stuck
-			deltaX = abs(tempXpos - location.xpos); //where it was minus where it is now is the change
+			deltaX = abs(tempXpos - location.xpos); //where it was - where it is now = the change
 			deltaY = abs(tempYpos - location.ypos);
 			deltaZ = abs(tempZpos - location.zpos);
 			
@@ -549,7 +549,8 @@ int G1(String readString){
 		j++;
 	}
 	i = 2;
-	while (i <= readString.length()){ //This code extracts the relivant information from the string. It's crude and should be made to work like the code in the g2go() function.
+	memset(sect,0,sizeof(sect)); //This clears the array
+	while (i <= readString.length()){ //This code extracts the relevant information from the string. It's crude and should be made to work like the code in the g2go() function.
 		if(readString[i] == 'X'){
 			begin = i + 1;
 			while (i <= readString.length()){
@@ -605,6 +606,7 @@ int G1(String readString){
 		i++;
 	}
 	i = 2;
+	memset(sect,0,sizeof(sect)); //This clears the array
 	while (i <= readString.length()){
 		j = 0;
 		while (j < 23){
@@ -637,6 +639,7 @@ int G1(String readString){
 		i++;
 	}
 	i = 2;
+	memset(sect,0,sizeof(sect)); //This clears the array
 	while (i <= readString.length()){
 		//Serial.println("in length ran");
 		if(readString[i] == 'F'){
@@ -644,7 +647,6 @@ int G1(String readString){
 			//Serial.println(i);
 			begin = i + 1;
 			while (i <= readString.length()){
-				//Serial.println("that");
 				if(readString[i] == ' '){
 					//Serial.println("space detected at");
 					//Serial.println(i);
@@ -658,6 +660,8 @@ int G1(String readString){
 				sect[i - begin] = readString[i];
 				i++;
 			}
+			//Serial.println("Sect: ");
+			//Serial.println(sect);
 			gospeed = atof(sect);
 			break;
 		}
@@ -665,19 +669,17 @@ int G1(String readString){
 	}
 	
 	
-	
 	if(unitScalor > 15){ //running in inches
 			gospeed = gospeed * 25; //convert to inches
 	}
-	
 	if(gospeed >= 4){ //federate is preserved because most function lines of gcode rely on it having been preserved from the previous call.
 		feedrate = gospeed;
 	}
 	
-	
 	xgoto = xgoto * unitScalor;
 	ygoto = ygoto * unitScalor;
 	zgoto = zgoto * unitScalor;
+	
 	
 	
 	if( xgoto > 9000 ){ //These check to see if a variable hasn't been changed and make the machine hold position on that axis
@@ -689,8 +691,6 @@ int G1(String readString){
 	if( zgoto > 9000 ){
 		zgoto = location.ztarget;
 	}
-	
-	
 	
 	
 	int tempo = Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
@@ -902,9 +902,6 @@ int G2(String readString){
 	
 	if(fval > 4){ //preserves the feedrate for the next call
 		feedrate = fval;
-		if(unitScalor > 15){ //running in inches
-			feedrate = fval * 25; //convert to inches
-		}
 	}
 	
 	float ScaledXLoc = -1*location.xtarget;
