@@ -179,7 +179,6 @@ void loop(){
 	}
 	
 	if(readString.substring(0, 3) == "G10"){
-		Serial.println("Rezero ");
 		G10(readString);
 		Serial.println("gready");
 		readString = "";

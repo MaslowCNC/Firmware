@@ -738,12 +738,12 @@ int Circle(float radius, int direction, float xcenter, float ycenter, float star
 			startrad = 2 - startrad;
 		}*/
 	}
-	if (radius > 400){ //This resolved a bug where very small circles were being misrepresented as VERY large circles. It may not do anything anymore.
+	/*if (radius > 400){ //This resolved a bug where very small circles were being misrepresented as VERY large circles. It may not do anything anymore.
 		Serial.print("Radius of ");
 		Serial.print(radius);
 		Serial.println(" produced an error");
 		return(1);
-	}
+	}*/
 	
 	
 	/*Serial.println("IN CIRCLE: ");
