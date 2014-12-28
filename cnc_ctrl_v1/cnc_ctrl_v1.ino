@@ -336,8 +336,8 @@ void loop(){
 	}
 	
 	if (readString.length() > 0){
-		Serial.print("Unrecognized Gcode: ");
-		Serial.println(readString);
+		//Serial.println(readString);
+		//Serial.println("<-- Unknown");
 		readString = "";
 		Serial.println("gready");
 	}
