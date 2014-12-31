@@ -67,7 +67,7 @@ void setup(){
 	pinMode(xpot, INPUT);
 	pinMode(xpot, INPUT);
 	pinMode(zpot, INPUT);
-	pinMode(53, OUTPUT);
+	pinMode(SENSEPIN, INPUT_PULLUP);
 	//card.init(SPI_HALF_SPEED, chipSelect); //setup SD card
 	//volume.init(card);
 	//lcdBegin(); //Initialize the LCD
@@ -108,6 +108,7 @@ void estop(){
 void loop(){
 	readString = "";
 	
+
 	if (Serial.available()){
 		while (Serial.available()) {
 			delay(1);  //delay to allow buffer to fill 
@@ -270,11 +271,19 @@ void loop(){
 	}
 	
 	if(readString.substring(0, 3) == "B06"){
-		Serial.println("speed set recognized");
 		ManualControl(readString);
 		location.xtarget = location.xpos;
 		location.ytarget = location.ypos;
 		location.ztarget = location.zpos;
+		readString = "";
+		Serial.println("gready");
+	}
+	if(readString.substring(0, 3) == "B07"){
+		float ofset = toolOffset(SENSEPIN);
+		location.zpos = 0.0;
+		location.ztarget = location.zpos - ofset;
+		Move(location.xtarget, location.ytarget, location.ztarget, 127);
+		time = millis();
 		readString = "";
 		Serial.println("gready");
 	}

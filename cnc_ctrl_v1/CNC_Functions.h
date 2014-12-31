@@ -36,6 +36,8 @@
 #define YSERVO 6
 #define ZSERVO 7
 
+#define SENSEPIN 53
+
 #define TOLERANCE .3//this sets how close to the target point the tool must be before it moves on.
 #define MOVETOLERANCE .2 //this sets how close the machine must be to the target line at any given moment
 
@@ -1159,6 +1161,7 @@ void G10(String readString){
 int ManualControl(String readString){
 	String readString2 = readString;
 	int stringLength = readString2.length();
+	long tmptime = millis();
 	while(1){
 		if (Serial.available()){
 			while (Serial.available()) {
@@ -1174,23 +1177,51 @@ int ManualControl(String readString){
 		if(stringLength > 0){
 			Serial.println(readString2);
 			
-			if(readString2 == "Exit Manual Control"){
+			if(readString2 == "Exit Manual Control "){
 				Serial.println("Test Complete");
 				return(1);
 			}
-			if(readString2.indexOf('X') > 2){
+			if(readString2.indexOf('X') > 2 && readString2.indexOf('B') == 0){
 				x.write((readString2.substring(5)).toInt());
+				tmptime = millis();
 			}
-			if(readString2.indexOf('Y') > 2){
+			if(readString2.indexOf('Y') > 2 && readString2.indexOf('B') == 0){
 				y.write((readString2.substring(5)).toInt());
+				tmptime = millis();
 			}
-			if(readString2.indexOf('Z') > 2){
+			if(readString2.indexOf('Z') > 2 && readString2.indexOf('B') == 0){
 				z.write((readString2.substring(5)).toInt());
+				tmptime = millis();
 			}
 			
 			Serial.println("gready");
 		}
+		if(millis() - tmptime > 5000){
+			Serial.println("Test Complete - Timed Out");
+			return(1);
+		}
 		
 		readString2 = "";
+	}
+}
+
+float toolOffset(int pin){
+	long tmptime = millis();
+	long tmpTimeout = millis();
+	while(1){
+		tmptime = millis();
+		location.ztarget = location.ztarget - .05;
+		while(millis() - tmptime < 100){ //This is just a delay which doesn't loose the machine's position.
+			SetPos(&location); 
+			SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 123);
+
+			if(digitalRead(pin) == 0){  //The surface has been found
+				return(location.zpos);
+			}
+		}
+		if(millis() - tmpTimeout > 3000){ //if it has to move down for more than three seconds it will time out
+			Serial.println("Surface not found, position the tool closer to the sufrace and try again.");
+			return(location.zpos);
+		}
 	}
 }
