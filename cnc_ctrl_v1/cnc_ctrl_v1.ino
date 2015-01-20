@@ -68,14 +68,23 @@ void setup(){
 	pinMode(xpot, INPUT);
 	pinMode(zpot, INPUT);
 	pinMode(SENSEPIN, INPUT_PULLUP);
-	//card.init(SPI_HALF_SPEED, chipSelect); //setup SD card
-	//volume.init(card);
-	//lcdBegin(); //Initialize the LCD
-	//setContrast(contrast); 
-	//analogWrite(blPin, backLight); //0-255
-	//clearDisplay(WHITE);
-	//SetScreen(0.0, 0.0, 0.0);
+	noInterrupts();
+	TCCR1A = 0;
+	TCCR1B = 0;
+	TCNT1 = 50000;
+	TCCR1B |= (1 << CS12);
+	TIMSK1 |= (1 << TOIE1);
+	interrupts();   
 	initialXspot = PWMread(ypot);
+}
+
+ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven
+{
+	TCNT1 = 64000;            // preload timer
+	//Serial.println("this ran");
+	//SetPos(&location); 
+	//SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 123);
+	
 }
 
 void estop(){
@@ -108,6 +117,8 @@ void estop(){
 void loop(){
 	readString = "";
 	
+	SetPos(&location); 
+	SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 123);
 
 	if (Serial.available()){
 		while (Serial.available()) {
@@ -119,8 +130,6 @@ void loop(){
 		}
 	}
 	
-	SetPos(&location); 
-	SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 123);
 	
 	i = 0;
 	while (i < 23){

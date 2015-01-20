@@ -729,47 +729,37 @@ int Circle(float radius, int direction, float xcenter, float ycenter, float star
 	Serial.println(startrad);
 	Serial.println(endrad);*/
 	
-	endAngle = (int)(endrad*stepMultiplier*radius);
+	//This adress a wierd issue where sometimes CAD packages use a circle with a HUGE radius to aproximate a straight line. The problem with this is that the arduino has
+	//a hard time doing very precise floating point math, so when you use a very large radius it ends up being inacurate. This shuld be solved in some better way.
+	if(radius > 300 && abs(startrad - endrad) < 0.2){ 
+		return(1);
+	}
+
+	endAngle = endrad*stepMultiplier*radius;
+	i = startrad*stepMultiplier*radius;
 	
 	if(endrad < startrad){ //avoids weird behavior when not valid indices are sent
 		endAngle = endAngle + (int)(2*stepMultiplier*radius);
-		/*if(endrad > 1.9 or endrad < .1){ //If the end is very close to the wrap around point it is changed.
-			endrad = 2 - endrad; 
-		}
-		else{
-			startrad = 2 - startrad;
-		}*/
 	}
-	/*if (radius > 400){ //This resolved a bug where very small circles were being misrepresented as VERY large circles. It may not do anything anymore.
-		Serial.print("Radius of ");
-		Serial.print(radius);
-		Serial.println(" produced an error");
-		return(1);
-	}*/
-	
 	
 	/*Serial.println("IN CIRCLE: ");
 	Serial.println(radius);
 	Serial.println(direction);
-	Serial.println(startrad);
-	Serial.println(endrad);*/
-	
-	
-	i = startrad*stepMultiplier*radius;
-	String stopString = "";
-	/*Serial.print("Start i: ");
+	Serial.println(startrad,7);
+	Serial.println(endrad,7);
+	Serial.print("Start i: ");
 	Serial.println(i);
 	Serial.print("End i: ");
 	Serial.println(endAngle);*/
 	
-	
+	String stopString = "";
 	while(i<endAngle){ //Actual movement takes place by incrementing the target position along the circle.
-		
 		if (Serial.available() > 0) {
 			char c = Serial.read();  //gets one byte from serial buffer
 			stopString += c; //makes the string readString
 			//Serial.println(stopString);
 			if(stopString == "STOP"){
+				Serial.println("STOP");
 				Serial.println("Clear Buffer");
 				return(0);
 			}
@@ -897,6 +887,14 @@ int G2(String readString){
 	ival = atof(isect)*unitScalor;
 	jval = atof(jsect)*unitScalor;
 	fval = atof(fsect);
+
+	if (xpos == -1){ //If x is not found in the provided string
+		xval = -location.xtarget; //The xval is the current location of the machine
+	}
+
+	if (ypos == -1){ //If y is not found in the provided string
+		yval = location.ytarget; //The yval is the current location of the machine
+	}
 	
 	if(unitScalor > 15){ //running in inches
 			fval = fval * 25; //convert to inches
@@ -929,7 +927,7 @@ int G2(String readString){
 	}
 	
 	
-	if(CircleReturnVal == 1){
+	if(CircleReturnVal == 1){ //If the circle was cut correctly
 		while( abs(location.xpos + xval) > TOLERANCE or abs(location.ypos - yval) > TOLERANCE){ //This ensures that the circle is completed and that if it is a circle with a VERY large radius and a small angle it isn't neglected
 			SetTarget(-1*xval, yval, location.ztarget, &location, 123);
 			//Serial.println(abs(location.xpos + xval));
@@ -937,6 +935,10 @@ int G2(String readString){
 		}
 		location.xtarget = -1*xval;
 		location.ytarget = yval;
+	}
+	else{  //If something went wrong while cutting the circle
+		location.xtarget = location.xpos;
+		location.ytarget = location.ypos;
 	}
 }
 
