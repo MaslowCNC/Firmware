@@ -62,7 +62,7 @@ int PWMread(int pin){
 	int duration = 0;
 	
 	duration = pulseIn(pin, HIGH, 2000); //This returns 
-	duration = (int)((float)duration*1.15); //1.23 scales it to a ten bit number
+	duration = (int)((float)duration*.9); //1.23 scales it to a ten bit number
 	
 	if (duration >= 1023){
 		duration = 1023;
@@ -454,12 +454,13 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 		SetPos(&location);
 		SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, gain);
 		if( millis() - mtime > timeStep){ 
-			if(abs(location.xpos - location.xtarget) < MOVETOLERANCE && abs(location.ypos - location.ytarget) < MOVETOLERANCE && abs(location.zpos - location.ztarget) < MOVETOLERANCE){ //updates the position if the tool is close to the target and the elapsed time has passed
-				location.xtarget = location.xtarget + xIncmtDist;
-				location.ytarget = location.ytarget + yIncmtDist;
-				location.ztarget = location.ztarget + zIncmtDist;
-				mtime = millis();
-			}
+			//if(abs(location.xpos - location.xtarget) < MOVETOLERANCE && abs(location.ypos - location.ytarget) < MOVETOLERANCE && abs(location.zpos - location.ztarget) < MOVETOLERANCE){ //updates the position if the tool is close to the target and the elapsed time has passed
+			location.xtarget = location.xtarget + xIncmtDist;
+			location.ytarget = location.ytarget + yIncmtDist;
+			location.ztarget = location.ztarget + zIncmtDist;
+			Serial.println(PWMread(xpot));
+			mtime = millis();
+			//}
 		}
 		//Serial.println(abs(location.ypos - location.ytarget));
 		if( millis() - ntime > 300){ //Checks to see if the machine is stuck
