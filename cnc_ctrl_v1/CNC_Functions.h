@@ -1222,7 +1222,7 @@ float toolOffset(int pin){
 			}
 		}
 		if(millis() - tmpTimeout > 3000){ //if it has to move down for more than three seconds it will time out
-			Serial.println("Surface not found, position the tool closer to the sufrace and try again.");
+			Serial.println("Surface not found, position the tool closer to the surface and try again.");
 			return(location.zpos);
 		}
 	}
