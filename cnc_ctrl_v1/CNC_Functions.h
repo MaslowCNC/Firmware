@@ -458,7 +458,6 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 			location.xtarget = location.xtarget + xIncmtDist;
 			location.ytarget = location.ytarget + yIncmtDist;
 			location.ztarget = location.ztarget + zIncmtDist;
-			Serial.println(PWMread(xpot));
 			mtime = millis();
 			//}
 		}
