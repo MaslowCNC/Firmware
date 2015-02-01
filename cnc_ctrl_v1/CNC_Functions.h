@@ -730,7 +730,7 @@ int Circle(float radius, int direction, float xcenter, float ycenter, float star
 	Serial.println(startrad);
 	Serial.println(endrad);*/
 	
-	//This adress a weird issue where sometimes CAD packages use a circle with a HUGE radius to aproximate a straight line. The problem with this is that the arduino has
+	//This addresses a weird issue where sometimes CAD packages use a circle with a HUGE radius to aproximate a straight line. The problem with this is that the arduino has
 	//a hard time doing very precise floating point math, so when you use a very large radius it ends up being inaccurate. This should be solved in some better way.
 	if(radius > 300 && abs(startrad - endrad) < 0.2){ 
 		return(1);
