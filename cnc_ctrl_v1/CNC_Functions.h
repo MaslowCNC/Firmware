@@ -423,7 +423,7 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 	}
 	
 	if(pathLength < .1){ //This prevents div/0 errors.
-		pathLength = 1;
+		pathLength = .1;
 	}
 	
 	
