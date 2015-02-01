@@ -109,19 +109,19 @@ float getAngle(float X,float Y,float centerX,float centerY){
 	if (X > centerX and Y > centerY) { //quadrant one
 		//Serial.println("Quadrant 1");
 		theta = atan((centerY - Y)/(X - centerX));
-		theta = 2 + theta/3.14;
+		theta = 2 + theta/3.141593;
 	}
 	if (X < centerX and Y > centerY) { //#quadrant two
 		//Serial.println("Quadrant 2");
 		theta = atan((Y - centerY)/(X - centerX));
-		theta = 1 - theta/3.14;
+		theta = 1 - theta/3.141593;
 	}
 	if (X < centerX and Y < centerY) { //#quadrant three
 		//Serial.println("Quadrant 3");
 		theta = atan((centerY - Y)/(centerX - X));
 		//Serial.println(theta);
-		//theta = theta/3.14 + 1;
-		theta = 2 - theta/3.14;
+		//theta = theta/3.141593 + 1;
+		theta = 2 - theta/3.141593;
 		theta = theta - 1;
 		//Serial.println(theta);
 	}
@@ -129,7 +129,7 @@ float getAngle(float X,float Y,float centerX,float centerY){
 		//Serial.println("Quadrant 4");
 		theta = atan((centerY - Y)/(X - centerX));
 		//Serial.println(theta);
-		theta = theta/3.14;
+		theta = theta/3.141593;
 		//Serial.println(theta);
 	}
 	
@@ -672,7 +672,7 @@ int G1(String readString){
 	
 	
 	if(unitScalor > 15){ //running in inches
-			gospeed = gospeed * 25; //convert to inches
+			gospeed = gospeed * 25.4; //convert to inches
 	}
 	if(gospeed >= 4){ //feedrate is preserved because most function lines of gcode rely on it having been preserved from the previous call.
 		feedrate = gospeed;
@@ -768,8 +768,8 @@ int Circle(float radius, int direction, float xcenter, float ycenter, float star
 			}
 		} 
 		
-		location.xtarget = -1*radius * cos(3.14*((float)i/(int)(stepMultiplier*radius))) - xcenter; //computes the new target position.
-		location.ytarget = direction * radius * sin(3.14*((float)i/(int)(stepMultiplier*radius))) + ycenter;
+		location.xtarget = -1*radius * cos(3.141593*((float)i/(int)(stepMultiplier*radius))) - xcenter; //computes the new target position.
+		location.ytarget = direction * radius * sin(3.141593*((float)i/(int)(stepMultiplier*radius))) + ycenter;
 		
 		SetPos(&location);
 		SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 123);
@@ -897,7 +897,7 @@ int G2(String readString){
 	}
 	
 	if(unitScalor > 15){ //running in inches
-			fval = fval * 25; //convert to inches
+			fval = fval * 25.4; //convert to inches
 	}
 	
 	if(fval > 4){ //preserves the feedrate for the next call
