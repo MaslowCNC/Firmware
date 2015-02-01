@@ -202,51 +202,51 @@ int SetPos(location_st* position){
 	int maxJump = 400; 
 	static int loopCount = 0;
 	static int CurrentXangle, CurrentYangle, CurrentZangle;
-	static int PrevousXangle, PrevousYangle, PrevousZangle;
+	static int PreviousXangle, PreviousYangle, PreviousZangle;
 	
-	if(abs(CurrentXangle - PrevousXangle) <= maxJump){ //The encoder did not just transition from 0 to 360 degrees
-		position->xpos = position->xpos + (CurrentXangle - PrevousXangle)/1023.0; //The position is incremented by the change in position since the last update.
+	if(abs(CurrentXangle - PreviousXangle) <= maxJump){ //The encoder did not just transition from 0 to 360 degrees
+		position->xpos = position->xpos + (CurrentXangle - PreviousXangle)/1023.0; //The position is incremented by the change in position since the last update.
 	}
 	else{//The transition from 0 to 360 (10-bit value 1023) or vice versa has just taken place
-		if(PrevousXangle < 200 && CurrentXangle > 850){ //Add back in any dropped position
+		if(PreviousXangle < 200 && CurrentXangle > 850){ //Add back in any dropped position
 			CurrentXangle = 1023;
-			position->xpos = position->xpos + (0 - PrevousXangle)/1023.0;
+			position->xpos = position->xpos + (0 - PreviousXangle)/1023.0;
 		}
-		if(PrevousXangle > 850 && CurrentXangle < 200){
+		if(PreviousXangle > 850 && CurrentXangle < 200){
 			CurrentXangle = 0;
-			position->xpos = position->xpos + (1023 - PrevousXangle)/1023.0;
+			position->xpos = position->xpos + (1023 - PreviousXangle)/1023.0;
 		}
 	}
-	if(abs(CurrentYangle - PrevousYangle) <= maxJump){
-		position->ypos = position->ypos + (CurrentYangle - PrevousYangle)/1023.0;
+	if(abs(CurrentYangle - PreviousYangle) <= maxJump){
+		position->ypos = position->ypos + (CurrentYangle - PreviousYangle)/1023.0;
 	}
 	else{
-		if(PrevousYangle < 200 && CurrentYangle > 850){
+		if(PreviousYangle < 200 && CurrentYangle > 850){
 			CurrentYangle = 1023;
-			position->ypos = position->ypos + (0 - PrevousYangle)/1023.0;
+			position->ypos = position->ypos + (0 - PreviousYangle)/1023.0;
 		}
-		if(PrevousYangle > 850 && CurrentYangle < 200){
+		if(PreviousYangle > 850 && CurrentYangle < 200){
 			CurrentYangle = 0;
-			position->ypos = position->ypos + (1023 - PrevousYangle)/1023.0;
+			position->ypos = position->ypos + (1023 - PreviousYangle)/1023.0;
 		}
 	}
-	if(abs(CurrentZangle - PrevousZangle) <= maxJump){
-		position->zpos = position->zpos + (CurrentZangle - PrevousZangle)/1023.0;
+	if(abs(CurrentZangle - PreviousZangle) <= maxJump){
+		position->zpos = position->zpos + (CurrentZangle - PreviousZangle)/1023.0;
 	}
 	else{
-		if(PrevousZangle < 200 && CurrentZangle > 850){
+		if(PreviousZangle < 200 && CurrentZangle > 850){
 			CurrentZangle = 1023;
-			position->zpos = position->zpos + (0 - PrevousZangle)/1023.0;
+			position->zpos = position->zpos + (0 - PreviousZangle)/1023.0;
 		}
-		if(PrevousZangle > 850 && CurrentZangle < 200){
+		if(PreviousZangle > 850 && CurrentZangle < 200){
 			CurrentZangle = 0;
-			position->zpos = position->zpos + (1023 - PrevousZangle)/1023.0;
+			position->zpos = position->zpos + (1023 - PreviousZangle)/1023.0;
 		}
 	}
 	
-	PrevousXangle = CurrentXangle; //Reset the previous angle variables
-	PrevousYangle = CurrentYangle;
-	PrevousZangle = CurrentZangle;
+	PreviousXangle = CurrentXangle; //Reset the previous angle variables
+	PreviousYangle = CurrentYangle;
+	PreviousZangle = CurrentZangle;
 	
 	if(XDIRECTION == FORWARD){ //Update the current angle variable. Direction is set at compile time depending on which side of the rod the encoder is positioned on.
 		CurrentXangle = PWMread(xpot);
