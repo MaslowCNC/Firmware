@@ -354,8 +354,8 @@ void loop(){
 	}
 	
 	if (readString.length() > 0){
-		//Serial.println(readString);
-		//Serial.println("<-- Unknown");
+		Serial.println(readString);
+		Serial.println("<-- Unknown
 		readString = "";
 		Serial.println("gready");
 	}
