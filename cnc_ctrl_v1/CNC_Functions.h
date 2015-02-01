@@ -574,6 +574,7 @@ int G1(String readString){
 		i++;
 	}
 	i = 2;
+	memset(sect,0,sizeof(sect)); //This clears the array
 	while (i <= readString.length()){
 		//Serial.println("in length ran");
 		j = 0;
