@@ -86,7 +86,7 @@ float getAngle(float X,float Y,float centerX,float centerY){
 		centerY = Y;
 	}
 	
-	if (X == centerX) { //this resolves /div0 errors
+	if (X == centerX) { //this resolves div/0 errors
 		if (Y >= centerY) {
 			//Serial.println("special case one");
 			return(0.5);
@@ -96,7 +96,7 @@ float getAngle(float X,float Y,float centerX,float centerY){
 			return(1.5);
 		}
 	}
-	if (Y == centerY) { //this resolves /div0 errors
+	if (Y == centerY) { //this resolves div/0 errors
 		if ( X >= centerX) {
 			//Serial.println("special case three");
 			return(0);
@@ -135,7 +135,7 @@ float getAngle(float X,float Y,float centerX,float centerY){
 	
 	theta = 2 - theta;
 	
-	//Serial.println("Theata: ");
+	//Serial.println("Theta: ");
 	//Serial.println(theta);
 	return(theta);
 }
@@ -204,7 +204,7 @@ int SetPos(location_st* position){
 	static int CurrentXangle, CurrentYangle, CurrentZangle;
 	static int PrevousXangle, PrevousYangle, PrevousZangle;
 	
-	if(abs(CurrentXangle - PrevousXangle) <= maxJump){ //The encoder did not just transition from 0 to 340 degrees
+	if(abs(CurrentXangle - PrevousXangle) <= maxJump){ //The encoder did not just transition from 0 to 360 degrees
 		position->xpos = position->xpos + (CurrentXangle - PrevousXangle)/1023.0; //The position is incremented by the change in position since the last update.
 	}
 	else{//The transition from 0 to 360 (10-bit value 1023) or vice versa has just taken place
@@ -348,7 +348,7 @@ int Unstick(Servo axis, int direction){
 	
 	axis.write(90 + 45*direction); //Spin the motor backwards
 	long tmptime = millis();
-	while(millis() - tmptime < 30){ //This is just a delay which doesn't loose the machine's position.
+	while(millis() - tmptime < 30){ //This is just a delay which doesn't lose the machine's position.
 		SetPos(&location); 
 	}
 	axis.write(90 - 45*direction); //Spin the motor forward again
@@ -471,7 +471,7 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 			tempYpos = location.ypos;
 			tempZpos = location.zpos;
 			
-			if(abs(location.xpos - xEnd) > .2 && deltaX < .01 && abs(location.xpos - location.xtarget) > .1){//The machine has not moved signifigantly in the last 300ms
+			if(abs(location.xpos - xEnd) > .2 && deltaX < .01 && abs(location.xpos - location.xtarget) > .1){//The machine has not moved significantly in the last 300ms
 				Serial.println("x stuck");
 				if(location.xpos < xEnd){
 					Unstick(x, -1);
@@ -674,7 +674,7 @@ int G1(String readString){
 	if(unitScalor > 15){ //running in inches
 			gospeed = gospeed * 25; //convert to inches
 	}
-	if(gospeed >= 4){ //federate is preserved because most function lines of gcode rely on it having been preserved from the previous call.
+	if(gospeed >= 4){ //feedrate is preserved because most function lines of gcode rely on it having been preserved from the previous call.
 		feedrate = gospeed;
 	}
 	
@@ -729,8 +729,8 @@ int Circle(float radius, int direction, float xcenter, float ycenter, float star
 	Serial.println(startrad);
 	Serial.println(endrad);*/
 	
-	//This adress a wierd issue where sometimes CAD packages use a circle with a HUGE radius to aproximate a straight line. The problem with this is that the arduino has
-	//a hard time doing very precise floating point math, so when you use a very large radius it ends up being inacurate. This shuld be solved in some better way.
+	//This adress a weird issue where sometimes CAD packages use a circle with a HUGE radius to aproximate a straight line. The problem with this is that the arduino has
+	//a hard time doing very precise floating point math, so when you use a very large radius it ends up being inaccurate. This should be solved in some better way.
 	if(radius > 300 && abs(startrad - endrad) < 0.2){ 
 		return(1);
 	}
@@ -979,7 +979,7 @@ int testMotors(){
 	
 	x.write(180); //Spin the motor backwards
 	long tmptime = millis();
-	while(millis() - tmptime < 600){ //This is just a delay which doesn't loose the machine's position.
+	while(millis() - tmptime < 600){ //This is just a delay which doesn't lose the machine's position.
 		SetPos(&location); 
 	}
 	x.write(0); //Spin the motor forward again
@@ -991,7 +991,7 @@ int testMotors(){
 	
 	y.write(180); //Spin the motor backwards
 	tmptime = millis();
-	while(millis() - tmptime < 600){ //This is just a delay which doesn't loose the machine's position.
+	while(millis() - tmptime < 600){ //This is just a delay which doesn't lose the machine's position.
 		SetPos(&location); 
 	}
 	y.write(0); //Spin the motor forward again
@@ -1003,7 +1003,7 @@ int testMotors(){
 	
 	z.write(180); //Spin the motor backwards
 	tmptime = millis();
-	while(millis() - tmptime < 600){ //This is just a delay which doesn't loose the machine's position.
+	while(millis() - tmptime < 600){ //This is just a delay which doesn't lose the machine's position.
 		SetPos(&location); 
 	}
 	z.write(0); //Spin the motor forward again
@@ -1028,7 +1028,7 @@ int testBoth(){
 	
 	x.write(180); //Spin the motor backwards
 	long tmptime = millis();
-	while(millis() - tmptime < 600){ //This is just a delay which doesn't loose the machine's position.
+	while(millis() - tmptime < 600){ //This is just a delay which doesn't lose the machine's position.
 		SetPos(&location); 
 	}
 	x.write(0); //Spin the motor forward again
@@ -1061,7 +1061,7 @@ int testBoth(){
 	deltaZ = location.zpos;
 	y.write(180); //Spin the motor backwards
 	tmptime = millis();
-	while(millis() - tmptime < 600){ //This is just a delay which doesn't loose the machine's position.
+	while(millis() - tmptime < 600){ //This is just a delay which doesn't lose the machine's position.
 		SetPos(&location); 
 	}
 	
@@ -1097,7 +1097,7 @@ int testBoth(){
 	
 	z.write(180); //Spin the motor backwards
 	tmptime = millis();
-	while(millis() - tmptime < 600){ //This is just a delay which doesn't loose the machine's position.
+	while(millis() - tmptime < 600){ //This is just a delay which doesn't lose the machine's position.
 		SetPos(&location); 
 	}
 	deltaX = abs(location.xpos - deltaX);
@@ -1138,12 +1138,12 @@ void centerMotors(){
 	y.write(90);
 	z.write(90);
 	long tmptime = millis();
-	while(millis() - tmptime < 2000){ //This is just a delay which doesn't loose the machine's position.
+	while(millis() - tmptime < 2000){ //This is just a delay which doesn't lose the machine's position.
 		SetPos(&location); 
 	}
 }
 
-/*The G10() function handles the G10 gcode which re-zeroes one of all of the machine's axies.*/
+/*The G10() function handles the G10 gcode which re-zeroes one or all of the machine's axes.*/
 void G10(String readString){
 	
 	if(readString.indexOf('X') > 2){
@@ -1213,7 +1213,7 @@ float toolOffset(int pin){
 	while(1){
 		tmptime = millis();
 		location.ztarget = location.ztarget - .05;
-		while(millis() - tmptime < 100){ //This is just a delay which doesn't loose the machine's position.
+		while(millis() - tmptime < 100){ //This is just a delay which doesn't lose the machine's position.
 			SetPos(&location); 
 			SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 123);
 
