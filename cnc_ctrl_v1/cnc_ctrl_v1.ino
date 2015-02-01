@@ -65,7 +65,7 @@ void setup(){
 	digitalWrite(spindle, LOW);       // turn on pullup resistors
 	analogReference(EXTERNAL);
 	pinMode(xpot, INPUT);
-	pinMode(xpot, INPUT);
+	pinMode(ypot, INPUT);
 	pinMode(zpot, INPUT);
 	pinMode(SENSEPIN, INPUT_PULLUP);
 	noInterrupts();
