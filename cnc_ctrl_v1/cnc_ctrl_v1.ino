@@ -61,7 +61,7 @@ void setup(){
 	x.write(90); y.write(90); z.write(90);
 	Serial.println("ready");
 	Serial.println("gready");
-	pinMode(spindle, OUTPUT);           // set pin to input
+	pinMode(spindle, OUTPUT);           // set pin to output
 	digitalWrite(spindle, LOW);       // turn on pullup resistors
 	analogReference(EXTERNAL);
 	pinMode(xpot, INPUT);
