@@ -49,7 +49,6 @@ location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 
 int xpot = 8;
 int ypot = 9;
 int zpot = 10;
-int initialXspot;
 Servo x;
 Servo y;
 Servo z;

@@ -75,7 +75,6 @@ void setup(){
 	TCCR1B |= (1 << CS12);
 	TIMSK1 |= (1 << TOIE1);
 	interrupts();   
-	initialXspot = PWMread(ypot);
 }
 
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven
