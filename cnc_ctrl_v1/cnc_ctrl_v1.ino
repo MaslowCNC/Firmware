@@ -200,14 +200,14 @@ void loop(){
 	
 	if(readString.substring(0, 3) == "G20"){
 		//Serial.println("Inches Set");
-		unitScalor = 20; //there are 20 rotations per inch
+		unitScalar = 20; //there are 20 rotations per inch
 		Serial.println("gready");
 		readString = "";
 	}
 	
 	if(readString.substring(0, 3) == "G21"){
 		//Serial.println("mm set");
-		unitScalor = 1/1.27; //the machine moves 1.27 mm per rotation
+		unitScalar = 1/1.27; //the machine moves 1.27 mm per rotation
 		Serial.println("gready");
 		readString = "";
 	}
