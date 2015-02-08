@@ -61,7 +61,7 @@ void setup(){
 	x.write(90); y.write(90); z.write(90);
 	Serial.println("ready");
 	Serial.println("gready");
-	pinMode(spindle, OUTPUT);           // set pin to input
+	pinMode(spindle, OUTPUT);           // set pin to output
 	digitalWrite(spindle, LOW);       // turn on pullup resistors
 	analogReference(EXTERNAL);
 	pinMode(xpot, INPUT);
@@ -75,7 +75,6 @@ void setup(){
 	TCCR1B |= (1 << CS12);
 	TIMSK1 |= (1 << TOIE1);
 	interrupts();   
-	initialXspot = PWMread(ypot);
 }
 
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven

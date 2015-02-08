@@ -768,11 +768,16 @@ int Circle(float radius, int direction, float xcenter, float ycenter, float star
 			}
 		} 
 		
+<<<<<<< HEAD
+		location.xtarget = -1*radius * cos(3.141593*((float)i/stepMultiplier*radius)) - xcenter; //computes the new target position.
+		location.ytarget = direction * radius * sin(3.141593*((float)i/stepMultiplier*radius)) + ycenter;
+=======
 		location.xtarget = -1*radius * cos(3.141593*((float)i/(int)(stepMultiplier*radius))) - xcenter; //computes the new target position.
 		location.ytarget = direction * radius * sin(3.141593*((float)i/(int)(stepMultiplier*radius))) + ycenter;
+>>>>>>> upstream/master
 		
 		SetPos(&location);
-		SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 123);
+		SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 400);
 		
 		if( millis() - stime > timeStep ){
 			if( abs(location.xpos - location.xtarget) < TOLERANCE && abs(location.ypos - location.ytarget) < TOLERANCE && abs(location.zpos - location.ztarget) < TOLERANCE){ //if the target is reached move to the next position
