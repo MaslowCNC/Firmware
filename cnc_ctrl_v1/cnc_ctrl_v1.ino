@@ -21,6 +21,7 @@
 #include <Servo.h>
 #include "MyTypes.h"
 #include <SPI.h>
+#include <EEPROM.h>
 #include "CNC_Functions.h"
 
 
@@ -74,7 +75,8 @@ void setup(){
 	TCNT1 = 50000;
 	TCCR1B |= (1 << CS12);
 	TIMSK1 |= (1 << TOIE1);
-	interrupts();   
+	interrupts(); 
+	  
 }
 
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven
@@ -154,8 +156,7 @@ void loop(){
 			x.attach(XSERVO);
 			y.attach(YSERVO);
 			z.attach(ZSERVO);
-			//analogWrite(blPin, backLight);
-			//setContrast(contrast); 
+			//calibrateMagnets(); 
 		}
 		servoDetachFlag = 0;
 	}
@@ -354,7 +355,6 @@ void loop(){
 	
 	if (readString.length() > 0){
 		Serial.println(readString);
-		Serial.println("<-- Unknown
 		readString = "";
 		Serial.println("gready");
 	}

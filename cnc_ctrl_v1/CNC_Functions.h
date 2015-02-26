@@ -60,7 +60,7 @@ takes this duration and converts it to a ten bit number.*/
 int PWMread(int pin){
 	int duration = 0;
 	
-	duration = pulseIn(pin, HIGH, 2000); //This returns 
+	duration = pulseIn(pin, HIGH, 2000); //This returns the pulse duration
 	duration = (int)((float)duration*.9); //1.23 scales it to a ten bit number
 	
 	if (duration >= 1023){
@@ -1141,6 +1141,108 @@ void centerMotors(){
 	}
 }
 
+void calibrateMagnets(){
+	Serial.println("Calibrating Magnets");
+	
+	x.write(90);
+	y.write(90);
+	z.write(90);
+	
+	int maxXVal = 0;
+	int maxYVal = 0;
+	int maxZVal = 0;
+	
+	int tempVal = 0;
+	int i = 0;
+	x.write(180);
+	y.write(90);
+	z.write(90);
+	while(i<2000){
+		tempVal = pulseIn(xpot, HIGH, 2000); 
+		if (tempVal > maxXVal){
+			maxXVal = tempVal;
+		}
+		i++;
+	}
+	
+	tempVal = 0;
+	i = 0;
+	x.write(0);
+	y.write(90);
+	z.write(90);
+	while(i<2000){
+		tempVal = pulseIn(xpot, HIGH, 2000); 
+		if (tempVal > maxXVal){
+			maxXVal = tempVal;
+		}
+		i++;
+	}
+	
+	
+	tempVal = 0;
+	i = 0;
+	x.write(90);
+	y.write(180);
+	z.write(90);
+	while(i<2000){
+		tempVal = pulseIn(ypot, HIGH, 2000); 
+		if (tempVal > maxYVal){
+			maxYVal = tempVal;
+		}
+		i++;
+	}
+	
+	tempVal = 0;
+	i = 0;
+	x.write(90);
+	y.write(0);
+	z.write(90);
+	while(i<2000){
+		tempVal = pulseIn(ypot, HIGH, 2000); 
+		if (tempVal > maxYVal){
+			maxYVal = tempVal;
+		}
+		i++;
+	}
+	
+	tempVal = 0;
+	i = 0;
+	x.write(90);
+	y.write(90);
+	z.write(180);
+	while(i<2000){
+		tempVal = pulseIn(zpot, HIGH, 2000); 
+		if (tempVal > maxZVal){
+			maxZVal = tempVal;
+		}
+		i++;
+	}
+	
+	tempVal = 0;
+	i = 0;
+	x.write(90);
+	y.write(90);
+	z.write(0);
+	while(i<2000){
+		tempVal = pulseIn(zpot, HIGH, 2000); 
+		if (tempVal > maxZVal){
+			maxZVal = tempVal;
+		}
+		i++;
+	
+	}
+	//maxXVal*x = 1024
+	//x = 1024/maxXVal
+	Serial.println(maxXVal);
+	Serial.println(maxYVal);
+	Serial.println(maxZVal);
+	Serial.println(round(100*(1024.0/float(maxXVal))));
+	Serial.println(round(100*(1024.0/float(maxYVal))));
+	Serial.println(round(100*(1024.0/float(maxZVal))));
+	Serial.println("Done");
+}
+	
+	
 /*The G10() function handles the G10 gcode which re-zeroes one or all of the machine's axes.*/
 void G10(String readString){
 	
