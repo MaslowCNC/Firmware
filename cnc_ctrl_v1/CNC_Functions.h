@@ -44,7 +44,7 @@
 
 int stepsize = 1;
 int feedrate = 125;
-float unitScalor = 1/1.27;
+float unitScalar = 1/1.27;
 location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 0, 0}; 
 int xpot = 8;
 int ypot = 9;
@@ -176,7 +176,7 @@ float getAngle(float X,float Y,float centerX,float centerY){
 	sprintf(Msg, "%d.%d", tWhole, tFract < 10 ? 0 : tFract);
 	setStr(Msg, 20, 20, BLACK);
 
-	if (unitScalor == 20){
+	if (unitScalar == 20){
 		setStr("G20", 67, 0, BLACK);
 	}
 	else{
@@ -279,7 +279,7 @@ int SetPos(location_st* position){
 			Serial.print(",");
 			Serial.print(position->zpos);
 			Serial.println(")");
-			//SetScreen(position->xpos/unitScalor, position->ypos/unitScalor, position->zpos/unitScalor);
+			//SetScreen(position->xpos/unitScalar, position->ypos/unitScalar, position->zpos/unitScalar);
 		}
 		else{ //If the machine is stopped print the target position
 			Serial.print("pz(");
@@ -289,7 +289,7 @@ int SetPos(location_st* position){
 			Serial.print(",");
 			Serial.print(position->ztarget);
 			Serial.println(")");
-			//SetScreen(position->xtarget/unitScalor, position->ytarget/unitScalor, position->ztarget/unitScalor);
+			//SetScreen(position->xtarget/unitScalar, position->ytarget/unitScalar, position->ztarget/unitScalar);
 		} 
 		loopCount = 0;
 	}
@@ -671,16 +671,16 @@ int G1(String readString){
 	}
 	
 	
-	if(unitScalor > 15){ //running in inches
+	if(unitScalar > 15){ //running in inches
 			gospeed = gospeed * 25.4; //convert to inches
 	}
 	if(gospeed >= 4){ //feedrate is preserved because most function lines of gcode rely on it having been preserved from the previous call.
 		feedrate = gospeed;
 	}
 	
-	xgoto = xgoto * unitScalor;
-	ygoto = ygoto * unitScalor;
-	zgoto = zgoto * unitScalor;
+	xgoto = xgoto * unitScalar;
+	ygoto = ygoto * unitScalar;
+	zgoto = zgoto * unitScalar;
 	
 	
 	
@@ -772,8 +772,7 @@ int Circle(float radius, int direction, float xcenter, float ycenter, float star
 		location.ytarget = direction * radius * sin(3.141593*((float)i/(int)(stepMultiplier*radius))) + ycenter;
 		
 		SetPos(&location);
-		SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 123);
-		
+		SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 400);
 		if( millis() - stime > timeStep ){
 			if( abs(location.xpos - location.xtarget) < TOLERANCE && abs(location.ypos - location.ytarget) < TOLERANCE && abs(location.zpos - location.ztarget) < TOLERANCE){ //if the target is reached move to the next position
 				i++;
@@ -882,10 +881,10 @@ int G2(String readString){
 	readString.substring((jpos + 1), jspace).toCharArray(jsect, 23);
 	readString.substring((fpos + 1), fspace).toCharArray(fsect, 23);
 	
-	xval = atof(xsect)*unitScalor;//The relevant information has been extracted
-	yval = atof(ysect)*unitScalor;
-	ival = atof(isect)*unitScalor;
-	jval = atof(jsect)*unitScalor;
+	xval = atof(xsect)*unitScalar;//The relevant information has been extracted
+	yval = atof(ysect)*unitScalar;
+	ival = atof(isect)*unitScalar;
+	jval = atof(jsect)*unitScalar;
 	fval = atof(fsect);
 
 	if (xpos == -1){ //If x is not found in the provided string
@@ -896,7 +895,7 @@ int G2(String readString){
 		yval = location.ytarget; //The yval is the current location of the machine
 	}
 	
-	if(unitScalor > 15){ //running in inches
+	if(unitScalar > 15){ //running in inches
 			fval = fval * 25.4; //convert to inches
 	}
 	
