@@ -930,7 +930,6 @@ int G2(String readString){
 	if(CircleReturnVal == 1){ //If the circle was cut correctly
 		while( abs(location.xpos + xval) > TOLERANCE or abs(location.ypos - yval) > TOLERANCE){ //This ensures that the circle is completed and that if it is a circle with a VERY large radius and a small angle it isn't neglected
 			SetTarget(-1*xval, yval, location.ztarget, &location, 123);
-			//Serial.println(abs(location.xpos + xval));
 			SetPos(&location);
 		}
 		location.xtarget = -1*xval;
