@@ -44,6 +44,9 @@ int i = 0;
 int begin;
 int end;
 char sect[22];
+int xMagnetScale = 1.23;
+int yMagnetScale = 1.23;
+int zMagnetScale = 1.23;
 
 
 //Sd2Card card;
@@ -76,6 +79,10 @@ void setup(){
 	TCCR1B |= (1 << CS12);
 	TIMSK1 |= (1 << TOIE1);
 	interrupts(); 
+	if (EEPROM.read(4) == 56){ //If the EEPROM has been written to by a prevous calibration, this will be 56
+		int xMagnetScale = EEPROM.read(1)/100;
+		int yMagnetScale = EEPROM.read(2)/100;
+		int zMagnetScale = EEPROM.read(3)/100;
 	  
 }
 
