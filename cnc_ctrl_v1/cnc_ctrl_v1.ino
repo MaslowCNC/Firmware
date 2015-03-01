@@ -77,10 +77,11 @@ void setup(){
 	TIMSK1 |= (1 << TOIE1);
 	interrupts(); 
 	if (EEPROM.read(4) == 56){ //If the EEPROM has been written to by a prevous calibration, this will be 56
-		xMagnetScale = EEPROM.read(1)/100;
-		yMagnetScale = EEPROM.read(2)/100;
-		zMagnetScale = EEPROM.read(3)/100;
+		xMagnetScale = float(EEPROM.read(1))/100.0;
+		yMagnetScale = float(EEPROM.read(2))/100.0;
+		zMagnetScale = float(EEPROM.read(3))/100.0;
 	}
+	
 	if (EEPROM.read(18) == 56){ //If valid data can be loaded
 		Serial.println("Position Loaded");
 		location.xpos = readFloat(5); //load the position from  the EEPROM
@@ -317,7 +318,6 @@ void loop(){
 		Serial.println("gready");
 	}
 	
-	}
 	if(readString.substring(0,11) == "Test Motors"){
 		testMotors();
 		readString = "";
@@ -333,6 +333,12 @@ void loop(){
 	if(readString.substring(0,13) == "Center Motors"){
 		Serial.println("center motors test begin");
 		centerMotors();
+		readString = "";
+		Serial.println("gready");
+	}
+	
+	if(readString.substring(0,13) == "Align Magnets"){
+		calibrateMagnets();
 		readString = "";
 		Serial.println("gready");
 	}

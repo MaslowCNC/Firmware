@@ -54,9 +54,9 @@ Servo y;
 Servo z;
 int servoDetachFlag = 1;
 int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
-int xMagnetScale = 1.23;
-int yMagnetScale = 1.23;
-int zMagnetScale = 1.23;
+float xMagnetScale = 1.23;
+float yMagnetScale = 1.23;
+float zMagnetScale = 1.23;
 
 
 
@@ -1146,7 +1146,7 @@ void centerMotors(){
 	}
 }
 
-void calibrateMagnets(){
+int calibrateMagnets(){
 	Serial.println("Calibrating Magnets");
 	
 	x.write(90);
@@ -1230,6 +1230,7 @@ void calibrateMagnets(){
 	z.write(0);
 	while(i<2000){
 		tempVal = pulseIn(zpot, HIGH, 2000); 
+		//Serial.println(tempVal);
 		if (tempVal > maxZVal){
 			maxZVal = tempVal;
 		}
@@ -1238,15 +1239,28 @@ void calibrateMagnets(){
 	}
 	//maxXVal*x = 1024
 	//x = 1024/maxXVal
-	Serial.println(maxXVal);
+	/*Serial.println(maxXVal);
 	Serial.println(maxYVal);
-	Serial.println(maxZVal);
-	Serial.println(round(100*(1024.0/float(maxXVal))));
-	Serial.println(round(100*(1024.0/float(maxYVal))));
-	Serial.println(round(100*(1024.0/float(maxZVal))));
-	Serial.println("Done");
-}
+	Serial.println(maxZVal);*/
 	
+	int xMagScale = round(100*(1024.0/float(maxXVal)));
+	int yMagScale = round(100*(1024.0/float(maxYVal)));
+	int zMagScale = round(100*(1024.0/float(maxZVal)));
+	
+	if (xMagScale < 60 || yMagScale < 60 || zMagScale < 60 ){	
+		Serial.println("Magnet calibration failed. Please try again.");
+		return 0;
+	}
+	Serial.println(xMagScale);
+	Serial.println(yMagScale);
+	Serial.println(zMagScale);
+	EEPROM.write(1,xMagScale);
+	EEPROM.write(2,yMagScale);
+	EEPROM.write(3,zMagScale);
+	EEPROM.write(4,56);//This is a marker value which is used to check if valid data can be read later
+	Serial.println("Magnet Positions Calibrated");
+	return 1;
+}
 	
 /*The G10() function handles the G10 gcode which re-zeroes one or all of the machine's axes.*/
 void G10(String readString){
