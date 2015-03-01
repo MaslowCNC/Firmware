@@ -85,9 +85,9 @@ void setup(){
 	Serial.println(readFloat(10));
 	Serial.println(readFloat(14));
 	Serial.println(EEPROM.read(18));
-	if (EEPROM.read(18) == 56){
+	if (EEPROM.read(18) == 56){ //If valid data can be loaded
 		Serial.println("Position Loaded");
-		location.xpos = readFloat(5);
+		location.xpos = readFloat(5); //load the position from  the EEPROM
 		location.ypos = readFloat(10);
 		location.zpos = readFloat(14);
 		location.xtarget = location.xpos;
@@ -358,8 +358,6 @@ void loop(){
 			writeFloat(10,location.ypos);
 			writeFloat(14,location.zpos);
 			EEPROM.write(18,56); //This known value is used as a flag for if valid data can be read from EEPROM later
-			
-			Serial.println("location saved");
 		}
 		servoDetachFlag = 1;
 		x.detach();
