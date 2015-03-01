@@ -81,10 +81,6 @@ void setup(){
 		yMagnetScale = EEPROM.read(2)/100;
 		zMagnetScale = EEPROM.read(3)/100;
 	}
-	Serial.println(readFloat(5));
-	Serial.println(readFloat(10));
-	Serial.println(readFloat(14));
-	Serial.println(EEPROM.read(18));
 	if (EEPROM.read(18) == 56){ //If valid data can be loaded
 		Serial.println("Position Loaded");
 		location.xpos = readFloat(5); //load the position from  the EEPROM
@@ -315,32 +311,33 @@ void loop(){
 		Serial.println("gready");
 	}
 	
-	if(readString == "Test Encoders"){
+	if(readString.substring(0,13) == "Test Encoders"){
 		testEncoders();
 		readString = "";
 		Serial.println("gready");
 	}
 	
-	if(readString == "Test Motors"){
+	}
+	if(readString.substring(0,11) == "Test Motors"){
 		testMotors();
 		readString = "";
 		Serial.println("gready");
 	}
 	
-	if(readString == "Test Both"){
+	if(readString.substring(0,9) == "Test Both"){
 		testBoth();
 		readString = "";
 		Serial.println("gready");
 	}
 	
-	if(readString == "Center Motors"){
+	if(readString.substring(0,13) == "Center Motors"){
 		Serial.println("center motors test begin");
 		centerMotors();
 		readString = "";
 		Serial.println("gready");
 	}
 	
-	if(readString[0] == 'T' || readString[0] == 't'){
+	if((readString[0] == 'T' || readString[0] == 't') && readString[1] != 'e'){
 		if(readString[1] == '0'){
 			digitalWrite(spindle, LOW);
 		}
