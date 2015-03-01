@@ -64,9 +64,20 @@ float zMagnetScale = 1.23;
 takes this duration and converts it to a ten bit number.*/
 int PWMread(int pin){
 	int duration = 0;
+	float tempMagnetScale = 1.23;
+	if (pin == xpot){
+		tempMagnetScale = xMagnetScale;
+	}
+	if (pin == ypot){
+		tempMagnetScale = yMagnetScale;
+	}
+	if (pin == zpot){
+		tempMagnetScale = zMagnetScale;
+	}
+	
 	
 	duration = pulseIn(pin, HIGH, 2000); //This returns the pulse duration
-	duration = (int)((float)duration*xMagnetScale); //1.23 scales it to a ten bit number
+	duration = (int)((float)duration*tempMagnetScale); //1.23 scales it to a ten bit number
 	
 	if (duration >= 1023){
 		duration = 1023;
