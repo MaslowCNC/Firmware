@@ -54,6 +54,9 @@ Servo y;
 Servo z;
 int servoDetachFlag = 1;
 int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
+int xMagnetScale = 1.23;
+int yMagnetScale = 1.23;
+int zMagnetScale = 1.23;
 
 
 

@@ -44,9 +44,6 @@ int i = 0;
 int begin;
 int end;
 char sect[22];
-int xMagnetScale = 1.23;
-int yMagnetScale = 1.23;
-int zMagnetScale = 1.23;
 
 
 //Sd2Card card;
@@ -80,9 +77,23 @@ void setup(){
 	TIMSK1 |= (1 << TOIE1);
 	interrupts(); 
 	if (EEPROM.read(4) == 56){ //If the EEPROM has been written to by a prevous calibration, this will be 56
-		int xMagnetScale = EEPROM.read(1)/100;
-		int yMagnetScale = EEPROM.read(2)/100;
-		int zMagnetScale = EEPROM.read(3)/100;
+		xMagnetScale = EEPROM.read(1)/100;
+		yMagnetScale = EEPROM.read(2)/100;
+		zMagnetScale = EEPROM.read(3)/100;
+	}
+	Serial.println(readFloat(5));
+	Serial.println(readFloat(10));
+	Serial.println(readFloat(14));
+	Serial.println(EEPROM.read(18));
+	if (EEPROM.read(18) == 56){
+		Serial.println("Position Loaded");
+		location.xpos = readFloat(5);
+		location.ypos = readFloat(10);
+		location.zpos = readFloat(14);
+		location.xtarget = location.xpos;
+		location.ytarget = location.ypos;
+		location.ztarget = location.zpos;
+	}
 	  
 }
 
@@ -342,6 +353,14 @@ void loop(){
 	}
 	
 	if( millis() - time > 500){
+		if (servoDetachFlag == 0){
+			writeFloat(5,location.xpos);
+			writeFloat(10,location.ypos);
+			writeFloat(14,location.zpos);
+			EEPROM.write(18,56); //This known value is used as a flag for if valid data can be read from EEPROM later
+			
+			Serial.println("location saved");
+		}
 		servoDetachFlag = 1;
 		x.detach();
 		y.detach();
