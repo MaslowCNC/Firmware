@@ -289,7 +289,7 @@ void loop(){
 	}
 	
 	if(readString.substring(0, 3) == "B05"){
-		Serial.println("Firmware Version .57");
+		Serial.println("Firmware Version .59");
 		readString = "";
 		Serial.println("gready");
 	}
