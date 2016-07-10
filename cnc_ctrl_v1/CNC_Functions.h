@@ -58,6 +58,10 @@ float xMagnetScale = 1.23;
 float yMagnetScale = 1.23;
 float zMagnetScale = 1.23;
 
+int Motor11    = 9;
+int Motor12    = 8; 
+int Motor1PWM  = 7;
+
 
 
 /*PWMread() measures the duty cycle of a PWM signal on the provided pin. It then
@@ -78,10 +82,7 @@ int PWMread(int pin){
 	
 	duration = pulseIn(pin, HIGH, 2000); //This returns the pulse duration
 	duration = (int)((float)duration*tempMagnetScale); //1.23 scales it to a ten bit number
-	if (pin = xpot){
-		Serial.println(duration);
-	}
-		
+	
 	
 	if (duration >= 1023){
 		duration = 1023;
@@ -90,6 +91,7 @@ int PWMread(int pin){
 	if (duration < 10){
 		duration = 0;
 	}
+    
 	return duration;
 }
 
@@ -291,7 +293,7 @@ int SetPos(location_st* position){
 	
 	loopCount++;
 	if(loopCount > 30){ //Update the position every so often
-		servoDetachFlag == 0;
+		servoDetachFlag = 0;
 		if(servoDetachFlag == 0){ //If the machine is moving print the real position
 			Serial.print("pz(");
 			Serial.print(position->xpos);
@@ -340,6 +342,24 @@ int SetSpeed(float posNow, float posTarget, int gain){
 	speed = BoostLimit(speed, 85); //Limits the output to an acceptable range
 	
 	return(speed);
+}
+
+/*Set DC motor speed*/
+void setMotor(int speed){
+    Serial.println("set motor one to speed:");
+    Serial.println(speed);
+    
+    
+    analogWrite(Motor1PWM, abs(speed));
+    
+    if (speed > 0){
+        digitalWrite(Motor11 , HIGH);
+        digitalWrite(Motor12 , LOW );
+    }
+    else{
+        digitalWrite(Motor11 , LOW);
+        digitalWrite(Motor12 , HIGH );
+    }
 }
 
 /*The SetTarget() function moves the machine to the position stored in the location structure.*/

@@ -25,7 +25,7 @@
 #include "CNC_Functions.h"
 
 
-int spindle = 11;
+int spindle = 13;
 int USE_ESTOP = 0;
 int estopswitch = 18;
 int estoppower = 19;
@@ -69,6 +69,15 @@ void setup(){
 	pinMode(ypot, INPUT);
 	pinMode(zpot, INPUT);
 	pinMode(SENSEPIN, INPUT_PULLUP);
+    
+    pinMode(Motor11,   OUTPUT); 
+    pinMode(Motor12,   OUTPUT); 
+    pinMode(Motor1PWM, OUTPUT);   
+
+    digitalWrite(Motor11, HIGH);
+    digitalWrite(Motor12, LOW) ;
+    digitalWrite(Motor1PWM, LOW);
+    
 	noInterrupts();
 	TCCR1A = 0;
 	TCCR1B = 0;
@@ -76,7 +85,7 @@ void setup(){
 	TCCR1B |= (1 << CS12);
 	TIMSK1 |= (1 << TOIE1);
 	interrupts(); 
-	if (EEPROM.read(4) == 56){ //If the EEPROM has been written to by a prevous calibration, this will be 56
+	if (EEPROM.read(4) == 56){ //If the EEPROM has been written to by a previous calibration, this will be 56
 		xMagnetScale = float(EEPROM.read(1))/100.0;
 		yMagnetScale = float(EEPROM.read(2))/100.0;
 		zMagnetScale = float(EEPROM.read(3))/100.0;
@@ -91,7 +100,8 @@ void setup(){
 		location.ytarget = location.ypos;
 		location.ztarget = location.zpos;
 	}
-	  
+	
+	setMotor(1000);
 }
 
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven
