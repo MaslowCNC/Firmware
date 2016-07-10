@@ -78,6 +78,10 @@ int PWMread(int pin){
 	
 	duration = pulseIn(pin, HIGH, 2000); //This returns the pulse duration
 	duration = (int)((float)duration*tempMagnetScale); //1.23 scales it to a ten bit number
+	if (pin = xpot){
+		Serial.println(duration);
+	}
+		
 	
 	if (duration >= 1023){
 		duration = 1023;
@@ -287,6 +291,7 @@ int SetPos(location_st* position){
 	
 	loopCount++;
 	if(loopCount > 30){ //Update the position every so often
+		servoDetachFlag == 0;
 		if(servoDetachFlag == 0){ //If the machine is moving print the real position
 			Serial.print("pz(");
 			Serial.print(position->xpos);
