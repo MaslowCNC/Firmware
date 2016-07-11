@@ -23,6 +23,7 @@
 #include <SPI.h>
 #include <EEPROM.h>
 #include "CNC_Functions.h"
+#include "GearMotor.h"
 
 
 int spindle = 13;
@@ -52,7 +53,7 @@ char sect[22];
 
 
 void setup(){
-	Serial.begin(19200);
+	Serial.begin(9600);
 	if (USE_ESTOP == 1){
 		pinMode(estopswitch,INPUT);     //input for emergency stop system 
         	pinMode(estoppower,OUTPUT);     //power for emergency stop system
