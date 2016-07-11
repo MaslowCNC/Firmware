@@ -46,24 +46,18 @@
 int stepsize = 1;
 int feedrate = 125;
 float unitScalar = 1/1.27;
-location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 0, 0}; 
+location_st location = {1.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 0, 0}; 
 int xpot = 8;
 int ypot = 9;
 int zpot = 10;
 GearMotor x(7,8,9);
 Servo y;
 Servo z;
-//GearMotor G(7,8,9);
 int servoDetachFlag = 1;
 int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
 float xMagnetScale = 1.23;
 float yMagnetScale = 1.23;
 float zMagnetScale = 1.23;
-
-//int Motor11    = 9;
-//int Motor12    = 8; 
-//int Motor1PWM  = 7;
-
 
 
 /*PWMread() measures the duty cycle of a PWM signal on the provided pin. It then
@@ -163,63 +157,6 @@ float getAngle(float X,float Y,float centerX,float centerY){
 	return(theta);
 }
 
-/*SetScreen() updates the position displayed on the LCD display (yes, we're working on adding an LCD display upgrade.*/
-/*void SetScreen(float x, float y, float z){
-	char Msg[6];
-	
-	clearDisplay(WHITE); 
-	setStr("X: ", 0, 0, BLACK);
-	setStr("Y: ", 0, 10, BLACK);
-	setStr("Z: ", 0, 20, BLACK);
-	
-	if(x < 0){
-		setStr("-", 14, 0, BLACK);
-	}
-	if(y < 0){
-		setStr("-", 14, 10, BLACK);
-	}
-	if(z < 0){
-		setStr("-", 14, 20, BLACK);
-	}
-	
-	int t100 = 100 * abs(x); 
-	int tWhole = t100 / 100;
-	int tFract = t100 % 100;
-	sprintf(Msg, "%d.%d", tWhole, tFract < 10 ? 0 : tFract);
-	setStr(Msg, 20, 0, BLACK);
-	
-	t100 = 100 * abs(y); 
-	tWhole = t100 / 100;
-	tFract = t100 % 100;
-	sprintf(Msg, "%d.%d", tWhole, tFract < 10 ? 0 : tFract);
-	setStr(Msg, 20, 10, BLACK);
-	
-	t100 = 100 * abs(z); 
-	tWhole = t100 / 100;
-	tFract = t100 % 100;
-	sprintf(Msg, "%d.%d", tWhole, tFract < 10 ? 0 : tFract);
-	setStr(Msg, 20, 20, BLACK);
-
-	if (unitScalar == 20){
-		setStr("G20", 67, 0, BLACK);
-	}
-	else{
-		setStr("G19", 67, 0, BLACK);
-	}
-	
-	if (movemode == 1){
-		setStr("G90", 67, 10, BLACK);
-	}
-	else{
-		setStr("91", 67, 10, BLACK);
-	}
-	
-	setStr("Makesmith Tech", 0, 40, BLACK);
-	
-	
-	updateDisplay();
-}*/
-
 /*The SetPos() function updates the machine's position by essentially integrating the input from the encoder*/
 int SetPos(location_st* position){
 	int maxJump = 400; 
@@ -304,6 +241,9 @@ int SetPos(location_st* position){
 			Serial.print(",");
 			Serial.print(position->zpos);
 			Serial.println(")");
+            Serial.println(location.xpos);
+            Serial.println(location.ypos);
+            Serial.println(location.zpos);
 			//SetScreen(position->xpos/unitScalar, position->ypos/unitScalar, position->zpos/unitScalar);
 		}
 		else{ //If the machine is stopped print the target position
@@ -367,10 +307,15 @@ void setMotor(int speed){
 /*The SetTarget() function moves the machine to the position stored in the location structure.*/
 int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position, int gain){
 	int xspeed, yspeed, zspeed;
-	xspeed = SetSpeed(xTarget, location.xpos, gain); //Generate motor speeds
-	yspeed = SetSpeed(yTarget, location.ypos, gain);
-	zspeed = SetSpeed(zTarget, location.zpos, 200);
+	xspeed = SetSpeed(xTarget, position->xpos, gain); //Generate motor speeds
+	yspeed = SetSpeed(yTarget, position->ypos, gain);
+	zspeed = SetSpeed(zTarget, position->zpos, 200);
 	
+    Serial.print("dst: ");
+    Serial.print(xTarget);
+    Serial.print("--");
+    Serial.println(position->xpos);
+    
 	x.write(90 + XDIRECTION*xspeed); //Command the motors to rotate
 	y.write(90 + YDIRECTION*yspeed);
 	z.write(90 + ZDIRECTION*zspeed);

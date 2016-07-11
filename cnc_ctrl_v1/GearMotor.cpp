@@ -51,11 +51,11 @@ void GearMotor::detach(){
 }
 
 void GearMotor::write(int speed){
-    Serial.print("gm: ");
+    //Serial.print("gm: ");
     
     int pwmFrequency = (speed - 90)*(2034/90);
     
-    Serial.println(speed);
+    //Serial.println(speed);
     //Serial.println(pwmFrequency);
     
     analogWrite(_pwmPin, abs(pwmFrequency));
