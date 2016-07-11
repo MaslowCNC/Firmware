@@ -53,7 +53,7 @@ char sect[22];
 
 
 void setup(){
-	Serial.begin(9600);
+	Serial.begin(19200);
 	if (USE_ESTOP == 1){
 		pinMode(estopswitch,INPUT);     //input for emergency stop system 
         	pinMode(estoppower,OUTPUT);     //power for emergency stop system

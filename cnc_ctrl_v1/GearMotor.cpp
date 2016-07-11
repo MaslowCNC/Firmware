@@ -43,19 +43,20 @@ GearMotor::GearMotor(int pwmPin, int pin1, int pin2)
 }
 
 void GearMotor::attach(int pin){
-    Serial.println("gear motor attached");
+    //Serial.println("gear motor attached");
 }
 
 void GearMotor::detach(){
-    Serial.println("gear motor detached");
+    //Serial.println("gear motor detached");
 }
 
 void GearMotor::write(int speed){
-    Serial.println("gear motor written to");
+    Serial.print("gm: ");
     
     int pwmFrequency = (speed - 90)*(2034/90);
     
-    Serial.println(pwmFrequency);
+    Serial.println(speed);
+    //Serial.println(pwmFrequency);
     
     analogWrite(_pwmPin, abs(pwmFrequency));
     
