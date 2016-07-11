@@ -21,9 +21,42 @@
 GearMotor::GearMotor(int pwmPin, int pin1, int pin2)
 {
   Serial.println("created gear motor");
+  Serial.println(pwmPin);
+  Serial.println(pin1);
+  Serial.println(pin2);
+  
+  //store pin numbers as private variables
+  _pwmPin = pwmPin;
+  _pin1  = pin1;
+  _pin2  = pin2;
+  
+  //set pinmodes
+  pinMode(_pwmPin,   OUTPUT); 
+  pinMode(_pin1,   OUTPUT); 
+  pinMode(_pin2, OUTPUT);
+  
+  //stop the motor
+  digitalWrite(_pin1, HIGH);
+  digitalWrite(_pin2, LOW) ;
+  digitalWrite(_pwmPin, LOW);
+  
 }
 
 void GearMotor::attach(int pin){
     Serial.println("gear motor attached");
+}
+
+void GearMotor::detach(){
+    Serial.println("gear motor detached");
+}
+
+void GearMotor::write(int speed){
+    Serial.println("gear motor written to");
+    Serial.println(speed);
+}
+
+int GearMotor::attached(){
+    Serial.println("gear motor attached");
+    return 1;
 }
 

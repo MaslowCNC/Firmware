@@ -71,13 +71,13 @@ void setup(){
 	pinMode(zpot, INPUT);
 	pinMode(SENSEPIN, INPUT_PULLUP);
     
-    pinMode(Motor11,   OUTPUT); 
-    pinMode(Motor12,   OUTPUT); 
-    pinMode(Motor1PWM, OUTPUT);   
+//    pinMode(Motor11,   OUTPUT); 
+//    pinMode(Motor12,   OUTPUT); 
+//    pinMode(Motor1PWM, OUTPUT);   
 
-    digitalWrite(Motor11, HIGH);
-    digitalWrite(Motor12, LOW) ;
-    digitalWrite(Motor1PWM, LOW);
+//    digitalWrite(Motor11, HIGH);
+//    digitalWrite(Motor12, LOW) ;
+//    digitalWrite(Motor1PWM, LOW);
     
 	noInterrupts();
 	TCCR1A = 0;
@@ -102,7 +102,7 @@ void setup(){
 		location.ztarget = location.zpos;
 	}
 	
-	setMotor(1000);
+//	setMotor(1000);
 }
 
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven

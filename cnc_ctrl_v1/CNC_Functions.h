@@ -50,18 +50,19 @@ location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 
 int xpot = 8;
 int ypot = 9;
 int zpot = 10;
-GearMotor x;
+GearMotor x(7,8,9);
 Servo y;
 Servo z;
+//GearMotor G(7,8,9);
 int servoDetachFlag = 1;
 int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
 float xMagnetScale = 1.23;
 float yMagnetScale = 1.23;
 float zMagnetScale = 1.23;
 
-int Motor11    = 9;
-int Motor12    = 8; 
-int Motor1PWM  = 7;
+//int Motor11    = 9;
+//int Motor12    = 8; 
+//int Motor1PWM  = 7;
 
 
 
@@ -349,7 +350,7 @@ int SetSpeed(float posNow, float posTarget, int gain){
 void setMotor(int speed){
     Serial.println("set motor one to speed:");
     Serial.println(speed);
-    
+    /*
     
     analogWrite(Motor1PWM, abs(speed));
     
@@ -360,7 +361,7 @@ void setMotor(int speed){
     else{
         digitalWrite(Motor11 , LOW);
         digitalWrite(Motor12 , HIGH );
-    }
+    }*/
 }
 
 /*The SetTarget() function moves the machine to the position stored in the location structure.*/
