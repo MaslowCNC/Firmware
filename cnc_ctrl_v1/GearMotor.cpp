@@ -52,7 +52,22 @@ void GearMotor::detach(){
 
 void GearMotor::write(int speed){
     Serial.println("gear motor written to");
-    Serial.println(speed);
+    
+    int pwmFrequency = (speed - 90)*(2034/90);
+    
+    Serial.println(pwmFrequency);
+    
+    analogWrite(_pwmPin, abs(pwmFrequency));
+    
+    if (pwmFrequency > 0){
+        digitalWrite(_pin1 , LOW);
+        digitalWrite(_pin2 , HIGH );
+    }
+    else{
+        digitalWrite(_pin1 , HIGH);
+        digitalWrite(_pin2 , LOW );
+    }
+    
 }
 
 int GearMotor::attached(){
