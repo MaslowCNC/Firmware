@@ -41,6 +41,7 @@
 #define TOLERANCE .3//this sets how close to the target point the tool must be before it moves on.
 #define MOVETOLERANCE .2 //this sets how close the machine must be to the target line at any given moment
 
+#include "GearMotor.h"
 
 int stepsize = 1;
 int feedrate = 125;
@@ -49,7 +50,7 @@ location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 
 int xpot = 8;
 int ypot = 9;
 int zpot = 10;
-Servo x;
+GearMotor x;
 Servo y;
 Servo z;
 int servoDetachFlag = 1;
@@ -514,28 +515,28 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 			if(abs(location.xpos - xEnd) > .2 && deltaX < .01 && abs(location.xpos - location.xtarget) > .1){//The machine has not moved significantly in the last 300ms
 				Serial.println("x stuck");
 				if(location.xpos < xEnd){
-					Unstick(x, -1);
+					//Unstick(x, -1);
 				}
 				else{
-					Unstick(x, 1);
+					//Unstick(x, 1);
 				}
 			}
 			if(abs(location.ypos - yEnd) > .2 && deltaY < .01 && abs(location.ypos - location.ytarget) > .1){
 				Serial.println("y stuck");
 				if(location.ypos < yEnd){
-					Unstick(y, -1);
+					//Unstick(y, -1);
 				}
 				else{
-					Unstick(y, 1);
+					//Unstick(y, 1);
 				}
 			}
 			if(abs(location.zpos - zEnd) > .2 && deltaZ < .01 && abs(location.zpos - location.ztarget) > .1){
 				Serial.println("z stuck");
 				if(location.zpos < zEnd){
-					Unstick(z, -1);
+					//Unstick(z, -1);
 				}
 				else{
-					Unstick(z, 1);
+					//Unstick(z, 1);
 				}
 			}
 			
@@ -833,28 +834,28 @@ int Circle(float radius, int direction, float xcenter, float ycenter, float star
 			if(deltaX < .01 && abs(location.xpos - location.xtarget) > .1){
 				//Serial.println("x stuck");
 				if(location.xpos < location.xtarget){
-					Unstick(x, -1);
+					//Unstick(x, -1);
 				}
 				else{
-					Unstick(x, 1);
+					//Unstick(x, 1);
 				}
 			}
 			if(deltaY < .01 && abs(location.ypos - location.ytarget) > .1){
 				//Serial.println("y stuck");
 				if(location.ypos < location.ytarget){
-					Unstick(y, -1);
+					//Unstick(y, -1);
 				}
 				else{
-					Unstick(y, 1);
+					//Unstick(y, 1);
 				}
 			}
 			if(deltaZ < .01 && abs(location.zpos - location.ztarget) > .1){
 				//Serial.println("z stuck");
 				if(location.zpos < location.ztarget){
-					Unstick(z, -1);
+					//Unstick(z, -1);
 				}
 				else{
-					Unstick(z, 1);
+					//Unstick(z, 1);
 				}
 			}
 			

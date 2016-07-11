@@ -1,4 +1,4 @@
-    /*This file is part of the Makesmith Control Software.
+/*This file is part of the Makesmith Control Software.
 
     The Makesmith Control Software is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,24 +14,16 @@
     along with the Makesmith Control Software.  If not, see <http://www.gnu.org/licenses/>.
     
     Copyright 2014-2016 Bar Smith*/
-    
-    #ifndef GearMotor_h
-    #define GearMotor_h
 
-    #include "Arduino.h"
+#include "Arduino.h"
+#include "GearMotor.h"
 
-    class GearMotor{
-        public:
-            GearMotor(int pwmPin, int pin1, int pin2);
-            void attach(int pin);
-            void detach();
-            void write(int speed);
-            int attached();
-        private:
-            int _pwmPin;
-            int _pin1;
-            int _pin2;
-            bool _attachedState;
-    };
+GearMotor::GearMotor(int pwmPin, int pin1, int pin2)
+{
+  Serial.println("created gear motor");
+}
 
-    #endif
+void GearMotor::attach(int pin){
+    Serial.println("gear motor attached");
+}
+

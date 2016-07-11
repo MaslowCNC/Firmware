@@ -23,7 +23,7 @@
 #include <SPI.h>
 #include <EEPROM.h>
 #include "CNC_Functions.h"
-#include "GearMotor.h"
+
 
 
 int spindle = 13;
@@ -64,7 +64,7 @@ void setup(){
 	Serial.println("ready");
 	Serial.println("gready");
 	pinMode(spindle, OUTPUT);           // set pin to output
-	digitalWrite(spindle, LOW);       // turn on pullup resistors
+	digitalWrite(spindle, LOW);
 	analogReference(EXTERNAL);
 	pinMode(xpot, INPUT);
 	pinMode(ypot, INPUT);
