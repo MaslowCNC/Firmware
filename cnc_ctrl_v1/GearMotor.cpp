@@ -61,12 +61,12 @@ void GearMotor::write(int speed){
     analogWrite(_pwmPin, abs(pwmFrequency));
     
     if (pwmFrequency > 0){
-        digitalWrite(_pin1 , LOW);
-        digitalWrite(_pin2 , HIGH );
-    }
-    else{
         digitalWrite(_pin1 , HIGH);
         digitalWrite(_pin2 , LOW );
+    }
+    else{
+        digitalWrite(_pin1 , LOW);
+        digitalWrite(_pin2 , HIGH );
     }
     
 }

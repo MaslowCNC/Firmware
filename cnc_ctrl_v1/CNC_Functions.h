@@ -46,10 +46,10 @@
 int stepsize = 1;
 int feedrate = 125;
 float unitScalar = 1/1.27;
-location_st location = {1.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 0, 0}; 
-int xpot = 8;
+location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 0, 0}; 
+int xpot = 10;
 int ypot = 9;
-int zpot = 10;
+int zpot = 8;
 GearMotor x(7,8,9);
 Servo y;
 Servo z;
@@ -310,11 +310,6 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
 	xspeed = SetSpeed(xTarget, position->xpos, gain); //Generate motor speeds
 	yspeed = SetSpeed(yTarget, position->ypos, gain);
 	zspeed = SetSpeed(zTarget, position->zpos, 200);
-	
-    Serial.print("dst: ");
-    Serial.print(xTarget);
-    Serial.print("--");
-    Serial.println(position->xpos);
     
 	x.write(90 + XDIRECTION*xspeed); //Command the motors to rotate
 	y.write(90 + YDIRECTION*yspeed);
