@@ -18,8 +18,7 @@
 #include "Arduino.h"
 #include "GearMotor.h"
 
-GearMotor::GearMotor(int pwmPin, int pin1, int pin2)
-{
+GearMotor::GearMotor(int pwmPin, int pin1, int pin2){
   Serial.println("created gear motor");
   Serial.println(pwmPin);
   Serial.println(pin1);
@@ -29,6 +28,7 @@ GearMotor::GearMotor(int pwmPin, int pin1, int pin2)
   _pwmPin = pwmPin;
   _pin1  = pin1;
   _pin2  = pin2;
+  _attachedState = 1;
   
   //set pinmodes
   pinMode(_pwmPin,   OUTPUT); 
@@ -43,36 +43,40 @@ GearMotor::GearMotor(int pwmPin, int pin1, int pin2)
 }
 
 void GearMotor::attach(int pin){
-    //Serial.println("gear motor attached");
+    _attachedState = 1;
 }
 
 void GearMotor::detach(){
-    //Serial.println("gear motor detached");
+    _attachedState = 0;
+    
+    //stop the motor
+    digitalWrite(_pin1, HIGH);
+    digitalWrite(_pin2, LOW) ;
+    digitalWrite(_pwmPin, LOW);
 }
 
 void GearMotor::write(int speed){
-    //Serial.print("gm: ");
     
-    int pwmFrequency = (speed - 90)*(2034/90);
-    
-    //Serial.println(speed);
-    //Serial.println(pwmFrequency);
-    
-    analogWrite(_pwmPin, abs(pwmFrequency));
-    
-    if (pwmFrequency > 0){
-        digitalWrite(_pin1 , HIGH);
-        digitalWrite(_pin2 , LOW );
-    }
-    else{
-        digitalWrite(_pin1 , LOW);
-        digitalWrite(_pin2 , HIGH );
+    if (_attachedState == 1){
+        
+        int pwmFrequency = (speed - 90)*(2034/90);
+        
+        analogWrite(_pwmPin, abs(pwmFrequency));
+        
+        if (pwmFrequency > 0){
+            digitalWrite(_pin1 , HIGH);
+            digitalWrite(_pin2 , LOW );
+        }
+        else{
+            digitalWrite(_pin1 , LOW);
+            digitalWrite(_pin2 , HIGH );
+        }
     }
     
 }
 
 int GearMotor::attached(){
-    Serial.println("gear motor attached");
-    return 1;
+    
+    return _attachedState;
 }
 
