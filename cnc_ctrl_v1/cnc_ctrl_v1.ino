@@ -62,9 +62,6 @@ void setup(){
 	}
 	x.write(90); y.write(90); z.write(90);
 	Serial.println("ready");
-    Serial.println(location.xpos);
-    Serial.println(location.ypos);
-    Serial.println(location.zpos);
 	Serial.println("gready");
 	pinMode(spindle, OUTPUT);           // set pin to output
 	digitalWrite(spindle, LOW);
@@ -103,7 +100,6 @@ void setup(){
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven
 {
 	TCNT1 = 64000;            // preload timer
-	//Serial.println("this ran");
 	//SetPos(&location); 
 	//SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 123);
 	

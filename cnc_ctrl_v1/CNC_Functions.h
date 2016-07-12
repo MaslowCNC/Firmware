@@ -241,9 +241,6 @@ int SetPos(location_st* position){
 			Serial.print(",");
 			Serial.print(position->zpos);
 			Serial.println(")");
-            Serial.println(location.xpos);
-            Serial.println(location.ypos);
-            Serial.println(location.zpos);
 			//SetScreen(position->xpos/unitScalar, position->ypos/unitScalar, position->zpos/unitScalar);
 		}
 		else{ //If the machine is stopped print the target position
@@ -284,24 +281,6 @@ int SetSpeed(float posNow, float posTarget, int gain){
 	speed = BoostLimit(speed, 85); //Limits the output to an acceptable range
 	
 	return(speed);
-}
-
-/*Set DC motor speed*/
-void setMotor(int speed){
-    Serial.println("set motor one to speed:");
-    Serial.println(speed);
-    /*
-    
-    analogWrite(Motor1PWM, abs(speed));
-    
-    if (speed > 0){
-        digitalWrite(Motor11 , HIGH);
-        digitalWrite(Motor12 , LOW );
-    }
-    else{
-        digitalWrite(Motor11 , LOW);
-        digitalWrite(Motor12 , HIGH );
-    }*/
 }
 
 /*The SetTarget() function moves the machine to the position stored in the location structure.*/
