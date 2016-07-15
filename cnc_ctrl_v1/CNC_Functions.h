@@ -20,9 +20,9 @@
 #define FORWARD 1
 #define BACKWARD -1
 
-#define XPITCH 1/20
-#define YPITCH 1/20
-#define ZPITCH 1/20
+#define XPITCH 10
+#define YPITCH 10
+#define ZPITCH 10
 
 #define XDIRECTION BACKWARD
 #define YDIRECTION BACKWARD
