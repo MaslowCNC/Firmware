@@ -26,7 +26,7 @@
 
 
 
-int spindle = 13;
+int spindle = 17;
 int USE_ESTOP = 0;
 int estopswitch = 18;
 int estoppower = 19;

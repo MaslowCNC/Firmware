@@ -62,6 +62,7 @@ void GearMotor::write(int speed){
         int pwmFrequency = (speed - 90)*(2034/90);
         
         analogWrite(_pwmPin, abs(pwmFrequency));
+        //digitalWrite(_pwmPin, HIGH);
         
         if (pwmFrequency > 0){
             digitalWrite(_pin1 , HIGH);
