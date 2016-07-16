@@ -48,10 +48,10 @@ int feedrate = 125;
 float unitScalar = 1/1.27;
 location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 0, 0}; 
 int xpot = 10;
-int ypot = 33;
+int ypot = 11;
 int zpot = 32;
-GearMotor x(6,12,13);
-Servo y;
+GearMotor x(7,8,9);
+GearMotor y(6,12,13);
 Servo z;
 int servoDetachFlag = 1;
 int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
