@@ -48,7 +48,7 @@ int feedrate = 125;
 float unitScalar = 1/1.27;
 location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 0, 0}; 
 int xpot = 10;
-int ypot = 11;
+int ypot = 34;
 int zpot = 32;
 GearMotor x(7,8,9);
 GearMotor y(6,12,13);
