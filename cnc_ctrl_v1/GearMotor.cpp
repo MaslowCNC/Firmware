@@ -19,10 +19,10 @@
 #include "GearMotor.h"
 
 GearMotor::GearMotor(int pwmPin, int pin1, int pin2){
-  Serial.println("created gear motor");
-  Serial.println(pwmPin);
-  Serial.println(pin1);
-  Serial.println(pin2);
+  //Serial.println("created gear motor");
+  //Serial.println(pwmPin);
+  //Serial.println(pin1);
+  //Serial.println(pin2);
   
   //store pin numbers as private variables
   _pwmPin = pwmPin;
