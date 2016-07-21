@@ -45,7 +45,7 @@
 
 int stepsize = 1;
 int feedrate = 125;
-float unitScalar = 1/1.27;
+float unitScalar = 20;
 location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 0, 0}; 
 int xpot = 10;
 int ypot = 34;
