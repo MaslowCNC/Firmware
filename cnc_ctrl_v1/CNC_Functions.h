@@ -541,9 +541,6 @@ int G1(String readString){
     xgoto = xgoto / XPITCH;
     ygoto = ygoto / YPITCH;
     zgoto = zgoto / ZPITCH;
-    Serial.println("ygoto:");
-    Serial.println(ygoto);
-    
     
     int tempo = Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 
