@@ -19,7 +19,7 @@
 
 
 #include <Servo.h>
-#include "MyTypes.h"
+#include "MyTypes.h" 
 #include <SPI.h>
 #include <EEPROM.h>
 #include "CNC_Functions.h"
