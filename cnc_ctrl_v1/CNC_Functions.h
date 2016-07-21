@@ -510,11 +510,17 @@ float extractGcodeValue(String readString, char target){
     String numberAsString;
     float numberAsFloat;
     
-    begin           =  readString.indexOf('X');
+    begin           =  readString.indexOf(target);
     end             =  readString.indexOf(' ', begin);
     numberAsString  =  readString.substring(begin+1,end);
     numberAsFloat   =  numberAsString.toFloat();
     
+    if (begin == -1){ //if the character was not found, return error
+        Serial.println("not found");
+        return -9999;
+    }
+    
+    Serial.println(target);
     Serial.println(begin);
     Serial.println(end);
     Serial.println(numberAsString);
