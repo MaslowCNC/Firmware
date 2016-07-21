@@ -179,7 +179,7 @@ void loop(){
     }
     
     if(readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G0 " || readString.substring(0, 3) == "G1 "){
-        //Serial.println("G1 recognized");
+        Serial.println("G1 recognized");
         G1(readString);
         Serial.println("ready");
         Serial.println("gready");

@@ -20,7 +20,8 @@
 #define FORWARD 1
 #define BACKWARD -1
 
-#define XPITCH 10
+//these define the number (or fraction there of) of inches moved with each rotation of each axis
+#define XPITCH 1000
 #define YPITCH 10
 #define ZPITCH 10
 
@@ -498,6 +499,7 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 /*G1() is the function which is called to process the string if it begins with 'G01' or 'G00'*/
 int G1(String readString){
 
+    Serial.println("g1 doing its thing");
     float xgoto = 99999; //These are initialized to ridiculous values as a method to check if they have been changed or not, there is a better way to do this?
     float ygoto = 99999;
     float zgoto = 99999;
@@ -641,7 +643,10 @@ int G1(String readString){
     }
 
     //convert from mm to rotations
-    xgoto = xgoto * unitScalar;
+    Serial.println("**");
+    Serial.println(xgoto);
+    xgoto = xgoto / XPITCH;
+    Serial.println(xgoto);
     ygoto = ygoto * unitScalar;
     zgoto = zgoto * unitScalar;
 
