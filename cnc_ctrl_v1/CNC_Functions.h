@@ -299,7 +299,7 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     zspeed = SetSpeed(zTarget, position->zpos, 200);
 
     x.write(90 + XDIRECTION*xspeed); //Command the motors to rotate
-    y.write(90 + YDIRECTION*yspeed);
+    y.write(90 + (-1)*yspeed);
     z.write(90 + ZDIRECTION*zspeed);
 }
 
@@ -539,8 +539,10 @@ int G1(String readString){
     
     //convert from mm to rotations
     xgoto = xgoto / XPITCH;
-    ygoto = (ygoto / YPITCH)*-1;
+    ygoto = ygoto / YPITCH;
     zgoto = zgoto / ZPITCH;
+    Serial.println("ygoto:");
+    Serial.println(ygoto);
     
     
     int tempo = Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
