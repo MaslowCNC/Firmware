@@ -28,7 +28,7 @@
 #define BACKWARD -1
 
 //these define the number (or fraction there of) of mm moved with each rotation of each axis
-#define XPITCH 100
+#define XPITCH 40
 #define YPITCH 10
 #define ZPITCH 10
 
