@@ -68,9 +68,12 @@ float yMagnetScale = 1.23;
 float zMagnetScale = 1.23;
 
 
+
+int PWMread(int pin){
+
 /*PWMread() measures the duty cycle of a PWM signal on the provided pin. It then
 takes this duration and converts it to a ten bit number.*/
-int PWMread(int pin){
+
     int duration = 0;
     float tempMagnetScale = 1.23;
     if (pin == xpot){
@@ -100,8 +103,10 @@ int PWMread(int pin){
 }
 
 float getAngle(float X,float Y,float centerX,float centerY){
-    /*This function takes in the ABSOLUTE coordinates of the end of the circle and
- the ABSOLUTE coordinates of the center of the circle and returns the angle between the end and the axis in pi-radians*/
+
+/*This function takes in the ABSOLUTE coordinates of the end of the circle and
+ the ABSOLUTE coordinates of the center of the circle and returns the angle between 
+ the end and the axis in pi-radians*/
 
     float theta = 0;
     if ( abs(X - centerX) < .1){
@@ -165,8 +170,11 @@ float getAngle(float X,float Y,float centerX,float centerY){
     return(theta);
 }
 
-/*The SetPos() function updates the machine's position by essentially integrating the input from the encoder*/
 int SetPos(location_st* position){
+
+/*The SetPos() function updates the machine's position by essentially integrating 
+the input from the encoder*/
+
     int maxJump = 400;
     static int loopCount = 0;
     static int CurrentXangle, CurrentYangle, CurrentZangle;
@@ -265,8 +273,12 @@ int SetPos(location_st* position){
     }
 }
 
-/*BoostLimit sets the upper and lower bounds of the signals which go to the servos to prevent weird behavior. Valid input to set the servo speed ranges from 0-180, and the Arduino servo library gives strange results if you go outside those limits.*/
 int BoostLimit(int boost, int limit){
+
+/*BoostLimit sets the upper and lower bounds of the signals which go to the servos to prevent weird
+ behavior. Valid input to set the servo speed ranges from 0-180, and the Arduino servo library gives
+ strange results if you go outside those limits.*/
+
     if(boost > limit){
         boost = limit;
     }
@@ -276,8 +288,12 @@ int BoostLimit(int boost, int limit){
     return (boost);
 }
 
-/*SetSpeed() takes a position and a target and sets the speed of the servo to hit that target. Right now it implements a proportional controller, where the gain is set by the 'gain' input. A PID controller would be better.*/
 int SetSpeed(float posNow, float posTarget, int gain){
+
+/*SetSpeed() takes a position and a target and sets the speed of the servo to hit that target.
+ Right now it implements a proportional controller, where the gain is set by the 'gain' input.
+ A PID controller would be better.*/
+
     int speed;
 
     speed = gain * (posTarget - posNow); //Set speed proportional to the distance from the target
@@ -291,8 +307,10 @@ int SetSpeed(float posNow, float posTarget, int gain){
     return(speed);
 }
 
-/*The SetTarget() function moves the machine to the position stored in the location structure.*/
 int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position, int gain){
+
+/*The SetTarget() function moves the machine to the position stored in the location structure.*/
+
     int xspeed, yspeed, zspeed;
     xspeed = SetSpeed(xTarget, position->xpos, gain); //Generate motor speeds
     yspeed = SetSpeed(yTarget, position->ypos, gain);
@@ -303,8 +321,11 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     z.write(90 + ZDIRECTION*zspeed);
 }
 
-/*The Unstick() function is called to attempt to unstick the machine when it becomes stuck. */
 int Unstick(Servo axis, int direction){
+
+/*The Unstick() function is called to attempt to unstick the machine when
+ it becomes stuck. */
+
     static long staticTime = millis(); //This variable holds the time the function was last called. It persists between function calls.
     static int count = 0; //count is used to determine if the machine has become seriously stuck or if the machine is able to free itself. If the unstick() function is called multiple times in a short span of time the machine is deemed to be permanently stuck.
 
@@ -351,8 +372,13 @@ int Unstick(Servo axis, int direction){
     }
 }
 
-/*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each direction, the tool moves to the target in a straight line. This function is used by the G00 and G01 commands.*/
 int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
+    
+/*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
+the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
+direction, the tool moves to the target in a straight line. This function is used by the G00 
+and G01 commands.*/
+
     float curXtarget, curYtarget, curZtarget;
     long mtime = millis();
     long ntime = millis();
@@ -504,6 +530,10 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 }
 
 float extractGcodeValue(String readString, char target,float defaultReturn){
+
+/*Reads a string and returns the value of number following the target character.
+If no number is found, defaultReturn is returned*/
+
     int begin;
     int end;
     String numberAsString;
@@ -521,8 +551,11 @@ float extractGcodeValue(String readString, char target,float defaultReturn){
     return numberAsFloat;
 }
 
-/*G1() is the function which is called to process the string if it begins with 'G01' or 'G00'*/
 int G1(String readString){
+    
+/*G1() is the function which is called to process the string if it begins with 
+'G01' or 'G00'*/
+
     float xgoto = location.xtarget;
     float ygoto = location.ytarget;
     float zgoto = location.ztarget;
@@ -551,9 +584,15 @@ int G1(String readString){
     }
 }
 
-
-/*Circle two takes in the radius of the circle to be cut and the starting and ending points in radians with pi removed so a complete circle is from 0 to 2. If direction is 1 the function cuts a CCW circle, and -1 cuts a CW circle. The direction that one moves from zero changes between the two directions, meaning that a quarter circle is always given by 0,.5 regardless of the direction. So direction = -1 start = 0 end = .5 makes a 1/4 circle downward and direction = 1 start = 0 end = .5 makes a 1/4 circle upward starting from the right side of the circle*/
 int Circle(float radius, int direction, float xcenter, float ycenter, float startrad, float endrad, float speed){
+    
+/*Circle two takes in the radius of the circle to be cut and the starting and ending points in radians with 
+pi removed so a complete circle is from 0 to 2. If direction is 1 the function cuts a CCW circle, and -1 cuts 
+a CW circle. The direction that one moves from zero changes between the two directions, meaning that a quarter 
+circle is always given by 0,.5 regardless of the direction. So direction = -1 start = 0 end = .5 makes a 1/4 
+circle downward and direction = 1 start = 0 end = .5 makes a 1/4 circle upward starting from the right side of 
+the circle*/
+
     int i = 0;
     int j = 0;
     int comp = 1;
@@ -673,8 +712,12 @@ int Circle(float radius, int direction, float xcenter, float ycenter, float star
     return(1);
 }
 
-/*G2() is the function which is called when the string sent to the machine is 'G02' or 'G03'. The string is parsed to extract the relevant information which is then used to compute the start and end points of the circle and the the circle() function is called.*/
 int G2(String readString){
+
+    /*G2() is the function which is called when the string sent to the machine is 'G02' or 'G03'. 
+    The string is parsed to extract the relevant information which is then used to compute the start and end 
+    points of the circle and the the circle() function is called.*/
+    
     int rpos;
     int mpos;
     int npos;
@@ -788,8 +831,13 @@ int G2(String readString){
     }
 }
 
-/*The testEncoders() function tests that the encoders are connected and working properly. It does this by measuring the produced pulse width. If there is no pulse width then the encoder is not connected or is exactly at the zero position.*/
 int testEncoders(){
+    
+/*The testEncoders() function tests that the encoders are connected and working properly. It does this by 
+measuring the produced pulse width. If there is no pulse width then the encoder is not connected or is 
+exactly at the zero position.*/
+
+    
     Serial.println("\nTesting Encoders");
     if(PWMread(xpot) == 0){
         Serial.println("\nThe encoder on the xaxis of your machine did not respond. This is most likely due to a bad connection between the microcontroller and the encoder. This may be because the encoder is plugged in backwards.\n");
@@ -815,8 +863,11 @@ int testEncoders(){
     return(1);
 }
 
-/*The testMotors() function tests that the motors are all connected. It does this by driving each motor forward then backwards for a set amount of time.*/
 int testMotors(){
+    
+/*The testMotors() function tests that the motors are all connected. It does this by driving each motor forward then 
+backwards for a set amount of time.*/
+
     Serial.println("Testing Motors");
     x.write(90);
     y.write(90);
@@ -860,8 +911,11 @@ int testMotors(){
     z.write(90);
 }
 
-/*The testBoth() function checks that the motors and encoders are plugged in correctly. It does this by driving the motors and then measuring that the correct shaft rotates using the encoders.*/
 int testBoth(){
+    
+/*The testBoth() function checks that the motors and encoders are plugged in correctly. It does this by driving the 
+motors and then measuring that the correct shaft rotates using the encoders.*/
+
     Serial.println("Testing System");
     x.write(90);
     y.write(90);
@@ -1105,8 +1159,10 @@ int calibrateMagnets(){
     return 1;
 }
 
-/*The G10() function handles the G10 gcode which re-zeroes one or all of the machine's axes.*/
 void G10(String readString){
+
+/*The G10() function handles the G10 gcode which re-zeroes one or all of the machine's axes.*/
+
 
     if(readString.indexOf('X') > 2){
         location.xpos = 0.0;
@@ -1190,8 +1246,11 @@ float toolOffset(int pin){
     }
 }
 
-//readFloat and writeFloat functions courtesy of http://www.alexenglish.info/2014/05/saving-floats-longs-ints-eeprom-arduino-using-unions/
 float readFloat(unsigned int addr){
+
+//readFloat and writeFloat functions courtesy of http://www.alexenglish.info/2014/05/saving-floats-longs-ints-eeprom-arduino-using-unions/
+
+
     union{
         byte b[4];
         float f;
