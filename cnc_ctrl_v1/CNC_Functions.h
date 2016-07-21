@@ -506,7 +506,6 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 /*G1() is the function which is called to process the string if it begins with 'G01' or 'G00'*/
 int G1(String readString){
 
-    Serial.println("g1 doing its thing");
     float xgoto = 99999; //These are initialized to ridiculous values as a method to check if they have been changed or not, there is a better way to do this?
     float ygoto = 99999;
     float zgoto = 99999;
@@ -650,12 +649,9 @@ int G1(String readString){
     }
 
     //convert from mm to rotations
-    Serial.println("**");
-    Serial.println(xgoto);
     xgoto = xgoto / XPITCH;
-    Serial.println(xgoto);
-    ygoto = ygoto * unitScalar;
-    zgoto = zgoto * unitScalar;
+    ygoto = ygoto / YPITCH;
+    zgoto = zgoto / ZPITCH;
 
 
 
