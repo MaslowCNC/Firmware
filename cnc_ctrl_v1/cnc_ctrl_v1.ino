@@ -25,7 +25,8 @@
 #include "CNC_Functions.h"
 
 
-int spindle = 11;
+
+int spindle = 17;
 int USE_ESTOP = 0;
 int estopswitch = 18;
 int estoppower = 19;
@@ -63,12 +64,13 @@ void setup(){
 	Serial.println("ready");
 	Serial.println("gready");
 	pinMode(spindle, OUTPUT);           // set pin to output
-	digitalWrite(spindle, LOW);       // turn on pullup resistors
+	digitalWrite(spindle, LOW);
 	analogReference(EXTERNAL);
 	pinMode(xpot, INPUT);
 	pinMode(ypot, INPUT);
 	pinMode(zpot, INPUT);
 	pinMode(SENSEPIN, INPUT_PULLUP);
+    
 	noInterrupts();
 	TCCR1A = 0;
 	TCCR1B = 0;
@@ -76,7 +78,7 @@ void setup(){
 	TCCR1B |= (1 << CS12);
 	TIMSK1 |= (1 << TOIE1);
 	interrupts(); 
-	if (EEPROM.read(4) == 56){ //If the EEPROM has been written to by a prevous calibration, this will be 56
+	/*if (EEPROM.read(4) == 56){ //If the EEPROM has been written to by a previous calibration, this will be 56
 		xMagnetScale = float(EEPROM.read(1))/100.0;
 		yMagnetScale = float(EEPROM.read(2))/100.0;
 		zMagnetScale = float(EEPROM.read(3))/100.0;
@@ -90,14 +92,14 @@ void setup(){
 		location.xtarget = location.xpos;
 		location.ytarget = location.ypos;
 		location.ztarget = location.zpos;
-	}
-	  
+	}*/
+	
+//	setMotor(1000);
 }
 
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven
 {
 	TCNT1 = 64000;            // preload timer
-	//Serial.println("this ran");
 	//SetPos(&location); 
 	//SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 123);
 	
@@ -216,14 +218,14 @@ void loop(){
 	
 	if(readString.substring(0, 3) == "G20"){
 		//Serial.println("Inches Set");
-		unitScalar = 20; //there are 20 rotations per inch
+		unitScalar = 1; //there are 20 rotations per inch
 		Serial.println("gready");
 		readString = "";
 	}
 	
 	if(readString.substring(0, 3) == "G21"){
 		//Serial.println("mm set");
-		unitScalar = 1/1.27; //the machine moves 1.27 mm per rotation
+		unitScalar = 20; //the machine moves 1.27 mm per rotation
 		Serial.println("gready");
 		readString = "";
 	}
