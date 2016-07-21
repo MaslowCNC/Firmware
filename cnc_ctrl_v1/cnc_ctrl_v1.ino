@@ -370,18 +370,6 @@ void loop(){
         z.detach();
     }
     
-    if( millis() - time > 30000){
-        long fadeVal = backLight+(.01*(30000.0-float(millis() - time)));
-        if (fadeVal < 0){
-            fadeVal = 0;
-        }
-        //analogWrite(blPin, fadeVal);
-    }
-    
-    if( millis() - time > 45000){
-        //setContrast(0); 
-    }
-    
     if (readString.length() > 0){
         Serial.println(readString);
         readString = "";

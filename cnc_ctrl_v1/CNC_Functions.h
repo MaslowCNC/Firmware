@@ -14,13 +14,20 @@
     along with the Makesmith Control Software.  If not, see <http://www.gnu.org/licenses/>.
 
     Copyright 2014 Bar Smith*/
+    
+    /*
+    This module contains all of the functions necessary to move the machine. Internally the program operates in units of
+    rotation. The conversion ratio between rotations and linear movement is stored by the XPITCH... #defines. When a line
+    of Gcode arrives the units are converted into rotations, operated on, and the position is then returned by the machine
+    using real world units.
+    */
 
 #include "MyTypes.h"
 
 #define FORWARD 1
 #define BACKWARD -1
 
-//these define the number (or fraction there of) of inches moved with each rotation of each axis
+//these define the number (or fraction there of) of mm moved with each rotation of each axis
 #define XPITCH 1000
 #define YPITCH 10
 #define ZPITCH 10
@@ -241,7 +248,7 @@ int SetPos(location_st* position){
             Serial.print(position->ypos);
             Serial.print(",");
             Serial.print(position->zpos);
-            Serial.println(")");
+            Serial.println(")M");
             //SetScreen(position->xpos/unitScalar, position->ypos/unitScalar, position->zpos/unitScalar);
         }
         else{ //If the machine is stopped print the target position
