@@ -353,7 +353,6 @@ int Unstick(Servo axis, int direction){
 
 /*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each direction, the tool moves to the target in a straight line. This function is used by the G00 and G01 commands.*/
 int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
-    Serial.println("begining of move");
     float curXtarget, curYtarget, curZtarget;
     long mtime = millis();
     long ntime = millis();
@@ -516,22 +515,14 @@ float extractGcodeValue(String readString, char target,float defaultReturn){
     numberAsFloat   =  numberAsString.toFloat();
     
     if (begin == -1){ //if the character was not found, return error
-        Serial.println("not found");
         return defaultReturn;
     }
-    
-    Serial.println(target);
-    Serial.println(begin);
-    Serial.println(end);
-    Serial.println(numberAsString);
-    Serial.println(numberAsFloat);
     
     return numberAsFloat;
 }
 
 /*G1() is the function which is called to process the string if it begins with 'G01' or 'G00'*/
 int G1(String readString){
-    Serial.println("begin G!");
     float xgoto = location.xtarget;
     float ygoto = location.ytarget;
     float zgoto = location.ztarget;
@@ -548,7 +539,7 @@ int G1(String readString){
     
     //convert from mm to rotations
     xgoto = xgoto / XPITCH;
-    ygoto = ygoto / YPITCH;
+    ygoto = (ygoto / YPITCH)*-1;
     zgoto = zgoto / ZPITCH;
     
     
