@@ -20,9 +20,9 @@
 #define FORWARD 1
 #define BACKWARD -1
 
-#define XPITCH 10
-#define YPITCH 10
-#define ZPITCH 10
+#define XPITCH 1/20
+#define YPITCH 1/20
+#define ZPITCH 1/20
 
 #define XDIRECTION BACKWARD
 #define YDIRECTION BACKWARD
@@ -41,23 +41,23 @@
 #define TOLERANCE .3//this sets how close to the target point the tool must be before it moves on.
 #define MOVETOLERANCE .2 //this sets how close the machine must be to the target line at any given moment
 
-#include "GearMotor.h"
 
 int stepsize = 1;
 int feedrate = 125;
-float unitScalar = 20;
+float unitScalar = 1/1.27;
 location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 0, 0}; 
-int xpot = 10;
-int ypot = 34;
-int zpot = 32;
-GearMotor x(7,8,9);
-GearMotor y(6,12,13);
+int xpot = 8;
+int ypot = 9;
+int zpot = 10;
+Servo x;
+Servo y;
 Servo z;
 int servoDetachFlag = 1;
 int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
 float xMagnetScale = 1.23;
 float yMagnetScale = 1.23;
 float zMagnetScale = 1.23;
+
 
 
 /*PWMread() measures the duty cycle of a PWM signal on the provided pin. It then
@@ -79,7 +79,6 @@ int PWMread(int pin){
 	duration = pulseIn(pin, HIGH, 2000); //This returns the pulse duration
 	duration = (int)((float)duration*tempMagnetScale); //1.23 scales it to a ten bit number
 	
-	
 	if (duration >= 1023){
 		duration = 1023;
 	}
@@ -87,7 +86,6 @@ int PWMread(int pin){
 	if (duration < 10){
 		duration = 0;
 	}
-    
 	return duration;
 }
 
@@ -156,6 +154,63 @@ float getAngle(float X,float Y,float centerX,float centerY){
 	//Serial.println(theta);
 	return(theta);
 }
+
+/*SetScreen() updates the position displayed on the LCD display (yes, we're working on adding an LCD display upgrade.*/
+/*void SetScreen(float x, float y, float z){
+	char Msg[6];
+	
+	clearDisplay(WHITE); 
+	setStr("X: ", 0, 0, BLACK);
+	setStr("Y: ", 0, 10, BLACK);
+	setStr("Z: ", 0, 20, BLACK);
+	
+	if(x < 0){
+		setStr("-", 14, 0, BLACK);
+	}
+	if(y < 0){
+		setStr("-", 14, 10, BLACK);
+	}
+	if(z < 0){
+		setStr("-", 14, 20, BLACK);
+	}
+	
+	int t100 = 100 * abs(x); 
+	int tWhole = t100 / 100;
+	int tFract = t100 % 100;
+	sprintf(Msg, "%d.%d", tWhole, tFract < 10 ? 0 : tFract);
+	setStr(Msg, 20, 0, BLACK);
+	
+	t100 = 100 * abs(y); 
+	tWhole = t100 / 100;
+	tFract = t100 % 100;
+	sprintf(Msg, "%d.%d", tWhole, tFract < 10 ? 0 : tFract);
+	setStr(Msg, 20, 10, BLACK);
+	
+	t100 = 100 * abs(z); 
+	tWhole = t100 / 100;
+	tFract = t100 % 100;
+	sprintf(Msg, "%d.%d", tWhole, tFract < 10 ? 0 : tFract);
+	setStr(Msg, 20, 20, BLACK);
+
+	if (unitScalar == 20){
+		setStr("G20", 67, 0, BLACK);
+	}
+	else{
+		setStr("G19", 67, 0, BLACK);
+	}
+	
+	if (movemode == 1){
+		setStr("G90", 67, 10, BLACK);
+	}
+	else{
+		setStr("91", 67, 10, BLACK);
+	}
+	
+	setStr("Makesmith Tech", 0, 40, BLACK);
+	
+	
+	updateDisplay();
+}*/
 
 /*The SetPos() function updates the machine's position by essentially integrating the input from the encoder*/
 int SetPos(location_st* position){
@@ -232,7 +287,6 @@ int SetPos(location_st* position){
 	
 	loopCount++;
 	if(loopCount > 30){ //Update the position every so often
-		servoDetachFlag = 0;
 		if(servoDetachFlag == 0){ //If the machine is moving print the real position
 			Serial.print("pz(");
 			Serial.print(position->xpos);
@@ -286,10 +340,10 @@ int SetSpeed(float posNow, float posTarget, int gain){
 /*The SetTarget() function moves the machine to the position stored in the location structure.*/
 int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position, int gain){
 	int xspeed, yspeed, zspeed;
-	xspeed = SetSpeed(xTarget, position->xpos, gain); //Generate motor speeds
-	yspeed = SetSpeed(yTarget, position->ypos, gain);
-	zspeed = SetSpeed(zTarget, position->zpos, 200);
-    
+	xspeed = SetSpeed(xTarget, location.xpos, gain); //Generate motor speeds
+	yspeed = SetSpeed(yTarget, location.ypos, gain);
+	zspeed = SetSpeed(zTarget, location.zpos, 200);
+	
 	x.write(90 + XDIRECTION*xspeed); //Command the motors to rotate
 	y.write(90 + YDIRECTION*yspeed);
 	z.write(90 + ZDIRECTION*zspeed);
@@ -435,28 +489,28 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 			if(abs(location.xpos - xEnd) > .2 && deltaX < .01 && abs(location.xpos - location.xtarget) > .1){//The machine has not moved significantly in the last 300ms
 				Serial.println("x stuck");
 				if(location.xpos < xEnd){
-					//Unstick(x, -1);
+					Unstick(x, -1);
 				}
 				else{
-					//Unstick(x, 1);
+					Unstick(x, 1);
 				}
 			}
 			if(abs(location.ypos - yEnd) > .2 && deltaY < .01 && abs(location.ypos - location.ytarget) > .1){
 				Serial.println("y stuck");
 				if(location.ypos < yEnd){
-					//Unstick(y, -1);
+					Unstick(y, -1);
 				}
 				else{
-					//Unstick(y, 1);
+					Unstick(y, 1);
 				}
 			}
 			if(abs(location.zpos - zEnd) > .2 && deltaZ < .01 && abs(location.zpos - location.ztarget) > .1){
 				Serial.println("z stuck");
 				if(location.zpos < zEnd){
-					//Unstick(z, -1);
+					Unstick(z, -1);
 				}
 				else{
-					//Unstick(z, 1);
+					Unstick(z, 1);
 				}
 			}
 			
@@ -754,28 +808,28 @@ int Circle(float radius, int direction, float xcenter, float ycenter, float star
 			if(deltaX < .01 && abs(location.xpos - location.xtarget) > .1){
 				//Serial.println("x stuck");
 				if(location.xpos < location.xtarget){
-					//Unstick(x, -1);
+					Unstick(x, -1);
 				}
 				else{
-					//Unstick(x, 1);
+					Unstick(x, 1);
 				}
 			}
 			if(deltaY < .01 && abs(location.ypos - location.ytarget) > .1){
 				//Serial.println("y stuck");
 				if(location.ypos < location.ytarget){
-					//Unstick(y, -1);
+					Unstick(y, -1);
 				}
 				else{
-					//Unstick(y, 1);
+					Unstick(y, 1);
 				}
 			}
 			if(deltaZ < .01 && abs(location.zpos - location.ztarget) > .1){
 				//Serial.println("z stuck");
 				if(location.zpos < location.ztarget){
-					//Unstick(z, -1);
+					Unstick(z, -1);
 				}
 				else{
-					//Unstick(z, 1);
+					Unstick(z, 1);
 				}
 			}
 			
