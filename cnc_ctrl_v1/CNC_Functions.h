@@ -507,15 +507,20 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 float extractGcodeValue(String readString, char target){
     int begin;
     int end;
+    String numberAsString;
+    float numberAsFloat;
     
-    begin = readString.indexOf('X');
-    end   = readString.indexOf(' ', begin);
+    begin           =  readString.indexOf('X');
+    end             =  readString.indexOf(' ', begin);
+    numberAsString  =  readString.substring(begin+1,end);
+    numberAsFloat   =  numberAsString.toFloat();
     
     Serial.println(begin);
     Serial.println(end);
-    Serial.println(readString.substring(begin,end));
+    Serial.println(numberAsString);
+    Serial.println(numberAsFloat);
     
-    return 1.0;
+    return numberAsFloat;
 }
 
 /*G1() is the function which is called to process the string if it begins with 'G01' or 'G00'*/
@@ -529,6 +534,8 @@ int G1(String readString){
     readString.toUpperCase(); //Make the string all uppercase to remove variability
     
     xgoto = extractGcodeValue(readString, 'X');
+    ygoto = extractGcodeValue(readString, 'Y');
+    zgoto = extractGcodeValue(readString, 'Z');
     
 }
     
