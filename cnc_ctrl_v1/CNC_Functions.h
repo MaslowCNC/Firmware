@@ -353,6 +353,7 @@ int Unstick(Servo axis, int direction){
 
 /*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each direction, the tool moves to the target in a straight line. This function is used by the G00 and G01 commands.*/
 int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
+    Serial.println("begining of move");
     float curXtarget, curYtarget, curZtarget;
     long mtime = millis();
     long ntime = millis();
@@ -503,44 +504,35 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
     return(1);
 }
 
+float extractGcodeValue(String readString, char target){
+    int begin;
+    int end;
+    
+    begin = readString.indexOf('X');
+    end   = readString.indexOf(' ', begin);
+    
+    Serial.println(begin);
+    Serial.println(end);
+    Serial.println(readString.substring(begin,end));
+    
+    return 1.0;
+}
+
 /*G1() is the function which is called to process the string if it begins with 'G01' or 'G00'*/
 int G1(String readString){
+    Serial.println("begin G!");
     float xgoto = location.xtarget;
     float ygoto = location.ytarget;
     float zgoto = location.ztarget;
     float gospeed = 0;
-    int i = 0;
-    int j = 0;
-    int begin;
-    int end;
-    char sect[22]; //This whole section is kinda a mess maybe it should be done like g1go()?
-    while (j < 23){
-        sect[j] = ' ';
-        j++;
-    }
-    i = 2;
-    memset(sect,0,sizeof(sect)); //This clears the array
-    while (i <= readString.length()){ //This code extracts the relevant information from the string. It's crude and should be made to work like the code in the g2go() function.
-        if(readString[i] == 'X'){
-            begin = i + 1;
-            while (i <= readString.length()){
-                if(readString[i] == ' '){
-                    end = i - 1;
-                    break;
-                }
-                i++;
-            }
-            i = begin;
-            while(i <= end){
-                sect[i - begin] = readString[i];
-                i++;
-            }
-            xgoto = atof(sect);
-            xgoto = -xgoto;
-            break;
-        }
-        i++;
-    }
+    
+    readString.toUpperCase(); //Make the string all uppercase to remove variability
+    
+    xgoto = extractGcodeValue(readString, 'X');
+    
+}
+    
+    /*
     i = 2;
     memset(sect,0,sizeof(sect)); //This clears the array
     while (i <= readString.length()){
@@ -576,6 +568,7 @@ int G1(String readString){
         }
         i++;
     }
+    Serial.println("bisect");
     i = 2;
     memset(sect,0,sizeof(sect)); //This clears the array
     while (i <= readString.length()){
@@ -638,7 +631,8 @@ int G1(String readString){
         }
         i++;
     }
-
+    
+    Serial.println("got here");
 
     if(unitScalar > 15){ //running in inches
             gospeed = gospeed * 25.4; //convert to inches
@@ -652,14 +646,14 @@ int G1(String readString){
     ygoto = ygoto / YPITCH;
     zgoto = zgoto / ZPITCH;
 
-    int tempo = Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
+    //int tempo = Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 
-    if (tempo == 1){ //If the move finishes successfully
+    if (1 == 1){ //If the move finishes successfully 
         location.xtarget = xgoto;
         location.ytarget = ygoto;
         location.ztarget = zgoto;
     }
-}
+}*/
 
 /*Circle two takes in the radius of the circle to be cut and the starting and ending points in radians with pi removed so a complete circle is from 0 to 2. If direction is 1 the function cuts a CCW circle, and -1 cuts a CW circle. The direction that one moves from zero changes between the two directions, meaning that a quarter circle is always given by 0,.5 regardless of the direction. So direction = -1 start = 0 end = .5 makes a 1/4 circle downward and direction = 1 start = 0 end = .5 makes a 1/4 circle upward starting from the right side of the circle*/
 int Circle(float radius, int direction, float xcenter, float ycenter, float startrad, float endrad, float speed){
