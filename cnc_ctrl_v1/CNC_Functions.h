@@ -505,8 +505,6 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 
 /*G1() is the function which is called to process the string if it begins with 'G01' or 'G00'*/
 int G1(String readString){
-    Serial.println("executing G1:");
-    Serial.println(readString);
     float xgoto = location.xtarget;
     float ygoto = location.ytarget;
     float zgoto = location.ztarget;
@@ -650,19 +648,9 @@ int G1(String readString){
     }
 
     //convert from mm to rotations
-    Serial.println("start:");
-    Serial.println(xgoto);
     xgoto = xgoto / XPITCH;
     ygoto = ygoto / YPITCH;
     zgoto = zgoto / ZPITCH;
-    Serial.println(xgoto);
-    
-    Serial.println("this:");
-    Serial.println(xgoto);
-    Serial.println(location.xtarget);
-    Serial.println(ygoto);
-    Serial.println(zgoto);
-
 
     int tempo = Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 
