@@ -179,7 +179,6 @@ void loop(){
     }
     
     if(readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G0 " || readString.substring(0, 3) == "G1 "){
-        //Serial.println("G1 recognized");
         G1(readString);
         Serial.println("ready");
         Serial.println("gready");
@@ -368,18 +367,6 @@ void loop(){
         x.detach();
         y.detach();
         z.detach();
-    }
-    
-    if( millis() - time > 30000){
-        long fadeVal = backLight+(.01*(30000.0-float(millis() - time)));
-        if (fadeVal < 0){
-            fadeVal = 0;
-        }
-        //analogWrite(blPin, fadeVal);
-    }
-    
-    if( millis() - time > 45000){
-        //setContrast(0); 
     }
     
     if (readString.length() > 0){

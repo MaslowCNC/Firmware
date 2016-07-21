@@ -14,13 +14,21 @@
     along with the Makesmith Control Software.  If not, see <http://www.gnu.org/licenses/>.
 
     Copyright 2014 Bar Smith*/
+    
+    /*
+    This module contains all of the functions necessary to move the machine. Internally the program operates in units of
+    rotation. The conversion ratio between rotations and linear movement is stored by the XPITCH... #defines. When a line
+    of Gcode arrives the units are converted into rotations, operated on, and the position is then returned by the machine
+    using real world units.
+    */
 
 #include "MyTypes.h"
 
 #define FORWARD 1
 #define BACKWARD -1
 
-#define XPITCH 10
+//these define the number (or fraction there of) of mm moved with each rotation of each axis
+#define XPITCH 40
 #define YPITCH 10
 #define ZPITCH 10
 
@@ -235,12 +243,12 @@ int SetPos(location_st* position){
         servoDetachFlag = 0;
         if(servoDetachFlag == 0){ //If the machine is moving print the real position
             Serial.print("pz(");
-            Serial.print(position->xpos);
+            Serial.print(position->xpos*XPITCH);
             Serial.print(",");
-            Serial.print(position->ypos);
+            Serial.print(position->ypos*YPITCH);
             Serial.print(",");
-            Serial.print(position->zpos);
-            Serial.println(")");
+            Serial.print(position->zpos*ZPITCH);
+            Serial.println(")M");
             //SetScreen(position->xpos/unitScalar, position->ypos/unitScalar, position->zpos/unitScalar);
         }
         else{ //If the machine is stopped print the target position
@@ -641,9 +649,9 @@ int G1(String readString){
     }
 
     //convert from mm to rotations
-    xgoto = xgoto * unitScalar;
-    ygoto = ygoto * unitScalar;
-    zgoto = zgoto * unitScalar;
+    xgoto = xgoto / XPITCH;
+    ygoto = ygoto / YPITCH;
+    zgoto = zgoto / ZPITCH;
 
 
 

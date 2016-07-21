@@ -15,14 +15,16 @@
     
     Copyright 2014-2016 Bar Smith*/
 
+/*
+The GearMotor module imitates the behavior of the arduino servo module. It allows a gear motor (or any electric motor)
+to be a drop in replacement for a continuous rotation servo.
+*/
+
 #include "Arduino.h"
 #include "GearMotor.h"
 
 GearMotor::GearMotor(int pwmPin, int pin1, int pin2){
   //Serial.println("created gear motor");
-  //Serial.println(pwmPin);
-  //Serial.println(pin1);
-  //Serial.println(pin2);
   
   //store pin numbers as private variables
   _pwmPin = pwmPin;
@@ -56,15 +58,14 @@ void GearMotor::detach(){
 }
 
 void GearMotor::write(int speed){
-    
+    /*
+    Mirrors the behavior of the servo.write() function. Speed = 90 is stopped, 0 is full reverse, 180 is full ahead.
+    */
     if (_attachedState == 1){
         
         int pwmFrequency = (speed - 90)*2.8333;
         
         analogWrite(_pwmPin, abs(pwmFrequency));
-        //Serial.println(abs(pwmFrequency));
-        //Serial.println(speed);
-        //digitalWrite(_pwmPin, HIGH);
         
         if (pwmFrequency > 0){
             digitalWrite(_pin1 , HIGH);
