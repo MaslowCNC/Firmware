@@ -28,7 +28,7 @@
 #define BACKWARD -1
 
 //these define the number (or fraction there of) of mm moved with each rotation of each axis
-#define XPITCH 1000
+#define XPITCH 100
 #define YPITCH 10
 #define ZPITCH 10
 
@@ -243,11 +243,11 @@ int SetPos(location_st* position){
         servoDetachFlag = 0;
         if(servoDetachFlag == 0){ //If the machine is moving print the real position
             Serial.print("pz(");
-            Serial.print(position->xpos);
+            Serial.print(position->xpos*XPITCH);
             Serial.print(",");
-            Serial.print(position->ypos);
+            Serial.print(position->ypos*YPITCH);
             Serial.print(",");
-            Serial.print(position->zpos);
+            Serial.print(position->zpos*ZPITCH);
             Serial.println(")M");
             //SetScreen(position->xpos/unitScalar, position->ypos/unitScalar, position->zpos/unitScalar);
         }
