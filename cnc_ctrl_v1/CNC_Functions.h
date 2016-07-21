@@ -42,7 +42,7 @@
 
 #define XSERVO 5
 #define YSERVO 6
-#define ZSERVO 7
+#define ZSERVO 31
 
 #define SENSEPIN 53
 
@@ -505,10 +505,9 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 
 /*G1() is the function which is called to process the string if it begins with 'G01' or 'G00'*/
 int G1(String readString){
-
-    float xgoto = 99999; //These are initialized to ridiculous values as a method to check if they have been changed or not, there is a better way to do this?
-    float ygoto = 99999;
-    float zgoto = 99999;
+    float xgoto = location.xtarget;
+    float ygoto = location.ytarget;
+    float zgoto = location.ztarget;
     float gospeed = 0;
     int i = 0;
     int j = 0;
@@ -652,19 +651,6 @@ int G1(String readString){
     xgoto = xgoto / XPITCH;
     ygoto = ygoto / YPITCH;
     zgoto = zgoto / ZPITCH;
-
-
-
-    if( xgoto > 9000 ){ //These check to see if a variable hasn't been changed and make the machine hold position on that axis
-        xgoto = location.xtarget;
-    }
-    if( ygoto > 9000 ){
-        ygoto = location.ytarget;
-    }
-    if( zgoto > 9000 ){
-        zgoto = location.ztarget;
-    }
-
 
     int tempo = Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 
