@@ -504,7 +504,7 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
     return(1);
 }
 
-float extractGcodeValue(String readString, char target){
+float extractGcodeValue(String readString, char target,float defaultReturn){
     int begin;
     int end;
     String numberAsString;
@@ -517,7 +517,7 @@ float extractGcodeValue(String readString, char target){
     
     if (begin == -1){ //if the character was not found, return error
         Serial.println("not found");
-        return -9999;
+        return defaultReturn;
     }
     
     Serial.println(target);
@@ -539,9 +539,9 @@ int G1(String readString){
     
     readString.toUpperCase(); //Make the string all uppercase to remove variability
     
-    xgoto = extractGcodeValue(readString, 'X');
-    ygoto = extractGcodeValue(readString, 'Y');
-    zgoto = extractGcodeValue(readString, 'Z');
+    xgoto = extractGcodeValue(readString, 'X', location.xtarget);
+    ygoto = extractGcodeValue(readString, 'Y', location.ytarget);
+    zgoto = extractGcodeValue(readString, 'Z', location.ztarget);
     
 }
     
