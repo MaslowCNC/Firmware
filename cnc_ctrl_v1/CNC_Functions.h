@@ -539,134 +539,28 @@ int G1(String readString){
     
     readString.toUpperCase(); //Make the string all uppercase to remove variability
     
-    xgoto = extractGcodeValue(readString, 'X', location.xtarget);
-    ygoto = extractGcodeValue(readString, 'Y', location.ytarget);
-    zgoto = extractGcodeValue(readString, 'Z', location.ztarget);
+    xgoto   = extractGcodeValue(readString, 'X', location.xtarget);
+    ygoto   = extractGcodeValue(readString, 'Y', location.ytarget);
+    zgoto   = extractGcodeValue(readString, 'Z', location.ztarget);
+    gospeed = extractGcodeValue(readString, 'F', feedrate);
     
-}
+    feedrate = gospeed; //store the feed rate for later use
     
-    /*
-    i = 2;
-    memset(sect,0,sizeof(sect)); //This clears the array
-    while (i <= readString.length()){
-        //Serial.println("in length ran");
-        j = 0;
-        while (j < 23){
-            sect[j] = ' ';
-            j++;
-        }
-        if(readString[i] == 'Y'){
-            //Serial.println("ydetected at");
-            //Serial.println(i);
-            begin = i + 1;
-            while (i <= readString.length()){
-                //Serial.println("that");
-                if(readString[i] == ' '){
-                    //Serial.println("space detected at");
-                    //Serial.println(i);
-                    end = i - 1;
-                    break;
-                }
-                i++;
-            }
-            i = begin;
-            while(i <= end){
-                sect[i - begin] = readString[i];
-                i++;
-            }
-            //Serial.println("Y section:");
-            //Serial.println(sect);
-            ygoto = atof(sect);
-            break;
-        }
-        i++;
-    }
-    Serial.println("bisect");
-    i = 2;
-    memset(sect,0,sizeof(sect)); //This clears the array
-    while (i <= readString.length()){
-        j = 0;
-        while (j < 23){
-            sect[j] = ' ';
-            j++;
-        }
-        //Serial.println("in length ran");
-        if(readString[i] == 'Z'){
-            //Serial.println("zdetected at");
-            //Serial.println(i);
-            begin = i + 1;
-            while (i <= readString.length()){
-                //Serial.println("that");
-                if(readString[i] == ' '){
-                    //Serial.println("space detected at");
-                    //Serial.println(i);
-                    end = i - 1;
-                    break;
-                }
-                i++;
-            }
-            i = begin;
-            while(i <= end){
-                sect[i - begin] = readString[i];
-                i++;
-            }
-            zgoto = atof(sect);
-            break;
-        }
-        i++;
-    }
-    i = 2;
-    memset(sect,0,sizeof(sect)); //This clears the array
-    while (i <= readString.length()){
-        //Serial.println("in length ran");
-        if(readString[i] == 'F'){
-            //Serial.println("fdetected at");
-            //Serial.println(i);
-            begin = i + 1;
-            while (i <= readString.length()){
-                if(readString[i] == ' '){
-                    //Serial.println("space detected at");
-                    //Serial.println(i);
-                    end = i - 1;
-                    break;
-                }
-                i++;
-            }
-            i = begin;
-            while(i <= end){
-                sect[i - begin] = readString[i];
-                i++;
-            }
-            //Serial.println("Sect: ");
-            //Serial.println(sect);
-            gospeed = atof(sect);
-            break;
-        }
-        i++;
-    }
-    
-    Serial.println("got here");
-
-    if(unitScalar > 15){ //running in inches
-            gospeed = gospeed * 25.4; //convert to inches
-    }
-    if(gospeed >= 4){ //feedrate is preserved because most function lines of gcode rely on it having been preserved from the previous call.
-        feedrate = gospeed;
-    }
-
     //convert from mm to rotations
     xgoto = xgoto / XPITCH;
     ygoto = ygoto / YPITCH;
     zgoto = zgoto / ZPITCH;
+    
+    
+    int tempo = Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 
-    //int tempo = Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
-
-    if (1 == 1){ //If the move finishes successfully 
+    if (tempo == 1){ //If the move finishes successfully 
         location.xtarget = xgoto;
         location.ytarget = ygoto;
         location.ztarget = zgoto;
     }
-}*/
+}
+
 
 /*Circle two takes in the radius of the circle to be cut and the starting and ending points in radians with pi removed so a complete circle is from 0 to 2. If direction is 1 the function cuts a CCW circle, and -1 cuts a CW circle. The direction that one moves from zero changes between the two directions, meaning that a quarter circle is always given by 0,.5 regardless of the direction. So direction = -1 start = 0 end = .5 makes a 1/4 circle downward and direction = 1 start = 0 end = .5 makes a 1/4 circle upward starting from the right side of the circle*/
 int Circle(float radius, int direction, float xcenter, float ycenter, float startrad, float endrad, float speed){
