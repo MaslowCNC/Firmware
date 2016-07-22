@@ -315,10 +315,9 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     xspeed = SetSpeed(xTarget, position->xpos, gain); //Generate motor speeds
     yspeed = SetSpeed(yTarget, position->ypos, gain);
     zspeed = SetSpeed(zTarget, position->zpos, 200);
-
-    x.write(90 + XDIRECTION*xspeed); //Command the motors to rotate
-    y.write(90 + (-1*YDIRECTION*yspeed));
-    z.write(90 + ZDIRECTION*zspeed);
+    
+    //make motors rotate
+    x.write(90 + xspeed);
 }
 
 int Unstick(Servo axis, int direction){
@@ -378,153 +377,14 @@ int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
 the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands.*/
-
-    float curXtarget, curYtarget, curZtarget;
-    long mtime = millis();
-    long ntime = millis();
-    float xIncmtDist, yIncmtDist, zIncmtDist;
-    float pathLength = sqrt(sq(location.xtarget - xEnd) + sq(location.ytarget - yEnd) + sq(location.ztarget - zEnd));
-    float tempXpos = location.xpos;
-    float tempYpos = location.ypos;
-    float tempZpos = location.zpos;
-    float deltaX = 5;
-    float deltaY = 5;
-    float deltaZ = 5;
-    float moveFract;
-    static int shortCount = 0;
-    static int gain = 123;
-    int timeStep = 10;
-    //Serial.println("Length: ");
-    //Serial.println(pathLength);
-
-    if ( moveSpeed > 123){ //Limits the movement speed to the ability of the machine. This should potentially be moved to a #define at the top of the file.
-        moveSpeed = 123;
-    }
-
-    moveFract = moveSpeed/123.0;
-
-    if(pathLength < 1){ //This is used to adjust the machine's behavior when cutting many small lines
-        shortCount++;
-    }
-    if(pathLength > 3){
-        shortCount = 0;
-    }
-
-    if(shortCount > 4){
-        gain = 400;
-    }
-    else{
-        gain = 400;//123;
-    }
-
-    if(pathLength < .1){ //This prevents div/0 errors.
-        pathLength = .1;
-    }
-
-
-
-    if(location.xtarget < xEnd){ //sets up the distance to be moved at each time step
-        xIncmtDist = .05*moveFract*abs((location.xtarget - xEnd)/pathLength);
-    }
-    else{
-        xIncmtDist = -.05*moveFract*abs((location.xtarget - xEnd)/pathLength);
-    }
-
-    if(location.ytarget < yEnd){
-        yIncmtDist = .05*moveFract*abs((location.ytarget - yEnd)/pathLength);
-    }
-    else{
-        yIncmtDist = -.05*moveFract*abs((location.ytarget - yEnd)/pathLength);
-    }
-
-    if(location.ztarget < zEnd){
-        zIncmtDist = .05*abs((location.ztarget - zEnd)/pathLength);
-    }
-    else{
-        zIncmtDist = -.05*abs((location.ztarget - zEnd)/pathLength);
-    }
-
-    String stopString = "";
-    while(1){ //The movement takes place in here
-        SetPos(&location);
-        SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, gain);
-        if( millis() - mtime > timeStep){
-            if(abs(location.xpos - location.xtarget) < MOVETOLERANCE && abs(location.ypos - location.ytarget) < MOVETOLERANCE && abs(location.zpos - location.ztarget) < MOVETOLERANCE){ //updates the position if the tool is close to the target and the elapsed time has passed
-                location.xtarget = location.xtarget + xIncmtDist;
-                location.ytarget = location.ytarget + yIncmtDist;
-                location.ztarget = location.ztarget + zIncmtDist;
-                mtime = millis();
-            }
-        }
-        //Serial.println(abs(location.ypos - location.ytarget));
-        if( millis() - ntime > 300){ //Checks to see if the machine is stuck
-            deltaX = abs(tempXpos - location.xpos); //where it was - where it is now = the change
-            deltaY = abs(tempYpos - location.ypos);
-            deltaZ = abs(tempZpos - location.zpos);
-
-            tempXpos = location.xpos;
-            tempYpos = location.ypos;
-            tempZpos = location.zpos;
-
-            if(abs(location.xpos - xEnd) > .2 && deltaX < .01 && abs(location.xpos - location.xtarget) > .1){//The machine has not moved significantly in the last 300ms
-                Serial.println("x stuck");
-                if(location.xpos < xEnd){
-                    //Unstick(x, -1);
-                }
-                else{
-                    //Unstick(x, 1);
-                }
-            }
-            if(abs(location.ypos - yEnd) > .2 && deltaY < .01 && abs(location.ypos - location.ytarget) > .1){
-                Serial.println("y stuck");
-                if(location.ypos < yEnd){
-                    //Unstick(y, -1);
-                }
-                else{
-                    //Unstick(y, 1);
-                }
-            }
-            if(abs(location.zpos - zEnd) > .2 && deltaZ < .01 && abs(location.zpos - location.ztarget) > .1){
-                Serial.println("z stuck");
-                if(location.zpos < zEnd){
-                    //Unstick(z, -1);
-                }
-                else{
-                    //Unstick(z, 1);
-                }
-            }
-
-            ntime = millis();
-        }
-
-        if (Serial.available() > 0) {
-            char c = Serial.read();  //gets one byte from serial buffer
-            stopString += c; //makes the string readString
-            //Serial.println(stopString);
-            if(stopString == "STOP"){
-                Serial.println("Clear Buffer");
-                return(0);
-            }
-            if(stopString [0] != 'S'){
-                stopString = "";
-            }
-        }
-
-        if(abs(location.xtarget - xEnd) < .1){
-            location.xtarget = xEnd;
-        }
-        if(abs(location.ytarget - yEnd) < .1){
-            location.ytarget = yEnd;
-        }
-        if(abs(location.ztarget - zEnd) < .1){
-            location.ztarget = zEnd;
-            //Serial.println("hit end");
-        }
-
-        if(abs(location.xpos - xEnd) < TOLERANCE && abs(location.ypos - yEnd) < TOLERANCE && abs(location.zpos - zEnd) < TOLERANCE){//The machine has completed it's move successfully
-            return(1);
-        }
-
+    
+    int i = 0;
+    while(i < 1000){ //The movement takes place in here
+        SetPos(&location); 
+        SetTarget(location.xtarget + (i/100), location.ytarget, location.ztarget, &location, 123);
+        delay(50);
+        Serial.println(i);
+        i++;
     }
     return(1);
 }
