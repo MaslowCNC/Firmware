@@ -26,6 +26,7 @@ void setup()
 
   //turn the PID on
   myPID.SetMode(AUTOMATIC);
+  myPID.SetOutputLimits(-90, 90);
   
 }
 
@@ -42,16 +43,21 @@ void loop()
             } 
         }
     }
-    Serial.println(readString);
-    Serial.println(readString.toFloat()
-  
-  Input = analogRead(PIN_INPUT);
+    
+    if (readString.length() > 0){
+        Serial.println("Input Set to:");
+        Serial.println(readString.toFloat());
+        Input = readString.toFloat();
+    }
+    
+
   myPID.Compute();
   analogWrite(PIN_OUTPUT, Output);
   delay(500);
-  //Serial.println(Output);
-  //Serial.println(Input);
-  //Serial.println(Setpoint);
+  Serial.println("###");
+  Serial.println(Output);
+  Serial.println(Input);
+  Serial.println(Setpoint);
 }
 
 
