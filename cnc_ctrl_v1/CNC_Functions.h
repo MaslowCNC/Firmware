@@ -57,7 +57,7 @@ double Setpoint, Input, Output;
 
 //Specify the links and initial tuning parameters
 double Kp=300, Ki=0, Kd=10;
-PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+PID xPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 int stepsize = 1;
 int feedrate = 125;
@@ -74,8 +74,8 @@ int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
 
 void initializePID(){
     Setpoint = 100;
-    myPID.SetMode(AUTOMATIC);
-    myPID.SetOutputLimits(-90, 90);
+    xPID.SetMode(AUTOMATIC);
+    xPID.SetOutputLimits(-90, 90);
 }
 
 int PWMread(int pin){
@@ -325,12 +325,12 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     Input      =  position->xpos;
     Setpoint   =  xTarget;
     
-    myPID.Compute();
+    xPID.Compute();
     
-    Serial.println("###");
-    Serial.print(Setpoint*100);
-    Serial.print(" ");
-    Serial.println(Input*100);
+    //Serial.println("###");
+    //Serial.print(Setpoint*100);
+    //Serial.print(" ");
+    //Serial.println(Input*100);
     
     //make motors rotate
     x.write(90 + Output);
