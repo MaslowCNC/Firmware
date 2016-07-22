@@ -97,7 +97,7 @@ void setup(){
     
     initializePID();
     
-    G1("G01 X10 F123 ");
+    G1("G01 X10 F100 ");
 }
 
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven
@@ -139,7 +139,7 @@ void loop(){
     readString = "";
     
     SetPos(&location); 
-    SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 123);
+    SetTarget(location.xtarget, location.ytarget, location.ztarget, &location);
 
     if (Serial.available()){
         while (Serial.available()) {

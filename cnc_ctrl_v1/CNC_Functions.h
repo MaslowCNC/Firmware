@@ -29,7 +29,7 @@
 #define BACKWARD -1
 
 //these define the number (or fraction there of) of mm moved with each rotation of each axis
-#define XPITCH 40
+#define XPITCH 2
 #define YPITCH 10
 #define ZPITCH 10
 
@@ -178,7 +178,7 @@ float getAngle(float X,float Y,float centerX,float centerY){
 
 int SetPos(location_st* position){
 
-/*The SetPos() function updates the machine's position by essentially integrating 
+/*I would like to rename this function "updateMachineLocation" The SetPos() function updates the machine's position by essentially integrating 
 the input from the encoder*/
 
     int maxJump = 400;
@@ -312,13 +312,13 @@ int SetSpeed(float posNow, float posTarget, int gain){
     return(speed);
 }
 
-int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position, int gain){
+int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position){
 
 /*The SetTarget() function moves the machine to the position stored in the location structure.*/
 
     int xspeed, yspeed, zspeed;
-    xspeed = SetSpeed(xTarget, position->xpos, gain); //Generate motor speeds
-    yspeed = SetSpeed(yTarget, position->ypos, gain);
+    xspeed = SetSpeed(xTarget, position->xpos, 123); //Generate motor speeds
+    yspeed = SetSpeed(yTarget, position->ypos, 123);
     zspeed = SetSpeed(zTarget, position->zpos, 200);
     
     
@@ -387,27 +387,67 @@ int Unstick(Servo axis, int direction){
     }
 }
 
-int Move(float xEnd, float yEnd, float zEnd, float moveSpeed){
+int Move(float xEnd, float yEnd, float zEnd, float rotationsPerSecond){
     
 /*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
 the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
 direction, the tool moves to the target in a straight line. This function is used by the G00 
-and G01 commands.*/
+and G01 commands. The units at this point should all be in rotations or rotations per second*/
     
-    int i = 0;
-    while(i < 10000){ //The movement takes place in here
+    
+    Serial.println("At the beginning of move we know: ");
+    float startingLocation = location.xtarget;
+    
+    Serial.println("The x position now: ");
+    Serial.println(startingLocation);
+    
+    Serial.println("The final position: ");
+    Serial.println(xEnd);
+    
+    Serial.println("The speed to move: ");
+    Serial.println(rotationsPerSecond);
+    
+    float distanceToMoveInRotations = xEnd - startingLocation;
+    Serial.println("Which is a distance of: ");
+    Serial.println(distanceToMoveInRotations);
+    
+    Serial.println("Which will take: ");
+    int millisecondsForMove = 1000*(distanceToMoveInRotations/rotationsPerSecond);
+    Serial.println(millisecondsForMove);
+    Serial.println("milliseconds");
+    
+    //From here we will move in set step sizes. Each step is 1000th of a rotation
+    int finalNumberOfSteps   = distanceToMoveInRotations*1000;
+    Serial.println("This will be done in: ");
+    Serial.println(finalNumberOfSteps);
+    Serial.println("steps");
+    
+    Serial.println("Each of which will take: ");
+    float timePerStep = millisecondsForMove/float(finalNumberOfSteps);
+    Serial.println(timePerStep);
+    Serial.println("milliseconds");
+    
+    
+    
+    int numberOfStepsTaken   = 0;
+    
+    while(numberOfStepsTaken < finalNumberOfSteps){
+        
         SetPos(&location); 
         
-        if (i<200){
-            SetTarget(0, location.ytarget, location.ztarget, &location, 123);
-        }
-        else{
-            SetTarget(1, location.ytarget, location.ztarget, &location, 123);
-        }
-        delay(5);
-        i++;
+        
+        float whereItShouldBeAtThisStep = startingLocation + (numberOfStepsTaken/1000.0);
+        
+        SetTarget(whereItShouldBeAtThisStep, location.ytarget, location.ztarget, &location);
+        
+        
+        //delay(timePerStep);
+        
+        numberOfStepsTaken = numberOfStepsTaken + 1;
     }
     return(1);
+    
+    Serial.println
 }
 
 float extractGcodeValue(String readString, char target,float defaultReturn){
@@ -540,7 +580,7 @@ the circle*/
         location.ytarget = direction * radius * sin(3.141593*((float)i/(int)(stepMultiplier*radius))) + ycenter;
 
         SetPos(&location);
-        SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 400);
+        SetTarget(location.xtarget, location.ytarget, location.ztarget, &location);
         if( millis() - stime > timeStep ){
             if( abs(location.xpos - location.xtarget) < TOLERANCE && abs(location.ypos - location.ytarget) < TOLERANCE && abs(location.zpos - location.ztarget) < TOLERANCE){ //if the target is reached move to the next position
                 i++;
@@ -700,7 +740,7 @@ int G2(String readString){
 
     if(CircleReturnVal == 1){ //If the circle was cut correctly
         while( abs(location.xpos + xval) > TOLERANCE or abs(location.ypos - yval) > TOLERANCE){ //This ensures that the circle is completed and that if it is a circle with a VERY large radius and a small angle it isn't neglected
-            SetTarget(-1*xval, yval, location.ztarget, &location, 123);
+            SetTarget(-1*xval, yval, location.ztarget, &location);
             SetPos(&location);
         }
         location.xtarget = -1*xval;
@@ -1114,7 +1154,7 @@ float toolOffset(int pin){
         location.ztarget = location.ztarget - .05;
         while(millis() - tmptime < 100){ //This is just a delay which doesn't lose the machine's position.
             SetPos(&location);
-            SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 123);
+            SetTarget(location.xtarget, location.ytarget, location.ztarget, &location);
 
             if(digitalRead(pin) == 0){  //The surface has been found
                 return(location.zpos);
