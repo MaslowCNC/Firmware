@@ -331,7 +331,7 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     yspeed = SetSpeed(yTarget, position->ypos, gain);
     zspeed = SetSpeed(zTarget, position->zpos, 200);
     
-    //myPID.Compute();
+    myPID.Compute();
     
     //make motors rotate
     x.write(90 + xspeed);
