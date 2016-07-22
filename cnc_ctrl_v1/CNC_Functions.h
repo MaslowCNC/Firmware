@@ -84,7 +84,7 @@ int PWMread(int pin){
 takes this duration and converts it to a ten bit number.*/
 
     int duration = 0;
-    int numberOfSamplesToAverage = 15;
+    int numberOfSamplesToAverage = 2;
     int i = 0;
     
     while (i < numberOfSamplesToAverage){
@@ -235,7 +235,6 @@ the input from the encoder*/
     }
     else{
         CurrentXangle = 1023 - PWMread(xpot);
-        Serial.println(CurrentXangle);
     }
 
     if(YDIRECTION == FORWARD){
@@ -331,7 +330,7 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     //Serial.println("###");
     //Serial.print(Setpoint*100);
     //Serial.print(" ");
-    //Serial.println(Input*100);
+    Serial.println(Input*100);
     //Serial.println(Input-Setpoint);
     //Serial.println(Output);
     
@@ -401,7 +400,7 @@ and G01 commands.*/
     while(i < 1000){ //The movement takes place in here
         SetPos(&location); 
         SetTarget((i/200.0), location.ytarget, location.ztarget, &location, 123);
-        //delay(50);
+        delay(50);
         i++;
     }
     return(1);
