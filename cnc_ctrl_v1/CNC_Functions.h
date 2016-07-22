@@ -327,9 +327,9 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     
     myPID.Compute();
     
-    //Serial.println("###");
-    //Serial.print(Setpoint*100);
-    //Serial.print(" ");
+    Serial.println("###");
+    Serial.print(Setpoint*100);
+    Serial.print(" ");
     Serial.println(Input*100);
     //Serial.println(Input-Setpoint);
     //Serial.println(Output);
