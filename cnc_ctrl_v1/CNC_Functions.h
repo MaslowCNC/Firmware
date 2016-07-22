@@ -340,6 +340,7 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     Serial.println("###");
     Serial.println(Setpoint);
     Serial.println(Input);
+    Serial.println(Input-Setpoint);
     Serial.println(Output);
     
     //make motors rotate
@@ -407,7 +408,7 @@ and G01 commands.*/
     int i = 0;
     while(i < 1000){ //The movement takes place in here
         SetPos(&location); 
-        SetTarget((i/100.0), location.ytarget, location.ztarget, &location, 123);
+        SetTarget((i/50.0), location.ytarget, location.ztarget, &location, 123);
         delay(500);
         i++;
     }
