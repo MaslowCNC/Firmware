@@ -331,7 +331,17 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     yspeed = SetSpeed(yTarget, position->ypos, gain);
     zspeed = SetSpeed(zTarget, position->zpos, 200);
     
-    myPID.Compute();
+    
+    Input      =  position->xpos;
+    Setpoint   =  xTarget;
+    
+    xspeed = myPID.Compute();
+    
+    Serial.println("###");
+    Serial.println(Setpoint);
+    Serial.println(Setpoint);
+    Serial.println(Input);
+    Serial.println(Output);
     
     //make motors rotate
     x.write(90 + xspeed);
@@ -399,8 +409,7 @@ and G01 commands.*/
     while(i < 1000){ //The movement takes place in here
         SetPos(&location); 
         SetTarget(location.xtarget + (i/100), location.ytarget, location.ztarget, &location, 123);
-        delay(50);
-        Serial.println(i);
+        delay(500);
         i++;
     }
     return(1);
