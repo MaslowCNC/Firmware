@@ -23,6 +23,7 @@
     */
 
 #include "MyTypes.h"
+#include "PID_v1.h"
 
 #define FORWARD 1
 #define BACKWARD -1
@@ -303,6 +304,7 @@ int SetSpeed(float posNow, float posTarget, int gain){
     }
 
     speed = BoostLimit(speed, 85); //Limits the output to an acceptable range
+    
 
     return(speed);
 }
@@ -315,6 +317,8 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     xspeed = SetSpeed(xTarget, position->xpos, gain); //Generate motor speeds
     yspeed = SetSpeed(yTarget, position->ypos, gain);
     zspeed = SetSpeed(zTarget, position->zpos, 200);
+    
+    //myPID.Compute();
     
     //make motors rotate
     x.write(90 + xspeed);
