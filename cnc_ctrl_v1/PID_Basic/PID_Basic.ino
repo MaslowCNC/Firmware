@@ -20,6 +20,8 @@ void setup()
   //initialize the variables we're linked to
   Input = analogRead(PIN_INPUT);
   Setpoint = 100;
+  Serial.begin(19200);
+  Serial.println("test");
 
   //turn the PID on
   myPID.SetMode(AUTOMATIC);
@@ -30,6 +32,8 @@ void loop()
   Input = analogRead(PIN_INPUT);
   myPID.Compute();
   analogWrite(PIN_OUTPUT, Output);
+  delay(50);
+  Serial.println(Output);
 }
 
 
