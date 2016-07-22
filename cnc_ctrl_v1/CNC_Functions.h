@@ -56,7 +56,7 @@
 double Setpoint, Input, Output;
 
 //Specify the links and initial tuning parameters
-double Kp=100, Ki=40, Kd=1;
+double Kp=300, Ki=0, Kd=10;
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 int stepsize = 1;
@@ -331,8 +331,6 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     Serial.print(Setpoint*100);
     Serial.print(" ");
     Serial.println(Input*100);
-    //Serial.println(Input-Setpoint);
-    //Serial.println(Output);
     
     //make motors rotate
     x.write(90 + Output);
@@ -397,10 +395,16 @@ direction, the tool moves to the target in a straight line. This function is use
 and G01 commands.*/
     
     int i = 0;
-    while(i < 1000){ //The movement takes place in here
+    while(i < 10000){ //The movement takes place in here
         SetPos(&location); 
-        SetTarget((i/200.0), location.ytarget, location.ztarget, &location, 123);
-        delay(50);
+        
+        if (i<200){
+            SetTarget(0, location.ytarget, location.ztarget, &location, 123);
+        }
+        else{
+            SetTarget(1, location.ytarget, location.ztarget, &location, 123);
+        }
+        delay(5);
         i++;
     }
     return(1);
