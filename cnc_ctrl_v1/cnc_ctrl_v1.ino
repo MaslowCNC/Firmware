@@ -47,11 +47,12 @@ int begin;
 int end;
 char sect[22];
 
+//Define Variables we'll be connecting to
+double Setpoint, Input, Output;
 
-//Sd2Card card;
-//SdVolume volume;
-//SdFile root;
-
+//Specify the links and initial tuning parameters
+double Kp=2, Ki=5, Kd=1;
+PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 void setup(){
     Serial.begin(19200);
@@ -95,7 +96,10 @@ void setup(){
         location.ztarget = location.zpos;
     }*/
     
-//  setMotor(1000);
+    Setpoint = 0;
+    //turn the PID on
+    myPID.SetMode(AUTOMATIC);
+    myPID.SetOutputLimits(-90, 90);
 }
 
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven
