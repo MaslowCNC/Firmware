@@ -56,7 +56,7 @@
 double Setpoint, Input, Output;
 
 //Specify the links and initial tuning parameters
-double Kp=150, Ki=50, Kd=1;
+double Kp=100, Ki=40, Kd=1;
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 int stepsize = 1;
@@ -71,13 +71,8 @@ GearMotor y(6,12,13);
 Servo z;
 int servoDetachFlag = 1;
 int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
-float xMagnetScale = 1.23;
-float yMagnetScale = 1.23;
-float zMagnetScale = 1.23;
-
 
 void initializePID(){
-    Serial.println("initialize PID");
     Setpoint = 100;
     myPID.SetMode(AUTOMATIC);
     myPID.SetOutputLimits(-90, 90);
@@ -89,22 +84,19 @@ int PWMread(int pin){
 takes this duration and converts it to a ten bit number.*/
 
     int duration = 0;
-    float tempMagnetScale = 1.23;
-    if (pin == xpot){
-        tempMagnetScale = xMagnetScale;
+    int numberOfSamplesToAverage = 15;
+    int i = 0;
+    
+    while (i < numberOfSamplesToAverage){
+        duration = duration + pulseIn(pin, HIGH, 2000); //This returns the pulse duration
+        i++;
     }
-    if (pin == ypot){
-        tempMagnetScale = yMagnetScale;
-    }
-    if (pin == zpot){
-        tempMagnetScale = zMagnetScale;
-    }
-
-
-    duration = pulseIn(pin, HIGH, 2000); //This returns the pulse duration
-    duration = (int)((float)duration*tempMagnetScale); //1.23 scales it to a ten bit number
-
-
+    
+    duration = duration/numberOfSamplesToAverage;
+    
+    duration = (int)((float)duration*1.23); //1.23 scales it to a ten bit number
+    
+    
     if (duration >= 1023){
         duration = 1023;
     }
@@ -243,6 +235,7 @@ the input from the encoder*/
     }
     else{
         CurrentXangle = 1023 - PWMread(xpot);
+        Serial.println(CurrentXangle);
     }
 
     if(YDIRECTION == FORWARD){
@@ -263,7 +256,7 @@ the input from the encoder*/
     loopCount++;
     if(loopCount > 30){ //Update the position every so often
         servoDetachFlag = 0;
-        if(servoDetachFlag == 0){ //If the machine is moving print the real position
+        /*if(servoDetachFlag == 0){ //If the machine is moving print the real position
             Serial.print("pz(");
             Serial.print(position->xpos*XPITCH);
             Serial.print(",");
@@ -271,7 +264,6 @@ the input from the encoder*/
             Serial.print(",");
             Serial.print(position->zpos*ZPITCH);
             Serial.println(")M");
-            //SetScreen(position->xpos/unitScalar, position->ypos/unitScalar, position->zpos/unitScalar);
         }
         else{ //If the machine is stopped print the target position
             Serial.print("pz(");
@@ -281,8 +273,7 @@ the input from the encoder*/
             Serial.print(",");
             Serial.print(position->ztarget);
             Serial.println(")");
-            //SetScreen(position->xtarget/unitScalar, position->ytarget/unitScalar, position->ztarget/unitScalar);
-        }
+        }*/
         loopCount = 0;
     }
 }
@@ -337,11 +328,12 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     
     myPID.Compute();
     
-    Serial.println("###");
-    Serial.println(Setpoint);
-    Serial.println(Input);
-    Serial.println(Input-Setpoint);
-    Serial.println(Output);
+    //Serial.println("###");
+    //Serial.print(Setpoint*100);
+    //Serial.print(" ");
+    //Serial.println(Input*100);
+    //Serial.println(Input-Setpoint);
+    //Serial.println(Output);
     
     //make motors rotate
     x.write(90 + Output);
@@ -408,8 +400,8 @@ and G01 commands.*/
     int i = 0;
     while(i < 1000){ //The movement takes place in here
         SetPos(&location); 
-        SetTarget((i/50.0), location.ytarget, location.ztarget, &location, 123);
-        delay(500);
+        SetTarget((i/200.0), location.ytarget, location.ztarget, &location, 123);
+        //delay(50);
         i++;
     }
     return(1);
