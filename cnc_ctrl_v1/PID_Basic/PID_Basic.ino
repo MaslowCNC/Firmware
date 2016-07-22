@@ -14,6 +14,7 @@ double Setpoint, Input, Output;
 //Specify the links and initial tuning parameters
 double Kp=2, Ki=5, Kd=1;
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+String readString;
 
 void setup()
 {
@@ -25,15 +26,32 @@ void setup()
 
   //turn the PID on
   myPID.SetMode(AUTOMATIC);
+  
 }
 
 void loop()
 {
+  readString = "";
+  
+  if (Serial.available()){
+        while (Serial.available()) {
+            delay(1);  //delay to allow buffer to fill 
+            if (Serial.available() > 0) {
+                char c = Serial.read();  //gets one byte from serial buffer
+                readString += c; //makes the string readString
+            } 
+        }
+    }
+    Serial.println(readString);
+    Serial.println(readString.toFloat()
+  
   Input = analogRead(PIN_INPUT);
   myPID.Compute();
   analogWrite(PIN_OUTPUT, Output);
-  delay(50);
-  Serial.println(Output);
+  delay(500);
+  //Serial.println(Output);
+  //Serial.println(Input);
+  //Serial.println(Setpoint);
 }
 
 
