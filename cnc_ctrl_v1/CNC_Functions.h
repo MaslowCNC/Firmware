@@ -335,16 +335,15 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     Input      =  position->xpos;
     Setpoint   =  xTarget;
     
-    xspeed = myPID.Compute();
+    myPID.Compute();
     
     Serial.println("###");
-    Serial.println(Setpoint);
     Serial.println(Setpoint);
     Serial.println(Input);
     Serial.println(Output);
     
     //make motors rotate
-    x.write(90 + xspeed);
+    x.write(90 + Output);
 }
 
 int Unstick(Servo axis, int direction){
@@ -408,7 +407,7 @@ and G01 commands.*/
     int i = 0;
     while(i < 1000){ //The movement takes place in here
         SetPos(&location); 
-        SetTarget(location.xtarget + (i/100), location.ytarget, location.ztarget, &location, 123);
+        SetTarget((i/100.0), location.ytarget, location.ztarget, &location, 123);
         delay(500);
         i++;
     }
