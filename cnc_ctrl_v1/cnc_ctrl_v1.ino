@@ -95,7 +95,7 @@ void setup(){
         location.ztarget = location.zpos;
     }*/
     
-//  setMotor(1000);
+    initializePID();
 }
 
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven

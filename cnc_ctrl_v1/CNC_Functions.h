@@ -69,6 +69,9 @@ float yMagnetScale = 1.23;
 float zMagnetScale = 1.23;
 
 
+void initializePID(){
+    Serial.println("initialize PID");
+}
 
 int PWMread(int pin){
 
