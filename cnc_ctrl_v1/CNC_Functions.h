@@ -78,6 +78,9 @@ float zMagnetScale = 1.23;
 
 void initializePID(){
     Serial.println("initialize PID");
+    Setpoint = 100;
+    myPID.SetMode(AUTOMATIC);
+    myPID.SetOutputLimits(-90, 90);
 }
 
 int PWMread(int pin){
