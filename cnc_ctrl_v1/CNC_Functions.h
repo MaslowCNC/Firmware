@@ -60,7 +60,7 @@ double Kp=300, Ki=0, Kd=10;
 PID xPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 int stepsize = 1;
-int feedrate = 125;
+float feedrate = 125;
 float unitScalar = 200;
 location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 0, 0};
 int xpot = 10;
@@ -84,7 +84,7 @@ int PWMread(int pin){
 takes this duration and converts it to a ten bit number.*/
 
     int duration = 0;
-    int numberOfSamplesToAverage = 2;
+    int numberOfSamplesToAverage = 1;
     int i = 0;
     
     while (i < numberOfSamplesToAverage){
@@ -255,7 +255,7 @@ the input from the encoder*/
     loopCount++;
     if(loopCount > 30){ //Update the position every so often
         servoDetachFlag = 0;
-        /*if(servoDetachFlag == 0){ //If the machine is moving print the real position
+        if(servoDetachFlag == 0){ //If the machine is moving print the real position
             Serial.print("pz(");
             Serial.print(position->xpos*XPITCH);
             Serial.print(",");
@@ -272,7 +272,7 @@ the input from the encoder*/
             Serial.print(",");
             Serial.print(position->ztarget);
             Serial.println(")");
-        }*/
+        }
         loopCount = 0;
     }
 }
@@ -317,7 +317,6 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
 /*The SetTarget() function moves the machine to the position stored in the location structure.*/
 
     int xspeed, yspeed, zspeed;
-    xspeed = SetSpeed(xTarget, position->xpos, 123); //Generate motor speeds
     yspeed = SetSpeed(yTarget, position->ypos, 123);
     zspeed = SetSpeed(zTarget, position->zpos, 200);
     
@@ -326,11 +325,6 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     Setpoint   =  xTarget;
     
     xPID.Compute();
-    
-    //Serial.println("###");
-    //Serial.print(Setpoint*100);
-    //Serial.print(" ");
-    //Serial.println(Input*100);
     
     //make motors rotate
     x.write(90 + Output);
@@ -412,7 +406,9 @@ and G01 commands. The units at this point should all be in rotations or rotation
     Serial.println(distanceToMoveInRotations);
     
     Serial.println("Which will take: ");
-    int millisecondsForMove = 1000*(distanceToMoveInRotations/rotationsPerSecond);
+    Serial.println(distanceToMoveInRotations);
+    Serial.println(rotationsPerSecond);
+    float millisecondsForMove = 1000*(distanceToMoveInRotations/rotationsPerSecond);
     Serial.println(millisecondsForMove);
     Serial.println("milliseconds");
     
@@ -429,7 +425,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     
     
-    int numberOfStepsTaken   = 0;
+    int numberOfStepsTaken   =  0;
     
     while(numberOfStepsTaken < finalNumberOfSteps){
         
@@ -440,14 +436,12 @@ and G01 commands. The units at this point should all be in rotations or rotation
         
         SetTarget(whereItShouldBeAtThisStep, location.ytarget, location.ztarget, &location);
         
-        
-        //delay(timePerStep);
+        delay(timePerStep);
         
         numberOfStepsTaken = numberOfStepsTaken + 1;
     }
     return(1);
     
-    Serial.println
 }
 
 float extractGcodeValue(String readString, char target,float defaultReturn){
