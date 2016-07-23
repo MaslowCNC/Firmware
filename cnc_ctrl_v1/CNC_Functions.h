@@ -389,41 +389,12 @@ direction, the tool moves to the target in a straight line. This function is use
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
     
     
-    Serial.println("At the beginning of move we know: ");
-    float startingLocation = location.xtarget;
     
-    Serial.println("The x position now: ");
-    Serial.println(startingLocation);
-    
-    Serial.println("The final position: ");
-    Serial.println(xEnd);
-    
-    Serial.println("The speed to move: ");
-    Serial.println(rotationsPerSecond);
-    
-    float distanceToMoveInRotations = xEnd - startingLocation;
-    Serial.println("Which is a distance of: ");
-    Serial.println(distanceToMoveInRotations);
-    
-    Serial.println("Which will take: ");
-    Serial.println(distanceToMoveInRotations);
-    Serial.println(rotationsPerSecond);
-    float millisecondsForMove = 1000*(distanceToMoveInRotations/rotationsPerSecond);
-    Serial.println(millisecondsForMove);
-    Serial.println("milliseconds");
-    
-    //From here we will move in set step sizes. Each step is 1000th of a rotation
-    int finalNumberOfSteps   = distanceToMoveInRotations*1000;
-    Serial.println("This will be done in: ");
-    Serial.println(finalNumberOfSteps);
-    Serial.println("steps");
-    
-    Serial.println("Each of which will take: ");
-    float timePerStep = millisecondsForMove/float(finalNumberOfSteps);
-    Serial.println(timePerStep);
-    Serial.println("milliseconds");
-    
-    
+    float  startingLocation           = location.xtarget;
+    float  distanceToMoveInRotations  = xEnd - startingLocation;
+    float  millisecondsForMove        = 1000*(distanceToMoveInRotations/rotationsPerSecond);
+    int    finalNumberOfSteps         = distanceToMoveInRotations*1000;
+    float  timePerStep                = millisecondsForMove/float(finalNumberOfSteps);
     
     int numberOfStepsTaken   =  0;
     

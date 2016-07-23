@@ -96,8 +96,6 @@ void setup(){
     }*/
     
     initializePID();
-    
-    G1("G01 X10.3 F5 ");
 }
 
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven
