@@ -75,7 +75,9 @@ void setup(){
     }*/
     
     
-    G1("G01 X10 F123");
+    xAxis.initializePID();
+    
+    G1("G01 X10 F1");
 }
 
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven

@@ -46,11 +46,6 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
     double Kp=300, Ki=0, Kd=10;
     PID _pidController(&_pidInput, &_pidOutput, &_pidSetpoint, Kp, Ki, Kd, DIRECT);
     
-    _pidController.SetMode(AUTOMATIC);
-    _pidController.SetOutputLimits(-90, 90);
-    Serial.println("PID controller mode:");
-    Serial.println(_pidController.GetMode());
-    
     //initialize variables
     _direction    = encoderDirection;
     _encoderPin   = encoderPin;
@@ -60,16 +55,21 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
     
 }
 
+void   Axis::initializePID(){
+    _pidController.SetMode(AUTOMATIC);
+    _pidController.SetOutputLimits(-90, 90);
+    Serial.println("PID controller mode:");
+    Serial.println(_pidController.GetMode());
+}
+
 int    Axis::write(float targetPosition){
     
-    _pidInput      =  0;
-    _pidSetpoint   =  1000;
+    _pidInput      =  _axisPosition;
+    _pidSetpoint   =  targetPosition;
     
     
     
     bool pidreturn = _pidController.Compute();
-    //Serial.println(pidreturn);
-    //Serial.println(_pidController.GetMode());
     
     Serial.print(_pidInput);
     Serial.print(" ");
