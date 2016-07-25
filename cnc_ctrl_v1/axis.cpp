@@ -23,12 +23,10 @@
 #define FORWARD 1
 #define BACKWARD -1
 
-//Define Variables we'll be connecting to
+//PID setup 
 double Setpoint, Input, Output;
-
-//Specify the links and initial tuning parameters
 double Kp=300, Ki=0, Kd=10;
-PID xPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+PID _pidController(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName){
     Serial.println("begin this is a long string so you can see some of it");
@@ -37,15 +35,15 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
     //initialize motor
     _motor      = GearMotor();
     _motor.setupMotor(pwmPin, directionPin1, directionPin2);
-    _motor.write(0);
+    //_motor.write(0);
     
     //initialize pins
     pinMode(encoderPin, INPUT);
     
     //initialize PID controller
     Setpoint = 100;
-    xPID.SetMode(AUTOMATIC);
-    xPID.SetOutputLimits(-90, 90);
+    _pidController.SetMode(AUTOMATIC);
+    _pidController.SetOutputLimits(-90, 90);
     
     //initialize variables
     _direction    = encoderDirection;
@@ -58,9 +56,20 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
 
 int    Axis::write(float targetPosition){
     
-    Serial.print(targetPosition);
+    Input      =  _axisPosition;
+    Setpoint   =  targetPosition;
+    
+    Serial.print(Input);
     Serial.print(" ");
-    Serial.println(_axisPosition);
+    Serial.print(Setpoint);
+    Serial.print(" ");
+    Serial.println(Output);
+    
+    _pidController.Compute();
+    
+    _motor.write(90 + Output);
+    
+    return 1;
 }
 
 float  Axis::read(){
@@ -133,16 +142,4 @@ takes this duration and converts it to a ten bit number.*/
     }
 
     return duration;
-}
-
-int    Axis::_goToLocation(float target){
-    
-    Input      =  _axisPosition;
-    Setpoint   =  target;
-    
-    xPID.Compute();
-    
-    _motor.write(90 + Output);
-    
-    return 1;
 }
