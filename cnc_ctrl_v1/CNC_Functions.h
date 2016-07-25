@@ -334,57 +334,6 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     x.write(90 + Output);
 }
 
-int Unstick(Servo axis, int direction){
-
-/*The Unstick() function is called to attempt to unstick the machine when
- it becomes stuck. */
-
-    static long staticTime = millis(); //This variable holds the time the function was last called. It persists between function calls.
-    static int count = 0; //count is used to determine if the machine has become seriously stuck or if the machine is able to free itself. If the unstick() function is called multiple times in a short span of time the machine is deemed to be permanently stuck.
-
-    if(millis() - staticTime < 1000){
-        count++;
-    }
-    else{
-        count = 0;
-    }
-
-    axis.write(90 + 45*direction); //Spin the motor backwards
-    long tmptime = millis();
-    while(millis() - tmptime < 30){ //This is just a delay which doesn't lose the machine's position.
-        SetPos(&location);
-    }
-    axis.write(90 - 45*direction); //Spin the motor forward again
-    tmptime = millis();
-    while(millis() - tmptime < 140){
-        SetPos(&location);
-    }
-
-    staticTime = millis();//sets the time the last function finished
-
-    if (count > 15){ //The machine is seriously stuck
-        Serial.println("really stuck");
-        x.detach(); //Detach the motors to prevent them from being damaged
-        y.detach();
-        z.detach();
-        String stuckString = "";
-        while(1){ //Wait for signal to continue
-            SetPos(&location);
-            if (Serial.available() > 0) {
-                char c = Serial.read();
-                stuckString += c;
-            }
-            if (stuckString == "unstuck"){ //Ground control software says to try again
-                x.attach(XSERVO); //reattach the motors
-                y.attach(YSERVO);
-                z.attach(ZSERVO);
-                Serial.println("trying again");
-                break;
-            }
-        }
-    }
-}
-
 int Move(float xEnd, float yEnd, float zEnd, float rotationsPerSecond){
     
 /*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
