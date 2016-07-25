@@ -81,14 +81,14 @@ the input from the encoder*/
     previousAngle = currentAngle; //Reset the previous angle variables
 
     if(_direction == FORWARD){ //Update the current angle variable. Direction is set at compile time depending on which side of the rod the encoder is positioned on.
-        currentAngle = PWMread(_encoderPin);
+        currentAngle = _PWMread(_encoderPin);
     }
     else{
-        currentAngle = 1023 - PWMread(_encoderPin);
+        currentAngle = 1023 - _PWMread(_encoderPin);
     }
 }
 
-int    Axis::PWMread(int pin){
+int    Axis::_PWMread(int pin){
 
 /*PWMread() measures the duty cycle of a PWM signal on the provided pin. It then
 takes this duration and converts it to a ten bit number.*/

@@ -29,7 +29,7 @@
             int    set(float newAxisPosition);
             int    updatePositionFromEncoder();
         private:
-            int    PWMread(int pin);
+            int    _PWMread(int pin);
             
             GearMotor  _motor;
             int        _direction;
