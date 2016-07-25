@@ -413,6 +413,10 @@ and G01 commands. The units at this point should all be in rotations or rotation
         
         delay(timePerStep);
         
+        Serial.println("in move");
+        
+        xAxis.write(whereItShouldBeAtThisStep);
+        
         numberOfStepsTaken = numberOfStepsTaken + 1;
     }
     return(1);
