@@ -31,6 +31,8 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
     _motor.setupMotor(pwmPin, directionPin1, directionPin2);
     _motor.write(0);
     
+    pinMode(encoderPin, INPUT);
+    
     _direction    = encoderDirection;
     _encoderPin   = encoderPin;
     _axisName     = axisName;

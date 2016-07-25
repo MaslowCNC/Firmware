@@ -64,9 +64,6 @@ int stepsize = 1;
 float feedrate = 125;
 float unitScalar = 200;
 location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 0, 0};
-int xpot = 10;
-int ypot = 34;
-int zpot = 32;
 Servo x;
 Servo y;
 Servo z;
@@ -76,7 +73,7 @@ Axis xAxis(7,8,9, FORWARD, 10, "X-axis");
 int servoDetachFlag = 1;
 int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
 
-void initializePID(){
+void  initializePID(){
     Setpoint = 100;
     xPID.SetMode(AUTOMATIC);
     xPID.SetOutputLimits(-90, 90);
@@ -150,7 +147,7 @@ float getAngle(float X,float Y,float centerX,float centerY){
     return(theta);
 }
 
-int BoostLimit(int boost, int limit){
+int   BoostLimit(int boost, int limit){
 
 /*BoostLimit sets the upper and lower bounds of the signals which go to the servos to prevent weird
  behavior. Valid input to set the servo speed ranges from 0-180, and the Arduino servo library gives
@@ -165,7 +162,7 @@ int BoostLimit(int boost, int limit){
     return (boost);
 }
 
-int SetSpeed(float posNow, float posTarget, int gain){
+int   SetSpeed(float posNow, float posTarget, int gain){
 
 /*SetSpeed() takes a position and a target and sets the speed of the servo to hit that target.
  Right now it implements a proportional controller, where the gain is set by the 'gain' input.
@@ -185,7 +182,7 @@ int SetSpeed(float posNow, float posTarget, int gain){
     return(speed);
 }
 
-int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position){
+int   SetTarget(float xTarget, float yTarget, float zTarget, location_st* position){
 
 /*The SetTarget() function moves the machine to the position stored in the location structure.*/
 
@@ -203,7 +200,7 @@ int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position
     x.write(90 + Output);
 }
 
-int Move(float xEnd, float yEnd, float zEnd, float rotationsPerSecond){
+int   Move(float xEnd, float yEnd, float zEnd, float rotationsPerSecond){
     
 /*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
 the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
@@ -259,7 +256,7 @@ If no number is found, defaultReturn is returned*/
     return numberAsFloat;
 }
 
-int G1(String readString){
+int   G1(String readString){
     
 /*G1() is the function which is called to process the string if it begins with 
 'G01' or 'G00'*/
@@ -292,7 +289,7 @@ int G1(String readString){
     }
 }
 
-int Circle(float radius, int direction, float xcenter, float ycenter, float startrad, float endrad, float speed){
+int   Circle(float radius, int direction, float xcenter, float ycenter, float startrad, float endrad, float speed){
     
 /*Circle two takes in the radius of the circle to be cut and the starting and ending points in radians with 
 pi removed so a complete circle is from 0 to 2. If direction is 1 the function cuts a CCW circle, and -1 cuts 
@@ -420,7 +417,7 @@ the circle*/
     return(1);
 }
 
-int G2(String readString){
+int   G2(String readString){
 
     /*G2() is the function which is called when the string sent to the machine is 'G02' or 'G03'. 
     The string is parsed to extract the relevant information which is then used to compute the start and end 
@@ -539,7 +536,7 @@ int G2(String readString){
     }
 }
 
-void G10(String readString){
+void  G10(String readString){
 
 /*The G10() function handles the G10 gcode which re-zeroes one or all of the machine's axes.*/
 
@@ -574,7 +571,7 @@ float readFloat(unsigned int addr){
     return data.f;
 }
 
-void writeFloat(unsigned int addr, float x){
+void  writeFloat(unsigned int addr, float x){
     union{
         byte b[4];
         float f;

@@ -48,10 +48,6 @@ int end;
 char sect[22];
 
 
-//Sd2Card card;
-//SdVolume volume;
-//SdFile root;
-
 
 void setup(){
     Serial.begin(19200);
@@ -67,9 +63,7 @@ void setup(){
     pinMode(spindle, OUTPUT);           // set pin to output
     digitalWrite(spindle, LOW);
     analogReference(EXTERNAL);
-    pinMode(xpot, INPUT);
-    pinMode(ypot, INPUT);
-    pinMode(zpot, INPUT);
+    
     pinMode(SENSEPIN, INPUT_PULLUP);
     
     noInterrupts();
