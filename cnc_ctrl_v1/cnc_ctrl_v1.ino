@@ -298,55 +298,6 @@ void loop(){
         Serial.println("gready");
     }
     
-    if(readString.substring(0, 3) == "B06"){
-        ManualControl(readString);
-        location.xtarget = location.xpos;
-        location.ytarget = location.ypos;
-        location.ztarget = location.zpos;
-        readString = "";
-        Serial.println("gready");
-    }
-    if(readString.substring(0, 3) == "B07"){
-        float ofset = toolOffset(SENSEPIN);
-        location.zpos = 0.0;
-        location.ztarget = location.zpos - ofset;
-        Move(location.xtarget, location.ytarget, location.ztarget, 127);
-        time = millis();
-        readString = "";
-        Serial.println("gready");
-    }
-    
-    if(readString.substring(0,13) == "Test Encoders"){
-        testEncoders();
-        readString = "";
-        Serial.println("gready");
-    }
-    
-    if(readString.substring(0,11) == "Test Motors"){
-        testMotors();
-        readString = "";
-        Serial.println("gready");
-    }
-    
-    if(readString.substring(0,9) == "Test Both"){
-        testBoth();
-        readString = "";
-        Serial.println("gready");
-    }
-    
-    if(readString.substring(0,13) == "Center Motors"){
-        Serial.println("center motors test begin");
-        centerMotors();
-        readString = "";
-        Serial.println("gready");
-    }
-    
-    if(readString.substring(0,13) == "Align Magnets"){
-        calibrateMagnets();
-        readString = "";
-        Serial.println("gready");
-    }
-    
     if((readString[0] == 'T' || readString[0] == 't') && readString[1] != 'e'){
         if(readString[1] == '0'){
             digitalWrite(spindle, LOW);
