@@ -82,36 +82,6 @@ void initializePID(){
     xPID.SetOutputLimits(-90, 90);
 }
 
-int PWMread(int pin){
-
-/*PWMread() measures the duty cycle of a PWM signal on the provided pin. It then
-takes this duration and converts it to a ten bit number.*/
-
-    int duration = 0;
-    int numberOfSamplesToAverage = 1;
-    int i = 0;
-    
-    while (i < numberOfSamplesToAverage){
-        duration = duration + pulseIn(pin, HIGH, 2000); //This returns the pulse duration
-        i++;
-    }
-    
-    duration = duration/numberOfSamplesToAverage;
-    
-    duration = (int)((float)duration*1.23); //1.23 scales it to a ten bit number
-    
-    
-    if (duration >= 1023){
-        duration = 1023;
-    }
-
-    if (duration < 10){
-        duration = 0;
-    }
-
-    return duration;
-}
-
 float getAngle(float X,float Y,float centerX,float centerY){
 
 /*This function takes in the ABSOLUTE coordinates of the end of the circle and
@@ -178,107 +148,6 @@ float getAngle(float X,float Y,float centerX,float centerY){
     //Serial.println("Theta: ");
     //Serial.println(theta);
     return(theta);
-}
-
-int SetPos(location_st* position){
-
-/*I would like to rename this function "updateMachineLocation" The SetPos() function updates the machine's position by essentially integrating 
-the input from the encoder*/
-
-    int maxJump = 400;
-    static int loopCount = 0;
-    static int CurrentXangle, CurrentYangle, CurrentZangle;
-    static int PreviousXangle, PreviousYangle, PreviousZangle;
-
-    if(abs(CurrentXangle - PreviousXangle) <= maxJump){ //The encoder did not just transition from 0 to 360 degrees
-        position->xpos = position->xpos + (CurrentXangle - PreviousXangle)/1023.0; //The position is incremented by the change in position since the last update.
-    }
-    else{//The transition from 0 to 360 (10-bit value 1023) or vice versa has just taken place
-        if(PreviousXangle < 200 && CurrentXangle > 850){ //Add back in any dropped position
-            CurrentXangle = 1023;
-            position->xpos = position->xpos + (0 - PreviousXangle)/1023.0;
-        }
-        if(PreviousXangle > 850 && CurrentXangle < 200){
-            CurrentXangle = 0;
-            position->xpos = position->xpos + (1023 - PreviousXangle)/1023.0;
-        }
-    }
-    if(abs(CurrentYangle - PreviousYangle) <= maxJump){
-        position->ypos = position->ypos + (CurrentYangle - PreviousYangle)/1023.0;
-    }
-    else{
-        if(PreviousYangle < 200 && CurrentYangle > 850){
-            CurrentYangle = 1023;
-            position->ypos = position->ypos + (0 - PreviousYangle)/1023.0;
-        }
-        if(PreviousYangle > 850 && CurrentYangle < 200){
-            CurrentYangle = 0;
-            position->ypos = position->ypos + (1023 - PreviousYangle)/1023.0;
-        }
-    }
-    if(abs(CurrentZangle - PreviousZangle) <= maxJump){
-        position->zpos = position->zpos + (CurrentZangle - PreviousZangle)/1023.0;
-    }
-    else{
-        if(PreviousZangle < 200 && CurrentZangle > 850){
-            CurrentZangle = 1023;
-            position->zpos = position->zpos + (0 - PreviousZangle)/1023.0;
-        }
-        if(PreviousZangle > 850 && CurrentZangle < 200){
-            CurrentZangle = 0;
-            position->zpos = position->zpos + (1023 - PreviousZangle)/1023.0;
-        }
-    }
-
-    PreviousXangle = CurrentXangle; //Reset the previous angle variables
-    PreviousYangle = CurrentYangle;
-    PreviousZangle = CurrentZangle;
-
-    if(XDIRECTION == FORWARD){ //Update the current angle variable. Direction is set at compile time depending on which side of the rod the encoder is positioned on.
-        CurrentXangle = PWMread(xpot);
-    }
-    else{
-        CurrentXangle = 1023 - PWMread(xpot);
-    }
-
-    if(YDIRECTION == FORWARD){
-        CurrentYangle = PWMread(ypot);
-    }
-    else{
-        CurrentYangle = 1023 - PWMread(ypot);
-    }
-
-    if(ZDIRECTION == FORWARD){
-        CurrentZangle = PWMread(zpot);
-    }
-    else{
-        CurrentZangle = 1023 - PWMread(zpot);
-    }
-
-
-    loopCount++;
-    if(loopCount > 30){ //Update the position every so often
-        servoDetachFlag = 0;
-        if(servoDetachFlag == 0){ //If the machine is moving print the real position
-            Serial.print("pz(");
-            Serial.print(position->xpos*XPITCH);
-            Serial.print(",");
-            Serial.print(position->ypos*YPITCH);
-            Serial.print(",");
-            Serial.print(position->zpos*ZPITCH);
-            Serial.println(")M");
-        }
-        else{ //If the machine is stopped print the target position
-            Serial.print("pz(");
-            Serial.print(position->xtarget);
-            Serial.print(",");
-            Serial.print(position->ytarget);
-            Serial.print(",");
-            Serial.print(position->ztarget);
-            Serial.println(")");
-        }
-        loopCount = 0;
-    }
 }
 
 int BoostLimit(int boost, int limit){
@@ -353,7 +222,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     while(numberOfStepsTaken < finalNumberOfSteps){
         
-        SetPos(&location); 
+        //SetPos(&location); 
         
         
         float whereItShouldBeAtThisStep = startingLocation + (numberOfStepsTaken/1000.0);
@@ -501,7 +370,7 @@ the circle*/
         location.xtarget = -1*radius * cos(3.141593*((float)i/(int)(stepMultiplier*radius))) - xcenter; //computes the new target position.
         location.ytarget = direction * radius * sin(3.141593*((float)i/(int)(stepMultiplier*radius))) + ycenter;
 
-        SetPos(&location);
+        //setpos(&location);
         SetTarget(location.xtarget, location.ytarget, location.ztarget, &location);
         if( millis() - stime > timeStep ){
             if( abs(location.xpos - location.xtarget) < TOLERANCE && abs(location.ypos - location.ytarget) < TOLERANCE && abs(location.zpos - location.ztarget) < TOLERANCE){ //if the target is reached move to the next position
@@ -663,7 +532,7 @@ int G2(String readString){
     if(CircleReturnVal == 1){ //If the circle was cut correctly
         while( abs(location.xpos + xval) > TOLERANCE or abs(location.ypos - yval) > TOLERANCE){ //This ensures that the circle is completed and that if it is a circle with a VERY large radius and a small angle it isn't neglected
             SetTarget(-1*xval, yval, location.ztarget, &location);
-            SetPos(&location);
+            //setpos(&location);
         }
         location.xtarget = -1*xval;
         location.ytarget = yval;

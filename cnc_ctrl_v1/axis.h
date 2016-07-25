@@ -24,13 +24,19 @@
     class Axis{
         public:
             Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName);
-            int write(float targetPosition);
-            float read();
+            int    write(float targetPosition);
+            float  read();
+            int    set(float newAxisPosition);
+            int    updatePositionFromEncoder();
         private:
+            int    PWMread(int pin);
+            
             GearMotor  _motor;
             int        _direction;
             int        _encoderPin;
             String     _axisName;
+            float      _axisPosition;
+            float      _axisTarget;
     };
 
     #endif

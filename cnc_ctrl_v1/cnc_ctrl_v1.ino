@@ -138,7 +138,7 @@ void estop(){
 void loop(){
     readString = "";
     
-    SetPos(&location); 
+    //SetPos(&location); 
     SetTarget(location.xtarget, location.ytarget, location.ztarget, &location);
 
     if (Serial.available()){
