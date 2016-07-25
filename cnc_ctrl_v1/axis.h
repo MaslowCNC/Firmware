@@ -30,6 +30,7 @@
             int    updatePositionFromEncoder();
         private:
             int    _PWMread(int pin);
+            int    _goToLocation(float target);
             
             GearMotor  _motor;
             int        _direction;

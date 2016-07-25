@@ -23,7 +23,6 @@
     */
 
 #include "MyTypes.h"
-#include "PID_v1.h"
 
 #define FORWARD 1
 #define BACKWARD -1
@@ -53,12 +52,6 @@
 #include "GearMotor.h"
 #include "Axis.h"
 
-//Define Variables we'll be connecting to
-double Setpoint, Input, Output;
-
-//Specify the links and initial tuning parameters
-double Kp=300, Ki=0, Kd=10;
-PID xPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 int stepsize = 1;
 float feedrate = 125;
@@ -72,12 +65,6 @@ Axis xAxis(7,8,9, FORWARD, 10, "X-axis");
 
 int servoDetachFlag = 1;
 int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
-
-void  initializePID(){
-    Setpoint = 100;
-    xPID.SetMode(AUTOMATIC);
-    xPID.SetOutputLimits(-90, 90);
-}
 
 float getAngle(float X,float Y,float centerX,float centerY){
 
@@ -182,24 +169,6 @@ int   SetSpeed(float posNow, float posTarget, int gain){
     return(speed);
 }
 
-int   SetTarget(float xTarget, float yTarget, float zTarget, location_st* position){
-
-/*The SetTarget() function moves the machine to the position stored in the location structure.*/
-
-    int xspeed, yspeed, zspeed;
-    yspeed = SetSpeed(yTarget, position->ypos, 123);
-    zspeed = SetSpeed(zTarget, position->zpos, 200);
-    
-    
-    Input      =  position->xpos;
-    Setpoint   =  xTarget;
-    
-    xPID.Compute();
-    
-    //make motors rotate
-    x.write(90 + Output);
-}
-
 int   Move(float xEnd, float yEnd, float zEnd, float rotationsPerSecond){
     
 /*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
@@ -220,8 +189,6 @@ and G01 commands. The units at this point should all be in rotations or rotation
     while(numberOfStepsTaken < finalNumberOfSteps){
         
         float whereItShouldBeAtThisStep = startingLocation + (numberOfStepsTaken/1000.0);
-        
-        SetTarget(whereItShouldBeAtThisStep, location.ytarget, location.ztarget, &location);
         
         delay(timePerStep);
         
@@ -364,7 +331,7 @@ the circle*/
         location.ytarget = direction * radius * sin(3.141593*((float)i/(int)(stepMultiplier*radius))) + ycenter;
 
         //setpos(&location);
-        SetTarget(location.xtarget, location.ytarget, location.ztarget, &location);
+        //SetTarget(location.xtarget, location.ytarget, location.ztarget, &location);
         if( millis() - stime > timeStep ){
             if( abs(location.xpos - location.xtarget) < TOLERANCE && abs(location.ypos - location.ytarget) < TOLERANCE && abs(location.zpos - location.ztarget) < TOLERANCE){ //if the target is reached move to the next position
                 i++;
@@ -524,7 +491,7 @@ int   G2(String readString){
 
     if(CircleReturnVal == 1){ //If the circle was cut correctly
         while( abs(location.xpos + xval) > TOLERANCE or abs(location.ypos - yval) > TOLERANCE){ //This ensures that the circle is completed and that if it is a circle with a VERY large radius and a small angle it isn't neglected
-            SetTarget(-1*xval, yval, location.ztarget, &location);
+            //SetTarget(-1*xval, yval, location.ztarget, &location);
             //setpos(&location);
         }
         location.xtarget = -1*xval;

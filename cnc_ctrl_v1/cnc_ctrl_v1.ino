@@ -89,7 +89,6 @@ void setup(){
         location.ztarget = location.zpos;
     }*/
     
-    initializePID();
     
     G1("G01 X10 F123");
 }
@@ -133,7 +132,7 @@ void loop(){
     readString = "";
     
     //SetPos(&location); 
-    SetTarget(location.xtarget, location.ytarget, location.ztarget, &location);
+    //SetTarget(location.xtarget, location.ytarget, location.ztarget, &location);
 
     if (Serial.available()){
         while (Serial.available()) {
