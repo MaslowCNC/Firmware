@@ -28,6 +28,7 @@
             float  read();
             int    set(float newAxisPosition);
             int    updatePositionFromEncoder();
+            int    returnPidMode();
         private:
             int    _PWMread(int pin);
             

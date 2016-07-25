@@ -24,9 +24,9 @@
 #define BACKWARD -1
 
 //PID setup 
-double Setpoint, Input, Output;
+double _pidSetpoint, _pidInput, _pidOutput;
 double Kp=300, Ki=0, Kd=10;
-PID _pidController(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+PID _pidController(&_pidInput, &_pidOutput, &_pidSetpoint, Kp, Ki, Kd, DIRECT);
 
 Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName){
     Serial.println("begin this is a long string so you can see some of it");
@@ -41,9 +41,15 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
     pinMode(encoderPin, INPUT);
     
     //initialize PID controller
-    Setpoint = 100;
+    
+    double _pidSetpoint, _pidInput, _pidOutput;
+    double Kp=300, Ki=0, Kd=10;
+    PID _pidController(&_pidInput, &_pidOutput, &_pidSetpoint, Kp, Ki, Kd, DIRECT);
+    
     _pidController.SetMode(AUTOMATIC);
     _pidController.SetOutputLimits(-90, 90);
+    Serial.println("PID controller mode:");
+    Serial.println(_pidController.GetMode());
     
     //initialize variables
     _direction    = encoderDirection;
@@ -56,18 +62,26 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
 
 int    Axis::write(float targetPosition){
     
-    Input      =  _axisPosition;
-    Setpoint   =  targetPosition;
+    _pidInput      =  0;
+    _pidSetpoint   =  1000;
     
-    Serial.print(Input);
+    
+    
+    bool pidreturn = _pidController.Compute();
+    //Serial.println(pidreturn);
+    //Serial.println(_pidController.GetMode());
+    
+    Serial.print(_pidInput);
     Serial.print(" ");
-    Serial.print(Setpoint);
+    Serial.print(_pidSetpoint);
     Serial.print(" ");
-    Serial.println(Output);
+    Serial.print(_pidOutput);
+    Serial.print(" ");
+    Serial.print(_pidController.GetMode());
+    Serial.print(" ");
+    Serial.println(pidreturn);
     
-    _pidController.Compute();
-    
-    _motor.write(90 + Output);
+    _motor.write(90 + _pidOutput);
     
     return 1;
 }
@@ -142,4 +156,8 @@ takes this duration and converts it to a ten bit number.*/
     }
 
     return duration;
+}
+
+int Axis::returnPidMode(){
+    return _pidController.GetMode();
 }

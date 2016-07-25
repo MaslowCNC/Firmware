@@ -133,7 +133,7 @@ the speed moveSpeed. Movements are correlated so that regardless of the distance
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
     
-    
+    Serial.println("move ran");
     
     float  startingLocation           = location.xtarget;
     float  distanceToMoveInRotations  = xEnd - startingLocation;
@@ -142,6 +142,8 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float  timePerStep                = millisecondsForMove/float(finalNumberOfSteps);
     
     int numberOfStepsTaken   =  0;
+    
+    Serial.println(xAxis.returnPidMode());
     
     while(numberOfStepsTaken < finalNumberOfSteps){
         
@@ -184,7 +186,9 @@ int   G1(String readString){
     
 /*G1() is the function which is called to process the string if it begins with 
 'G01' or 'G00'*/
-
+    
+    Serial.println("g1 ran");
+    
     float xgoto = location.xtarget;
     float ygoto = location.ytarget;
     float zgoto = location.ztarget;
