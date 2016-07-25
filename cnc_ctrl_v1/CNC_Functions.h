@@ -404,15 +404,12 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     while(numberOfStepsTaken < finalNumberOfSteps){
         
-        //SetPos(&location); 
+        SetPos(&location); 
         
         
         float whereItShouldBeAtThisStep = startingLocation + (numberOfStepsTaken/1000.0);
         
-        //SetTarget(whereItShouldBeAtThisStep, location.ytarget, location.ztarget, &location);
-        
-        xAxis.write(whereItShouldBeAtThisStep);
-        Serial.println("Move!!!");
+        SetTarget(whereItShouldBeAtThisStep, location.ytarget, location.ztarget, &location);
         
         delay(timePerStep);
         

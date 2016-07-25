@@ -24,7 +24,7 @@
     class Axis{
         public:
             Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName);
-            int write(float targetPosition);
+            int moveTo(float targetPosition);
         private:
             GearMotor  _motor;
             int        _direction;
