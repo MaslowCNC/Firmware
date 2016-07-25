@@ -55,12 +55,6 @@ char sect[22];
 
 void setup(){
     Serial.begin(19200);
-    if (USE_ESTOP == 1){
-        pinMode(estopswitch,INPUT);     //input for emergency stop system 
-            pinMode(estoppower,OUTPUT);     //power for emergency stop system
-            digitalWrite(estoppower,HIGH);  //turn on the power
-            attachInterrupt(5,estop,LOW);   //start monitoring the ESTOP switch
-    }
     x.write(90); y.write(90); z.write(90);
     Serial.println("ready");
     Serial.println("gready");
@@ -96,14 +90,8 @@ void setup(){
     }*/
     
     initializePID();
-}
-
-ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven
-{
-    TCNT1 = 64000;            // preload timer
-    //SetPos(&location); 
-    //SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 123);
     
+    G1("G01 X10 F123 ");
 }
 
 void estop(){
