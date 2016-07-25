@@ -41,7 +41,6 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
     pinMode(encoderPin, INPUT);
     
     //initialize PID controller
-    
     double _pidSetpoint, _pidInput, _pidOutput;
     double Kp=300, Ki=0, Kd=10;
     PID _pidController(&_pidInput, &_pidOutput, &_pidSetpoint, Kp, Ki, Kd, DIRECT);
@@ -52,6 +51,7 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
     _axisName     = axisName;
     _axisPosition = 0.0;
     _axisTarget   = 0.0;
+    _direction    = BACKWARD;
     
 }
 
