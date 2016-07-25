@@ -28,10 +28,6 @@
 
 
 int spindle = 17;
-int USE_ESTOP = 0;
-int estopswitch = 18;
-int estoppower = 19;
-volatile int panic = 0;
 String readString;
 String prependString;
 long time = millis();
@@ -51,12 +47,7 @@ char sect[22];
 
 void setup(){
     Serial.begin(19200);
-    if (USE_ESTOP == 1){
-        pinMode(estopswitch,INPUT);     //input for emergency stop system 
-            pinMode(estoppower,OUTPUT);     //power for emergency stop system
-            digitalWrite(estoppower,HIGH);  //turn on the power
-            attachInterrupt(5,estop,LOW);   //start monitoring the ESTOP switch
-    }
+    
     x.write(90); y.write(90); z.write(90);
     Serial.println("ready");
     Serial.println("gready");
@@ -101,39 +92,10 @@ ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of a
     
 }
 
-void estop(){
-    if(panic == 0){
-        panic = 1;
-        detachInterrupt(5);  // the interrupt already fired, we have the con until we give it up
-        Serial.println("ESTOP"); // send a message to groundcontrol
-        int xstate = x.attached();  //save current servo states
-        int ystate = y.attached();
-        int zstate = z.attached();
-        x.detach(); //Detach the motors to prevent them from being damaged
-        y.detach();
-        z.detach();
- 
-        int estopstate = LOW;  // declare a local variable for manually reading the switch
-        while(estopstate == LOW){
-            delay(500);  //give some time for the switch to debounce
-            estopstate = digitalRead(estopswitch);
-            delay(500);
-        }
-        Serial.println("ESTOP cleared");  // let ground control know we are clear
-        panic = 0;
-        attachInterrupt(5,estop,LOW);  //mischief managed, start watching for trouble again.
-        if (xstate == 1){x.attach(XSERVO);}  // re-enable any servos that were attached
-        if (ystate == 1){y.attach(YSERVO);}
-        if (zstate == 1){z.attach(ZSERVO);}
-    }
-}
+
 
 void loop(){
     readString = "";
-    
-    //SetPos(&location); 
-    //SetTarget(location.xtarget, location.ytarget, location.ztarget, &location);
-
     if (Serial.available()){
         while (Serial.available()) {
             delay(1);  //delay to allow buffer to fill 
@@ -165,12 +127,7 @@ void loop(){
     if(readString.length() > 0){
         Serial.println(readString);
         time = millis();
-        if( servoDetachFlag == 1){
-            x.attach(XSERVO);
-            y.attach(YSERVO);
-            z.attach(ZSERVO);
-            //calibrateMagnets(); 
-        }
+        
         servoDetachFlag = 0;
     }
     

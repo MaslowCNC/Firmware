@@ -36,14 +36,6 @@
 #define YDIRECTION FORWARD
 #define ZDIRECTION BACKWARD
 
-#define XSTOP 90
-#define YSTOP 90
-#define ZSTOP 90
-
-#define XSERVO 5
-#define YSERVO 6
-#define ZSERVO 31
-
 #define SENSEPIN 53
 
 #define TOLERANCE .3//this sets how close to the target point the tool must be before it moves on.
@@ -132,41 +124,6 @@ float getAngle(float X,float Y,float centerX,float centerY){
     //Serial.println("Theta: ");
     //Serial.println(theta);
     return(theta);
-}
-
-int   BoostLimit(int boost, int limit){
-
-/*BoostLimit sets the upper and lower bounds of the signals which go to the servos to prevent weird
- behavior. Valid input to set the servo speed ranges from 0-180, and the Arduino servo library gives
- strange results if you go outside those limits.*/
-
-    if(boost > limit){
-        boost = limit;
-    }
-    if(boost < -limit){
-        boost = -limit;
-    }
-    return (boost);
-}
-
-int   SetSpeed(float posNow, float posTarget, int gain){
-
-/*SetSpeed() takes a position and a target and sets the speed of the servo to hit that target.
- Right now it implements a proportional controller, where the gain is set by the 'gain' input.
- A PID controller would be better.*/
-
-    int speed;
-
-    speed = gain * (posTarget - posNow); //Set speed proportional to the distance from the target
-
-    if(abs(posNow - posTarget) < .02){ //Set the deadband
-        speed = 0;
-    }
-
-    speed = BoostLimit(speed, 85); //Limits the output to an acceptable range
-    
-
-    return(speed);
 }
 
 int   Move(float xEnd, float yEnd, float zEnd, float rotationsPerSecond){
