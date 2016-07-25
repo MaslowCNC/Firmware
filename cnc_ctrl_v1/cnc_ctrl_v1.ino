@@ -43,19 +43,13 @@ int begin;
 int end;
 char sect[22];
 
-
-
 void setup(){
     Serial.begin(19200);
     
-    x.write(90); y.write(90); z.write(90);
     Serial.println("ready");
     Serial.println("gready");
-    pinMode(spindle, OUTPUT);           // set pin to output
-    digitalWrite(spindle, LOW);
     analogReference(EXTERNAL);
     
-    pinMode(SENSEPIN, INPUT_PULLUP);
     
     noInterrupts();
     TCCR1A = 0;
@@ -81,7 +75,7 @@ void setup(){
     }*/
     
     
-    G1("G01 X-10 F123");
+    G1("G01 X10 F123");
 }
 
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven
