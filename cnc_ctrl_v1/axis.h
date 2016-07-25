@@ -19,19 +19,17 @@
     #define Axis_h
 
     #include "Arduino.h"
+    #include "GearMotor.h"
 
     class Axis{
         public:
-            Axis(int pwmPin, int pin1, int pin2);
-            void attach(int pin);
-            void detach();
-            void write(int speed);
-            int attached();
+            Axis(int pwmPin, int directionPin1, int directionPin2, int direction, int encoderPin, String axisName);
+            int moveTo(float targetPosition);
         private:
-            int _pwmPin;
-            int _pin1;
-            int _pin2;
-            bool _attachedState;
+            GearMotor  _motor        = GearMotor(pwmPin, directionPin1, directionPin2);
+            int        _direction;
+            int        _encoderPin;
+            String     _axisName;
     };
 
     #endif

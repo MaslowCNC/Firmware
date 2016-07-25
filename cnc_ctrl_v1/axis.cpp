@@ -15,72 +15,21 @@
     
     Copyright 2014-2016 Bar Smith*/
 
-/*
-The GearMotor module imitates the behavior of the arduino servo module. It allows a gear motor (or any electric motor)
-to be a drop in replacement for a continuous rotation servo.
-*/
 
 #include "Arduino.h"
 #include "Axis.h"
 
-Axis::Axis(int pwmPin, int pin1, int pin2){
-  //Serial.println("created gear motor");
-  
-  //store pin numbers as private variables
-  _pwmPin = pwmPin;
-  _pin1  = pin1;
-  _pin2  = pin2;
-  _attachedState = 1;
-  
-  //set pinmodes
-  pinMode(_pwmPin,   OUTPUT); 
-  pinMode(_pin1,   OUTPUT); 
-  pinMode(_pin2, OUTPUT);
-  
-  //stop the motor
-  digitalWrite(_pin1, HIGH);
-  digitalWrite(_pin2, LOW) ;
-  digitalWrite(_pwmPin, LOW);
-  
-}
-
-void Axis::attach(int pin){
-    _attachedState = 1;
-}
-
-void Axis::detach(){
-    _attachedState = 0;
+Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int direction, int encoderPin, String axisName){
+    Serial.println("safe");
     
-    //stop the motor
-    digitalWrite(_pin1, HIGH);
-    digitalWrite(_pin2, LOW) ;
-    digitalWrite(_pwmPin, LOW);
-}
-
-void Axis::write(int speed){
-    /*
-    Mirrors the behavior of the servo.write() function. Speed = 90 is stopped, 0 is full reverse, 180 is full ahead.
-    */
-    if (_attachedState == 1){
-        
-        int pwmFrequency = (speed - 90)*2.8333;
-        
-        analogWrite(_pwmPin, abs(pwmFrequency));
-        
-        if (pwmFrequency > 0){
-            digitalWrite(_pin1 , HIGH);
-            digitalWrite(_pin2 , LOW );
-        }
-        else{
-            digitalWrite(_pin1 , LOW);
-            digitalWrite(_pin2 , HIGH );
-        }
-    }
+    
+    _motor      = GearMotor(pwmPin, directionPin1, directionPin2);
+    _direction  = direction;
+    _encoderPin = encoderPin;
+    _axisName   = axisName;
     
 }
 
-int Axis::attached(){
-    
-    return _attachedState;
+int Axis::moveTo(float targetPosition){
+    Serial.println("move ran");
 }
-

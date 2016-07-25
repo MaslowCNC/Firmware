@@ -51,6 +51,7 @@
 #define MOVETOLERANCE .2 //this sets how close the machine must be to the target line at any given moment
 
 #include "GearMotor.h"
+#include "Axis.h"
 
 //Define Variables we'll be connecting to
 double Setpoint, Input, Output;
@@ -66,8 +67,10 @@ location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 
 int xpot = 10;
 int ypot = 34;
 int zpot = 32;
-GearMotor x(7,8,9);
-GearMotor y(6,12,13);
+GearMotor x;
+x.setupMotor(7,8,9);
+GearMotor y;
+y.setupMotor(6,12,13);
 Servo z;
 int servoDetachFlag = 1;
 int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode

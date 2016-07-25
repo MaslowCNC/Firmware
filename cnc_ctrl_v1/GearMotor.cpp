@@ -23,7 +23,14 @@ to be a drop in replacement for a continuous rotation servo.
 #include "Arduino.h"
 #include "GearMotor.h"
 
-GearMotor::GearMotor(int pwmPin, int pin1, int pin2){
+GearMotor::GearMotor(){
+  //Serial.println("created gear motor");
+  
+  _attachedState = 0;
+  
+}
+
+int GearMotor::setupMotor(int pwmPin, int pin1, int pin2){
   //Serial.println("created gear motor");
   
   //store pin numbers as private variables
@@ -42,6 +49,7 @@ GearMotor::GearMotor(int pwmPin, int pin1, int pin2){
   digitalWrite(_pin2, LOW) ;
   digitalWrite(_pwmPin, LOW);
   
+  return 1;
 }
 
 void GearMotor::attach(int pin){
