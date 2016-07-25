@@ -67,10 +67,8 @@ location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 
 int xpot = 10;
 int ypot = 34;
 int zpot = 32;
-GearMotor x;
-x.setupMotor(7,8,9);
-GearMotor y;
-y.setupMotor(6,12,13);
+Servo x;
+Servo y;
 Servo z;
 int servoDetachFlag = 1;
 int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode

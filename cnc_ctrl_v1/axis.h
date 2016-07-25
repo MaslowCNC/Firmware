@@ -23,10 +23,10 @@
 
     class Axis{
         public:
-            Axis(int pwmPin, int directionPin1, int directionPin2, int direction, int encoderPin, String axisName);
+            Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName);
             int moveTo(float targetPosition);
         private:
-            GearMotor  _motor        = GearMotor(pwmPin, directionPin1, directionPin2);
+            GearMotor  _motor;
             int        _direction;
             int        _encoderPin;
             String     _axisName;

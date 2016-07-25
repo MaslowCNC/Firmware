@@ -19,12 +19,13 @@
 #include "Arduino.h"
 #include "Axis.h"
 
-Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int direction, int encoderPin, String axisName){
+Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName){
     Serial.println("safe");
     
     
-    _motor      = GearMotor(pwmPin, directionPin1, directionPin2);
-    _direction  = direction;
+    
+    _motor      = GearMotor();
+    _direction  = encoderDirection;
     _encoderPin = encoderPin;
     _axisName   = axisName;
     
