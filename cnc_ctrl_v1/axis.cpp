@@ -20,7 +20,7 @@
 #include "Axis.h"
 
 Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName){
-    Serial.println("safe");
+    Serial.println("begin this is a long string so you can see some of it");
     
     
     

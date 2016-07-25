@@ -70,6 +70,9 @@ int zpot = 32;
 Servo x;
 Servo y;
 Servo z;
+
+Axis xAxis(7,8,9, FORWARD, 10, "X-axis");
+
 int servoDetachFlag = 1;
 int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
 
