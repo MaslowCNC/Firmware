@@ -222,17 +222,13 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     while(numberOfStepsTaken < finalNumberOfSteps){
         
-        //SetPos(&location); 
-        
-        
         float whereItShouldBeAtThisStep = startingLocation + (numberOfStepsTaken/1000.0);
         
         SetTarget(whereItShouldBeAtThisStep, location.ytarget, location.ztarget, &location);
         
         delay(timePerStep);
         
-        Serial.println("in move");
-        
+        xAxis.updatePositionFromEncoder();
         xAxis.write(whereItShouldBeAtThisStep);
         
         numberOfStepsTaken = numberOfStepsTaken + 1;

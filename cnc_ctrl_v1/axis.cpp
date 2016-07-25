@@ -29,7 +29,7 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
     
     _motor      = GearMotor();
     _motor.setupMotor(pwmPin, directionPin1, directionPin2);
-    //_motor.write(0);
+    _motor.write(0);
     
     _direction    = encoderDirection;
     _encoderPin   = encoderPin;
@@ -40,8 +40,10 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
 }
 
 int    Axis::write(float targetPosition){
-    Serial.println("write ran");
-    Serial.println(targetPosition);
+    
+    Serial.print(targetPosition);
+    Serial.print(" ");
+    Serial.println(_axisPosition);
 }
 
 float  Axis::read(){
