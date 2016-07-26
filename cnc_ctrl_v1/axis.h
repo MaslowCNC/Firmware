@@ -15,24 +15,31 @@
     
     Copyright 2014-2016 Bar Smith*/
     
-    #ifndef GearMotor_h
-    #define GearMotor_h
+    #ifndef Axis_h
+    #define Axis_h
 
     #include "Arduino.h"
+    #include "GearMotor.h"
 
-    class GearMotor{
+    class Axis{
         public:
-            GearMotor();
-            void attach(int pin);
-            int setupMotor(int pwmPin, int pin1, int pin2);
-            void detach();
-            void write(int speed);
-            int attached();
+            Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName);
+            int    write(float targetPosition);
+            float  read();
+            int    set(float newAxisPosition);
+            int    updatePositionFromEncoder();
+            int    returnPidMode();
+            void   initializePID();
+            int    detach();
         private:
-            int _pwmPin;
-            int _pin1;
-            int _pin2;
-            bool _attachedState;
+            int    _PWMread(int pin);
+            
+            GearMotor  _motor;
+            int        _direction;
+            int        _encoderPin;
+            String     _axisName;
+            float      _axisPosition;
+            float      _axisTarget;
     };
 
     #endif

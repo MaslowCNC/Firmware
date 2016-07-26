@@ -23,7 +23,6 @@
     */
 
 #include "MyTypes.h"
-#include "PID_v1.h"
 
 #define FORWARD 1
 #define BACKWARD -1
@@ -37,76 +36,27 @@
 #define YDIRECTION FORWARD
 #define ZDIRECTION BACKWARD
 
-#define XSTOP 90
-#define YSTOP 90
-#define ZSTOP 90
-
-#define XSERVO 5
-#define YSERVO 6
-#define ZSERVO 31
-
 #define SENSEPIN 53
 
 #define TOLERANCE .3//this sets how close to the target point the tool must be before it moves on.
 #define MOVETOLERANCE .2 //this sets how close the machine must be to the target line at any given moment
 
 #include "GearMotor.h"
+#include "Axis.h"
 
-//Define Variables we'll be connecting to
-double Setpoint, Input, Output;
-
-//Specify the links and initial tuning parameters
-double Kp=300, Ki=0, Kd=10;
-PID xPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 int stepsize = 1;
 float feedrate = 125;
 float unitScalar = 200;
 location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 0, 0};
-int xpot = 10;
-int ypot = 34;
-int zpot = 32;
-GearMotor x(7,8,9);
-GearMotor y(6,12,13);
+Servo x;
+Servo y;
 Servo z;
+
+Axis xAxis(7,8,9, FORWARD, 10, "X-axis");
+
 int servoDetachFlag = 1;
 int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
-
-void initializePID(){
-    Setpoint = 100;
-    xPID.SetMode(AUTOMATIC);
-    xPID.SetOutputLimits(-90, 90);
-}
-
-int PWMread(int pin){
-
-/*PWMread() measures the duty cycle of a PWM signal on the provided pin. It then
-takes this duration and converts it to a ten bit number.*/
-
-    int duration = 0;
-    int numberOfSamplesToAverage = 1;
-    int i = 0;
-    
-    while (i < numberOfSamplesToAverage){
-        duration = duration + pulseIn(pin, HIGH, 2000); //This returns the pulse duration
-        i++;
-    }
-    
-    duration = duration/numberOfSamplesToAverage;
-    
-    duration = (int)((float)duration*1.23); //1.23 scales it to a ten bit number
-    
-    
-    if (duration >= 1023){
-        duration = 1023;
-    }
-
-    if (duration < 10){
-        duration = 0;
-    }
-
-    return duration;
-}
 
 float getAngle(float X,float Y,float centerX,float centerY){
 
@@ -176,240 +126,46 @@ float getAngle(float X,float Y,float centerX,float centerY){
     return(theta);
 }
 
-int SetPos(location_st* position){
-
-/*I would like to rename this function "updateMachineLocation" The SetPos() function updates the machine's position by essentially integrating 
-the input from the encoder*/
-
-    int maxJump = 400;
-    static int loopCount = 0;
-    static int CurrentXangle, CurrentYangle, CurrentZangle;
-    static int PreviousXangle, PreviousYangle, PreviousZangle;
-
-    if(abs(CurrentXangle - PreviousXangle) <= maxJump){ //The encoder did not just transition from 0 to 360 degrees
-        position->xpos = position->xpos + (CurrentXangle - PreviousXangle)/1023.0; //The position is incremented by the change in position since the last update.
-    }
-    else{//The transition from 0 to 360 (10-bit value 1023) or vice versa has just taken place
-        if(PreviousXangle < 200 && CurrentXangle > 850){ //Add back in any dropped position
-            CurrentXangle = 1023;
-            position->xpos = position->xpos + (0 - PreviousXangle)/1023.0;
-        }
-        if(PreviousXangle > 850 && CurrentXangle < 200){
-            CurrentXangle = 0;
-            position->xpos = position->xpos + (1023 - PreviousXangle)/1023.0;
-        }
-    }
-    if(abs(CurrentYangle - PreviousYangle) <= maxJump){
-        position->ypos = position->ypos + (CurrentYangle - PreviousYangle)/1023.0;
-    }
-    else{
-        if(PreviousYangle < 200 && CurrentYangle > 850){
-            CurrentYangle = 1023;
-            position->ypos = position->ypos + (0 - PreviousYangle)/1023.0;
-        }
-        if(PreviousYangle > 850 && CurrentYangle < 200){
-            CurrentYangle = 0;
-            position->ypos = position->ypos + (1023 - PreviousYangle)/1023.0;
-        }
-    }
-    if(abs(CurrentZangle - PreviousZangle) <= maxJump){
-        position->zpos = position->zpos + (CurrentZangle - PreviousZangle)/1023.0;
-    }
-    else{
-        if(PreviousZangle < 200 && CurrentZangle > 850){
-            CurrentZangle = 1023;
-            position->zpos = position->zpos + (0 - PreviousZangle)/1023.0;
-        }
-        if(PreviousZangle > 850 && CurrentZangle < 200){
-            CurrentZangle = 0;
-            position->zpos = position->zpos + (1023 - PreviousZangle)/1023.0;
-        }
-    }
-
-    PreviousXangle = CurrentXangle; //Reset the previous angle variables
-    PreviousYangle = CurrentYangle;
-    PreviousZangle = CurrentZangle;
-
-    if(XDIRECTION == FORWARD){ //Update the current angle variable. Direction is set at compile time depending on which side of the rod the encoder is positioned on.
-        CurrentXangle = PWMread(xpot);
-    }
-    else{
-        CurrentXangle = 1023 - PWMread(xpot);
-    }
-
-    if(YDIRECTION == FORWARD){
-        CurrentYangle = PWMread(ypot);
-    }
-    else{
-        CurrentYangle = 1023 - PWMread(ypot);
-    }
-
-    if(ZDIRECTION == FORWARD){
-        CurrentZangle = PWMread(zpot);
-    }
-    else{
-        CurrentZangle = 1023 - PWMread(zpot);
-    }
-
-
-    loopCount++;
-    if(loopCount > 30){ //Update the position every so often
-        servoDetachFlag = 0;
-        if(servoDetachFlag == 0){ //If the machine is moving print the real position
-            Serial.print("pz(");
-            Serial.print(position->xpos*XPITCH);
-            Serial.print(",");
-            Serial.print(position->ypos*YPITCH);
-            Serial.print(",");
-            Serial.print(position->zpos*ZPITCH);
-            Serial.println(")M");
-        }
-        else{ //If the machine is stopped print the target position
-            Serial.print("pz(");
-            Serial.print(position->xtarget);
-            Serial.print(",");
-            Serial.print(position->ytarget);
-            Serial.print(",");
-            Serial.print(position->ztarget);
-            Serial.println(")");
-        }
-        loopCount = 0;
-    }
-}
-
-int BoostLimit(int boost, int limit){
-
-/*BoostLimit sets the upper and lower bounds of the signals which go to the servos to prevent weird
- behavior. Valid input to set the servo speed ranges from 0-180, and the Arduino servo library gives
- strange results if you go outside those limits.*/
-
-    if(boost > limit){
-        boost = limit;
-    }
-    if(boost < -limit){
-        boost = -limit;
-    }
-    return (boost);
-}
-
-int SetSpeed(float posNow, float posTarget, int gain){
-
-/*SetSpeed() takes a position and a target and sets the speed of the servo to hit that target.
- Right now it implements a proportional controller, where the gain is set by the 'gain' input.
- A PID controller would be better.*/
-
-    int speed;
-
-    speed = gain * (posTarget - posNow); //Set speed proportional to the distance from the target
-
-    if(abs(posNow - posTarget) < .02){ //Set the deadband
-        speed = 0;
-    }
-
-    speed = BoostLimit(speed, 85); //Limits the output to an acceptable range
-    
-
-    return(speed);
-}
-
-int SetTarget(float xTarget, float yTarget, float zTarget, location_st* position){
-
-/*The SetTarget() function moves the machine to the position stored in the location structure.*/
-
-    int xspeed, yspeed, zspeed;
-    yspeed = SetSpeed(yTarget, position->ypos, 123);
-    zspeed = SetSpeed(zTarget, position->zpos, 200);
-    
-    
-    Input      =  position->xpos;
-    Setpoint   =  xTarget;
-    
-    xPID.Compute();
-    
-    //make motors rotate
-    x.write(90 + Output);
-}
-
-int Unstick(Servo axis, int direction){
-
-/*The Unstick() function is called to attempt to unstick the machine when
- it becomes stuck. */
-
-    static long staticTime = millis(); //This variable holds the time the function was last called. It persists between function calls.
-    static int count = 0; //count is used to determine if the machine has become seriously stuck or if the machine is able to free itself. If the unstick() function is called multiple times in a short span of time the machine is deemed to be permanently stuck.
-
-    if(millis() - staticTime < 1000){
-        count++;
-    }
-    else{
-        count = 0;
-    }
-
-    axis.write(90 + 45*direction); //Spin the motor backwards
-    long tmptime = millis();
-    while(millis() - tmptime < 30){ //This is just a delay which doesn't lose the machine's position.
-        SetPos(&location);
-    }
-    axis.write(90 - 45*direction); //Spin the motor forward again
-    tmptime = millis();
-    while(millis() - tmptime < 140){
-        SetPos(&location);
-    }
-
-    staticTime = millis();//sets the time the last function finished
-
-    if (count > 15){ //The machine is seriously stuck
-        Serial.println("really stuck");
-        x.detach(); //Detach the motors to prevent them from being damaged
-        y.detach();
-        z.detach();
-        String stuckString = "";
-        while(1){ //Wait for signal to continue
-            SetPos(&location);
-            if (Serial.available() > 0) {
-                char c = Serial.read();
-                stuckString += c;
-            }
-            if (stuckString == "unstuck"){ //Ground control software says to try again
-                x.attach(XSERVO); //reattach the motors
-                y.attach(YSERVO);
-                z.attach(ZSERVO);
-                Serial.println("trying again");
-                break;
-            }
-        }
-    }
-}
-
-int Move(float xEnd, float yEnd, float zEnd, float rotationsPerSecond){
+int   Move(float xEnd, float yEnd, float zEnd, float rotationsPerSecond){
     
 /*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
 the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
     
-    
+    Serial.println("move ran");
     
     float  startingLocation           = location.xtarget;
+    int    numberOfStepsPerRotation   = 250;
     float  distanceToMoveInRotations  = xEnd - startingLocation;
-    float  millisecondsForMove        = 1000*(distanceToMoveInRotations/rotationsPerSecond);
-    int    finalNumberOfSteps         = distanceToMoveInRotations*1000;
+    float  millisecondsForMove        = numberOfStepsPerRotation*(distanceToMoveInRotations/rotationsPerSecond);
+    int    finalNumberOfSteps         = distanceToMoveInRotations*numberOfStepsPerRotation;
     float  timePerStep                = millisecondsForMove/float(finalNumberOfSteps);
     
     int numberOfStepsTaken   =  0;
     
-    while(numberOfStepsTaken < finalNumberOfSteps){
+    Serial.println(finalNumberOfSteps);
+    Serial.println(numberOfStepsTaken);
+    Serial.println(finalNumberOfSteps/abs(finalNumberOfSteps));
+    
+    while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
-        SetPos(&location); 
-        
-        
-        float whereItShouldBeAtThisStep = startingLocation + (numberOfStepsTaken/1000.0);
-        
-        SetTarget(whereItShouldBeAtThisStep, location.ytarget, location.ztarget, &location);
+        float whereItShouldBeAtThisStep = startingLocation + (numberOfStepsTaken/float(numberOfStepsPerRotation));
         
         delay(timePerStep);
         
-        numberOfStepsTaken = numberOfStepsTaken + 1;
+        xAxis.updatePositionFromEncoder();
+        xAxis.write(whereItShouldBeAtThisStep);
+        
+        numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
+        
+        if (numberOfStepsTaken%20 == 0){
+            Serial.print("pz(");
+            Serial.print(xAxis.read());
+            Serial.println(", 0.0, 0.0)");
+        }
+        
+        xAxis.detach();
     }
     return(1);
     
@@ -437,11 +193,13 @@ If no number is found, defaultReturn is returned*/
     return numberAsFloat;
 }
 
-int G1(String readString){
+int   G1(String readString){
     
 /*G1() is the function which is called to process the string if it begins with 
 'G01' or 'G00'*/
-
+    
+    Serial.println("g1 ran");
+    
     float xgoto = location.xtarget;
     float ygoto = location.ytarget;
     float zgoto = location.ztarget;
@@ -470,7 +228,7 @@ int G1(String readString){
     }
 }
 
-int Circle(float radius, int direction, float xcenter, float ycenter, float startrad, float endrad, float speed){
+int   Circle(float radius, int direction, float xcenter, float ycenter, float startrad, float endrad, float speed){
     
 /*Circle two takes in the radius of the circle to be cut and the starting and ending points in radians with 
 pi removed so a complete circle is from 0 to 2. If direction is 1 the function cuts a CCW circle, and -1 cuts 
@@ -544,8 +302,8 @@ the circle*/
         location.xtarget = -1*radius * cos(3.141593*((float)i/(int)(stepMultiplier*radius))) - xcenter; //computes the new target position.
         location.ytarget = direction * radius * sin(3.141593*((float)i/(int)(stepMultiplier*radius))) + ycenter;
 
-        SetPos(&location);
-        SetTarget(location.xtarget, location.ytarget, location.ztarget, &location);
+        //setpos(&location);
+        //SetTarget(location.xtarget, location.ytarget, location.ztarget, &location);
         if( millis() - stime > timeStep ){
             if( abs(location.xpos - location.xtarget) < TOLERANCE && abs(location.ypos - location.ytarget) < TOLERANCE && abs(location.zpos - location.ztarget) < TOLERANCE){ //if the target is reached move to the next position
                 i++;
@@ -598,7 +356,7 @@ the circle*/
     return(1);
 }
 
-int G2(String readString){
+int   G2(String readString){
 
     /*G2() is the function which is called when the string sent to the machine is 'G02' or 'G03'. 
     The string is parsed to extract the relevant information which is then used to compute the start and end 
@@ -705,8 +463,8 @@ int G2(String readString){
 
     if(CircleReturnVal == 1){ //If the circle was cut correctly
         while( abs(location.xpos + xval) > TOLERANCE or abs(location.ypos - yval) > TOLERANCE){ //This ensures that the circle is completed and that if it is a circle with a VERY large radius and a small angle it isn't neglected
-            SetTarget(-1*xval, yval, location.ztarget, &location);
-            SetPos(&location);
+            //SetTarget(-1*xval, yval, location.ztarget, &location);
+            //setpos(&location);
         }
         location.xtarget = -1*xval;
         location.ytarget = yval;
@@ -717,335 +475,7 @@ int G2(String readString){
     }
 }
 
-int testEncoders(){
-    
-/*The testEncoders() function tests that the encoders are connected and working properly. It does this by 
-measuring the produced pulse width. If there is no pulse width then the encoder is not connected or is 
-exactly at the zero position.*/
-
-    
-    Serial.println("\nTesting Encoders");
-    if(PWMread(xpot) == 0){
-        Serial.println("\nThe encoder on the xaxis of your machine did not respond. This is most likely due to a bad connection between the microcontroller and the encoder. This may be because the encoder is plugged in backwards.\n");
-    }
-    else{
-        Serial.println("X axis encoder working correctly.");
-        Serial.println(PWMread(xpot));
-    }
-    if(PWMread(ypot) == 0){
-        Serial.println("\nThe encoder on the yaxis of your machine did not respond. This is most likely due to a bad connection between the microcontroller and the encoder. This may be because the encoder is plugged in backwards.\n");
-    }
-    else{
-        Serial.println("Y axis encoder working correctly.");
-        Serial.println(PWMread(ypot));
-    }
-    if(PWMread(zpot) == 0){
-        Serial.println("\nThe encoder on the zaxis of your machine did not respond. This is most likely due to a bad connection between the microcontroller and the encoder. This may be because the encoder is plugged in backwards.\n");
-    }
-    else{
-        Serial.println("Z axis encoder working correctly.");
-        Serial.println(PWMread(zpot));
-    }
-    return(1);
-}
-
-int testMotors(){
-    
-/*The testMotors() function tests that the motors are all connected. It does this by driving each motor forward then 
-backwards for a set amount of time.*/
-
-    Serial.println("Testing Motors");
-    x.write(90);
-    y.write(90);
-    z.write(90);
-
-
-    x.write(180); //Spin the motor backwards
-    long tmptime = millis();
-    while(millis() - tmptime < 600){ //This is just a delay which doesn't lose the machine's position.
-        SetPos(&location);
-    }
-    x.write(0); //Spin the motor forward again
-    tmptime = millis();
-    while(millis() - tmptime < 600){
-        SetPos(&location);
-    }
-    x.write(90);
-
-    y.write(180); //Spin the motor backwards
-    tmptime = millis();
-    while(millis() - tmptime < 600){ //This is just a delay which doesn't lose the machine's position.
-        SetPos(&location);
-    }
-    y.write(0); //Spin the motor forward again
-    tmptime = millis();
-    while(millis() - tmptime < 600){
-        SetPos(&location);
-    }
-    y.write(90);
-
-    z.write(180); //Spin the motor backwards
-    tmptime = millis();
-    while(millis() - tmptime < 600){ //This is just a delay which doesn't lose the machine's position.
-        SetPos(&location);
-    }
-    z.write(0); //Spin the motor forward again
-    tmptime = millis();
-    while(millis() - tmptime < 600){
-        SetPos(&location);
-    }
-    z.write(90);
-}
-
-int testBoth(){
-    
-/*The testBoth() function checks that the motors and encoders are plugged in correctly. It does this by driving the 
-motors and then measuring that the correct shaft rotates using the encoders.*/
-
-    Serial.println("Testing System");
-    x.write(90);
-    y.write(90);
-    z.write(90);
-
-    float deltaX = location.xpos;
-    float deltaY = location.ypos;
-    float deltaZ = location.zpos;
-    int problemFlag = 0;
-
-    x.write(180); //Spin the motor backwards
-    long tmptime = millis();
-    while(millis() - tmptime < 600){ //This is just a delay which doesn't lose the machine's position.
-        SetPos(&location);
-    }
-    x.write(0); //Spin the motor forward again
-
-    deltaX = abs(location.xpos - deltaX);
-    deltaY = abs(location.ypos - deltaY);
-    deltaZ = abs(location.zpos - deltaZ);
-
-    if(deltaX < .25){
-        Serial.println("x motor problem");
-        problemFlag = 1;
-    }
-    if (deltaX < deltaY and deltaY > .25){
-        Serial.println("Swap with Y1");
-        problemFlag = 1;
-    }
-    if (deltaX < deltaZ and deltaZ > .25){
-        Serial.println("Swap with Z1");
-        problemFlag = 1;
-    }
-
-    tmptime = millis();
-    while(millis() - tmptime < 600){
-        SetPos(&location);
-    }
-    x.write(90);
-
-    deltaX = location.xpos;
-    deltaY = location.ypos;
-    deltaZ = location.zpos;
-    y.write(180); //Spin the motor backwards
-    tmptime = millis();
-    while(millis() - tmptime < 600){ //This is just a delay which doesn't lose the machine's position.
-        SetPos(&location);
-    }
-
-    deltaX = abs(location.xpos - deltaX);
-    deltaY = abs(location.ypos - deltaY);
-    deltaZ = abs(location.zpos - deltaZ);
-
-    if(deltaY < .25){
-        Serial.println("y motor problem");
-        problemFlag = 1;
-    }
-    if (deltaY < deltaX and deltaX > .25){
-        Serial.println("Swap with X2");
-        Serial.println(deltaX);
-        Serial.println(deltaY);
-        problemFlag = 1;
-    }
-    if (deltaY < deltaZ and deltaZ > .25){
-        Serial.println("Swap with Z2");
-        problemFlag = 1;
-    }
-
-    y.write(0); //Spin the motor forward again
-    tmptime = millis();
-    while(millis() - tmptime < 600){
-        SetPos(&location);
-    }
-    y.write(90);
-
-    deltaX = location.xpos;
-    deltaY = location.ypos;
-    deltaZ = location.zpos;
-
-    z.write(180); //Spin the motor backwards
-    tmptime = millis();
-    while(millis() - tmptime < 600){ //This is just a delay which doesn't lose the machine's position.
-        SetPos(&location);
-    }
-    deltaX = abs(location.xpos - deltaX);
-    deltaY = abs(location.ypos - deltaY);
-    deltaZ = abs(location.zpos - deltaZ);
-
-    if(deltaZ < .25){
-        Serial.println("Z motor problem");
-        problemFlag = 1;
-    }
-    if (deltaZ < deltaY and deltaY > .25){
-        Serial.println("Swap with Y3");
-        problemFlag = 1;
-    }
-    if (deltaZ < deltaX and deltaX > .25){
-        Serial.println("Swap with X3");
-        problemFlag = 1;
-    }
-
-    z.write(0); //Spin the motor forward again
-    tmptime = millis();
-    while(millis() - tmptime < 600){
-        SetPos(&location);
-    }
-    z.write(90);
-
-    if(problemFlag == 0){
-        Serial.println("All tests passed");
-        return(1);
-    }
-    else{
-        return(0);
-    }
-}
-
-void centerMotors(){
-    x.write(90);
-    y.write(90);
-    z.write(90);
-    long tmptime = millis();
-    while(millis() - tmptime < 2000){ //This is just a delay which doesn't lose the machine's position.
-        SetPos(&location);
-    }
-}
-
-int calibrateMagnets(){
-    Serial.println("Calibrating Magnets");
-
-    x.write(90);
-    y.write(90);
-    z.write(90);
-
-    int maxXVal = 0;
-    int maxYVal = 0;
-    int maxZVal = 0;
-
-    int tempVal = 0;
-    int i = 0;
-    x.write(180);
-    y.write(90);
-    z.write(90);
-    while(i<2000){
-        tempVal = pulseIn(xpot, HIGH, 2000);
-        if (tempVal > maxXVal){
-            maxXVal = tempVal;
-        }
-        i++;
-    }
-
-    tempVal = 0;
-    i = 0;
-    x.write(0);
-    y.write(90);
-    z.write(90);
-    while(i<2000){
-        tempVal = pulseIn(xpot, HIGH, 2000);
-        if (tempVal > maxXVal){
-            maxXVal = tempVal;
-        }
-        i++;
-    }
-
-
-    tempVal = 0;
-    i = 0;
-    x.write(90);
-    y.write(180);
-    z.write(90);
-    while(i<2000){
-        tempVal = pulseIn(ypot, HIGH, 2000);
-        if (tempVal > maxYVal){
-            maxYVal = tempVal;
-        }
-        i++;
-    }
-
-    tempVal = 0;
-    i = 0;
-    x.write(90);
-    y.write(0);
-    z.write(90);
-    while(i<2000){
-        tempVal = pulseIn(ypot, HIGH, 2000);
-        if (tempVal > maxYVal){
-            maxYVal = tempVal;
-        }
-        i++;
-    }
-
-    tempVal = 0;
-    i = 0;
-    x.write(90);
-    y.write(90);
-    z.write(180);
-    while(i<2000){
-        tempVal = pulseIn(zpot, HIGH, 2000);
-        if (tempVal > maxZVal){
-            maxZVal = tempVal;
-        }
-        i++;
-    }
-
-    tempVal = 0;
-    i = 0;
-    x.write(90);
-    y.write(90);
-    z.write(0);
-    while(i<2000){
-        tempVal = pulseIn(zpot, HIGH, 2000);
-        //Serial.println(tempVal);
-        if (tempVal > maxZVal){
-            maxZVal = tempVal;
-        }
-        i++;
-
-    }
-    //maxXVal*x = 1024
-    //x = 1024/maxXVal
-    /*Serial.println(maxXVal);
-    Serial.println(maxYVal);
-    Serial.println(maxZVal);*/
-
-    int xMagScale = round(100*(1024.0/float(maxXVal)));
-    int yMagScale = round(100*(1024.0/float(maxYVal)));
-    int zMagScale = round(100*(1024.0/float(maxZVal)));
-
-    if (xMagScale < 60 || yMagScale < 60 || zMagScale < 60 ){
-        Serial.println("Magnet calibration failed. Please try again.");
-        return 0;
-    }
-    Serial.println(xMagScale);
-    Serial.println(yMagScale);
-    Serial.println(zMagScale);
-    EEPROM.write(1,xMagScale);
-    EEPROM.write(2,yMagScale);
-    EEPROM.write(3,zMagScale);
-    EEPROM.write(4,56);//This is a marker value which is used to check if valid data can be read later
-    Serial.println("Magnet Positions Calibrated");
-    return 1;
-}
-
-void G10(String readString){
+void  G10(String readString){
 
 /*The G10() function handles the G10 gcode which re-zeroes one or all of the machine's axes.*/
 
@@ -1061,74 +491,6 @@ void G10(String readString){
     if(readString.indexOf('Z') > 2){
         location.zpos = 0.0;
         location.ztarget = 0.0;
-    }
-}
-
-int ManualControl(String readString){
-    String readString2 = readString;
-    int stringLength = readString2.length();
-    long tmptime = millis();
-    while(1){
-        if (Serial.available()){
-            while (Serial.available()) {
-                delay(1);  //delay to allow buffer to fill
-                if (Serial.available() > 0) {
-                    char c = Serial.read();  //gets one byte from serial buffer
-                    readString2 += c; //makes the string readString
-                }
-            }
-        }
-        SetPos(&location);
-        stringLength = readString2.length();
-        if(stringLength > 0){
-            Serial.println(readString2);
-
-            if(readString2 == "Exit Manual Control "){
-                Serial.println("Test Complete");
-                return(1);
-            }
-            if(readString2.indexOf('X') > 2 && readString2.indexOf('B') == 0){
-                x.write((readString2.substring(5)).toInt());
-                tmptime = millis();
-            }
-            if(readString2.indexOf('Y') > 2 && readString2.indexOf('B') == 0){
-                y.write((readString2.substring(5)).toInt());
-                tmptime = millis();
-            }
-            if(readString2.indexOf('Z') > 2 && readString2.indexOf('B') == 0){
-                z.write((readString2.substring(5)).toInt());
-                tmptime = millis();
-            }
-
-            Serial.println("gready");
-        }
-        if(millis() - tmptime > 5000){
-            Serial.println("Test Complete - Timed Out");
-            return(1);
-        }
-
-        readString2 = "";
-    }
-}
-
-float toolOffset(int pin){
-    long tmptime = millis();
-    long tmpTimeout = millis();
-    while(1){
-        tmptime = millis();
-        location.ztarget = location.ztarget - .05;
-        while(millis() - tmptime < 100){ //This is just a delay which doesn't lose the machine's position.
-            SetPos(&location);
-            SetTarget(location.xtarget, location.ytarget, location.ztarget, &location);
-
-            if(digitalRead(pin) == 0){  //The surface has been found
-                return(location.zpos);
-            }
-        }
-        if(millis() - tmpTimeout > 3000){ //if it has to move down for more than three seconds it will time out
-            Serial.println("Surface not found, position the tool closer to the surface and try again.");
-            return(location.zpos);
-        }
     }
 }
 
@@ -1148,7 +510,7 @@ float readFloat(unsigned int addr){
     return data.f;
 }
 
-void writeFloat(unsigned int addr, float x){
+void  writeFloat(unsigned int addr, float x){
     union{
         byte b[4];
         float f;

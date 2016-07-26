@@ -28,10 +28,6 @@
 
 
 int spindle = 17;
-int USE_ESTOP = 0;
-int estopswitch = 18;
-int estoppower = 19;
-volatile int panic = 0;
 String readString;
 String prependString;
 long time = millis();
@@ -47,30 +43,13 @@ int begin;
 int end;
 char sect[22];
 
-
-//Sd2Card card;
-//SdVolume volume;
-//SdFile root;
-
-
 void setup(){
     Serial.begin(19200);
-    if (USE_ESTOP == 1){
-        pinMode(estopswitch,INPUT);     //input for emergency stop system 
-            pinMode(estoppower,OUTPUT);     //power for emergency stop system
-            digitalWrite(estoppower,HIGH);  //turn on the power
-            attachInterrupt(5,estop,LOW);   //start monitoring the ESTOP switch
-    }
-    x.write(90); y.write(90); z.write(90);
+    
     Serial.println("ready");
     Serial.println("gready");
-    pinMode(spindle, OUTPUT);           // set pin to output
-    digitalWrite(spindle, LOW);
     analogReference(EXTERNAL);
-    pinMode(xpot, INPUT);
-    pinMode(ypot, INPUT);
-    pinMode(zpot, INPUT);
-    pinMode(SENSEPIN, INPUT_PULLUP);
+    
     
     noInterrupts();
     TCCR1A = 0;
@@ -95,7 +74,10 @@ void setup(){
         location.ztarget = location.zpos;
     }*/
     
-    initializePID();
+    
+    xAxis.initializePID();
+    
+    G1("G01 X2 F123 ");
 }
 
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven
@@ -106,39 +88,10 @@ ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of a
     
 }
 
-void estop(){
-    if(panic == 0){
-        panic = 1;
-        detachInterrupt(5);  // the interrupt already fired, we have the con until we give it up
-        Serial.println("ESTOP"); // send a message to groundcontrol
-        int xstate = x.attached();  //save current servo states
-        int ystate = y.attached();
-        int zstate = z.attached();
-        x.detach(); //Detach the motors to prevent them from being damaged
-        y.detach();
-        z.detach();
- 
-        int estopstate = LOW;  // declare a local variable for manually reading the switch
-        while(estopstate == LOW){
-            delay(500);  //give some time for the switch to debounce
-            estopstate = digitalRead(estopswitch);
-            delay(500);
-        }
-        Serial.println("ESTOP cleared");  // let ground control know we are clear
-        panic = 0;
-        attachInterrupt(5,estop,LOW);  //mischief managed, start watching for trouble again.
-        if (xstate == 1){x.attach(XSERVO);}  // re-enable any servos that were attached
-        if (ystate == 1){y.attach(YSERVO);}
-        if (zstate == 1){z.attach(ZSERVO);}
-    }
-}
+
 
 void loop(){
     readString = "";
-    
-    SetPos(&location); 
-    SetTarget(location.xtarget, location.ytarget, location.ztarget, &location);
-
     if (Serial.available()){
         while (Serial.available()) {
             delay(1);  //delay to allow buffer to fill 
@@ -170,12 +123,7 @@ void loop(){
     if(readString.length() > 0){
         Serial.println(readString);
         time = millis();
-        if( servoDetachFlag == 1){
-            x.attach(XSERVO);
-            y.attach(YSERVO);
-            z.attach(ZSERVO);
-            //calibrateMagnets(); 
-        }
+        
         servoDetachFlag = 0;
     }
     
@@ -292,55 +240,6 @@ void loop(){
     
     if(readString.substring(0, 3) == "B05"){
         Serial.println("Firmware Version .59");
-        readString = "";
-        Serial.println("gready");
-    }
-    
-    if(readString.substring(0, 3) == "B06"){
-        ManualControl(readString);
-        location.xtarget = location.xpos;
-        location.ytarget = location.ypos;
-        location.ztarget = location.zpos;
-        readString = "";
-        Serial.println("gready");
-    }
-    if(readString.substring(0, 3) == "B07"){
-        float ofset = toolOffset(SENSEPIN);
-        location.zpos = 0.0;
-        location.ztarget = location.zpos - ofset;
-        Move(location.xtarget, location.ytarget, location.ztarget, 127);
-        time = millis();
-        readString = "";
-        Serial.println("gready");
-    }
-    
-    if(readString.substring(0,13) == "Test Encoders"){
-        testEncoders();
-        readString = "";
-        Serial.println("gready");
-    }
-    
-    if(readString.substring(0,11) == "Test Motors"){
-        testMotors();
-        readString = "";
-        Serial.println("gready");
-    }
-    
-    if(readString.substring(0,9) == "Test Both"){
-        testBoth();
-        readString = "";
-        Serial.println("gready");
-    }
-    
-    if(readString.substring(0,13) == "Center Motors"){
-        Serial.println("center motors test begin");
-        centerMotors();
-        readString = "";
-        Serial.println("gready");
-    }
-    
-    if(readString.substring(0,13) == "Align Magnets"){
-        calibrateMagnets();
         readString = "";
         Serial.println("gready");
     }
