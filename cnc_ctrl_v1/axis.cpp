@@ -73,8 +73,6 @@ int    Axis::write(float targetPosition){
     
     _motor.write(90 + _pidOutput);
     
-    Serial.println(_axisName);
-    
     return 1;
 }
 
@@ -88,35 +86,33 @@ int    Axis::set(float newAxisPosition){
 
 int    Axis::updatePositionFromEncoder(){
 
-/*I would like to rename this function "updateMachineLocation" The SetPos() function updates the machine's position by essentially integrating 
+/*The SetPos() function updates the machine's position by essentially integrating 
 the input from the encoder*/
 
     int maxJump = 400;
-    static int currentAngle;
-    static int previousAngle;
 
-    if(abs(currentAngle - previousAngle) <= maxJump){ //The encoder did not just transition from 0 to 360 degrees
-        _axisPosition = _axisPosition + (currentAngle - previousAngle)/1023.0; //The position is incremented by the change in position since the last update.
+    if(abs(_currentAngle - _previousAngle) <= maxJump){ //The encoder did not just transition from 0 to 360 degrees
+        _axisPosition = _axisPosition + (_currentAngle - _previousAngle)/1023.0; //The position is incremented by the change in position since the last update.
     }
     else{//The transition from 0 to 360 (10-bit value 1023) or vice versa has just taken place
-        if(previousAngle < 200 && currentAngle > 850){ //Add back in any dropped position
-            currentAngle = 1023;
-            _axisPosition = _axisPosition + (0 - previousAngle)/1023.0;
+        if(_previousAngle < 200 && _currentAngle > 850){ //Add back in any dropped position
+            _currentAngle = 1023;
+            _axisPosition = _axisPosition + (0 - _previousAngle)/1023.0;
         }
-        if(previousAngle > 850 && currentAngle < 200){
-            currentAngle = 0;
-            _axisPosition = _axisPosition + (1023 - previousAngle)/1023.0;
+        if(_previousAngle > 850 && _currentAngle < 200){
+            _currentAngle = 0;
+            _axisPosition = _axisPosition + (1023 - _previousAngle)/1023.0;
         }
     }
     
 
-    previousAngle = currentAngle; //Reset the previous angle variables
+    _previousAngle = _currentAngle; //Reset the previous angle variables
 
     if(_direction == FORWARD){ //Update the current angle variable. Direction is set at compile time depending on which side of the rod the encoder is positioned on.
-        currentAngle = _PWMread(_encoderPin);
+        _currentAngle = _PWMread(_encoderPin);
     }
     else{
-        currentAngle = 1023 - _PWMread(_encoderPin);
+        _currentAngle = 1023 - _PWMread(_encoderPin);
     }
 }
 
