@@ -228,7 +228,7 @@ int   G1(String readString){
     
     //convert from mm to rotations
     xgoto = (XDIRECTION*xgoto) / XPITCH;
-    ygoto = ygoto / YPITCH;
+    ygoto = (XDIRECTION*ygoto) / YPITCH;
     zgoto = zgoto / ZPITCH;
     int secondsPerMinute = 60;
     feedrate = gospeed/(secondsPerMinute*XPITCH); //store the feed rate for later use
