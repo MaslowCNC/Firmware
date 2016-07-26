@@ -30,6 +30,7 @@
             int    updatePositionFromEncoder();
             int    returnPidMode();
             void   initializePID();
+            int    detach();
         private:
             int    _PWMread(int pin);
             

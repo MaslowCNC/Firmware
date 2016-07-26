@@ -71,7 +71,7 @@ int    Axis::write(float targetPosition){
     
     bool pidreturn = _pidController.Compute();
     
-    Serial.print(_pidInput);
+    /*Serial.print(_pidInput);
     Serial.print(" ");
     Serial.print(_pidSetpoint);
     Serial.print(" ");
@@ -79,7 +79,7 @@ int    Axis::write(float targetPosition){
     Serial.print(" ");
     Serial.print(_pidController.GetMode());
     Serial.print(" ");
-    Serial.println(pidreturn);
+    Serial.println(pidreturn);*/
     
     _motor.write(90 + _pidOutput);
     
@@ -87,7 +87,7 @@ int    Axis::write(float targetPosition){
 }
 
 float  Axis::read(){
-    return 1.234;
+    return _axisPosition;
 }
 
 int    Axis::set(float newAxisPosition){
@@ -128,6 +128,10 @@ the input from the encoder*/
     }
 }
 
+int    Axis::detach(){
+    _motor.detach();
+}
+
 int    Axis::_PWMread(int pin){
 
 /*PWMread() measures the duty cycle of a PWM signal on the provided pin. It then
@@ -158,6 +162,6 @@ takes this duration and converts it to a ten bit number.*/
     return duration;
 }
 
-int Axis::returnPidMode(){
+int    Axis::returnPidMode(){
     return _pidController.GetMode();
 }

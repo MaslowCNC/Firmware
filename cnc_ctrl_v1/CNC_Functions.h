@@ -158,6 +158,14 @@ and G01 commands. The units at this point should all be in rotations or rotation
         xAxis.write(whereItShouldBeAtThisStep);
         
         numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
+        
+        if (numberOfStepsTaken%20 == 0){
+            Serial.print("pz(");
+            Serial.print(xAxis.read());
+            Serial.println(", 0.0, 0.0)");
+        }
+        
+        xAxis.detach();
     }
     return(1);
     
