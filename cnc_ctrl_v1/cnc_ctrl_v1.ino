@@ -277,7 +277,7 @@ void loop(){
     if (readString.length() > 0){
         interpretCommandString(readString);
     }
-    xAxis.updatePositionFromEncoder();
+    //xAxis.updatePositionFromEncoder();
     returnPoz();
 }
     

@@ -114,6 +114,7 @@ the input from the encoder*/
     else{
         _currentAngle = 1023 - _PWMread(_encoderPin);
     }
+    
 }
 
 int    Axis::detach(){
