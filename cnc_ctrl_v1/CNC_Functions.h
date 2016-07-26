@@ -160,15 +160,8 @@ and G01 commands. The units at this point should all be in rotations or rotation
     int numberOfStepsTaken   =  0;
     
     xAxis.attach();
+    yAxis.attach();
     
-    Serial.println("Move sees a target of: ");
-    Serial.println(yEnd);
-    Serial.println("And an end at: ");
-    Serial.println(startingLocation + (finalNumberOfSteps/float(numberOfStepsPerRotation)));
-    
-    /*Serial.println(finalNumberOfSteps);
-    Serial.println(numberOfStepsTaken);
-    Serial.println(finalNumberOfSteps/abs(finalNumberOfSteps));*/
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
