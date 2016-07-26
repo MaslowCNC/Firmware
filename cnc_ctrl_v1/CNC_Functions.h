@@ -139,8 +139,6 @@ the speed moveSpeed. Movements are correlated so that regardless of the distance
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
     
-    Serial.println("move ran");
-    
     float  startingLocation           = location.xtarget;
     int    numberOfStepsPerRotation   = 1000;
     float  distanceToMoveInRotations  = xEnd - startingLocation;
@@ -152,9 +150,9 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     xAxis.attach();
     
-    Serial.println(finalNumberOfSteps);
+    /*Serial.println(finalNumberOfSteps);
     Serial.println(numberOfStepsTaken);
-    Serial.println(finalNumberOfSteps/abs(finalNumberOfSteps));
+    Serial.println(finalNumberOfSteps/abs(finalNumberOfSteps));*/
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
@@ -203,8 +201,6 @@ int   G1(String readString){
 /*G1() is the function which is called to process the string if it begins with 
 'G01' or 'G00'*/
     
-    Serial.println("g1 ran");
-    
     float xgoto = location.xtarget;
     float ygoto = location.ytarget;
     float zgoto = location.ztarget;
@@ -217,12 +213,13 @@ int   G1(String readString){
     zgoto   = extractGcodeValue(readString, 'Z', location.ztarget);
     gospeed = extractGcodeValue(readString, 'F', feedrate);
     
-    feedrate = gospeed; //store the feed rate for later use
     
     //convert from mm to rotations
     xgoto = xgoto / XPITCH;
     ygoto = ygoto / YPITCH;
     zgoto = zgoto / ZPITCH;
+    int secondsPerMinute = 60;
+    feedrate = gospeed/(secondsPerMinute*XPITCH); //store the feed rate for later use
     
     int tempo = Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 

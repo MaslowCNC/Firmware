@@ -77,7 +77,7 @@ void setup(){
     
     xAxis.initializePID();
     
-    G1("G01 X-3 F.1 ");
+    //G1("G01 X-3 F.1 ");
 }
 
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven
@@ -88,21 +88,7 @@ ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of a
     
 }
 
-
-
-void loop(){
-    readString = "";
-    if (Serial.available()){
-        while (Serial.available()) {
-            delay(1);  //delay to allow buffer to fill 
-            if (Serial.available() > 0) {
-                char c = Serial.read();  //gets one byte from serial buffer
-                readString += c; //makes the string readString
-            } 
-        }
-    }
-    
-    
+void interpretCommandString(String readString){
     i = 0;
     while (i < 23){
         sect[i] = ' ';
@@ -274,4 +260,25 @@ void loop(){
         readString = "";
         Serial.println("gready");
     }
+} 
+
+void loop(){
+    readString = "";
+    if (Serial.available()){
+        while (Serial.available()) {
+            delay(1);  //delay to allow buffer to fill 
+            if (Serial.available() > 0) {
+                char c = Serial.read();  //gets one byte from serial buffer
+                readString += c; //makes the string readString
+            } 
+        }
+    }
+    if (readString.length() > 0){
+        interpretCommandString(readString);
+    }
+    xAxis.updatePositionFromEncoder();
+    returnPoz();
 }
+    
+    
+    
