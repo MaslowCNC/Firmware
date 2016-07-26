@@ -61,15 +61,16 @@ void   Axis::initializePID(){
 int    Axis::write(float targetPosition){
     
     _pidInput      =  _axisPosition;
+    _axisTarget    =  _axisPosition;
     _pidSetpoint   =  targetPosition;
     
     
     
     bool pidreturn = _pidController.Compute();
     
-    //Serial.println(targetPosition);
-    
     _motor.write(90 + _pidOutput);
+    
+    _timeLastMoved = millis();
     
     return 1;
 }
@@ -123,6 +124,16 @@ int    Axis::detach(){
 int    Axis::attach(){
      _motor.attach(1);
      return 1;
+}
+
+void   Axis::hold(){
+    if (millis() - _timeLastMoved > 1000){
+        updatePositionFromEncoder();
+        write(_axisTarget);
+    }
+    else{
+        detach();
+    }
 }
 
 int    Axis::_PWMread(int pin){

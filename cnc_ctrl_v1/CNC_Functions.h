@@ -170,9 +170,6 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     int numberOfStepsTaken            =  0;
     
-    Serial.println("true travel dist:");
-    Serial.println();
-    
     xAxis.attach();
     yAxis.attach();
     
@@ -194,12 +191,17 @@ and G01 commands. The units at this point should all be in rotations or rotation
         
         returnPoz();
     }
-    xAxis.detach();
-    yAxis.detach();
+    
     return(1);
     
 }
 
+void  holdPosition(){
+    
+    xAxis.hold();
+    yAxis.hold();
+}
+    
 float extractGcodeValue(String readString, char target,float defaultReturn){
 
 /*Reads a string and returns the value of number following the target character.

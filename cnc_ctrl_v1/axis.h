@@ -32,6 +32,7 @@
             void   initializePID();
             int    detach();
             int    attach();
+            void   hold();
         private:
             int    _PWMread(int pin);
             
@@ -43,6 +44,7 @@
             float      _axisTarget;
             int        _currentAngle;
             int        _previousAngle;
+            double     _timeLastMoved;
     };
 
     #endif
