@@ -26,7 +26,7 @@
 //PID setup 
 double _pidSetpoint, _pidInput, _pidOutput;
 double Kp=300, Ki=0, Kd=10;
-PID _pidController(&_pidInput, &_pidOutput, &_pidSetpoint, Kp, Ki, Kd, DIRECT);
+PID _pidController(&_pidInput, &_pidOutput, &_pidSetpoint, Kp, Ki, Kd, REVERSE);
 
 Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName){
     
@@ -37,11 +37,6 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
     
     //initialize pins
     pinMode(encoderPin, INPUT);
-    
-    //initialize PID controller
-    double _pidSetpoint, _pidInput, _pidOutput;
-    double Kp=300, Ki=0, Kd=10;
-    PID _pidController(&_pidInput, &_pidOutput, &_pidSetpoint, Kp, Ki, Kd, DIRECT);
     
     //initialize variables
     _direction    = encoderDirection;
@@ -61,7 +56,6 @@ void   Axis::initializePID(){
 int    Axis::write(float targetPosition){
     
     _pidInput      =  _axisPosition;
-    _axisTarget    =  _axisPosition;
     _pidSetpoint   =  targetPosition;
     
     
@@ -126,13 +120,14 @@ int    Axis::attach(){
 
 void   Axis::hold(){
     
-    if (millis() - _timeLastMoved < 5000){
+    if (millis() - _timeLastMoved < 30000){
         updatePositionFromEncoder();
-        write(_axisTarget);
+        write(-1.4);
     }
     else{
         detach();
     }
+    
 }
 
 void  Axis::endMove(float finalTarget){

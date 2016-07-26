@@ -33,7 +33,7 @@
 #define ZPITCH 1
 
 #define XDIRECTION BACKWARD
-#define YDIRECTION FORWARD
+#define YDIRECTION BACKWARD
 #define ZDIRECTION BACKWARD
 
 #define SENSEPIN 53
@@ -53,7 +53,7 @@ Servo x;
 Servo y;
 Servo z;
 
-Axis xAxis(7,8,9, FORWARD, 10, "X-axis");
+Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis");
 Axis yAxis(6,12,13, FORWARD, 34, "Y-axis");
 
 int servoDetachFlag = 1;
@@ -202,7 +202,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
 void  holdPosition(){
     
     xAxis.hold();
-    yAxis.hold();
+    //yAxis.hold();
 }
     
 float extractGcodeValue(String readString, char target,float defaultReturn){
