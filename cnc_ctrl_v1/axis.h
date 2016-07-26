@@ -33,6 +33,7 @@
             int    detach();
             int    attach();
             void   hold();
+            void   endMove(float finalTarget);
         private:
             int    _PWMread(int pin);
             

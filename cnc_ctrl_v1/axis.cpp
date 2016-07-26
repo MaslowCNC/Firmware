@@ -70,8 +70,6 @@ int    Axis::write(float targetPosition){
     
     _motor.write(90 + _pidOutput);
     
-    _timeLastMoved = millis();
-    
     return 1;
 }
 
@@ -127,13 +125,24 @@ int    Axis::attach(){
 }
 
 void   Axis::hold(){
-    if (millis() - _timeLastMoved > 1000){
+    
+    if (millis() - _timeLastMoved < 5000){
         updatePositionFromEncoder();
         write(_axisTarget);
     }
     else{
         detach();
     }
+}
+
+void  Axis::endMove(float finalTarget){
+    
+    Serial.println("End Move");
+    Serial.println(_axisName);
+    Serial.println(finalTarget);
+    _timeLastMoved = millis();
+    _axisTarget    = finalTarget;
+    
 }
 
 int    Axis::_PWMread(int pin){
@@ -169,6 +178,7 @@ takes this duration and converts it to a ten bit number.*/
     }
 
     return duration;
+
 }
 
 int    Axis::returnPidMode(){

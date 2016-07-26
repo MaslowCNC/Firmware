@@ -192,6 +192,9 @@ and G01 commands. The units at this point should all be in rotations or rotation
         returnPoz();
     }
     
+    xAxis.endMove(xEnd);
+    yAxis.endMove(yEnd);
+    
     return(1);
     
 }
