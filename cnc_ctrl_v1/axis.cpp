@@ -56,8 +56,6 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
 void   Axis::initializePID(){
     _pidController.SetMode(AUTOMATIC);
     _pidController.SetOutputLimits(-90, 90);
-    Serial.println("PID controller mode:");
-    Serial.println(_pidController.GetMode());
 }
 
 int    Axis::write(float targetPosition){
@@ -149,7 +147,12 @@ takes this duration and converts it to a ten bit number.*/
     if (duration >= 1023){
         duration = 1023;
     }
-
+    
+    //if (duration == 0){
+    //    Serial.print(_axisName);
+    //    Serial.println(" timed out");
+    //}
+    
     if (duration < 10){
         duration = 0;
     }

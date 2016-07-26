@@ -54,7 +54,7 @@ Servo y;
 Servo z;
 
 Axis xAxis(7,8,9, FORWARD, 10, "X-axis");
-Axis yAxis(6,12,13, FORWARD, 32, "Y-axis");
+Axis yAxis(6,12,13, FORWARD, 34, "Y-axis");
 
 int servoDetachFlag = 1;
 int movemode        = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
@@ -153,15 +153,25 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float  xStartingLocation          = location.xtarget;
     float  yStartingLocation          = location.ytarget;
     int    numberOfStepsPerRotation   = 1000;
-    float  distanceToMoveInRotations  = xEnd - xStartingLocation;
+    
+    float  distanceToMoveInRotations  = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
+    float  xDistanceToMoveInRotations = xEnd - xStartingLocation;
+    float  yDistanceToMoveInRotations = yEnd - yStartingLocation;
+    
     float  millisecondsForMove        = numberOfStepsPerRotation*(distanceToMoveInRotations/rotationsPerSecond);
+    
     int    finalNumberOfSteps         = distanceToMoveInRotations*numberOfStepsPerRotation;
+    
     float  timePerStep                = millisecondsForMove/float(finalNumberOfSteps);
     
-    int numberOfStepsTaken   =  0;
+    float  xStepSize                  = (xDistanceToMoveInRotations/distanceToMoveInRotations)/float(numberOfStepsPerRotation);
+    float  yStepSize                  = (yDistanceToMoveInRotations/distanceToMoveInRotations)/float(numberOfStepsPerRotation);
+    
+    
+    int numberOfStepsTaken            =  0;
     
     Serial.println("true travel dist:");
-    Serial.println(  sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  )  );
+    Serial.println();
     
     xAxis.attach();
     yAxis.attach();
@@ -169,15 +179,16 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
-        float whereItShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken/float(numberOfStepsPerRotation));
+        float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
+        float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
         
         delay(timePerStep);
         
         xAxis.updatePositionFromEncoder();
         yAxis.updatePositionFromEncoder();
         
-        xAxis.write(whereItShouldBeAtThisStep);
-        //yAxis.write(whereItShouldBeAtThisStep);
+        xAxis.write(whereXShouldBeAtThisStep);
+        yAxis.write(whereYShouldBeAtThisStep);
         
         numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
         
