@@ -127,9 +127,18 @@ float getAngle(float X,float Y,float centerX,float centerY){
 }
 
 void   returnPoz(){
-    Serial.print("pz(");
-    Serial.print(xAxis.read());
-    Serial.println(", 0.0, 0.0)");
+    static unsigned long lastRan = millis();
+    
+    
+    if (millis() - lastRan > 100){
+        
+        Serial.print("pz(");
+        Serial.print(xAxis.read());
+        Serial.println(", 0.0, 0.0)");
+        
+        lastRan = millis();
+    }
+    
 }
 
 int   Move(float xEnd, float yEnd, float zEnd, float rotationsPerSecond){
@@ -165,9 +174,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
         
         numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
         
-        if (numberOfStepsTaken%20 == 0){
-            returnPoz();
-        }
+        returnPoz();
     }
     xAxis.detach();
     return(1);
