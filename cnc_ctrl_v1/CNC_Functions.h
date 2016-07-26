@@ -54,9 +54,10 @@ Servo y;
 Servo z;
 
 Axis xAxis(7,8,9, FORWARD, 10, "X-axis");
+Axis yAxis(6,12,13, FORWARD, 10, "Y-axis");
 
 int servoDetachFlag = 1;
-int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
+int movemode        = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
 
 float getAngle(float X,float Y,float centerX,float centerY){
 
@@ -129,12 +130,13 @@ float getAngle(float X,float Y,float centerX,float centerY){
 void  returnPoz(){
     static unsigned long lastRan = millis();
     
-    
     if (millis() - lastRan > 100){
         
         Serial.print("pz(");
         Serial.print(xAxis.read());
-        Serial.println(", 0.0, 0.0)");
+        Serial.print(", ");
+        Serial.print(yAxis.read());
+        Serial.println(", 0.0)");
         
         lastRan = millis();
     }
@@ -160,7 +162,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     xAxis.attach();
     
     Serial.println("Move sees a target of: ");
-    Serial.println(xEnd);
+    Serial.println(yEnd);
     Serial.println("And an end at: ");
     Serial.println(startingLocation + (finalNumberOfSteps/float(numberOfStepsPerRotation)));
     
@@ -175,13 +177,17 @@ and G01 commands. The units at this point should all be in rotations or rotation
         delay(timePerStep);
         
         xAxis.updatePositionFromEncoder();
+        yAxis.updatePositionFromEncoder();
+        
         xAxis.write(whereItShouldBeAtThisStep);
+        yAxis.write(whereItShouldBeAtThisStep);
         
         numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
         
         returnPoz();
     }
     xAxis.detach();
+    yAxis.detach();
     return(1);
     
 }

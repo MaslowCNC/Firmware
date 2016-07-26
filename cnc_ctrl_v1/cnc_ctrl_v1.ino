@@ -76,6 +76,7 @@ void setup(){
     
     
     xAxis.initializePID();
+    yAxis.initializePID();
     
     //G1("G01 X-3 F.1 ");
 }
