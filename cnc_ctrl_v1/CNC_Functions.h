@@ -143,9 +143,11 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     int numberOfStepsTaken   =  0;
     
-    Serial.println(xAxis.returnPidMode());
+    Serial.println(finalNumberOfSteps);
+    Serial.println(numberOfStepsTaken);
+    Serial.println(finalNumberOfSteps/abs(finalNumberOfSteps));
     
-    while(numberOfStepsTaken < finalNumberOfSteps){
+    while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
         float whereItShouldBeAtThisStep = startingLocation + (numberOfStepsTaken/1000.0);
         
@@ -154,7 +156,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
         xAxis.updatePositionFromEncoder();
         xAxis.write(whereItShouldBeAtThisStep);
         
-        numberOfStepsTaken = numberOfStepsTaken + 1;
+        numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
     }
     return(1);
     
