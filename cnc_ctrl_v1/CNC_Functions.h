@@ -136,9 +136,10 @@ and G01 commands. The units at this point should all be in rotations or rotation
     Serial.println("move ran");
     
     float  startingLocation           = location.xtarget;
+    int    numberOfStepsPerRotation   = 250;
     float  distanceToMoveInRotations  = xEnd - startingLocation;
-    float  millisecondsForMove        = 1000*(distanceToMoveInRotations/rotationsPerSecond);
-    int    finalNumberOfSteps         = distanceToMoveInRotations*1000;
+    float  millisecondsForMove        = numberOfStepsPerRotation*(distanceToMoveInRotations/rotationsPerSecond);
+    int    finalNumberOfSteps         = distanceToMoveInRotations*numberOfStepsPerRotation;
     float  timePerStep                = millisecondsForMove/float(finalNumberOfSteps);
     
     int numberOfStepsTaken   =  0;
@@ -149,7 +150,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
-        float whereItShouldBeAtThisStep = startingLocation + (numberOfStepsTaken/1000.0);
+        float whereItShouldBeAtThisStep = startingLocation + (numberOfStepsTaken/float(numberOfStepsPerRotation));
         
         delay(timePerStep);
         
