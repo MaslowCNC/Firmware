@@ -69,7 +69,7 @@ int    Axis::write(float targetPosition){
     
     bool pidreturn = _pidController.Compute();
     
-    Serial.print(_pidInput);
+    /*Serial.print(_pidInput);
     Serial.print(" ");
     Serial.print(_pidSetpoint);
     Serial.print(" ");
@@ -77,7 +77,7 @@ int    Axis::write(float targetPosition){
     Serial.print(" ");
     Serial.print(_pidController.GetMode());
     Serial.print(" ");
-    Serial.println(pidreturn);
+    Serial.println(pidreturn);*/
     
     _motor.write(90 + _pidOutput);
     

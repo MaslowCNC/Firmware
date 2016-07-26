@@ -126,6 +126,12 @@ float getAngle(float X,float Y,float centerX,float centerY){
     return(theta);
 }
 
+void   returnPoz(){
+    Serial.print("pz(");
+    Serial.print(xAxis.read());
+    Serial.println(", 0.0, 0.0)");
+}
+
 int   Move(float xEnd, float yEnd, float zEnd, float rotationsPerSecond){
     
 /*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
@@ -162,9 +168,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
         numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
         
         if (numberOfStepsTaken%20 == 0){
-            Serial.print("pz(");
-            Serial.print(xAxis.read());
-            Serial.println(", 0.0, 0.0)");
+            returnPoz();
         }
     }
     xAxis.detach();
