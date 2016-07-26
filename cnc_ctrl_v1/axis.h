@@ -31,6 +31,7 @@
             int    returnPidMode();
             void   initializePID();
             int    detach();
+            int    attach();
         private:
             int    _PWMread(int pin);
             

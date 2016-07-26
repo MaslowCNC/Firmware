@@ -29,8 +29,6 @@ double Kp=300, Ki=0, Kd=10;
 PID _pidController(&_pidInput, &_pidOutput, &_pidSetpoint, Kp, Ki, Kd, DIRECT);
 
 Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName){
-    Serial.println("begin this is a long string so you can see some of it");
-    
     
     //initialize motor
     _motor      = GearMotor();
@@ -71,7 +69,7 @@ int    Axis::write(float targetPosition){
     
     bool pidreturn = _pidController.Compute();
     
-    /*Serial.print(_pidInput);
+    Serial.print(_pidInput);
     Serial.print(" ");
     Serial.print(_pidSetpoint);
     Serial.print(" ");
@@ -79,7 +77,7 @@ int    Axis::write(float targetPosition){
     Serial.print(" ");
     Serial.print(_pidController.GetMode());
     Serial.print(" ");
-    Serial.println(pidreturn);*/
+    Serial.println(pidreturn);
     
     _motor.write(90 + _pidOutput);
     
@@ -130,6 +128,12 @@ the input from the encoder*/
 
 int    Axis::detach(){
     _motor.detach();
+    return 1;
+}
+
+int   Axis::attach(){
+     _motor.attach(1);
+     return 1;
 }
 
 int    Axis::_PWMread(int pin){

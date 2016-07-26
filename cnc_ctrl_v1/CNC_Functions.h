@@ -144,6 +144,8 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     int numberOfStepsTaken   =  0;
     
+    xAxis.attach();
+    
     Serial.println(finalNumberOfSteps);
     Serial.println(numberOfStepsTaken);
     Serial.println(finalNumberOfSteps/abs(finalNumberOfSteps));
@@ -164,9 +166,8 @@ and G01 commands. The units at this point should all be in rotations or rotation
             Serial.print(xAxis.read());
             Serial.println(", 0.0, 0.0)");
         }
-        
-        xAxis.detach();
     }
+    xAxis.detach();
     return(1);
     
 }
