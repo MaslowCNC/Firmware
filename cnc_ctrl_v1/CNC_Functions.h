@@ -28,9 +28,9 @@
 #define BACKWARD -1
 
 //these define the number (or fraction there of) of mm moved with each rotation of each axis
-#define XPITCH 2
-#define YPITCH 10
-#define ZPITCH 10
+#define XPITCH 1
+#define YPITCH 1
+#define ZPITCH 1
 
 #define XDIRECTION BACKWARD
 #define YDIRECTION FORWARD
@@ -126,7 +126,7 @@ float getAngle(float X,float Y,float centerX,float centerY){
     return(theta);
 }
 
-void   returnPoz(){
+void  returnPoz(){
     static unsigned long lastRan = millis();
     
     
@@ -158,6 +158,11 @@ and G01 commands. The units at this point should all be in rotations or rotation
     int numberOfStepsTaken   =  0;
     
     xAxis.attach();
+    
+    Serial.println("Move sees a target of: ");
+    Serial.println(xEnd);
+    Serial.println("And an end at: ");
+    Serial.println(startingLocation + (finalNumberOfSteps/float(numberOfStepsPerRotation)));
     
     /*Serial.println(finalNumberOfSteps);
     Serial.println(numberOfStepsTaken);
@@ -222,7 +227,7 @@ int   G1(String readString){
     
     
     //convert from mm to rotations
-    xgoto = xgoto / XPITCH;
+    xgoto = (XDIRECTION*xgoto) / XPITCH;
     ygoto = ygoto / YPITCH;
     zgoto = zgoto / ZPITCH;
     int secondsPerMinute = 60;

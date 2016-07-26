@@ -69,15 +69,7 @@ int    Axis::write(float targetPosition){
     
     bool pidreturn = _pidController.Compute();
     
-    /*Serial.print(_pidInput);
-    Serial.print(" ");
-    Serial.print(_pidSetpoint);
-    Serial.print(" ");
-    Serial.print(_pidOutput);
-    Serial.print(" ");
-    Serial.print(_pidController.GetMode());
-    Serial.print(" ");
-    Serial.println(pidreturn);*/
+    //Serial.println(targetPosition);
     
     _motor.write(90 + _pidOutput);
     
@@ -131,7 +123,7 @@ int    Axis::detach(){
     return 1;
 }
 
-int   Axis::attach(){
+int    Axis::attach(){
      _motor.attach(1);
      return 1;
 }
