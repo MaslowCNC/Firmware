@@ -130,6 +130,7 @@ void  returnPoz(){
         float   c   = seperationOfMotorCentersMM;
         float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2*b*c) );
         float   h   = distFromSpindleToTopAtCenter - (b*sin(theta));
+        float   w   = (b*cos(theta)) - seperationOfMotorCentersMM/2;
         
         /*Serial.print("theta: ");
         Serial.println(a);
@@ -139,7 +140,7 @@ void  returnPoz(){
         Serial.println(h);*/
         
         Serial.print("pz(");
-        Serial.print("0.0");
+        Serial.print(w);
         Serial.print(", ");
         Serial.print(h);
         Serial.println(", 0.0)");
