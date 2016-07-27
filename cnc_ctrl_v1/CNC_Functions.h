@@ -154,8 +154,25 @@ void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* 
     Serial.println("conversion function ran");
     
     
+    float chainLengthAtCenterInMM       = 1362.45;
+    float seperationOfMotorCentersMM    = 2438.40;
+    float distFromSpindleToTopAtCenter  = 609;
     
-    *aChainLength = 3.14;
+    float X1 = seperationOfMotorCentersMM/2 + xTarget;
+    float X2 = seperationOfMotorCentersMM/2 - xTarget;
+    float Y  = distFromSpindleToTopAtCenter - yTarget;
+    
+    float La = sqrt( sq(X1) + sq(Y) );
+    float Lb = sqrt( sq(X2) + sq(Y) );
+    
+    *aChainLength = La;
+    *bChainLength = Lb;
+    
+    Serial.println("Lengths: ");
+    Serial.println(La);
+    Serial.println(Lb);
+    
+    
 }
 
 int   Move(float xEnd, float yEnd, float zEnd, float rotationsPerSecond){
