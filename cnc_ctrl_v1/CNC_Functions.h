@@ -31,8 +31,8 @@
 #define BACKWARD -1
 
 //these define the number (or fraction there of) of mm moved with each rotation of each axis
-#define XPITCH 1
-#define YPITCH 1
+#define XPITCH 76.2
+#define YPITCH 76.2
 #define ZPITCH 1
 
 #define XDIRECTION BACKWARD
@@ -142,63 +142,8 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float  yStartingLocation          = yAxis.read();
     int    numberOfStepsPerRotation   = 1000;
     
-    float  distanceToMoveInRotations  = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
-    float  xDistanceToMoveInRotations = xEnd - xStartingLocation;
-    float  yDistanceToMoveInRotations = yEnd - yStartingLocation;
-    
-    float  millisecondsForMove        = numberOfStepsPerRotation*(distanceToMoveInRotations/rotationsPerSecond);
-    
-    int    finalNumberOfSteps         = distanceToMoveInRotations*numberOfStepsPerRotation;
-    
-    float  timePerStep                = millisecondsForMove/float(finalNumberOfSteps);
-    
-    float  xStepSize                  = (xDistanceToMoveInRotations/distanceToMoveInRotations)/float(numberOfStepsPerRotation);
-    float  yStepSize                  = (yDistanceToMoveInRotations/distanceToMoveInRotations)/float(numberOfStepsPerRotation);
-    
-    
-    int numberOfStepsTaken            =  0;
-    
-    xAxis.attach();
-    yAxis.attach();
-    
-    
-    while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
-        
-        float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
-        float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
-        
-        delay(timePerStep);
-        
-        xAxis.updatePositionFromEncoder();
-        yAxis.updatePositionFromEncoder();
-        
-        xAxis.write(whereXShouldBeAtThisStep);
-        yAxis.write(whereYShouldBeAtThisStep);
-        
-        numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
-        
-        returnPoz();
-    }
-    
-    xAxis.endMove(xEnd);
-    yAxis.endMove(yEnd);
-    
-    return(1);
-    
-}
-
-int   interpolatedMove(float xEnd, float yEnd, float zEnd, float rotationsPerSecond){
-    
-/*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
-the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
-direction, the tool moves to the target in a straight line. This function is used by the G00 
-and G01 commands. The units at this point should all be in rotations or rotations per second*/
-    
-    Serial.println("begin interpolated move");
-    
-    float  xStartingLocation          = xAxis.read();
-    float  yStartingLocation          = yAxis.read();
-    int    numberOfStepsPerRotation   = 1000;
+    Serial.println("move called with:");
+    Serial.println(xEnd);
     
     float  distanceToMoveInRotations  = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
     float  xDistanceToMoveInRotations = xEnd - xStartingLocation;
@@ -297,7 +242,7 @@ int   G1(String readString){
     int secondsPerMinute = 60;
     feedrate = gospeed/(secondsPerMinute*XPITCH); //store the feed rate for later use
     
-    interpolatedMove(xgoto, ygoto, zgoto, feedrate); //The move is performed
+    Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 }
 
 void  G10(String readString){
