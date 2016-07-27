@@ -260,6 +260,8 @@ void interpretCommandString(String readString){
         i++;
     }
     
+    Serial.println(readString);
+    
     if(readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G02" || readString.substring(0, 3) == "G03" || readString.substring(0, 2) == "G0" || readString.substring(0, 2) == "G1" || readString.substring(0, 2) == "G2" || readString.substring(0, 2) == "G3"){
         prependString = readString.substring(0, 3);
         prependString = prependString + " ";
@@ -310,7 +312,6 @@ void interpretCommandString(String readString){
         Serial.println("gready");
         readString = "";
     }
-    
     
     if(readString.substring(0, 3) == "B05"){
         Serial.println("Firmware Version .59");
