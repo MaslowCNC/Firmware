@@ -116,9 +116,9 @@ int    Axis::attach(){
 
 void   Axis::hold(){
     
-    if (millis() - _timeLastMoved < 30000){
+    if (millis() - _timeLastMoved < 2000){
         updatePositionFromEncoder();
-        write(-1.4);
+        write(_axisTarget);
     }
     else{
         detach();
