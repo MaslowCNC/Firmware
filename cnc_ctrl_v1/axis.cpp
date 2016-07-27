@@ -128,9 +128,6 @@ void   Axis::hold(){
 
 void  Axis::endMove(float finalTarget){
     
-    Serial.println("End Move");
-    Serial.println(_axisName);
-    Serial.println(finalTarget);
     _timeLastMoved = millis();
     _axisTarget    = finalTarget;
     
