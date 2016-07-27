@@ -57,15 +57,6 @@ void setup(){
     TIMSK1 |= (1 << TOIE1);
     interrupts(); 
     
-    /*if (EEPROM.read(18) == 56){ //If valid data can be loaded
-        Serial.println("Position Loaded");
-        //location.zpos = readFloat(14);
-        
-        xAxis.set( readFloat(5));  //load the position from  the EEPROM
-        yAxis.set( readFloat(10));  //load the position from  the EEPROM
-    }*/
-    
-    
     xAxis.initializePID();
     yAxis.initializePID();
 }
@@ -230,20 +221,6 @@ void interpretCommandString(String readString){
             Serial.println("gready");
         }
         readString = "";
-    }
-    
-    if( millis() - time > 500){
-        if (servoDetachFlag == 0){
-            Serial.println("write to eeprom");
-            //writeFloat(5,location.xpos);
-            //writeFloat(10,location.ypos);
-            //writeFloat(14,location.zpos);
-            //EEPROM.write(18,56); //This known value is used as a flag for if valid data can be read from EEPROM later
-        }
-        servoDetachFlag = 1;
-        x.detach();
-        y.detach();
-        z.detach();
     }
     
     if (readString.length() > 0){
