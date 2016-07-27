@@ -24,15 +24,8 @@
 #include "CNC_Functions.h"
 
 
-
-
-int spindle = 17;
 String readString;
 String prependString;
-long time = millis();
-const int chipSelect = 40;   
-int backLight = 140;
-int contrast = 35;
 float xgodist;
 float ygodist;
 float zgodist;
@@ -89,7 +82,6 @@ void interpretCommandString(String readString){
     
     if(readString.length() > 0){
         Serial.println(readString);
-        time = millis();
         
         servoDetachFlag = 0;
     }
@@ -99,7 +91,6 @@ void interpretCommandString(String readString){
         Serial.println("ready");
         Serial.println("gready");
         readString = "";
-        time = millis();
     }
     
     if(readString.substring(0, 3) == "G02" || readString.substring(0, 3) == "G2 "){
@@ -108,7 +99,6 @@ void interpretCommandString(String readString){
         Serial.println("ready");
         Serial.println("gready");
         readString = "";
-        time = millis();
     }
     
     if(readString.substring(0, 3) == "G03" || readString.substring(0, 3) == "G3 "){
@@ -117,7 +107,6 @@ void interpretCommandString(String readString){
         Serial.println("ready");
         Serial.println("gready");
         readString = "";
-        time = millis();
     }
     
     if(readString.substring(0, 3) == "G10"){
@@ -155,55 +144,6 @@ void interpretCommandString(String readString){
         readString = "";
     }
     
-    if(readString[0] == 'S' || readString[0] == 's'){
-        if(readString[1] == '5'){
-            digitalWrite(spindle, HIGH);       
-        }
-        if(readString[1] == '0'){
-            digitalWrite(spindle, LOW);
-        }
-        Serial.println("gready");
-        readString = "";
-    }
-    
-    if(readString.substring(0, 3) == "B01"){
-        readString = readString + "     ";
-        int apos = readString.indexOf('C');
-        char rsect[6] = "     ";
-        readString.substring(apos +1,apos+4).toCharArray(rsect, 6);
-        //int brightness = atof(rsect);
-        //analogWrite(blPin,brightness); //0-255
-        readString = "";
-        Serial.println("gready");
-    }
-
-    if(readString.substring(0, 3) == "B02"){
-        readString = readString + "     ";
-        int apos = readString.indexOf('C');
-        char rsect[6] = "     ";
-        readString.substring(apos +1,apos+4).toCharArray(rsect, 6);
-        int contrast = atof(rsect);
-        //setContrast(contrast); 
-        readString = "";
-        Serial.println("gready");
-    }
-    
-    if(readString.substring(0, 3) == "B03"){ 
-        Serial.println("\nFiles found on the card (name, date and size in bytes): ");
-        //root.openRoot(volume);
-        // list all files in the card with date and size
-        //root.ls(LS_R);
-        readString = "";
-        Serial.println("gready");
-    }
-    
-    if(readString.substring(0, 3) == "B04"){
-        //root.openRoot(volume); 
-        // list all files in the card with date and size
-        //root.ls(LS_R);
-        readString = "";
-        Serial.println("gready");
-    }
     
     if(readString.substring(0, 3) == "B05"){
         Serial.println("Firmware Version .59");
@@ -212,9 +152,6 @@ void interpretCommandString(String readString){
     }
     
     if((readString[0] == 'T' || readString[0] == 't') && readString[1] != 'e'){
-        if(readString[1] == '0'){
-            digitalWrite(spindle, LOW);
-        }
         if(readString[1] != '1'){
             Serial.print("Please insert tool ");
             Serial.println(readString);
