@@ -132,13 +132,6 @@ void  returnPoz(){
         float   h   = distFromSpindleToTopAtCenter - (b*sin(theta));
         float   w   = (b*cos(theta)) - seperationOfMotorCentersMM/2;
         
-        /*Serial.print("theta: ");
-        Serial.println(a);
-        Serial.println(b);
-        Serial.println(c);
-        Serial.println(theta);
-        Serial.println(h);*/
-        
         Serial.print("pz(");
         Serial.print(w);
         Serial.print(", ");
@@ -160,9 +153,6 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float  xStartingLocation          = xAxis.read();
     float  yStartingLocation          = yAxis.read();
     int    numberOfStepsPerRotation   = 1000;
-    
-    Serial.println("move called with:");
-    Serial.println(xEnd);
     
     float  distanceToMoveInRotations  = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
     float  xDistanceToMoveInRotations = xEnd - xStartingLocation;
