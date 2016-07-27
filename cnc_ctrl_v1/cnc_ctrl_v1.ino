@@ -26,14 +26,6 @@
 
 String readString;
 String prependString;
-float xgodist;
-float ygodist;
-float zgodist;
-float gospeed;
-int i = 0;
-int begin;
-int end;
-char sect[22];
 
 void setup(){
     Serial.begin(19200);
@@ -41,29 +33,14 @@ void setup(){
     Serial.println("ready");
     Serial.println("gready");
     
-    
-    noInterrupts();
-    TCCR1A = 0;
-    TCCR1B = 0;
-    TCNT1 = 50000;
-    TCCR1B |= (1 << CS12);
-    TIMSK1 |= (1 << TOIE1);
-    interrupts(); 
-    
     xAxis.initializePID();
     yAxis.initializePID();
 }
 
-ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven
-{
-    TCNT1 = 64000;            // preload timer
-    //SetPos(&location); 
-    //SetTarget(location.xtarget, location.ytarget, location.ztarget, &location, 123);
-    
-}
-
 void interpretCommandString(String readString){
-    i = 0;
+    int i = 0;
+    char sect[22];
+    
     while (i < 23){
         sect[i] = ' ';
         i++;
