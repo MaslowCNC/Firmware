@@ -17,10 +17,7 @@
     
     
 
-
-#include <Servo.h>
 #include "MyTypes.h"
-#include <SPI.h>
 #include "CNC_Functions.h"
 
 

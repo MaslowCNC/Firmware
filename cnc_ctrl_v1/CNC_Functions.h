@@ -49,9 +49,6 @@ int stepsize = 1;
 float feedrate = 125;
 float unitScalar = 200;
 location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 0, 0};
-Servo x;
-Servo y;
-Servo z;
 
 Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis", 5);
 Axis yAxis(6,12,13, FORWARD, 34, "Y-axis", 10);
