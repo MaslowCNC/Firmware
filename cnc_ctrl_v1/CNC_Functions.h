@@ -31,8 +31,8 @@
 #define BACKWARD -1
 
 //these define the number (or fraction there of) of mm moved with each rotation of each axis
-#define XPITCH 1
-#define YPITCH 1
+#define XPITCH 76.2
+#define YPITCH 76.2
 #define ZPITCH 1
 
 #define XDIRECTION BACKWARD
@@ -118,12 +118,24 @@ float getAngle(float X,float Y,float centerX,float centerY){
 void  returnPoz(){
     static unsigned long lastRan = millis();
     
-    if (millis() - lastRan > 100){
+    if (millis() - lastRan > 200){
+        
+        float chainLengthAtCenterInMM       = 1362.45;
+        float seperationOfMotorCentersMM    = 2438.40;
+        float distFromSpindleToTopAtCenter  = 609;
+    
+        //Use the law of cosines to find the angle between the two chains
+        float   a   = chainLengthAtCenterInMM + (yAxis.read()*XPITCH);
+        float   b   = chainLengthAtCenterInMM - (xAxis.read()*YPITCH);
+        float   c   = seperationOfMotorCentersMM;
+        float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2*b*c) );
+        float   h   = distFromSpindleToTopAtCenter - (b*sin(theta));
+        float   w   = (b*cos(theta)) - seperationOfMotorCentersMM/2;
         
         Serial.print("pz(");
-        Serial.print(xAxis.read());
+        Serial.print(w);
         Serial.print(", ");
-        Serial.print(yAxis.read());
+        Serial.print(h);
         Serial.println(", 0.0)");
         
         lastRan = millis();
