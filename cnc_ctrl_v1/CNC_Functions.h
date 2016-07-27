@@ -39,19 +39,13 @@
 #define YDIRECTION BACKWARD
 #define ZDIRECTION BACKWARD
 
-int stepsize = 1;
-float feedrate = 125;
-float unitScalar = 200;
-location_st location = {0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 500 , 500 , 500, 0, 0, 0};
 
 Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis", 5);
 Axis yAxis(6,12,13, FORWARD, 34, "Y-axis", 10);
 
 
+float feedrate = 125;
 String prependString;
-
-int servoDetachFlag = 1;
-int movemode        = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
 
 float getAngle(float X,float Y,float centerX,float centerY){
 
@@ -144,8 +138,8 @@ the speed moveSpeed. Movements are correlated so that regardless of the distance
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
     
-    float  xStartingLocation          = location.xtarget;
-    float  yStartingLocation          = location.ytarget;
+    float  xStartingLocation          = xAxis.read();
+    float  yStartingLocation          = yAxis.read();
     int    numberOfStepsPerRotation   = 1000;
     
     float  distanceToMoveInRotations  = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
@@ -225,16 +219,16 @@ int   G1(String readString){
 /*G1() is the function which is called to process the string if it begins with 
 'G01' or 'G00'*/
     
-    float xgoto = location.xtarget;
-    float ygoto = location.ytarget;
-    float zgoto = location.ztarget;
-    float gospeed = 0;
+    float xgoto;
+    float ygoto;
+    float zgoto;
+    float gospeed;
     
     readString.toUpperCase(); //Make the string all uppercase to remove variability
     
-    xgoto   = extractGcodeValue(readString, 'X', location.xtarget);
-    ygoto   = extractGcodeValue(readString, 'Y', location.ytarget);
-    zgoto   = extractGcodeValue(readString, 'Z', location.ztarget);
+    xgoto   = extractGcodeValue(readString, 'X', xAxis.read());
+    ygoto   = extractGcodeValue(readString, 'Y', yAxis.read());
+    zgoto   = extractGcodeValue(readString, 'Z', 0.0);
     gospeed = extractGcodeValue(readString, 'F', feedrate);
     
     
@@ -245,13 +239,7 @@ int   G1(String readString){
     int secondsPerMinute = 60;
     feedrate = gospeed/(secondsPerMinute*XPITCH); //store the feed rate for later use
     
-    int tempo = Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
-
-    if (tempo == 1){ //If the move finishes successfully 
-        location.xtarget = xgoto;
-        location.ytarget = ygoto;
-        location.ztarget = zgoto;
-    }
+    Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 }
 
 void  G10(String readString){
@@ -283,12 +271,6 @@ void interpretCommandString(String readString){
         //Serial.println(prependString);
     }
     
-    if(readString.length() > 0){
-        Serial.println(readString);
-        
-        servoDetachFlag = 0;
-    }
-    
     if(readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G0 " || readString.substring(0, 3) == "G1 "){
         G1(readString);
         Serial.println("ready");
@@ -315,20 +297,6 @@ void interpretCommandString(String readString){
     }
     
     if(readString.substring(0, 3) == "G17"){ //XY plane is the default so no action is taken
-        Serial.println("gready");
-        readString = "";
-    }
-    
-    if(readString.substring(0, 3) == "G20"){
-        //Serial.println("Inches Set");
-        unitScalar = 1; //there are 20 rotations per inch
-        Serial.println("gready");
-        readString = "";
-    }
-    
-    if(readString.substring(0, 3) == "G21"){
-        //Serial.println("mm set");
-        unitScalar = 20; //the machine moves 1.27 mm per rotation
         Serial.println("gready");
         readString = "";
     }
