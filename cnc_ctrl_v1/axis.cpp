@@ -18,25 +18,23 @@
 
 #include "Arduino.h"
 #include "Axis.h"
-#include "PID_v1.h"
 
 #define FORWARD 1
 #define BACKWARD -1
 
-//PID setup 
-double _pidSetpoint, _pidInput, _pidOutput;
-double Kp=300, Ki=0, Kd=10;
-PID _pidController(&_pidInput, &_pidOutput, &_pidSetpoint, Kp, Ki, Kd, REVERSE);
+
 
 Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName){
     
     //initialize motor
-    _motor      = GearMotor();
+    //_motor      = GearMotor();
     _motor.setupMotor(pwmPin, directionPin1, directionPin2);
     //_motor.write(0);
     
     //initialize pins
     pinMode(encoderPin, INPUT);
+    
+    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _Ki, _Kd, REVERSE);
     
     //initialize variables
     _direction    = encoderDirection;
@@ -58,9 +56,7 @@ int    Axis::write(float targetPosition){
     _pidInput      =  _axisPosition;
     _pidSetpoint   =  targetPosition;
     
-    
-    
-    bool pidreturn = _pidController.Compute();
+    _pidController.Compute();
     
     _motor.write(90 + _pidOutput);
     
