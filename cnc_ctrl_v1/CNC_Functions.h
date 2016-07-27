@@ -269,8 +269,6 @@ void interpretCommandString(String readString){
     
     if(readString[0] == 'X' || readString[0] == 'Y' || readString[0] == 'Z'){
         readString = prependString + readString;
-        //Serial.print("prepended: ");
-        //Serial.println(prependString);
     }
     
     if(readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G0 " || readString.substring(0, 3) == "G1 "){
