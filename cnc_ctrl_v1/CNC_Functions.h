@@ -115,27 +115,34 @@ float getAngle(float X,float Y,float centerX,float centerY){
     return(theta);
 }
 
+void  chainLengthsToXY(float chainALength, float chainBlength, float* X, float* Y){
+    float chainLengthAtCenterInMM       = 1362.45;
+    float seperationOfMotorCentersMM    = 2438.40;
+    float distFromSpindleToTopAtCenter  = 609;
+
+    //Use the law of cosines to find the angle between the two chains
+    float   a   = chainLengthAtCenterInMM + (chainBlength*XPITCH);
+    float   b   = chainLengthAtCenterInMM - (chainALength*YPITCH);
+    float   c   = seperationOfMotorCentersMM;
+    float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2*b*c) );
+    *Y   = distFromSpindleToTopAtCenter - (b*sin(theta));
+    *X   = (b*cos(theta)) - seperationOfMotorCentersMM/2;
+}
+
 void  returnPoz(){
     static unsigned long lastRan = millis();
     
     if (millis() - lastRan > 200){
         
-        float chainLengthAtCenterInMM       = 1362.45;
-        float seperationOfMotorCentersMM    = 2438.40;
-        float distFromSpindleToTopAtCenter  = 609;
-    
-        //Use the law of cosines to find the angle between the two chains
-        float   a   = chainLengthAtCenterInMM + (yAxis.read()*XPITCH);
-        float   b   = chainLengthAtCenterInMM - (xAxis.read()*YPITCH);
-        float   c   = seperationOfMotorCentersMM;
-        float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2*b*c) );
-        float   h   = distFromSpindleToTopAtCenter - (b*sin(theta));
-        float   w   = (b*cos(theta)) - seperationOfMotorCentersMM/2;
+        float X;
+        float Y;
+        
+        chainLengthsToXY(xAxis.read(), yAxis.read(), &X, &Y);
         
         Serial.print("pz(");
-        Serial.print(w);
+        Serial.print(X);
         Serial.print(", ");
-        Serial.print(h);
+        Serial.print(Y);
         Serial.println(", 0.0)");
         
         lastRan = millis();
@@ -145,6 +152,10 @@ void  returnPoz(){
 
 void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     Serial.println("conversion function ran");
+    
+    
+    
+    *aChainLength = 3.14;
 }
 
 int   Move(float xEnd, float yEnd, float zEnd, float rotationsPerSecond){
