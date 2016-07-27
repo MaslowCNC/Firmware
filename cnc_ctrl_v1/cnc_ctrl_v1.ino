@@ -21,7 +21,6 @@
 #include <Servo.h>
 #include "MyTypes.h"
 #include <SPI.h>
-#include <EEPROM.h>
 #include "CNC_Functions.h"
 
 
@@ -57,22 +56,6 @@ void setup(){
     TCCR1B |= (1 << CS12);
     TIMSK1 |= (1 << TOIE1);
     interrupts(); 
-    /*if (EEPROM.read(4) == 56){ //If the EEPROM has been written to by a previous calibration, this will be 56
-        xMagnetScale = float(EEPROM.read(1))/100.0;
-        yMagnetScale = float(EEPROM.read(2))/100.0;
-        zMagnetScale = float(EEPROM.read(3))/100.0;
-    }
-    
-    if (EEPROM.read(18) == 56){ //If valid data can be loaded
-        Serial.println("Position Loaded");
-        location.xpos = readFloat(5); //load the position from  the EEPROM
-        location.ypos = readFloat(10);
-        location.zpos = readFloat(14);
-        location.xtarget = location.xpos;
-        location.ytarget = location.ypos;
-        location.ztarget = location.zpos;
-    }*/
-    
     
     xAxis.initializePID();
     yAxis.initializePID();
@@ -238,19 +221,6 @@ void interpretCommandString(String readString){
             Serial.println("gready");
         }
         readString = "";
-    }
-    
-    if( millis() - time > 500){
-        if (servoDetachFlag == 0){
-            writeFloat(5,location.xpos);
-            writeFloat(10,location.ypos);
-            writeFloat(14,location.zpos);
-            EEPROM.write(18,56); //This known value is used as a flag for if valid data can be read from EEPROM later
-        }
-        servoDetachFlag = 1;
-        x.detach();
-        y.detach();
-        z.detach();
     }
     
     if (readString.length() > 0){

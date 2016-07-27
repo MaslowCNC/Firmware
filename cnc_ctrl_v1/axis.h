@@ -21,10 +21,11 @@
     #include "Arduino.h"
     #include "GearMotor.h"
     #include "PID_v1.h"
+    #include <EEPROM.h>
 
     class Axis{
         public:
-            Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName);
+            Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName, int eepromAdr);
             int    write(float targetPosition);
             float  read();
             int    set(float newAxisPosition);
@@ -36,7 +37,9 @@
             void   hold();
             void   endMove(float finalTarget);
         private:
-            int    _PWMread(int pin);
+            int        _PWMread(int pin);
+            void       _writeFloat(unsigned int addr, float x);
+            float      _readFloat(unsigned int addr);
             
             GearMotor  _motor;
             int        _direction;
@@ -50,6 +53,7 @@
             double     _pidSetpoint, _pidInput, _pidOutput;
             double     _Kp=300, _Ki=0, _Kd=10;
             PID        _pidController;
+            int        _eepromAdr;
     };
 
     #endif

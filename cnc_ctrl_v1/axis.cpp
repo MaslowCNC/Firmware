@@ -22,14 +22,15 @@
 #define FORWARD 1
 #define BACKWARD -1
 
+#define EEPROMVALIDDATA 56
+#define EEPROMFLAG 18
 
 
-Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName){
+
+Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName, int eepromAdr){
     
     //initialize motor
-    //_motor      = GearMotor();
     _motor.setupMotor(pwmPin, directionPin1, directionPin2);
-    //_motor.write(0);
     
     //initialize pins
     pinMode(encoderPin, INPUT);
@@ -43,6 +44,12 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
     _axisPosition = 0.0;
     _axisTarget   = 0.0;
     _direction    = BACKWARD;
+    _eepromAdr    = eepromAdr;
+    
+    //load position
+    if (EEPROM.read(EEPROMFLAG) == EEPROMVALIDDATA){
+        set(_readFloat(_eepromAdr));
+    }
     
 }
 
@@ -106,7 +113,14 @@ the input from the encoder*/
 }
 
 int    Axis::detach(){
+    
+    if (_motor.attached()){
+        _writeFloat(_eepromAdr, read());
+        EEPROM.write(EEPROMFLAG, EEPROMVALIDDATA);
+    }
+    
     _motor.detach();
+    
     return 1;
 }
 
@@ -127,7 +141,7 @@ void   Axis::hold(){
     
 }
 
-void  Axis::endMove(float finalTarget){
+void   Axis::endMove(float finalTarget){
     
     _timeLastMoved = millis();
     _axisTarget    = finalTarget;
@@ -172,4 +186,31 @@ takes this duration and converts it to a ten bit number.*/
 
 int    Axis::returnPidMode(){
     return _pidController.GetMode();
+}
+
+float  Axis::_readFloat(unsigned int addr){
+
+//readFloat and writeFloat functions courtesy of http://www.alexenglish.info/2014/05/saving-floats-longs-ints-eeprom-arduino-using-unions/
+
+
+    union{
+        byte b[4];
+        float f;
+    } data;
+    for(int i = 0; i < 4; i++)
+    {
+        data.b[i] = EEPROM.read(addr+i);
+    }
+    return data.f;
+}
+
+void   Axis::_writeFloat(unsigned int addr, float x){
+    union{
+        byte b[4];
+        float f;
+    } data;
+    data.f = x;
+    for(int i = 0; i < 4; i++){
+        EEPROM.write(addr+i, data.b[i]);
+    }
 }

@@ -53,8 +53,8 @@ Servo x;
 Servo y;
 Servo z;
 
-Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis");
-Axis yAxis(6,12,13, FORWARD, 34, "Y-axis");
+Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis", 5);
+Axis yAxis(6,12,13, FORWARD, 34, "Y-axis", 10);
 
 int servoDetachFlag = 1;
 int movemode        = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
@@ -514,31 +514,4 @@ void  G10(String readString){
     xAxis.set(0);
     yAxis.set(0);
     
-}
-
-float readFloat(unsigned int addr){
-
-//readFloat and writeFloat functions courtesy of http://www.alexenglish.info/2014/05/saving-floats-longs-ints-eeprom-arduino-using-unions/
-
-
-    union{
-        byte b[4];
-        float f;
-    } data;
-    for(int i = 0; i < 4; i++)
-    {
-        data.b[i] = EEPROM.read(addr+i);
-    }
-    return data.f;
-}
-
-void  writeFloat(unsigned int addr, float x){
-    union{
-        byte b[4];
-        float f;
-    } data;
-    data.f = x;
-    for(int i = 0; i < 4; i++){
-        EEPROM.write(addr+i, data.b[i]);
-    }
 }
