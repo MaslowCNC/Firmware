@@ -18,30 +18,23 @@
 
 #include "Arduino.h"
 #include "Axis.h"
-#include "PID_v1.h"
 
 #define FORWARD 1
 #define BACKWARD -1
 
-//PID setup 
-double _pidSetpoint, _pidInput, _pidOutput;
-double Kp=300, Ki=0, Kd=10;
-PID _pidController(&_pidInput, &_pidOutput, &_pidSetpoint, Kp, Ki, Kd, DIRECT);
+
 
 Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName){
     
     //initialize motor
-    _motor      = GearMotor();
+    //_motor      = GearMotor();
     _motor.setupMotor(pwmPin, directionPin1, directionPin2);
     //_motor.write(0);
     
     //initialize pins
     pinMode(encoderPin, INPUT);
     
-    //initialize PID controller
-    double _pidSetpoint, _pidInput, _pidOutput;
-    double Kp=300, Ki=0, Kd=10;
-    PID _pidController(&_pidInput, &_pidOutput, &_pidSetpoint, Kp, Ki, Kd, DIRECT);
+    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _Ki, _Kd, REVERSE);
     
     //initialize variables
     _direction    = encoderDirection;
@@ -56,8 +49,6 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
 void   Axis::initializePID(){
     _pidController.SetMode(AUTOMATIC);
     _pidController.SetOutputLimits(-90, 90);
-    Serial.println("PID controller mode:");
-    Serial.println(_pidController.GetMode());
 }
 
 int    Axis::write(float targetPosition){
@@ -65,11 +56,7 @@ int    Axis::write(float targetPosition){
     _pidInput      =  _axisPosition;
     _pidSetpoint   =  targetPosition;
     
-    
-    
-    bool pidreturn = _pidController.Compute();
-    
-    //Serial.println(targetPosition);
+    _pidController.Compute();
     
     _motor.write(90 + _pidOutput);
     
@@ -86,36 +73,35 @@ int    Axis::set(float newAxisPosition){
 
 int    Axis::updatePositionFromEncoder(){
 
-/*I would like to rename this function "updateMachineLocation" The SetPos() function updates the machine's position by essentially integrating 
+/*The SetPos() function updates the machine's position by essentially integrating 
 the input from the encoder*/
 
     int maxJump = 400;
-    static int currentAngle;
-    static int previousAngle;
 
-    if(abs(currentAngle - previousAngle) <= maxJump){ //The encoder did not just transition from 0 to 360 degrees
-        _axisPosition = _axisPosition + (currentAngle - previousAngle)/1023.0; //The position is incremented by the change in position since the last update.
+    if(abs(_currentAngle - _previousAngle) <= maxJump){ //The encoder did not just transition from 0 to 360 degrees
+        _axisPosition = _axisPosition + (_currentAngle - _previousAngle)/1023.0; //The position is incremented by the change in position since the last update.
     }
     else{//The transition from 0 to 360 (10-bit value 1023) or vice versa has just taken place
-        if(previousAngle < 200 && currentAngle > 850){ //Add back in any dropped position
-            currentAngle = 1023;
-            _axisPosition = _axisPosition + (0 - previousAngle)/1023.0;
+        if(_previousAngle < 200 && _currentAngle > 850){ //Add back in any dropped position
+            _currentAngle = 1023;
+            _axisPosition = _axisPosition + (0 - _previousAngle)/1023.0;
         }
-        if(previousAngle > 850 && currentAngle < 200){
-            currentAngle = 0;
-            _axisPosition = _axisPosition + (1023 - previousAngle)/1023.0;
+        if(_previousAngle > 850 && _currentAngle < 200){
+            _currentAngle = 0;
+            _axisPosition = _axisPosition + (1023 - _previousAngle)/1023.0;
         }
     }
     
 
-    previousAngle = currentAngle; //Reset the previous angle variables
+    _previousAngle = _currentAngle; //Reset the previous angle variables
 
     if(_direction == FORWARD){ //Update the current angle variable. Direction is set at compile time depending on which side of the rod the encoder is positioned on.
-        currentAngle = _PWMread(_encoderPin);
+        _currentAngle = _PWMread(_encoderPin);
     }
     else{
-        currentAngle = 1023 - _PWMread(_encoderPin);
+        _currentAngle = 1023 - _PWMread(_encoderPin);
     }
+    
 }
 
 int    Axis::detach(){
@@ -126,6 +112,25 @@ int    Axis::detach(){
 int    Axis::attach(){
      _motor.attach(1);
      return 1;
+}
+
+void   Axis::hold(){
+    
+    if (millis() - _timeLastMoved < 2000){
+        updatePositionFromEncoder();
+        write(_axisTarget);
+    }
+    else{
+        detach();
+    }
+    
+}
+
+void  Axis::endMove(float finalTarget){
+    
+    _timeLastMoved = millis();
+    _axisTarget    = finalTarget;
+    
 }
 
 int    Axis::_PWMread(int pin){
@@ -150,12 +155,18 @@ takes this duration and converts it to a ten bit number.*/
     if (duration >= 1023){
         duration = 1023;
     }
-
+    
+    //if (duration == 0){
+    //    Serial.print(_axisName);
+    //    Serial.println(" timed out");
+    //}
+    
     if (duration < 10){
         duration = 0;
     }
 
     return duration;
+
 }
 
 int    Axis::returnPidMode(){

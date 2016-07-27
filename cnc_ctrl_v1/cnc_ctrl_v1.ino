@@ -48,7 +48,6 @@ void setup(){
     
     Serial.println("ready");
     Serial.println("gready");
-    analogReference(EXTERNAL);
     
     
     noInterrupts();
@@ -76,8 +75,7 @@ void setup(){
     
     
     xAxis.initializePID();
-    
-    //G1("G01 X-3 F.1 ");
+    yAxis.initializePID();
 }
 
 ISR(TIMER1_OVF_vect) //This code does not do anything right now, it is part of an ongoing effort to move the control system to be interupt driven
@@ -276,7 +274,9 @@ void loop(){
     if (readString.length() > 0){
         interpretCommandString(readString);
     }
-    xAxis.updatePositionFromEncoder();
+    
+    holdPosition();
+    
     returnPoz();
 }
     

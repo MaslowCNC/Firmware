@@ -20,6 +20,7 @@
 
     #include "Arduino.h"
     #include "GearMotor.h"
+    #include "PID_v1.h"
 
     class Axis{
         public:
@@ -32,6 +33,8 @@
             void   initializePID();
             int    detach();
             int    attach();
+            void   hold();
+            void   endMove(float finalTarget);
         private:
             int    _PWMread(int pin);
             
@@ -41,6 +44,12 @@
             String     _axisName;
             float      _axisPosition;
             float      _axisTarget;
+            int        _currentAngle;
+            int        _previousAngle;
+            double     _timeLastMoved;
+            double     _pidSetpoint, _pidInput, _pidOutput;
+            double     _Kp=300, _Ki=0, _Kd=10;
+            PID        _pidController;
     };
 
     #endif

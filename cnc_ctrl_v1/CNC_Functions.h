@@ -33,7 +33,7 @@
 #define ZPITCH 1
 
 #define XDIRECTION BACKWARD
-#define YDIRECTION FORWARD
+#define YDIRECTION BACKWARD
 #define ZDIRECTION BACKWARD
 
 #define SENSEPIN 53
@@ -53,10 +53,11 @@ Servo x;
 Servo y;
 Servo z;
 
-Axis xAxis(7,8,9, FORWARD, 10, "X-axis");
+Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis");
+Axis yAxis(6,12,13, FORWARD, 34, "Y-axis");
 
 int servoDetachFlag = 1;
-int movemode = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
+int movemode        = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode
 
 float getAngle(float X,float Y,float centerX,float centerY){
 
@@ -129,12 +130,13 @@ float getAngle(float X,float Y,float centerX,float centerY){
 void  returnPoz(){
     static unsigned long lastRan = millis();
     
-    
     if (millis() - lastRan > 100){
         
         Serial.print("pz(");
         Serial.print(xAxis.read());
-        Serial.println(", 0.0, 0.0)");
+        Serial.print(", ");
+        Serial.print(yAxis.read());
+        Serial.println(", 0.0)");
         
         lastRan = millis();
     }
@@ -148,44 +150,60 @@ the speed moveSpeed. Movements are correlated so that regardless of the distance
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
     
-    float  startingLocation           = location.xtarget;
+    float  xStartingLocation          = location.xtarget;
+    float  yStartingLocation          = location.ytarget;
     int    numberOfStepsPerRotation   = 1000;
-    float  distanceToMoveInRotations  = xEnd - startingLocation;
+    
+    float  distanceToMoveInRotations  = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
+    float  xDistanceToMoveInRotations = xEnd - xStartingLocation;
+    float  yDistanceToMoveInRotations = yEnd - yStartingLocation;
+    
     float  millisecondsForMove        = numberOfStepsPerRotation*(distanceToMoveInRotations/rotationsPerSecond);
+    
     int    finalNumberOfSteps         = distanceToMoveInRotations*numberOfStepsPerRotation;
+    
     float  timePerStep                = millisecondsForMove/float(finalNumberOfSteps);
     
-    int numberOfStepsTaken   =  0;
+    float  xStepSize                  = (xDistanceToMoveInRotations/distanceToMoveInRotations)/float(numberOfStepsPerRotation);
+    float  yStepSize                  = (yDistanceToMoveInRotations/distanceToMoveInRotations)/float(numberOfStepsPerRotation);
+    
+    
+    int numberOfStepsTaken            =  0;
     
     xAxis.attach();
+    yAxis.attach();
     
-    Serial.println("Move sees a target of: ");
-    Serial.println(xEnd);
-    Serial.println("And an end at: ");
-    Serial.println(startingLocation + (finalNumberOfSteps/float(numberOfStepsPerRotation)));
-    
-    /*Serial.println(finalNumberOfSteps);
-    Serial.println(numberOfStepsTaken);
-    Serial.println(finalNumberOfSteps/abs(finalNumberOfSteps));*/
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
-        float whereItShouldBeAtThisStep = startingLocation + (numberOfStepsTaken/float(numberOfStepsPerRotation));
+        float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
+        float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
         
         delay(timePerStep);
         
         xAxis.updatePositionFromEncoder();
-        xAxis.write(whereItShouldBeAtThisStep);
+        yAxis.updatePositionFromEncoder();
+        
+        xAxis.write(whereXShouldBeAtThisStep);
+        yAxis.write(whereYShouldBeAtThisStep);
         
         numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
         
         returnPoz();
     }
-    xAxis.detach();
+    
+    xAxis.endMove(xEnd);
+    yAxis.endMove(yEnd);
+    
     return(1);
     
 }
 
+void  holdPosition(){
+    xAxis.hold();
+    yAxis.hold();
+}
+    
 float extractGcodeValue(String readString, char target,float defaultReturn){
 
 /*Reads a string and returns the value of number following the target character.
@@ -227,8 +245,8 @@ int   G1(String readString){
     
     
     //convert from mm to rotations
-    xgoto = (XDIRECTION*xgoto) / XPITCH;
-    ygoto = (XDIRECTION*ygoto) / YPITCH;
+    xgoto = xgoto / XPITCH;
+    ygoto = ygoto / YPITCH;
     zgoto = zgoto / ZPITCH;
     int secondsPerMinute = 60;
     feedrate = gospeed/(secondsPerMinute*XPITCH); //store the feed rate for later use
