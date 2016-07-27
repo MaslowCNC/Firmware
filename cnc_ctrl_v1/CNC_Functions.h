@@ -510,20 +510,10 @@ int   G2(String readString){
 void  G10(String readString){
 
 /*The G10() function handles the G10 gcode which re-zeroes one or all of the machine's axes.*/
-
-
-    if(readString.indexOf('X') > 2){
-        location.xpos = 0.0;
-        location.xtarget = 0.0;
-    }
-    if(readString.indexOf('Y') > 2){
-        location.ypos = 0.0;
-        location.ytarget = 0.0;
-    }
-    if(readString.indexOf('Z') > 2){
-        location.zpos = 0.0;
-        location.ztarget = 0.0;
-    }
+    
+    xAxis.set(0);
+    yAxis.set(0);
+    
 }
 
 float readFloat(unsigned int addr){

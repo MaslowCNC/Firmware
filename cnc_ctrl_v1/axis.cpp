@@ -68,7 +68,8 @@ float  Axis::read(){
 }
 
 int    Axis::set(float newAxisPosition){
-    Serial.println (" would manually reset axis pos here");
+    _axisPosition =  newAxisPosition;
+    _axisTarget   =  newAxisPosition;
 }
 
 int    Axis::updatePositionFromEncoder(){
