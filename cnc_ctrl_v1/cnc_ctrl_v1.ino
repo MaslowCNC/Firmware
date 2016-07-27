@@ -21,7 +21,6 @@
 #include <Servo.h>
 #include "MyTypes.h"
 #include <SPI.h>
-#include <EEPROM.h>
 #include "CNC_Functions.h"
 
 
@@ -58,15 +57,13 @@ void setup(){
     TIMSK1 |= (1 << TOIE1);
     interrupts(); 
     
-    if (EEPROM.read(18) == 56){ //If valid data can be loaded
+    /*if (EEPROM.read(18) == 56){ //If valid data can be loaded
         Serial.println("Position Loaded");
-        location.xpos = readFloat(5); //load the position from  the EEPROM
-        location.ypos = readFloat(10);
-        location.zpos = readFloat(14);
-        location.xtarget = location.xpos;
-        location.ytarget = location.ypos;
-        location.ztarget = location.zpos;
-    }
+        //location.zpos = readFloat(14);
+        
+        xAxis.set( readFloat(5));  //load the position from  the EEPROM
+        yAxis.set( readFloat(10));  //load the position from  the EEPROM
+    }*/
     
     
     xAxis.initializePID();
@@ -237,10 +234,11 @@ void interpretCommandString(String readString){
     
     if( millis() - time > 500){
         if (servoDetachFlag == 0){
-            writeFloat(5,location.xpos);
-            writeFloat(10,location.ypos);
-            writeFloat(14,location.zpos);
-            EEPROM.write(18,56); //This known value is used as a flag for if valid data can be read from EEPROM later
+            Serial.println("write to eeprom");
+            //writeFloat(5,location.xpos);
+            //writeFloat(10,location.ypos);
+            //writeFloat(14,location.zpos);
+            //EEPROM.write(18,56); //This known value is used as a flag for if valid data can be read from EEPROM later
         }
         servoDetachFlag = 1;
         x.detach();

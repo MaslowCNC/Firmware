@@ -21,6 +21,7 @@
     #include "Arduino.h"
     #include "GearMotor.h"
     #include "PID_v1.h"
+    #include <EEPROM.h>
 
     class Axis{
         public:
@@ -36,7 +37,9 @@
             void   hold();
             void   endMove(float finalTarget);
         private:
-            int    _PWMread(int pin);
+            int        _PWMread(int pin);
+            void       _writeFloat(unsigned int addr, float x);
+            float      _readFloat(unsigned int addr);
             
             GearMotor  _motor;
             int        _direction;

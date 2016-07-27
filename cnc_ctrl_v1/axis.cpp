@@ -106,7 +106,13 @@ the input from the encoder*/
 }
 
 int    Axis::detach(){
+    
+    if (_motor.attached()){
+        Serial.println("this is the first time the motor has been detached");
+    }
+    
     _motor.detach();
+    
     return 1;
 }
 
@@ -127,7 +133,7 @@ void   Axis::hold(){
     
 }
 
-void  Axis::endMove(float finalTarget){
+void   Axis::endMove(float finalTarget){
     
     _timeLastMoved = millis();
     _axisTarget    = finalTarget;
@@ -172,4 +178,32 @@ takes this duration and converts it to a ten bit number.*/
 
 int    Axis::returnPidMode(){
     return _pidController.GetMode();
+}
+
+
+float  Axis::_readFloat(unsigned int addr){
+
+//readFloat and writeFloat functions courtesy of http://www.alexenglish.info/2014/05/saving-floats-longs-ints-eeprom-arduino-using-unions/
+
+
+    union{
+        byte b[4];
+        float f;
+    } data;
+    for(int i = 0; i < 4; i++)
+    {
+        data.b[i] = EEPROM.read(addr+i);
+    }
+    return data.f;
+}
+
+void   Axis::_writeFloat(unsigned int addr, float x){
+    union{
+        byte b[4];
+        float f;
+    } data;
+    data.f = x;
+    for(int i = 0; i < 4; i++){
+        EEPROM.write(addr+i, data.b[i]);
+    }
 }

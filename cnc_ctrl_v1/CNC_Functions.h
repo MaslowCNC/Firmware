@@ -515,30 +515,3 @@ void  G10(String readString){
     yAxis.set(0);
     
 }
-
-float readFloat(unsigned int addr){
-
-//readFloat and writeFloat functions courtesy of http://www.alexenglish.info/2014/05/saving-floats-longs-ints-eeprom-arduino-using-unions/
-
-
-    union{
-        byte b[4];
-        float f;
-    } data;
-    for(int i = 0; i < 4; i++)
-    {
-        data.b[i] = EEPROM.read(addr+i);
-    }
-    return data.f;
-}
-
-void  writeFloat(unsigned int addr, float x){
-    union{
-        byte b[4];
-        float f;
-    } data;
-    data.f = x;
-    for(int i = 0; i < 4; i++){
-        EEPROM.write(addr+i, data.b[i]);
-    }
-}
