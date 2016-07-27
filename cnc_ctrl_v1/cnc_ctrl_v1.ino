@@ -57,11 +57,6 @@ void setup(){
     TCCR1B |= (1 << CS12);
     TIMSK1 |= (1 << TOIE1);
     interrupts(); 
-    /*if (EEPROM.read(4) == 56){ //If the EEPROM has been written to by a previous calibration, this will be 56
-        xMagnetScale = float(EEPROM.read(1))/100.0;
-        yMagnetScale = float(EEPROM.read(2))/100.0;
-        zMagnetScale = float(EEPROM.read(3))/100.0;
-    }
     
     if (EEPROM.read(18) == 56){ //If valid data can be loaded
         Serial.println("Position Loaded");
@@ -71,7 +66,7 @@ void setup(){
         location.xtarget = location.xpos;
         location.ytarget = location.ypos;
         location.ztarget = location.zpos;
-    }*/
+    }
     
     
     xAxis.initializePID();
