@@ -53,8 +53,8 @@ Servo x;
 Servo y;
 Servo z;
 
-Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis");
-Axis yAxis(6,12,13, FORWARD, 34, "Y-axis");
+Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis", 5);
+Axis yAxis(6,12,13, FORWARD, 34, "Y-axis", 10);
 
 int servoDetachFlag = 1;
 int movemode        = 1; //if move mode == 0 in relative mode,   == 1 in absolute mode

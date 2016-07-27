@@ -22,14 +22,15 @@
 #define FORWARD 1
 #define BACKWARD -1
 
+#define EEPROMVALIDDATA 56
+#define EEPROMFLAG 18
 
 
-Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName){
+
+Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName, int eepromAdr){
     
     //initialize motor
-    //_motor      = GearMotor();
     _motor.setupMotor(pwmPin, directionPin1, directionPin2);
-    //_motor.write(0);
     
     //initialize pins
     pinMode(encoderPin, INPUT);
@@ -43,6 +44,12 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
     _axisPosition = 0.0;
     _axisTarget   = 0.0;
     _direction    = BACKWARD;
+    _eepromAdr    = eepromAdr;
+    
+    //load position
+    if (EEPROM.read(EEPROMFLAG) == EEPROMVALIDDATA){
+        set(_readFloat(_eepromAdr));
+    }
     
 }
 
@@ -108,7 +115,8 @@ the input from the encoder*/
 int    Axis::detach(){
     
     if (_motor.attached()){
-        Serial.println("this is the first time the motor has been detached");
+        _writeFloat(_eepromAdr, read());
+        EEPROM.write(EEPROMFLAG, EEPROMVALIDDATA);
     }
     
     _motor.detach();
@@ -179,7 +187,6 @@ takes this duration and converts it to a ten bit number.*/
 int    Axis::returnPidMode(){
     return _pidController.GetMode();
 }
-
 
 float  Axis::_readFloat(unsigned int addr){
 
