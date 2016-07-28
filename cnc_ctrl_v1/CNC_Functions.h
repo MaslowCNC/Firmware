@@ -136,6 +136,9 @@ void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* 
     float La = sqrt( sq(X1) + sq(Y) );
     float Lb = sqrt( sq(X2) + sq(Y) );
     
+    Serial.println("int Before");
+    Serial.println(La - chainLengthAtCenterInMM);
+    
     *aChainLength = -1*(La - chainLengthAtCenterInMM);
     *bChainLength = Lb - chainLengthAtCenterInMM;
 }
@@ -165,7 +168,7 @@ void  fakeMove(){
     
     float aChainLength;
     float bChainLength;
-    float X1 = 0.0;
+    float X1 = 24.0;
     float Y1 = 300.0;
     
     Serial.println("Input: ");
@@ -174,6 +177,10 @@ void  fakeMove(){
     
     xyToChainLengths(X1,Y1,&aChainLength,&bChainLength);
     
+    
+    Serial.println("Intermediate:");
+    Serial.println(aChainLength);
+    Serial.println(bChainLength);
     
     float X2;
     float Y2;
