@@ -181,7 +181,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     float  xStartingLocation          = xAxis.read();
     float  yStartingLocation          = yAxis.read();
-    int    numberOfStepsPerRotation   = 1000;
+    int    numberOfStepsPerMM         = 14;
     
     float aChainLength;
     float bChainLength;
@@ -192,14 +192,14 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
     float  yDistanceToMoveInMM        = yEnd - yStartingLocation;
     
-    float  millisecondsForMove        = numberOfStepsPerRotation*(distanceToMoveInMM/MMPerSecond);
+    float  millisecondsForMove        = numberOfStepsPerMM*(distanceToMoveInMM/MMPerSecond);
     
-    int    finalNumberOfSteps         = distanceToMoveInMM*numberOfStepsPerRotation;
+    int    finalNumberOfSteps         = distanceToMoveInMM*numberOfStepsPerMM;
     
     float  timePerStep                = millisecondsForMove/float(finalNumberOfSteps);
     
-    float  xStepSize                  = (xDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerRotation);
-    float  yStepSize                  = (yDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerRotation);
+    float  xStepSize                  = (xDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM);
+    float  yStepSize                  = (yDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM);
     
     
     int numberOfStepsTaken            =  0;
