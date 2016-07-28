@@ -134,7 +134,7 @@ void   Axis::hold(){
     
     if (millis() - _timeLastMoved < 2000){
         updatePositionFromEncoder();
-        write(_axisTarget);
+        write(_axisTarget*_mmPerRotation);
     }
     else{
         detach();
