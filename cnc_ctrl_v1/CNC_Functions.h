@@ -117,10 +117,12 @@ void  chainLengthsToXY(float chainALength, float chainBlength, float* X, float* 
     
     //Use the law of cosines to find the angle between the two chains
     float   a   = chainBlength + chainLengthAtCenterInMM;
-    float   b   = chainALength + chainLengthAtCenterInMM;
+    float   b   = -1*(chainALength - chainLengthAtCenterInMM);
     
-    Serial.println("int after");
-    Serial.println(b);
+    //Serial.println("int after");
+    //Serial.println(b);
+    //Serial.println(chainALength);
+    //Serial.println(chainLengthAtCenterInMM);
     
     float   c   = MACHINEWIDTH;
     float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
@@ -141,7 +143,7 @@ void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* 
     float Lb = sqrt( sq(X2) + sq(Y) );
     
     Serial.println("int Before");
-    Serial.println(La - chainLengthAtCenterInMM);
+    Serial.println(La);
     
     *aChainLength = -1*(La - chainLengthAtCenterInMM);
     *bChainLength = Lb - chainLengthAtCenterInMM;
