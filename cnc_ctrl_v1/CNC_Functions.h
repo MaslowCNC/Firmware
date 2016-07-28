@@ -118,6 +118,11 @@ void  chainLengthsToXY(float chainALength, float chainBlength, float* X, float* 
     //Use the law of cosines to find the angle between the two chains
     float   a   = chainBlength + chainLengthAtCenterInMM;
     float   b   = chainALength + chainLengthAtCenterInMM;
+    
+    Serial.println("After conversion:");
+    Serial.println(a);
+    Serial.println(b);
+    
     float   c   = MACHINEWIDTH;
     float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
     
@@ -135,6 +140,10 @@ void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* 
     
     float La = sqrt( sq(X1) + sq(Y) );
     float Lb = sqrt( sq(X2) + sq(Y) );
+    
+    Serial.println("before conversion:");
+    Serial.println(La);
+    Serial.println(Lb);
     
     *aChainLength = -1*(La - chainLengthAtCenterInMM);
     *bChainLength = Lb - chainLengthAtCenterInMM;
@@ -166,7 +175,7 @@ void  fakeMove(){
     float aChainLength;
     float bChainLength;
     float X1 = 0.0;
-    float Y1 = 300.0;
+    float Y1 = 230.0;
     
     Serial.println("Input: ");
     Serial.println(X1);
@@ -174,6 +183,9 @@ void  fakeMove(){
     
     xyToChainLengths(X1,Y1,&aChainLength,&bChainLength);
     
+    Serial.println("Intermediate:");
+    Serial.println(aChainLength);
+    Serial.println(bChainLength);
     
     float X2;
     float Y2;
