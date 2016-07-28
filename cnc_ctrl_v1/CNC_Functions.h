@@ -171,6 +171,12 @@ void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* 
     Serial.println("Lengths: ");
     Serial.println(La);
     Serial.println(Lb);
+    Serial.println(seperationOfMotorCentersMM);
+    Serial.println(X1);
+    Serial.println(X2);
+    Serial.println(Y);
+    Serial.println(yTarget);
+    Serial.println(xTarget);
     
     
 }
@@ -189,7 +195,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float aChainLength;
     float bChainLength;
     
-    xyToChainLengths(1,2,&aChainLength,&bChainLength);
+    xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
     
     float  distanceToMoveInRotations  = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
     float  xDistanceToMoveInRotations = xEnd - xStartingLocation;
