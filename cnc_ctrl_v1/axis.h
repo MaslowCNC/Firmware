@@ -36,6 +36,8 @@
             int    attach();
             void   hold();
             void   endMove(float finalTarget);
+            float  target();
+            
         private:
             int        _PWMread(int pin);
             void       _writeFloat(unsigned int addr, float x);

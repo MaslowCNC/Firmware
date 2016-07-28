@@ -165,14 +165,25 @@ void  fakeMove(){
     
     float aChainLength;
     float bChainLength;
-    float X1 = 123.43;
-    float Y1 = 378.93;
-    float X2;
-    float Y2;
+    float X1 = 0.0;
+    float Y1 = 300.0;
+    
+    Serial.println("Input: ");
+    Serial.println(X1);
+    Serial.println(Y1);
     
     xyToChainLengths(X1,Y1,&aChainLength,&bChainLength);
     
+    
+    float X2;
+    float Y2;
     chainLengthsToXY(aChainLength, bChainLength, &X2, &Y2);
+    
+    Serial.println("Output: ");
+    Serial.println(X2);
+    Serial.println(Y2);
+    
+    Serial.println("\n\n\n\n\n\n\n\n\n\n");
     
 }
 
@@ -190,10 +201,14 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float aChainLength;
     float bChainLength;
     
+    Serial.println("Input:");
+    Serial.println(xEnd);
+    Serial.println(yEnd);
+    
     xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
     
-    //xEnd = aChainLength;
-    //yEnd = bChainLength;
+    xEnd = aChainLength;
+    yEnd = bChainLength;
     
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
@@ -234,6 +249,14 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     xAxis.endMove(xEnd);
     yAxis.endMove(yEnd);
+    
+    float X2;
+    float Y2;
+    chainLengthsToXY(xEnd, yEnd, &X2, &Y2);
+    
+    Serial.println("Output: ");
+    Serial.println(X2);
+    Serial.println(Y2);
     
     return(1);
     
@@ -278,8 +301,8 @@ int   G1(String readString){
     
     readString.toUpperCase(); //Make the string all uppercase to remove variability
     
-    xgoto   = extractGcodeValue(readString, 'X', xAxis.read());
-    ygoto   = extractGcodeValue(readString, 'Y', yAxis.read());
+    xgoto   = extractGcodeValue(readString, 'X', xAxis.target());
+    ygoto   = extractGcodeValue(readString, 'Y', yAxis.target());
     zgoto   = extractGcodeValue(readString, 'Z', 0.0);
     gospeed = extractGcodeValue(readString, 'F', feedrate);
     

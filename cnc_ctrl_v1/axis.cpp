@@ -80,6 +80,10 @@ float  Axis::read(){
     }
 }
 
+float Axis::target(){
+    return _axisTarget*_mmPerRotation;
+}
+
 int    Axis::set(float newAxisPosition){
     _axisPosition =  newAxisPosition/_mmPerRotation;
     _axisTarget   =  newAxisPosition/_mmPerRotation;
