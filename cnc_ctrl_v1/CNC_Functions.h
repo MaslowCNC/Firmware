@@ -136,9 +136,6 @@ void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* 
     float La = sqrt( sq(X1) + sq(Y) );
     float Lb = sqrt( sq(X2) + sq(Y) );
     
-    Serial.println("int Before");
-    Serial.println(La);
-    
     *aChainLength = -1*(La - chainLengthAtCenterInMM);
     *bChainLength = Lb - chainLengthAtCenterInMM;
 }
