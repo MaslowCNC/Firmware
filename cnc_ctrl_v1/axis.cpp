@@ -27,7 +27,7 @@
 
 
 
-Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName, int eepromAdr){
+Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName, int eepromAdr, float mmPerRotation){
     
     //initialize motor
     _motor.setupMotor(pwmPin, directionPin1, directionPin2);
@@ -45,6 +45,7 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
     _axisTarget   = 0.0;
     _direction    = BACKWARD;
     _eepromAdr    = eepromAdr;
+    _mmPerRotation= mmPerRotation;
     
     //load position
     if (EEPROM.read(EEPROMFLAG) == EEPROMVALIDDATA){
@@ -61,7 +62,7 @@ void   Axis::initializePID(){
 int    Axis::write(float targetPosition){
     
     _pidInput      =  _axisPosition;
-    _pidSetpoint   =  targetPosition;
+    _pidSetpoint   =  targetPosition/_mmPerRotation;
     
     _pidController.Compute();
     
@@ -71,12 +72,12 @@ int    Axis::write(float targetPosition){
 }
 
 float  Axis::read(){
-    return _axisPosition;
+    return _axisPosition*_mmPerRotation;
 }
 
 int    Axis::set(float newAxisPosition){
-    _axisPosition =  newAxisPosition;
-    _axisTarget   =  newAxisPosition;
+    _axisPosition =  newAxisPosition/_mmPerRotation;
+    _axisTarget   =  newAxisPosition/_mmPerRotation;
 }
 
 int    Axis::updatePositionFromEncoder(){
@@ -144,7 +145,10 @@ void   Axis::hold(){
 void   Axis::endMove(float finalTarget){
     
     _timeLastMoved = millis();
-    _axisTarget    = finalTarget;
+    Serial.println("end move");
+    Serial.println(finalTarget);
+    _axisTarget    = finalTarget/_mmPerRotation;
+    Serial.println(_axisTarget);
     
 }
 

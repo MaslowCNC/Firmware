@@ -15,12 +15,7 @@
 
     Copyright 2014 Bar Smith*/
     
-    /*
-    This module contains all of the functions necessary to move the machine. Internally the program operates in units of
-    rotation. The conversion ratio between rotations and linear movement is stored by the XPITCH... #defines. When a line
-    of Gcode arrives the units are converted into rotations, operated on, and the position is then returned by the machine
-    using real world units.
-    */
+    
 
 #include "MyTypes.h"
 #include "GearMotor.h"
@@ -30,18 +25,14 @@
 #define FORWARD 1
 #define BACKWARD -1
 
-//these define the number (or fraction there of) of mm moved with each rotation of each axis
-#define XPITCH 76.2
-#define YPITCH 76.2
-#define ZPITCH 1
 
 #define XDIRECTION BACKWARD
 #define YDIRECTION BACKWARD
 #define ZDIRECTION BACKWARD
 
 
-Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis", 5);
-Axis yAxis(6,12,13, FORWARD, 34, "Y-axis", 10);
+Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis", 5, 76.2);
+Axis yAxis(6,12,13, FORWARD, 34, "Y-axis", 10, 76.2);
 
 
 float feedrate = 125;
@@ -121,8 +112,8 @@ void  chainLengthsToXY(float chainALength, float chainBlength, float* X, float* 
     float distFromSpindleToTopAtCenter  = 609;
 
     //Use the law of cosines to find the angle between the two chains
-    float   a   = chainLengthAtCenterInMM + (chainBlength*XPITCH);
-    float   b   = chainLengthAtCenterInMM - (chainALength*YPITCH);
+    float   a   = chainLengthAtCenterInMM + (chainBlength);
+    float   b   = chainLengthAtCenterInMM - (chainALength);
     float   c   = seperationOfMotorCentersMM;
     float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2*b*c) );
     *Y   = distFromSpindleToTopAtCenter - (b*sin(theta));
@@ -181,7 +172,7 @@ void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* 
     
 }
 
-int   Move(float xEnd, float yEnd, float zEnd, float rotationsPerSecond){
+int   Move(float xEnd, float yEnd, float zEnd, float MMPerSecond){
     
 /*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
 the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
@@ -195,20 +186,20 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float aChainLength;
     float bChainLength;
     
-    xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
+    //xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
     
-    float  distanceToMoveInRotations  = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
-    float  xDistanceToMoveInRotations = xEnd - xStartingLocation;
-    float  yDistanceToMoveInRotations = yEnd - yStartingLocation;
+    float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
+    float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
+    float  yDistanceToMoveInMM        = yEnd - yStartingLocation;
     
-    float  millisecondsForMove        = numberOfStepsPerRotation*(distanceToMoveInRotations/rotationsPerSecond);
+    float  millisecondsForMove        = numberOfStepsPerRotation*(distanceToMoveInMM/MMPerSecond);
     
-    int    finalNumberOfSteps         = distanceToMoveInRotations*numberOfStepsPerRotation;
+    int    finalNumberOfSteps         = distanceToMoveInMM*numberOfStepsPerRotation;
     
     float  timePerStep                = millisecondsForMove/float(finalNumberOfSteps);
     
-    float  xStepSize                  = (xDistanceToMoveInRotations/distanceToMoveInRotations)/float(numberOfStepsPerRotation);
-    float  yStepSize                  = (yDistanceToMoveInRotations/distanceToMoveInRotations)/float(numberOfStepsPerRotation);
+    float  xStepSize                  = (xDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerRotation);
+    float  yStepSize                  = (yDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerRotation);
     
     
     int numberOfStepsTaken            =  0;
@@ -216,6 +207,8 @@ and G01 commands. The units at this point should all be in rotations or rotation
     xAxis.attach();
     yAxis.attach();
     
+    Serial.println("These");
+    Serial.println(distanceToMoveInMM);
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
@@ -287,12 +280,8 @@ int   G1(String readString){
     gospeed = extractGcodeValue(readString, 'F', feedrate);
     
     
-    //convert from mm to rotations
-    xgoto = xgoto / XPITCH;
-    ygoto = ygoto / YPITCH;
-    zgoto = zgoto / ZPITCH;
     int secondsPerMinute = 60;
-    feedrate = gospeed/(secondsPerMinute*XPITCH); //store the feed rate for later use
+    feedrate = gospeed/(secondsPerMinute*76.2); //store the feed rate for later use
     
     Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 }
