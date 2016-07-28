@@ -30,6 +30,10 @@
 #define YDIRECTION BACKWARD
 #define ZDIRECTION BACKWARD
 
+#define MACHINEHEIGHT    1219.2
+#define MACHINEWIDTH     3048.0
+#define ORIGINCHAINLEN   sqrt(sq(MACHINEHEIGHT)+ sq(MACHINEWIDTH))
+
 
 Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis", 5, 76.2);
 Axis yAxis(6,12,13, FORWARD, 34, "Y-axis", 10, 76.2);
@@ -107,33 +111,29 @@ float getAngle(float X,float Y,float centerX,float centerY){
 }
 
 void  chainLengthsToXY(float chainALength, float chainBlength, float* X, float* Y){
-    float chainLengthAtCenterInMM       = 1362.45;
-    float seperationOfMotorCentersMM    = 2438.40;
-    float distFromSpindleToTopAtCenter  = 609.0;
+    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
 
     //Use the law of cosines to find the angle between the two chains
-    float   a   = chainLengthAtCenterInMM + (chainBlength);
-    float   b   = chainLengthAtCenterInMM - (chainALength);
-    float   c   = seperationOfMotorCentersMM;
+    float   a   = chainBlength;
+    float   b   = chainALength;
+    float   c   = MACHINEWIDTH;
     float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
-    *Y   = distFromSpindleToTopAtCenter - (b*sin(theta));
-    *X   = (b*cos(theta)) - seperationOfMotorCentersMM/2.0;
+    
+    *Y   = MACHINEHEIGHT/2 - (b*sin(theta));
+    *X   = (b*cos(theta)) - MACHINEWIDTH/2.0;
 }
 
 void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    //this one is good
+    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
     
-    float chainLengthAtCenterInMM       = 1362.45;
-    float seperationOfMotorCentersMM    = 2438.40;
-    float distFromSpindleToTopAtCenter  = 609.0;
+    float X1 = MACHINEWIDTH/2.0   + xTarget;
+    float X2 = MACHINEWIDTH/2.0   - xTarget;
+    float Y  = MACHINEHEIGHT/2.0  - yTarget;
     
-    float X1 = seperationOfMotorCentersMM/2.0 + xTarget;
-    float X2 = seperationOfMotorCentersMM/2.0 - xTarget;
-    float Y  = distFromSpindleToTopAtCenter - yTarget;
+    float La = sqrt( sq(X1) + sq(Y) );
+    float Lb = sqrt( sq(X2) + sq(Y) );
     
-    Serial.println(seperationOfMotorCentersMM - (X1+X2));
-    
-    float La = sqrt( sq(X1) + sq(Y) ) - chainLengthAtCenterInMM;
-    float Lb = sqrt( sq(X2) + sq(Y) ) - chainLengthAtCenterInMM;
     
     *aChainLength = La;
     *bChainLength = Lb;
@@ -164,8 +164,8 @@ void  fakeMove(){
     
     float aChainLength;
     float bChainLength;
-    float X1 = 10.0;
-    float Y1 = 20.0;
+    float X1 = 100.0;
+    float Y1 = 100.0;
     float X2;
     float Y2;
     
@@ -173,6 +173,7 @@ void  fakeMove(){
     Serial.println(X1);
     Serial.println(Y1);
     
+    //this one is pretty good
     xyToChainLengths(X1,Y1,&aChainLength,&bChainLength);
     
     chainLengthsToXY(aChainLength, bChainLength, &X2, &Y2);
@@ -180,8 +181,6 @@ void  fakeMove(){
     Serial.println("Output:");
     Serial.println(X2);
     Serial.println(Y2);
-    Serial.println(sin(.47));
-    Serial.println(sqrt(sq(sin(asin(sin(.47))))));
     
 }
 
