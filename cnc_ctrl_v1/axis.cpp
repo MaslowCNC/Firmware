@@ -27,7 +27,7 @@
 
 
 
-Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName, int eepromAdr){
+Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName, int eepromAdr, float mmPerRotation){
     
     //initialize motor
     _motor.setupMotor(pwmPin, directionPin1, directionPin2);
@@ -45,6 +45,7 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirectio
     _axisTarget   = 0.0;
     _direction    = BACKWARD;
     _eepromAdr    = eepromAdr;
+    _mmPerRotation= mmPerRotation;
     
     //load position
     if (EEPROM.read(EEPROMFLAG) == EEPROMVALIDDATA){
@@ -61,7 +62,7 @@ void   Axis::initializePID(){
 int    Axis::write(float targetPosition){
     
     _pidInput      =  _axisPosition;
-    _pidSetpoint   =  targetPosition;
+    _pidSetpoint   =  targetPosition/_mmPerRotation;
     
     _pidController.Compute();
     
@@ -71,12 +72,21 @@ int    Axis::write(float targetPosition){
 }
 
 float  Axis::read(){
-    return _axisPosition;
+    if (_motor.attached()){
+        return _axisPosition*_mmPerRotation;
+    }
+    else{
+        return _axisTarget*_mmPerRotation;
+    }
+}
+
+float Axis::target(){
+    return _axisTarget*_mmPerRotation;
 }
 
 int    Axis::set(float newAxisPosition){
-    _axisPosition =  newAxisPosition;
-    _axisTarget   =  newAxisPosition;
+    _axisPosition =  newAxisPosition/_mmPerRotation;
+    _axisTarget   =  newAxisPosition/_mmPerRotation;
 }
 
 int    Axis::updatePositionFromEncoder(){
@@ -133,7 +143,7 @@ void   Axis::hold(){
     
     if (millis() - _timeLastMoved < 2000){
         updatePositionFromEncoder();
-        write(_axisTarget);
+        write(_axisTarget*_mmPerRotation);
     }
     else{
         detach();
@@ -144,7 +154,7 @@ void   Axis::hold(){
 void   Axis::endMove(float finalTarget){
     
     _timeLastMoved = millis();
-    _axisTarget    = finalTarget;
+    _axisTarget    = finalTarget/_mmPerRotation;
     
 }
 
@@ -171,10 +181,7 @@ takes this duration and converts it to a ten bit number.*/
         duration = 1023;
     }
     
-    //if (duration == 0){
-    //    Serial.print(_axisName);
-    //    Serial.println(" timed out");
-    //}
+
     
     if (duration < 10){
         duration = 0;

@@ -15,12 +15,7 @@
 
     Copyright 2014 Bar Smith*/
     
-    /*
-    This module contains all of the functions necessary to move the machine. Internally the program operates in units of
-    rotation. The conversion ratio between rotations and linear movement is stored by the XPITCH... #defines. When a line
-    of Gcode arrives the units are converted into rotations, operated on, and the position is then returned by the machine
-    using real world units.
-    */
+    
 
 #include "MyTypes.h"
 #include "GearMotor.h"
@@ -30,18 +25,18 @@
 #define FORWARD 1
 #define BACKWARD -1
 
-//these define the number (or fraction there of) of mm moved with each rotation of each axis
-#define XPITCH 76.2
-#define YPITCH 76.2
-#define ZPITCH 1
 
 #define XDIRECTION BACKWARD
 #define YDIRECTION BACKWARD
 #define ZDIRECTION BACKWARD
 
+#define MACHINEHEIGHT    1219.2
+#define MACHINEWIDTH     3048.0
+#define ORIGINCHAINLEN   sqrt(sq(MACHINEHEIGHT/2.0)+ sq(MACHINEWIDTH/2.0))
 
-Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis", 5);
-Axis yAxis(6,12,13, FORWARD, 34, "Y-axis", 10);
+
+Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis", 5, 76.2);
+Axis yAxis(6,12,13, FORWARD, 34, "Y-axis", 10, 76.2);
 
 
 float feedrate = 125;
@@ -115,27 +110,53 @@ float getAngle(float X,float Y,float centerX,float centerY){
     return(theta);
 }
 
+void  chainLengthsToXY(float chainALength, float chainBlength, float* X, float* Y){
+    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
+    
+    
+    
+    //Use the law of cosines to find the angle between the two chains
+    float   a   = chainBlength + chainLengthAtCenterInMM;
+    float   b   = -1*(chainALength - chainLengthAtCenterInMM);
+    float   c   = MACHINEWIDTH;
+    float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
+    
+    *Y   = MACHINEHEIGHT/2 - (b*sin(theta));
+    *X   = (b*cos(theta)) - MACHINEWIDTH/2.0;
+}
+
+void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    
+    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
+    
+    float X1 = MACHINEWIDTH/2.0   + xTarget;
+    float X2 = MACHINEWIDTH/2.0   - xTarget;
+    float Y  = MACHINEHEIGHT/2.0  - yTarget;
+    
+    float La = sqrt( sq(X1) + sq(Y) );
+    float Lb = sqrt( sq(X2) + sq(Y) );
+    
+    Serial.println("int Before");
+    Serial.println(La);
+    
+    *aChainLength = -1*(La - chainLengthAtCenterInMM);
+    *bChainLength = Lb - chainLengthAtCenterInMM;
+}
+
 void  returnPoz(){
     static unsigned long lastRan = millis();
     
     if (millis() - lastRan > 200){
         
-        float chainLengthAtCenterInMM       = 1362.45;
-        float seperationOfMotorCentersMM    = 2438.40;
-        float distFromSpindleToTopAtCenter  = 609;
-    
-        //Use the law of cosines to find the angle between the two chains
-        float   a   = chainLengthAtCenterInMM + (yAxis.read()*XPITCH);
-        float   b   = chainLengthAtCenterInMM - (xAxis.read()*YPITCH);
-        float   c   = seperationOfMotorCentersMM;
-        float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2*b*c) );
-        float   h   = distFromSpindleToTopAtCenter - (b*sin(theta));
-        float   w   = (b*cos(theta)) - seperationOfMotorCentersMM/2;
+        float X;
+        float Y;
+        
+        chainLengthsToXY(xAxis.read(), yAxis.read(), &X, &Y);
         
         Serial.print("pz(");
-        Serial.print(w);
+        Serial.print(X);
         Serial.print(", ");
-        Serial.print(h);
+        Serial.print(Y);
         Serial.println(", 0.0)");
         
         lastRan = millis();
@@ -143,7 +164,37 @@ void  returnPoz(){
     
 }
 
-int   Move(float xEnd, float yEnd, float zEnd, float rotationsPerSecond){
+void  fakeMove(){
+    
+    float aChainLength;
+    float bChainLength;
+    float X1 = 24.0;
+    float Y1 = 300.0;
+    
+    Serial.println("Input: ");
+    Serial.println(X1);
+    Serial.println(Y1);
+    
+    xyToChainLengths(X1,Y1,&aChainLength,&bChainLength);
+    
+    
+    Serial.println("Intermediate:");
+    Serial.println(aChainLength);
+    Serial.println(bChainLength);
+    
+    float X2;
+    float Y2;
+    chainLengthsToXY(aChainLength, bChainLength, &X2, &Y2);
+    
+    Serial.println("Output: ");
+    Serial.println(X2);
+    Serial.println(Y2);
+    
+    Serial.println("\n\n\n\n\n\n\n\n\n\n");
+    
+}
+
+int   Move(float xEnd, float yEnd, float zEnd, float MMPerSecond){
     
 /*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
 the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
@@ -152,27 +203,34 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     float  xStartingLocation          = xAxis.read();
     float  yStartingLocation          = yAxis.read();
-    int    numberOfStepsPerRotation   = 1000;
+    int    numberOfStepsPerMM         = 14;
     
-    float  distanceToMoveInRotations  = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
-    float  xDistanceToMoveInRotations = xEnd - xStartingLocation;
-    float  yDistanceToMoveInRotations = yEnd - yStartingLocation;
+    float aChainLength;
+    float bChainLength;
     
-    float  millisecondsForMove        = numberOfStepsPerRotation*(distanceToMoveInRotations/rotationsPerSecond);
+    xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
     
-    int    finalNumberOfSteps         = distanceToMoveInRotations*numberOfStepsPerRotation;
+    xEnd = aChainLength;
+    yEnd = bChainLength;
+    
+    float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
+    float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
+    float  yDistanceToMoveInMM        = yEnd - yStartingLocation;
+    
+    float  millisecondsForMove        = numberOfStepsPerMM*(distanceToMoveInMM/MMPerSecond);
+    
+    int    finalNumberOfSteps         = distanceToMoveInMM*numberOfStepsPerMM;
     
     float  timePerStep                = millisecondsForMove/float(finalNumberOfSteps);
     
-    float  xStepSize                  = (xDistanceToMoveInRotations/distanceToMoveInRotations)/float(numberOfStepsPerRotation);
-    float  yStepSize                  = (yDistanceToMoveInRotations/distanceToMoveInRotations)/float(numberOfStepsPerRotation);
+    float  xStepSize                  = (xDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM);
+    float  yStepSize                  = (yDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM);
     
     
     int numberOfStepsTaken            =  0;
     
     xAxis.attach();
     yAxis.attach();
-    
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
@@ -238,18 +296,18 @@ int   G1(String readString){
     
     readString.toUpperCase(); //Make the string all uppercase to remove variability
     
-    xgoto   = extractGcodeValue(readString, 'X', xAxis.read());
-    ygoto   = extractGcodeValue(readString, 'Y', yAxis.read());
+    float currentXPos;
+    float currentYPos;
+    chainLengthsToXY(xAxis.target(), yAxis.target(), &currentXPos, &currentYPos);
+    
+    xgoto   = extractGcodeValue(readString, 'X', currentXPos);
+    ygoto   = extractGcodeValue(readString, 'Y', currentYPos);
     zgoto   = extractGcodeValue(readString, 'Z', 0.0);
     gospeed = extractGcodeValue(readString, 'F', feedrate);
     
     
-    //convert from mm to rotations
-    xgoto = xgoto / XPITCH;
-    ygoto = ygoto / YPITCH;
-    zgoto = zgoto / ZPITCH;
     int secondsPerMinute = 60;
-    feedrate = gospeed/(secondsPerMinute*XPITCH); //store the feed rate for later use
+    feedrate = gospeed/(secondsPerMinute*76.2); //store the feed rate for later use
     
     Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 }
