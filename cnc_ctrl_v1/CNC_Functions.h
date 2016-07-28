@@ -207,9 +207,6 @@ and G01 commands. The units at this point should all be in rotations or rotation
     xAxis.attach();
     yAxis.attach();
     
-    Serial.println("These");
-    Serial.println(distanceToMoveInMM);
-    
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
         float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);

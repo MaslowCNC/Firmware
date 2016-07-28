@@ -175,10 +175,7 @@ takes this duration and converts it to a ten bit number.*/
         duration = 1023;
     }
     
-    //if (duration == 0){
-    //    Serial.print(_axisName);
-    //    Serial.println(" timed out");
-    //}
+
     
     if (duration < 10){
         duration = 0;
