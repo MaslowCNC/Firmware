@@ -136,7 +136,7 @@ void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* 
     float La = sqrt( sq(X1) + sq(Y) );
     float Lb = sqrt( sq(X2) + sq(Y) );
     
-    *aChainLength = La - chainLengthAtCenterInMM;
+    *aChainLength = -1*(La - chainLengthAtCenterInMM);
     *bChainLength = Lb - chainLengthAtCenterInMM;
 }
 
@@ -161,6 +161,31 @@ void  returnPoz(){
     
 }
 
+void  fakeMove(){
+    
+    float aChainLength;
+    float bChainLength;
+    float X1 = 0.0;
+    float Y1 = 300.0;
+    
+    Serial.println("Input: ");
+    Serial.println(X1);
+    Serial.println(Y1);
+    
+    xyToChainLengths(X1,Y1,&aChainLength,&bChainLength);
+    
+    
+    float X2;
+    float Y2;
+    chainLengthsToXY(aChainLength, bChainLength, &X2, &Y2);
+    
+    Serial.println("Output: ");
+    Serial.println(X2);
+    Serial.println(Y2);
+    
+    Serial.println("\n\n\n\n\n\n\n\n\n\n");
+    
+}
 
 int   Move(float xEnd, float yEnd, float zEnd, float MMPerSecond){
     
