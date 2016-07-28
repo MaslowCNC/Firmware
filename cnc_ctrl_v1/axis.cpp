@@ -72,7 +72,12 @@ int    Axis::write(float targetPosition){
 }
 
 float  Axis::read(){
-    return _axisPosition*_mmPerRotation;
+    if (_motor.attached()){
+        return _axisPosition*_mmPerRotation;
+    }
+    else{
+        return _axisTarget*_mmPerRotation;
+    }
 }
 
 int    Axis::set(float newAxisPosition){
@@ -145,10 +150,12 @@ void   Axis::hold(){
 void   Axis::endMove(float finalTarget){
     
     _timeLastMoved = millis();
-    Serial.println("end move");
-    Serial.println(finalTarget);
     _axisTarget    = finalTarget/_mmPerRotation;
+    
+    Serial.println(_axisName);
     Serial.println(_axisTarget);
+    Serial.println(_axisPosition);
+    Serial.println(_axisTarget - _axisPosition);
     
 }
 

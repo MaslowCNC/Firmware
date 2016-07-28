@@ -31,6 +31,8 @@ void setup(){
     
     xAxis.initializePID();
     yAxis.initializePID();
+    
+    fakeMove();
 }
 
 void loop(){

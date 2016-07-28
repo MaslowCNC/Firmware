@@ -109,15 +109,34 @@ float getAngle(float X,float Y,float centerX,float centerY){
 void  chainLengthsToXY(float chainALength, float chainBlength, float* X, float* Y){
     float chainLengthAtCenterInMM       = 1362.45;
     float seperationOfMotorCentersMM    = 2438.40;
-    float distFromSpindleToTopAtCenter  = 609;
+    float distFromSpindleToTopAtCenter  = 609.0;
 
     //Use the law of cosines to find the angle between the two chains
     float   a   = chainLengthAtCenterInMM + (chainBlength);
     float   b   = chainLengthAtCenterInMM - (chainALength);
     float   c   = seperationOfMotorCentersMM;
-    float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2*b*c) );
+    float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
     *Y   = distFromSpindleToTopAtCenter - (b*sin(theta));
-    *X   = (b*cos(theta)) - seperationOfMotorCentersMM/2;
+    *X   = (b*cos(theta)) - seperationOfMotorCentersMM/2.0;
+}
+
+void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    
+    float chainLengthAtCenterInMM       = 1362.45;
+    float seperationOfMotorCentersMM    = 2438.40;
+    float distFromSpindleToTopAtCenter  = 609.0;
+    
+    float X1 = seperationOfMotorCentersMM/2.0 + xTarget;
+    float X2 = seperationOfMotorCentersMM/2.0 - xTarget;
+    float Y  = distFromSpindleToTopAtCenter - yTarget;
+    
+    Serial.println(seperationOfMotorCentersMM - (X1+X2));
+    
+    float La = sqrt( sq(X1) + sq(Y) ) - chainLengthAtCenterInMM;
+    float Lb = sqrt( sq(X2) + sq(Y) ) - chainLengthAtCenterInMM;
+    
+    *aChainLength = La;
+    *bChainLength = Lb;
 }
 
 void  returnPoz(){
@@ -141,34 +160,28 @@ void  returnPoz(){
     
 }
 
-void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
-    Serial.println("conversion function ran");
+void  fakeMove(){
     
+    float aChainLength;
+    float bChainLength;
+    float X1 = 10.0;
+    float Y1 = 20.0;
+    float X2;
+    float Y2;
     
-    float chainLengthAtCenterInMM       = 1362.45;
-    float seperationOfMotorCentersMM    = 2438.40;
-    float distFromSpindleToTopAtCenter  = 609;
-    
-    float X1 = seperationOfMotorCentersMM/2 + xTarget;
-    float X2 = seperationOfMotorCentersMM/2 - xTarget;
-    float Y  = distFromSpindleToTopAtCenter - yTarget;
-    
-    float La = sqrt( sq(X1) + sq(Y) );
-    float Lb = sqrt( sq(X2) + sq(Y) );
-    
-    *aChainLength = La;
-    *bChainLength = Lb;
-    
-    Serial.println("Lengths: ");
-    Serial.println(La);
-    Serial.println(Lb);
-    Serial.println(seperationOfMotorCentersMM);
+    Serial.println("Input:");
     Serial.println(X1);
-    Serial.println(X2);
-    Serial.println(Y);
-    Serial.println(yTarget);
-    Serial.println(xTarget);
+    Serial.println(Y1);
     
+    xyToChainLengths(X1,Y1,&aChainLength,&bChainLength);
+    
+    chainLengthsToXY(aChainLength, bChainLength, &X2, &Y2);
+    
+    Serial.println("Output:");
+    Serial.println(X2);
+    Serial.println(Y2);
+    Serial.println(sin(.47));
+    Serial.println(sqrt(sq(sin(asin(sin(.47))))));
     
 }
 
@@ -186,7 +199,10 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float aChainLength;
     float bChainLength;
     
-    //xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
+    xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
+    
+    //xEnd = aChainLength;
+    //yEnd = bChainLength;
     
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
