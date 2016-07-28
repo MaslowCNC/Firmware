@@ -301,14 +301,22 @@ int   G1(String readString){
     
     readString.toUpperCase(); //Make the string all uppercase to remove variability
     
-    xgoto   = extractGcodeValue(readString, 'X', xAxis.target());
-    ygoto   = extractGcodeValue(readString, 'Y', yAxis.target());
+    float X2;
+    float Y2;
+    chainLengthsToXY(xAxis.target(), yAxis.target(), &X2, &Y2);
+    
+    xgoto   = extractGcodeValue(readString, 'X', X2);
+    ygoto   = extractGcodeValue(readString, 'Y', Y2);
     zgoto   = extractGcodeValue(readString, 'Z', 0.0);
     gospeed = extractGcodeValue(readString, 'F', feedrate);
     
     
     int secondsPerMinute = 60;
     feedrate = gospeed/(secondsPerMinute*76.2); //store the feed rate for later use
+    
+    Serial.println("G1 xpos:");
+    Serial.println(xgoto);
+    Serial.println(xAxis.target());
     
     Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 }
