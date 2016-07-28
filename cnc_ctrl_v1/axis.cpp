@@ -155,9 +155,6 @@ void   Axis::endMove(float finalTarget){
     
     _timeLastMoved = millis();
     _axisTarget    = finalTarget/_mmPerRotation;
-    Serial.println("ft set to");
-    Serial.println(_axisTarget);
-    Serial.println(finalTarget);
     
 }
 

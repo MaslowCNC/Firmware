@@ -161,31 +161,6 @@ void  returnPoz(){
     
 }
 
-void  fakeMove(){
-    
-    float aChainLength;
-    float bChainLength;
-    float X1 = 0.0;
-    float Y1 = 300.0;
-    
-    Serial.println("Input: ");
-    Serial.println(X1);
-    Serial.println(Y1);
-    
-    xyToChainLengths(X1,Y1,&aChainLength,&bChainLength);
-    
-    
-    float X2;
-    float Y2;
-    chainLengthsToXY(aChainLength, bChainLength, &X2, &Y2);
-    
-    Serial.println("Output: ");
-    Serial.println(X2);
-    Serial.println(Y2);
-    
-    Serial.println("\n\n\n\n\n\n\n\n\n\n");
-    
-}
 
 int   Move(float xEnd, float yEnd, float zEnd, float MMPerSecond){
     
@@ -200,10 +175,6 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     float aChainLength;
     float bChainLength;
-    
-    Serial.println("Input:");
-    Serial.println(xEnd);
-    Serial.println(yEnd);
     
     xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
     
@@ -250,14 +221,6 @@ and G01 commands. The units at this point should all be in rotations or rotation
     xAxis.endMove(xEnd);
     yAxis.endMove(yEnd);
     
-    float X2;
-    float Y2;
-    chainLengthsToXY(xEnd, yEnd, &X2, &Y2);
-    
-    Serial.println("Output: ");
-    Serial.println(X2);
-    Serial.println(Y2);
-    
     return(1);
     
 }
@@ -301,22 +264,18 @@ int   G1(String readString){
     
     readString.toUpperCase(); //Make the string all uppercase to remove variability
     
-    float X2;
-    float Y2;
-    chainLengthsToXY(xAxis.target(), yAxis.target(), &X2, &Y2);
+    float currentXPos;
+    float currentYPos;
+    chainLengthsToXY(xAxis.target(), yAxis.target(), &currentXPos, &currentYPos);
     
-    xgoto   = extractGcodeValue(readString, 'X', X2);
-    ygoto   = extractGcodeValue(readString, 'Y', Y2);
+    xgoto   = extractGcodeValue(readString, 'X', currentXPos);
+    ygoto   = extractGcodeValue(readString, 'Y', currentYPos);
     zgoto   = extractGcodeValue(readString, 'Z', 0.0);
     gospeed = extractGcodeValue(readString, 'F', feedrate);
     
     
     int secondsPerMinute = 60;
     feedrate = gospeed/(secondsPerMinute*76.2); //store the feed rate for later use
-    
-    Serial.println("G1 xpos:");
-    Serial.println(xgoto);
-    Serial.println(xAxis.target());
     
     Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 }
