@@ -32,7 +32,7 @@
 
 #define MACHINEHEIGHT    1219.2
 #define MACHINEWIDTH     3048.0
-#define ORIGINCHAINLEN   sqrt(sq(MACHINEHEIGHT)+ sq(MACHINEWIDTH))
+#define ORIGINCHAINLEN   sqrt(sq(MACHINEHEIGHT/2.0)+ sq(MACHINEWIDTH/2.0))
 
 
 Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis", 5, 76.2);
@@ -113,13 +113,11 @@ float getAngle(float X,float Y,float centerX,float centerY){
 void  chainLengthsToXY(float chainALength, float chainBlength, float* X, float* Y){
     float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
     
-    Serial.println("After Conversion");
-    Serial.println(chainALength);
-    Serial.println(chainBlength);
+    
     
     //Use the law of cosines to find the angle between the two chains
-    float   a   = chainBlength;
-    float   b   = chainALength;
+    float   a   = chainBlength + chainLengthAtCenterInMM;
+    float   b   = chainALength + chainLengthAtCenterInMM;
     float   c   = MACHINEWIDTH;
     float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
     
@@ -128,7 +126,7 @@ void  chainLengthsToXY(float chainALength, float chainBlength, float* X, float* 
 }
 
 void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
-    //this one is good
+    
     float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
     
     float X1 = MACHINEWIDTH/2.0   + xTarget;
@@ -138,12 +136,8 @@ void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* 
     float La = sqrt( sq(X1) + sq(Y) );
     float Lb = sqrt( sq(X2) + sq(Y) );
     
-    Serial.println("Before Conversion");
-    Serial.println(La);
-    Serial.println(Lb);
-    
-    *aChainLength = La;
-    *bChainLength = Lb;
+    *aChainLength = La - chainLengthAtCenterInMM;
+    *bChainLength = Lb - chainLengthAtCenterInMM;
 }
 
 void  returnPoz(){
@@ -171,28 +165,14 @@ void  fakeMove(){
     
     float aChainLength;
     float bChainLength;
-    float X1 = 100.0;
-    float Y1 = 100.0;
+    float X1 = 123.43;
+    float Y1 = 378.93;
     float X2;
     float Y2;
     
-    Serial.println("Input:");
-    Serial.println(X1);
-    Serial.println(Y1);
-    
-    //this one is pretty good
     xyToChainLengths(X1,Y1,&aChainLength,&bChainLength);
     
-    Serial.println("Intermediate:");
-    Serial.println(aChainLength);
-    Serial.println(bChainLength);
-    
     chainLengthsToXY(aChainLength, bChainLength, &X2, &Y2);
-    
-    Serial.println("Output:");
-    Serial.println(X2);
-    Serial.println(Y2);
-    Serial.println("\n\n\n\n\n\n\n\n");
     
 }
 

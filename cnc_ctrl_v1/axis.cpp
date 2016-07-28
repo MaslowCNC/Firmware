@@ -152,11 +152,6 @@ void   Axis::endMove(float finalTarget){
     _timeLastMoved = millis();
     _axisTarget    = finalTarget/_mmPerRotation;
     
-    Serial.println(_axisName);
-    Serial.println(_axisTarget);
-    Serial.println(_axisPosition);
-    Serial.println(_axisTarget - _axisPosition);
-    
 }
 
 int    Axis::_PWMread(int pin){
