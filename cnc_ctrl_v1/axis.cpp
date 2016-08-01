@@ -80,7 +80,7 @@ float  Axis::read(){
     }
 }
 
-float Axis::target(){
+float  Axis::target(){
     return _axisTarget*_mmPerRotation;
 }
 
