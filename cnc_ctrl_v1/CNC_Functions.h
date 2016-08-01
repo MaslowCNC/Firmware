@@ -333,6 +333,8 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float whereXShouldBeAtThisStep = radius * cos(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
     float whereYShouldBeAtThisStep = radius * sin(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
     
+    Serial.println("this ran");
+    
     float aChainLength;
     float bChainLength;
     
@@ -370,11 +372,15 @@ int   G2(String readString){
     float Y1;
     chainLengthsToXY(xAxis.target(), yAxis.target(), &X1, &Y1);
     
-    float X2    = extractGcodeValue(readString, 'X', 0.0);
-    float Y2    = extractGcodeValue(readString, 'Y', 0.0);
-    float I     = extractGcodeValue(readString, 'I', 0.0);
-    float J     = extractGcodeValue(readString, 'J', 0.0);
-    float speed = extractGcodeValue(readString, 'F', feedrate);
+    float X2      = extractGcodeValue(readString, 'X', 0.0);
+    float Y2      = extractGcodeValue(readString, 'Y', 0.0);
+    float I       = extractGcodeValue(readString, 'I', 0.0);
+    float J       = extractGcodeValue(readString, 'J', 0.0);
+    float feed    = extractGcodeValue(readString, 'F', feedrate);
+    int   dir     = extractGcodeValue(readString, 'G', 0);
+    
+    float centerX = X1 + I;
+    float centerY = Y1 + J;
     
     Serial.print("X1: ");
     Serial.println(X1);
@@ -384,12 +390,23 @@ int   G2(String readString){
     Serial.println(X2);
     Serial.print("Y2: ");
     Serial.println(Y2);
-    Serial.println("I: ");
+    Serial.print("I: ");
     Serial.println(I);
-    Serial.println("J: ");
+    Serial.print("J: ");
     Serial.println(J);
+    Serial.print("centerX: ");
+    Serial.println(centerX);
+    Serial.print("CenterY: ");
+    Serial.println(centerY);
+    Serial.print("Dir: ");
+    Serial.println(dir);
     
-    //arc(-100, 0, 0, 100, 0, 0, 1000, COUNTERCLOCKWISE);
+    if (dir == 2){
+        arc(X1, Y1, X2, Y2, centerX, centerY, feed, CLOCKWISE);
+    }
+    if (dir == 3){
+        arc(X1, Y1, X2, Y2, centerX, centerY, feed, COUNTERCLOCKWISE);
+    }
 }
 
 void  G10(String readString){
@@ -429,12 +446,14 @@ void interpretCommandString(String readString){
     }
     
     if(readString.substring(0, 3) == "G02" || readString.substring(0, 3) == "G2 "){
+        G2(readString);
         Serial.println("ready");
         Serial.println("gready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G03" || readString.substring(0, 3) == "G3 "){
+        G2(readString);
         Serial.println("ready");
         Serial.println("gready");
         readString = "";
