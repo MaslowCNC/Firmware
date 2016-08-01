@@ -300,14 +300,10 @@ int   G1(String readString){
     float currentYPos;
     chainLengthsToXY(xAxis.target(), yAxis.target(), &currentXPos, &currentYPos);
     
-    xgoto   = extractGcodeValue(readString, 'X', currentXPos);
-    ygoto   = extractGcodeValue(readString, 'Y', currentYPos);
-    zgoto   = extractGcodeValue(readString, 'Z', 0.0);
-    gospeed = extractGcodeValue(readString, 'F', feedrate);
-    
-    
-    int secondsPerMinute = 60;
-    feedrate = gospeed/(secondsPerMinute*76.2); //store the feed rate for later use 76.2 is the #mm moved/rotation. Should be handled in axis object
+    xgoto    = extractGcodeValue(readString, 'X', currentXPos);
+    ygoto    = extractGcodeValue(readString, 'Y', currentYPos);
+    zgoto    = extractGcodeValue(readString, 'Z', 0.0);
+    feedrate = extractGcodeValue(readString, 'F', feedrate);
     
     Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 }
