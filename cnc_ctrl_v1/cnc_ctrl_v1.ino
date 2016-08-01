@@ -34,6 +34,7 @@ void setup(){
     
     G1("G01 X100 Y0 F3000");
     G2("test");
+    G1("G01 X0 Y0 F3000");
 }
 
 void loop(){

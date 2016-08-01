@@ -312,7 +312,7 @@ int   G1(String readString){
     Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 }
 
-int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, int direction){
+int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float mmPerSecond, int direction){
     
     float pi                     =  3.1415;
     float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
@@ -322,28 +322,11 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float arcLengthMM            =  circumference * (theta / (2*pi) );
     float startingAngle          =  atan( Y1/X1 );
     
-    Serial.println("Radius:");
-    Serial.println(radius);
-    Serial.println("Circumference:");
-    Serial.println(circumference);
-    Serial.println("Distance Between Points:");
-    Serial.println(distanceBetweenPoints);
-    Serial.println("Theta:");
-    Serial.println(theta);
-    Serial.println("Starting Angle");
-    Serial.println(startingAngle);
-    
-    
     int   numberOfStepsPerMM     =  15;
     int   finalNumberOfSteps     =  arcLengthMM*numberOfStepsPerMM;
     float stepSizeRadians        =  theta/finalNumberOfSteps;
     
-    Serial.println("Arc Length:");
-    Serial.println(arcLengthMM);
-    Serial.println("Final number of steps");
-    Serial.println(finalNumberOfSteps);
-    Serial.println("Step Size Radians:");
-    Serial.println(stepSizeRadians*1000);
+    float stepDelayMs              =  1000*((60*arcLengthMM)/mmPerSecond)/finalNumberOfSteps;
     
     int numberOfStepsTaken         =  0;
     
@@ -368,11 +351,11 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         xAxis.write(aChainLength);
         yAxis.write(bChainLength);
         
-        delay(4);
+        delay(stepDelayMs);
         
         returnPoz();
         
-        numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
+        numberOfStepsTaken = numberOfStepsTaken + 1;
     }
     
     xyToChainLengths(X2,Y2,&aChainLength,&bChainLength);
@@ -382,7 +365,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
 
 int   G2(String readString){
     Serial.println("G2 executing");
-    arc(-100, 0, 0, 100, 0, 0, COUNTERCLOCKWISE);
+    arc(-100, 0, 0, 100, 0, 0, 1000, COUNTERCLOCKWISE);
 }
 
 void  G10(String readString){
