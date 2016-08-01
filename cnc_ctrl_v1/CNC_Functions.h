@@ -365,7 +365,31 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
 
 int   G2(String readString){
     Serial.println("G2 executing");
-    arc(-100, 0, 0, 100, 0, 0, 1000, COUNTERCLOCKWISE);
+    
+    float X1;
+    float Y1;
+    chainLengthsToXY(xAxis.target(), yAxis.target(), &X1, &Y1);
+    
+    float X2    = extractGcodeValue(readString, 'X', 0.0);
+    float Y2    = extractGcodeValue(readString, 'Y', 0.0);
+    float I     = extractGcodeValue(readString, 'I', 0.0);
+    float J     = extractGcodeValue(readString, 'J', 0.0);
+    float speed = extractGcodeValue(readString, 'F', feedrate);
+    
+    Serial.print("X1: ");
+    Serial.println(X1);
+    Serial.print("Y1: ");
+    Serial.println(Y1);
+    Serial.print("X2: ");
+    Serial.println(X2);
+    Serial.print("Y2: ");
+    Serial.println(Y2);
+    Serial.println("I: ");
+    Serial.println(I);
+    Serial.println("J: ");
+    Serial.println(J);
+    
+    //arc(-100, 0, 0, 100, 0, 0, 1000, COUNTERCLOCKWISE);
 }
 
 void  G10(String readString){
