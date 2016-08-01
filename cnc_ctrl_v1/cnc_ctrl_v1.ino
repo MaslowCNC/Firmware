@@ -31,6 +31,8 @@ void setup(){
     
     xAxis.initializePID();
     yAxis.initializePID();
+    
+    G2("test");
 }
 
 void loop(){

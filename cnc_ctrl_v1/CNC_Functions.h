@@ -22,8 +22,11 @@
 #include "Axis.h"
 
 
-#define FORWARD 1
-#define BACKWARD -1
+#define FORWARD           1
+#define BACKWARD         -1
+
+#define CLOCKWISE        -1
+#define COUNTERCLOCKWISE  1
 
 
 #define XDIRECTION BACKWARD
@@ -304,9 +307,74 @@ int   G1(String readString){
     
     
     int secondsPerMinute = 60;
-    feedrate = gospeed/(secondsPerMinute*76.2); //store the feed rate for later use
+    feedrate = gospeed/(secondsPerMinute*76.2); //store the feed rate for later use 76.2 is the #mm moved/rotation. Should be handled in axis object
     
     Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
+}
+
+int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, int direction){
+    
+    float pi                     =  3.1415;
+    float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
+    float distanceBetweenPoints  =  sqrt( sq(  X2 - X1   ) + sq(    Y2  - Y1) );
+    float circumference          =  2.0*pi*radius;
+    float theta                  =  acos(  (sq(distanceBetweenPoints) - 2.0*sq(radius) )  /  (-4.0*radius)  ) ;
+    float arcLengthMM            =  circumference * (theta / (2*pi) );
+    float startingAngle          =  atan( Y1/X1 );
+    
+    Serial.println("Radius:");
+    Serial.println(radius);
+    Serial.println("Circumference:");
+    Serial.println(circumference);
+    Serial.println("Distance Between Points:");
+    Serial.println(distanceBetweenPoints);
+    Serial.println("Theta:");
+    Serial.println(theta);
+    Serial.println("Starting Angle");
+    Serial.println(startingAngle);
+    
+    
+    int   numberOfStepsPerMM     =  5;
+    int   finalNumberOfSteps     =  arcLengthMM*numberOfStepsPerMM;
+    float stepSizeRadians        =  theta/finalNumberOfSteps;
+    
+    Serial.println("Arc Length:");
+    Serial.println(arcLengthMM);
+    Serial.println("Final number of steps");
+    Serial.println(finalNumberOfSteps);
+    Serial.println("Step Size Radians:");
+    Serial.println(stepSizeRadians*1000);
+    
+    
+    float whereXShouldBeAtThisStep = radius * sin(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
+    float whereYShouldBeAtThisStep = radius * cos(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
+    
+    float aChainLength;
+    float bChainLength;
+    
+    int numberOfStepsTaken      =  0;
+    while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
+        
+        whereXShouldBeAtThisStep = radius * sin(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
+        whereYShouldBeAtThisStep = radius * cos(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
+        
+        
+        
+        if (numberOfStepsTaken % 20 == 0){
+            Serial.print("pz(");
+            Serial.print(whereXShouldBeAtThisStep);
+            Serial.print(", ");
+            Serial.print(whereYShouldBeAtThisStep);
+            Serial.println(", 0.0)");
+        }
+        
+        numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
+    }
+}
+
+int   G2(String readString){
+    Serial.println("G2 executing");
+    arc(-100, 0, 0, 100, 0, 0, COUNTERCLOCKWISE);
 }
 
 void  G10(String readString){
