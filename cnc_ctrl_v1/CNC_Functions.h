@@ -374,6 +374,10 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         
         numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
     }
+    
+    xyToChainLengths(X2,Y2,&aChainLength,&bChainLength);
+    xAxis.endMove(aChainLength);
+    yAxis.endMove(bChainLength);
 }
 
 int   G2(String readString){
