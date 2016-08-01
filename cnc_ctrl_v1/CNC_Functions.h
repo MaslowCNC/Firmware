@@ -319,6 +319,12 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float distanceBetweenPoints  =  sqrt( sq(  X2 - X1   ) + sq(    Y2  - Y1) );
     float circumference          =  2.0*pi*radius;
     float theta                  =  acos(  (sq(distanceBetweenPoints) - 2.0*sq(radius) )  /  (-4.0*radius)  ) ;
+    
+    if (direction == CLOCKWISE){
+        theta = 2.0*pi - theta;
+    }
+    
+    
     float arcLengthMM            =  circumference * (theta / (2*pi) );
     float startingAngle          =  atan( Y1/X1 );
     
@@ -332,8 +338,6 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     
     float whereXShouldBeAtThisStep = radius * cos(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
     float whereYShouldBeAtThisStep = radius * sin(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
-    
-    Serial.println("this ran");
     
     float aChainLength;
     float bChainLength;
