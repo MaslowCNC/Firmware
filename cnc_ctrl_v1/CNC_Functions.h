@@ -345,20 +345,20 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     Serial.println("Step Size Radians:");
     Serial.println(stepSizeRadians*1000);
     
+    int numberOfStepsTaken         =  0;
     
-    float whereXShouldBeAtThisStep = radius * sin(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
-    float whereYShouldBeAtThisStep = radius * cos(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
+    float whereXShouldBeAtThisStep = radius * cos(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
+    float whereYShouldBeAtThisStep = radius * sin(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
     
     float aChainLength;
     float bChainLength;
     
-    int numberOfStepsTaken      =  0;
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
-        whereXShouldBeAtThisStep = radius * sin(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
-        whereYShouldBeAtThisStep = radius * cos(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
+        whereXShouldBeAtThisStep = radius * cos(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
+        whereYShouldBeAtThisStep = radius * sin(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
         
-        
+        xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
         if (numberOfStepsTaken % 20 == 0){
             Serial.print("pz(");
