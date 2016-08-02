@@ -32,10 +32,6 @@ void setup(){
     xAxis.initializePID();
     yAxis.initializePID();
     
-    interpretCommandString("G20 ");
-    interpretCommandString("G01 X10 Y0 F300");
-    interpretCommandString("G02 X0 Y10 I-10 J0 F300");
-    interpretCommandString("G01 X0 Y0 F300");
 }
 
 void loop(){

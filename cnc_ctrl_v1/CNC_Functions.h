@@ -204,7 +204,7 @@ int   Move(float xEnd, float yEnd, float zEnd, float MMPerSecond){
 the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
-    Serial.println("move");
+    
     float  xStartingLocation          = xAxis.read();
     float  yStartingLocation          = yAxis.read();
     int    numberOfStepsPerMM         = 14;
@@ -313,8 +313,6 @@ int   G1(String readString){
 }
 
 int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float mmPerSecond, int direction){
-    
-    Serial.println("arc");
     
     float pi                     =  3.1415;
     float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
