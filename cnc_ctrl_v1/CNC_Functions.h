@@ -158,9 +158,9 @@ void  returnPoz(){
         chainLengthsToXY(xAxis.read(), yAxis.read(), &X, &Y);
         
         Serial.print("pz(");
-        Serial.print(X);
+        Serial.print(X/_inchesToMMConversion);
         Serial.print(", ");
-        Serial.print(Y);
+        Serial.print(Y/_inchesToMMConversion);
         Serial.println(", 0.0)");
         
         lastRan = millis();
