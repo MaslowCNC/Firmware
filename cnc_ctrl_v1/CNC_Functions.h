@@ -401,6 +401,15 @@ void  G10(String readString){
     xAxis.set(0);
     yAxis.set(0);
     
+    xAxis.endMove(0);
+    yAxis.endMove(0);
+    
+    xAxis.attach();
+    yAxis.attach();
+    
+    xAxis.detach();
+    yAxis.detach();
+    
 }
 
 void  setInchesToMillimetersConversion(float newConversionFactor){
