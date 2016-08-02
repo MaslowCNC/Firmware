@@ -37,12 +37,16 @@
 #define MACHINEWIDTH     3048.0
 #define ORIGINCHAINLEN   sqrt(sq(MACHINEHEIGHT/2.0)+ sq(MACHINEWIDTH/2.0))
 
+#define MILLIMETERS 1
+#define INCHES      25.4
+
 
 Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis", 5, 76.2);
 Axis yAxis(6,12,13, FORWARD, 34, "Y-axis", 10, 76.2);
 
 
-float feedrate = 125;
+float feedrate             =  125;
+float _inchesToMMConversion =  1;
 String prependString;
 
 float getAngle(float X,float Y,float centerX,float centerY){
@@ -200,7 +204,7 @@ int   Move(float xEnd, float yEnd, float zEnd, float MMPerSecond){
 the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
-    
+    Serial.println("move");
     float  xStartingLocation          = xAxis.read();
     float  yStartingLocation          = yAxis.read();
     int    numberOfStepsPerMM         = 14;
@@ -300,15 +304,17 @@ int   G1(String readString){
     float currentYPos;
     chainLengthsToXY(xAxis.target(), yAxis.target(), &currentXPos, &currentYPos);
     
-    xgoto    = extractGcodeValue(readString, 'X', currentXPos);
-    ygoto    = extractGcodeValue(readString, 'Y', currentYPos);
-    zgoto    = extractGcodeValue(readString, 'Z', 0.0);
-    feedrate = extractGcodeValue(readString, 'F', feedrate);
+    xgoto    = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
+    ygoto    = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
+    zgoto    = _inchesToMMConversion*extractGcodeValue(readString, 'Z', 0.0);
+    feedrate = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     
     Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 }
 
 int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float mmPerSecond, int direction){
+    
+    Serial.println("arc");
     
     float pi                     =  3.1415;
     float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
@@ -372,34 +378,15 @@ int   G2(String readString){
     float Y1;
     chainLengthsToXY(xAxis.target(), yAxis.target(), &X1, &Y1);
     
-    float X2      = extractGcodeValue(readString, 'X', 0.0);
-    float Y2      = extractGcodeValue(readString, 'Y', 0.0);
-    float I       = extractGcodeValue(readString, 'I', 0.0);
-    float J       = extractGcodeValue(readString, 'J', 0.0);
-    float feed    = extractGcodeValue(readString, 'F', feedrate);
+    float X2      = _inchesToMMConversion*extractGcodeValue(readString, 'X', 0.0);
+    float Y2      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', 0.0);
+    float I       = _inchesToMMConversion*extractGcodeValue(readString, 'I', 0.0);
+    float J       = _inchesToMMConversion*extractGcodeValue(readString, 'J', 0.0);
+    float feed    = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     int   dir     = extractGcodeValue(readString, 'G', 0);
     
     float centerX = X1 + I;
     float centerY = Y1 + J;
-    
-    Serial.print("X1: ");
-    Serial.println(X1);
-    Serial.print("Y1: ");
-    Serial.println(Y1);
-    Serial.print("X2: ");
-    Serial.println(X2);
-    Serial.print("Y2: ");
-    Serial.println(Y2);
-    Serial.print("I: ");
-    Serial.println(I);
-    Serial.print("J: ");
-    Serial.println(J);
-    Serial.print("centerX: ");
-    Serial.println(centerX);
-    Serial.print("CenterY: ");
-    Serial.println(centerY);
-    Serial.print("Dir: ");
-    Serial.println(dir);
     
     if (dir == 2){
         arc(X1, Y1, X2, Y2, centerX, centerY, feed, CLOCKWISE);
@@ -416,6 +403,10 @@ void  G10(String readString){
     xAxis.set(0);
     yAxis.set(0);
     
+}
+
+void  setInchesToMillimetersConversion(float newConversionFactor){
+    _inchesToMMConversion = newConversionFactor;
 }
 
 void interpretCommandString(String readString){
@@ -466,6 +457,18 @@ void interpretCommandString(String readString){
     }
     
     if(readString.substring(0, 3) == "G17"){ //XY plane is the default so no action is taken
+        Serial.println("gready");
+        readString = "";
+    }
+    
+    if(readString.substring(0, 3) == "G20"){
+        setInchesToMillimetersConversion(INCHES);
+        Serial.println("gready");
+        readString = "";
+    }
+    
+    if(readString.substring(0, 3) == "G21"){
+        setInchesToMillimetersConversion(MILLIMETERS);
         Serial.println("gready");
         readString = "";
     }
