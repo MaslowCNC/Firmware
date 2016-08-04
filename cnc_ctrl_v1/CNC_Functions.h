@@ -41,8 +41,8 @@
 #define INCHES      25.4
 
 
-Axis xAxis(7, 8, 9, FORWARD, 10, "X-axis", 5, 76.2);
-Axis yAxis(6,12,13, FORWARD, 34, "Y-axis", 10, 76.2);
+Axis xAxis(7, 8, 9, FORWARD, 10, "Left-axis", 5, 76.2);
+Axis yAxis(6,12,13, FORWARD, 34, "Right-axis", 10, 76.2);
 
 
 float feedrate             =  125;

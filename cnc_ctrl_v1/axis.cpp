@@ -174,6 +174,11 @@ takes this duration and converts it to a ten bit number.*/
     
     duration = duration/numberOfSamplesToAverage;
     
+    if (duration == 0){
+        //Serial.print(_axisName);
+        //Serial.println(" encoder miss");
+    }
+    
     duration = (int)((float)duration*1.23); //1.23 scales it to a ten bit number
     
     
