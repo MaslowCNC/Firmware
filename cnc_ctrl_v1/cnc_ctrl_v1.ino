@@ -35,6 +35,7 @@ void setup(){
 }
 
 void loop(){
+    
     readString = "";
     if (Serial.available()){
         while (Serial.available()) {
