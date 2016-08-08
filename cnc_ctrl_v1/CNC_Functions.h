@@ -416,7 +416,13 @@ void  setInchesToMillimetersConversion(float newConversionFactor){
     _inchesToMMConversion = newConversionFactor;
 }
 
-void interpretCommandString(String readString){
+int interpretCommandString(String readString){
+    
+    Serial.println("gready");
+    readString = "";
+    return 1;
+    
+    
     int i = 0;
     char sect[22];
     
