@@ -418,9 +418,9 @@ void  setInchesToMillimetersConversion(float newConversionFactor){
 
 int interpretCommandString(String readString){
     
-    Serial.println("gready");
-    readString = "";
-    return 1;
+    //Serial.println("gready");
+    //readString = "";
+    //return 1;
     
     
     int i = 0;
