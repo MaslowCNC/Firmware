@@ -369,7 +369,7 @@ void interpretCommandString(String readString){
     char sect[22];
     
     Serial.print("LR: ");
-    Serial.println(millis - T1);
+    Serial.println(millis() - T1);
     
     while (i < 23){
         sect[i] = ' ';

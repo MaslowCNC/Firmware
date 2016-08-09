@@ -37,10 +37,14 @@ void setup(){
 void loop(){
     readString = "";
     if (Serial.available()){
-        while (Serial.available()) {
+        while (true) {
             delay(1);  //delay to allow buffer to fill 
             if (Serial.available() > 0) {
                 char c = Serial.read();  //gets one byte from serial buffer
+                if (c == '#'){
+                    Serial.println("newline");
+                    break;
+                }
                 readString += c; //makes the string readString
             } 
         }
