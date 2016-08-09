@@ -44,10 +44,6 @@
 Axis xAxis(7, 8, 9, FORWARD, 10, "Left-axis", 5, 76.2);
 Axis yAxis(6,12,13, FORWARD, 34, "Right-axis", 10, 76.2);
 
-double T1;
-double T2;
-double T3;
-
 float feedrate             =  125;
 float _inchesToMMConversion =  1;
 String prependString;
@@ -147,10 +143,6 @@ the speed moveSpeed. Movements are correlated so that regardless of the distance
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
     
-    Serial.print("TSLEOM: ");
-    Serial.println(millis() - T1);
-    T1 = millis();
-    
     float  xStartingLocation          = xAxis.read();
     float  yStartingLocation          = yAxis.read();
     int    numberOfStepsPerMM         = 14;
@@ -202,8 +194,6 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     xAxis.endMove(xEnd);
     yAxis.endMove(yEnd);
-    
-    T1 = millis();
     
     return(1);
     
@@ -262,10 +252,6 @@ int   G1(String readString){
 
 int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float mmPerSecond, int direction){
     
-    Serial.print("TSLEOM: ");
-    Serial.println(millis() - T1);
-    T1 = millis();
-    
     float pi                     =  3.1415;
     float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
     float distanceBetweenPoints  =  sqrt( sq(  X2 - X1   ) + sq(    Y2  - Y1) );
@@ -319,7 +305,6 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     xyToChainLengths(X2,Y2,&aChainLength,&bChainLength);
     xAxis.endMove(aChainLength);
     yAxis.endMove(bChainLength);
-    T1 = millis();
 }
 
 int   G2(String readString){
@@ -447,11 +432,6 @@ void interpretCommandString(String readString){
         Serial.println("Firmware Version .59");
         readString = "";
         Serial.println("gready");
-    }
-    
-    if(readString.substring(0, 3) == "B01"){
-        Serial.println("Time Between T1 and T2");
-        Serial.println(T2 - T1);
     }
     
     if((readString[0] == 'T' || readString[0] == 't') && readString[1] != 'e'){
