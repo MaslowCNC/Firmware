@@ -44,78 +44,9 @@
 Axis xAxis(7, 8, 9, FORWARD, 10, "Left-axis", 5, 76.2);
 Axis yAxis(6,12,13, FORWARD, 34, "Right-axis", 10, 76.2);
 
-
 float feedrate             =  125;
 float _inchesToMMConversion =  1;
 String prependString;
-
-float getAngle(float X,float Y,float centerX,float centerY){
-
-/*This function takes in the ABSOLUTE coordinates of the end of the circle and
- the ABSOLUTE coordinates of the center of the circle and returns the angle between 
- the end and the axis in pi-radians*/
-
-    float theta = 0;
-    if ( abs(X - centerX) < .1){
-        centerX = X;
-    }
-    if ( abs(Y - centerY) < .1){
-        centerY = Y;
-    }
-
-    if (X == centerX) { //this resolves div/0 errors
-        if (Y >= centerY) {
-            //Serial.println("special case one");
-            return(0.5);
-        }
-        if ( Y <= centerY ){
-            //Serial.println("special case two");
-            return(1.5);
-        }
-    }
-    if (Y == centerY) { //this resolves div/0 errors
-        if ( X >= centerX) {
-            //Serial.println("special case three");
-            return(0);
-        }
-        if (X <= centerX) {
-            //Serial.println("special case four");
-            return(1.0);
-        }
-    }
-    if (X > centerX and Y > centerY) { //quadrant one
-        //Serial.println("Quadrant 1");
-        theta = atan((centerY - Y)/(X - centerX));
-        theta = 2 + theta/3.141593;
-    }
-    if (X < centerX and Y > centerY) { //#quadrant two
-        //Serial.println("Quadrant 2");
-        theta = atan((Y - centerY)/(X - centerX));
-        theta = 1 - theta/3.141593;
-    }
-    if (X < centerX and Y < centerY) { //#quadrant three
-        //Serial.println("Quadrant 3");
-        theta = atan((centerY - Y)/(centerX - X));
-        //Serial.println(theta);
-        //theta = theta/3.141593 + 1;
-        theta = 2 - theta/3.141593;
-        theta = theta - 1;
-        //Serial.println(theta);
-    }
-    if (X > centerX and Y < centerY) { //#quadrant four
-        //Serial.println("Quadrant 4");
-        theta = atan((centerY - Y)/(X - centerX));
-        //Serial.println(theta);
-        theta = theta/3.141593;
-        //Serial.println(theta);
-    }
-
-    theta = 2 - theta;
-
-    //Serial.println("Theta: ");
-    //Serial.println(theta);
-    return(theta);
-}
 
 void  chainLengthsToXY(float chainALength, float chainBlength, float* X, float* Y){
     float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
@@ -444,9 +375,9 @@ void interpretCommandString(String readString){
     }
     
     if(readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G0 " || readString.substring(0, 3) == "G1 "){
+        Serial.println("gready");
         G1(readString);
         Serial.println("ready");
-        Serial.println("gready");
         readString = "";
     }
     
@@ -458,9 +389,9 @@ void interpretCommandString(String readString){
     }
     
     if(readString.substring(0, 3) == "G03" || readString.substring(0, 3) == "G3 "){
+        Serial.println("gready");
         G2(readString);
         Serial.println("ready");
-        Serial.println("gready");
         readString = "";
     }
     
