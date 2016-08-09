@@ -38,11 +38,9 @@ void loop(){
     readString = "";
     if (Serial.available()){
         while (true) {
-            delay(1);  //delay to allow buffer to fill 
             if (Serial.available() > 0) {
                 char c = Serial.read();  //gets one byte from serial buffer
-                if (c == '#'){
-                    Serial.println("newline");
+                if (c == '\n'){
                     break;
                 }
                 readString += c; //makes the string readString

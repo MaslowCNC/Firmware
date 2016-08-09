@@ -262,6 +262,10 @@ int   G1(String readString){
 
 int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float mmPerSecond, int direction){
     
+    Serial.print("TSLEOM: ");
+    Serial.println(millis() - T1);
+    T1 = millis();
+    
     float pi                     =  3.1415;
     float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
     float distanceBetweenPoints  =  sqrt( sq(  X2 - X1   ) + sq(    Y2  - Y1) );
@@ -315,6 +319,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     xyToChainLengths(X2,Y2,&aChainLength,&bChainLength);
     xAxis.endMove(aChainLength);
     yAxis.endMove(bChainLength);
+    T1 = millis();
 }
 
 int   G2(String readString){
@@ -367,9 +372,6 @@ void  setInchesToMillimetersConversion(float newConversionFactor){
 void interpretCommandString(String readString){
     int i = 0;
     char sect[22];
-    
-    Serial.print("LR: ");
-    Serial.println(millis() - T1);
     
     while (i < 23){
         sect[i] = ' ';
