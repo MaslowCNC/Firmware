@@ -252,6 +252,14 @@ int   G1(String readString){
         Serial.print(zgoto);
         Serial.println(" mm");
         
+        int    waitTimeMs = 1000;
+        double startTime  = millis();
+        
+        while (millis() - startTime < waitTimeMs){
+            delay(1);
+            holdPosition();
+        } 
+        
     }
     
     Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
