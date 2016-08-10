@@ -307,7 +307,6 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
 }
 
 int   G2(String readString){
-    Serial.println("G2 executing");
     
     float X1;
     float Y1;
