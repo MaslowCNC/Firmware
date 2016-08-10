@@ -146,7 +146,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float  xStartingLocation          = xAxis.read();
     float  yStartingLocation          = yAxis.read();
     int    numberOfStepsPerMM         = 14;
-    
+    MMPerSecond = .5;
     float aChainLength;
     float bChainLength;
     
@@ -173,6 +173,9 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     xAxis.attach();
     yAxis.attach();
+    
+    Serial.println("***");
+    Serial.println(finalNumberOfSteps);
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
@@ -256,15 +259,10 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
     float distanceBetweenPoints  =  sqrt( sq(  X2 - X1   ) + sq(    Y2  - Y1) );
     float circumference          =  2.0*pi*radius;
-    float theta                  =  acos(  (sq(distanceBetweenPoints) - 2.0*sq(radius) )  /  (-4.0*radius)  ) ;
-    
-    if (direction == CLOCKWISE){
-        theta = 2.0*pi - theta;
-    }
-    
+    float theta                  =  acos(  (sq(radius)+sq(radius)-sq(distanceBetweenPoints)) / (2*radius*radius)  ) ;
     
     float arcLengthMM            =  circumference * (theta / (2*pi) );
-    float startingAngle          =  atan( Y1/X1 );
+    float startingAngle          =  atan2(Y1 - centerY, X1 - centerX);
     
     int   numberOfStepsPerMM     =  15;
     int   finalNumberOfSteps     =  arcLengthMM*numberOfStepsPerMM;
@@ -274,16 +272,26 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     
     int numberOfStepsTaken         =  0;
     
-    float whereXShouldBeAtThisStep = radius * cos(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
-    float whereYShouldBeAtThisStep = radius * sin(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
+    float angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
+    
+    float whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
+    float whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
     
     float aChainLength;
     float bChainLength;
     
+    Serial.println("#^");
+    Serial.println(arcLengthMM);
+    Serial.println(finalNumberOfSteps);
+    
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
-        whereXShouldBeAtThisStep = radius * cos(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
-        whereYShouldBeAtThisStep = radius * sin(startingAngle + direction*stepSizeRadians*numberOfStepsTaken);
+        angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
+        
+        Serial.println(angleNow);
+        
+        whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
+        whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
         
         xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
