@@ -258,12 +258,6 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float circumference          =  2.0*pi*radius;
     float theta                  =  acos(  (sq(radius)+sq(radius)-sq(distanceBetweenPoints)) / (2*radius*radius)  ) ;
     
-    
-    if (direction == CLOCKWISE){
-        theta = 2.0*pi - theta;
-    }
-    
-    
     float arcLengthMM            =  circumference * (theta / (2*pi) );
     float startingAngle          =  atan2(Y1 - centerY, X1 - centerX);
     
