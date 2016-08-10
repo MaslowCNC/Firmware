@@ -146,7 +146,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float  xStartingLocation          = xAxis.read();
     float  yStartingLocation          = yAxis.read();
     int    numberOfStepsPerMM         = 14;
-    
+    MMPerSecond = .5;
     float aChainLength;
     float bChainLength;
     
@@ -173,6 +173,9 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     xAxis.attach();
     yAxis.attach();
+    
+    Serial.println("***");
+    Serial.println(finalNumberOfSteps);
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
@@ -277,9 +280,15 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float aChainLength;
     float bChainLength;
     
+    Serial.println("#^");
+    Serial.println(arcLengthMM);
+    Serial.println(finalNumberOfSteps);
+    
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
         angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
+        
+        Serial.println(angleNow);
         
         whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
         whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
