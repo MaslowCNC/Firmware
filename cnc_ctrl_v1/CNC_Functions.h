@@ -247,6 +247,21 @@ int   G1(String readString){
     zgoto    = _inchesToMMConversion*extractGcodeValue(readString, 'Z', 0.0);
     feedrate = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     
+    if (zgoto != 0){
+        Serial.print("Message: Please adjust Z-Axis to a depth of ");
+        Serial.print(zgoto);
+        Serial.println(" mm");
+        
+        int    waitTimeMs = 1000;
+        double startTime  = millis();
+        
+        while (millis() - startTime < waitTimeMs){
+            delay(1);
+            holdPosition();
+        } 
+        
+    }
+    
     Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
 }
 
@@ -373,8 +388,9 @@ void interpretCommandString(String readString){
     }
     
     if(readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G0 " || readString.substring(0, 3) == "G1 "){
-        Serial.println("gready");
+        
         G1(readString);
+        Serial.println("gready");
         Serial.println("ready");
         readString = "";
     }
