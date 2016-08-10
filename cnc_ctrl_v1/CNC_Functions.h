@@ -265,7 +265,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     
     
     float arcLengthMM            =  circumference * (theta / (2*pi) );
-    float startingAngle          =  atan2(Y1,X1);
+    float startingAngle          =  atan2(Y1 - centerY, X1 - centerX);
     
     int   numberOfStepsPerMM     =  15;
     int   finalNumberOfSteps     =  arcLengthMM*numberOfStepsPerMM;
@@ -277,8 +277,8 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     
     float angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
     
-    float whereXShouldBeAtThisStep = radius * cos(angleNow);
-    float whereYShouldBeAtThisStep = radius * sin(angleNow);
+    float whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
+    float whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
     
     float aChainLength;
     float bChainLength;
@@ -289,9 +289,6 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         
         whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
         whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
-        
-        Serial.print("Angle: ");
-        Serial.println(angleNow);
         
         xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
