@@ -40,9 +40,11 @@
 #define MILLIMETERS 1
 #define INCHES      25.4
 
+#define DIST_PER_ROTATION 10*6.35//#teeth*pitch of chain
 
-Axis xAxis(7, 8, 9, FORWARD, 10, "Left-axis", 5, 76.2);
-Axis yAxis(6,12,13, FORWARD, 34, "Right-axis", 10, 76.2);
+
+Axis xAxis(7, 8, 9, FORWARD, 10, "Left-axis", 5, DIST_PER_ROTATION);
+Axis yAxis(6,12,13, FORWARD, 34, "Right-axis", 10, DIST_PER_ROTATION);
 
 float feedrate             =  125;
 float _inchesToMMConversion =  1;
