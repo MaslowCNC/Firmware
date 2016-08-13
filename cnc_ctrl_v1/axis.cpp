@@ -174,6 +174,9 @@ takes this duration and converts it to a ten bit number.*/
     
     duration = duration/numberOfSamplesToAverage;
     
+    Serial.print(_axisName);
+    Serial.println(duration);
+    
     if (duration == 0){
         //Serial.print(_axisName);
         //Serial.println(" encoder miss");
