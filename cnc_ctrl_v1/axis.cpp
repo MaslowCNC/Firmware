@@ -18,6 +18,7 @@
 
 #include "Arduino.h"
 #include "Axis.h"
+#include "Encoder.h"
 
 #define FORWARD 1
 #define BACKWARD -1
@@ -27,19 +28,17 @@
 
 
 
-Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName, int eepromAdr, float mmPerRotation){
+Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation){
     
     //initialize motor
     _motor.setupMotor(pwmPin, directionPin1, directionPin2);
     
-    //initialize pins
-    pinMode(encoderPin, INPUT);
+    Encoder _encoder(2, 3);
     
     _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _Ki, _Kd, REVERSE);
     
     //initialize variables
     _direction    = encoderDirection;
-    _encoderPin   = encoderPin;
     _axisName     = axisName;
     _axisPosition = 0.0;
     _axisTarget   = 0.0;
