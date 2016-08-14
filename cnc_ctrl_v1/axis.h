@@ -22,6 +22,7 @@
     #include "GearMotor.h"
     #include "PID_v1.h"
     #include <EEPROM.h>
+    #include "Encoder.h"
     
 
     class Axis{
