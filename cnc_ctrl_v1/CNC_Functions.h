@@ -148,7 +148,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float  xStartingLocation          = xAxis.read();
     float  yStartingLocation          = yAxis.read();
     int    numberOfStepsPerMM         = 14;
-    MMPerSecond = .5;
+    MMPerSecond = .1;
     float aChainLength;
     float bChainLength;
     
