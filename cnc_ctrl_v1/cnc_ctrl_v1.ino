@@ -51,10 +51,6 @@ void loop(){
         interpretCommandString(readString);
     }
     
-    while(true){
-        Serial.println(analogRead(A0));
-    }
-    
     holdPosition();
     
     returnPoz();

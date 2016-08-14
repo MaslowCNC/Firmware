@@ -59,6 +59,7 @@
             PID        _pidController;
             int        _eepromAdr;
             float      _mmPerRotation;
+            Encoder    _encoder;
     };
 
     #endif

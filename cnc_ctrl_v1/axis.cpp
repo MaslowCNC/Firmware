@@ -27,15 +27,15 @@
 
 
 
-Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation){
+Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation)
+:
+_encoder(encoderPin1,encoderPin2)
+{
     
     //initialize motor
     _motor.setupMotor(pwmPin, directionPin1, directionPin2);
     
     _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _Ki, _Kd, REVERSE);
-    
-    
-    global Encoder    _encoder(2, 3);
     
     //initialize variables
     _direction    = encoderDirection;
@@ -71,7 +71,8 @@ int    Axis::write(float targetPosition){
 }
 
 float  Axis::read(){
-    //Serial.println(_encoder.read());
+    Serial.print(_axisName);
+    Serial.println(_encoder.read());
     if (_motor.attached()){
         return _pidSetpoint*_mmPerRotation;
     }
@@ -173,9 +174,6 @@ takes this duration and converts it to a ten bit number.*/
     }
     
     duration = duration/numberOfSamplesToAverage;
-    
-    Serial.print(_axisName);
-    Serial.println(duration);
     
     if (duration == 0){
         //Serial.print(_axisName);
