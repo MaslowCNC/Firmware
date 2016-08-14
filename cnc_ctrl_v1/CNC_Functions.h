@@ -43,8 +43,8 @@
 #define DIST_PER_ROTATION 10*6.35//#teeth*pitch of chain
 
 
-Axis xAxis(7, 8, 9, FORWARD, 2, 3, "Left-axis", 5, DIST_PER_ROTATION);
-Axis yAxis(6,12,13, FORWARD, 18, 19, "Right-axis", 10, DIST_PER_ROTATION);
+Axis xAxis(7, 8, 9, FORWARD, 18, 19, "Left-axis", 5, DIST_PER_ROTATION);
+Axis yAxis(6,12,13, FORWARD, 2, 3, "Right-axis", 10, DIST_PER_ROTATION);
 
 float feedrate             =  125;
 float _inchesToMMConversion =  1;
