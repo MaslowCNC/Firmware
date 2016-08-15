@@ -89,7 +89,7 @@ float  Axis::target(){
 int    Axis::set(float newAxisPosition){
     _axisPosition =  newAxisPosition/_mmPerRotation;
     _axisTarget   =  newAxisPosition/_mmPerRotation;
-    _encoder.write(_direction*newAxisPosition*NUMBER_OF_ENCODER_STEPS);
+    _encoder.write((_direction*newAxisPosition*NUMBER_OF_ENCODER_STEPS)/_mmPerRotation);
 }
 
 int    Axis::updatePositionFromEncoder(){
