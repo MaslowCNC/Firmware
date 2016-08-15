@@ -145,17 +145,16 @@ the speed moveSpeed. Movements are correlated so that regardless of the distance
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
     
-    float  xStartingLocation          = xAxis.read();
-    float  yStartingLocation          = yAxis.read();
+    float  xStartingLocation;
+    float  yStartingLocation;
+    chainLengthsToXY(xAxis.target(), yAxis.target(), &xStartingLocation, &yStartingLocation);
+    
     int    numberOfStepsPerMM         = 14;
     MMPerSecond = .1;
     float aChainLength;
     float bChainLength;
     
     xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
-    
-    xEnd = aChainLength;
-    yEnd = bChainLength;
     
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
@@ -181,21 +180,24 @@ and G01 commands. The units at this point should all be in rotations or rotation
         float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
         float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
         
+        xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+        
         delay(timePerStep);
         
         xAxis.updatePositionFromEncoder();
         yAxis.updatePositionFromEncoder();
         
-        xAxis.write(whereXShouldBeAtThisStep);
-        yAxis.write(whereYShouldBeAtThisStep);
+        xAxis.write(aChainLength);
+        yAxis.write(bChainLength);
         
         numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
         
         returnPoz();
     }
     
-    xAxis.endMove(xEnd);
-    yAxis.endMove(yEnd);
+    xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
+    xAxis.endMove(aChainLength);
+    yAxis.endMove(bChainLength);
     
     return(1);
     
@@ -369,7 +371,7 @@ void  setInchesToMillimetersConversion(float newConversionFactor){
     _inchesToMMConversion = newConversionFactor;
 }
 
-void interpretCommandString(String readString){
+void  interpretCommandString(String readString){
     int i = 0;
     char sect[22];
     
