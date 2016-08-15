@@ -22,11 +22,12 @@
     #include "GearMotor.h"
     #include "PID_v1.h"
     #include <EEPROM.h>
+    #include "Encoder.h"
     
 
     class Axis{
         public:
-            Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName, int eepromAdr, float mmPerRotation);
+            Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation);
             int    write(float targetPosition);
             float  read();
             int    set(float newAxisPosition);
@@ -58,6 +59,7 @@
             PID        _pidController;
             int        _eepromAdr;
             float      _mmPerRotation;
+            Encoder    _encoder;
     };
 
     #endif

@@ -25,21 +25,22 @@
 #define EEPROMVALIDDATA 56
 #define EEPROMFLAG 18
 
+#define NUMBER_OF_ENCODER_STEPS 4096.0
 
 
-Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin, String axisName, int eepromAdr, float mmPerRotation){
+
+Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation)
+:
+_encoder(encoderPin1,encoderPin2)
+{
     
     //initialize motor
     _motor.setupMotor(pwmPin, directionPin1, directionPin2);
-    
-    //initialize pins
-    pinMode(encoderPin, INPUT);
     
     _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _Ki, _Kd, REVERSE);
     
     //initialize variables
     _direction    = encoderDirection;
-    _encoderPin   = encoderPin;
     _axisName     = axisName;
     _axisPosition = 0.0;
     _axisTarget   = 0.0;
@@ -72,6 +73,7 @@ int    Axis::write(float targetPosition){
 }
 
 float  Axis::read(){
+    
     if (_motor.attached()){
         return _pidSetpoint*_mmPerRotation;
     }
@@ -87,39 +89,13 @@ float  Axis::target(){
 int    Axis::set(float newAxisPosition){
     _axisPosition =  newAxisPosition/_mmPerRotation;
     _axisTarget   =  newAxisPosition/_mmPerRotation;
+    _encoder.write(_direction*newAxisPosition*NUMBER_OF_ENCODER_STEPS);
 }
 
 int    Axis::updatePositionFromEncoder(){
-
-/*The SetPos() function updates the machine's position by essentially integrating 
-the input from the encoder*/
-
-    int maxJump = 400;
-
-    if(abs(_currentAngle - _previousAngle) <= maxJump){ //The encoder did not just transition from 0 to 360 degrees
-        _axisPosition = _axisPosition + (_currentAngle - _previousAngle)/1023.0; //The position is incremented by the change in position since the last update.
-    }
-    else{//The transition from 0 to 360 (10-bit value 1023) or vice versa has just taken place
-        if(_previousAngle < 200 && _currentAngle > 850){ //Add back in any dropped position
-            _currentAngle = 1023;
-            _axisPosition = _axisPosition + (0 - _previousAngle)/1023.0;
-        }
-        if(_previousAngle > 850 && _currentAngle < 200){
-            _currentAngle = 0;
-            _axisPosition = _axisPosition + (1023 - _previousAngle)/1023.0;
-        }
-    }
     
+    _axisPosition = _direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS;
 
-    _previousAngle = _currentAngle; //Reset the previous angle variables
-
-    if(_direction == FORWARD){ //Update the current angle variable. Direction is set at compile time depending on which side of the rod the encoder is positioned on.
-        _currentAngle = _PWMread(_encoderPin);
-    }
-    else{
-        _currentAngle = 1023 - _PWMread(_encoderPin);
-    }
-    
 }
 
 int    Axis::detach(){
@@ -156,44 +132,6 @@ void   Axis::endMove(float finalTarget){
     _timeLastMoved = millis();
     _axisTarget    = finalTarget/_mmPerRotation;
     
-}
-
-int    Axis::_PWMread(int pin){
-
-/*PWMread() measures the duty cycle of a PWM signal on the provided pin. It then
-takes this duration and converts it to a ten bit number.*/
-
-    int duration = 0;
-    int numberOfSamplesToAverage = 1;
-    int i = 0;
-    
-    while (i < numberOfSamplesToAverage){
-        duration = duration + pulseIn(pin, HIGH, 2000); //This returns the pulse duration
-        i++;
-    }
-    
-    duration = duration/numberOfSamplesToAverage;
-    
-    if (duration == 0){
-        //Serial.print(_axisName);
-        //Serial.println(" encoder miss");
-    }
-    
-    duration = (int)((float)duration*1.23); //1.23 scales it to a ten bit number
-    
-    
-    if (duration >= 1023){
-        duration = 1023;
-    }
-    
-
-    
-    if (duration < 10){
-        duration = 0;
-    }
-
-    return duration;
-
 }
 
 int    Axis::returnPidMode(){

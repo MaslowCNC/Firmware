@@ -43,8 +43,8 @@
 #define DIST_PER_ROTATION 10*6.35//#teeth*pitch of chain
 
 
-Axis xAxis(7, 8, 9, FORWARD, 10, "Left-axis", 5, DIST_PER_ROTATION);
-Axis yAxis(6,12,13, FORWARD, 34, "Right-axis", 10, DIST_PER_ROTATION);
+Axis xAxis(7, 8, 9, FORWARD, 18, 19, "Left-axis", 5, DIST_PER_ROTATION);
+Axis yAxis(6,12,13, FORWARD, 2, 3, "Right-axis", 10, DIST_PER_ROTATION);
 
 float feedrate             =  125;
 float _inchesToMMConversion =  1;
@@ -148,7 +148,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float  xStartingLocation          = xAxis.read();
     float  yStartingLocation          = yAxis.read();
     int    numberOfStepsPerMM         = 14;
-    MMPerSecond = .5;
+    MMPerSecond = .1;
     float aChainLength;
     float bChainLength;
     
