@@ -202,7 +202,6 @@ and G01 commands. The units at this point should all be in rotations or rotation
 }
 
 int   rapidMove(float xEnd, float yEnd, float zEnd){
-    Serial.println ("in rapid move");
     
     float aChainLength;
     float bChainLength;
@@ -281,8 +280,6 @@ int   G1(String readString){
     zgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Z', 0.0);
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     isNotRapid = extractGcodeValue(readString, 'G', 1);
-    Serial.println("is not rapid");
-    Serial.println(isNotRapid);
     
     if (zgoto != 0){
         Serial.print("Message: Please adjust Z-Axis to a depth of ");
