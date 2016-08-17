@@ -111,6 +111,13 @@ void  returnPoz(){
         Serial.print(Y/_inchesToMMConversion);
         Serial.print(", 0.0)");
         
+        if (_inchesToMMConversion == INCHES){
+            Serial.println("in");
+        }
+        else{
+            Serial.println("mm");
+        }
+        
         lastRan = millis();
     }
     
