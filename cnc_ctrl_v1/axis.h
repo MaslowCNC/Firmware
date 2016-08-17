@@ -39,6 +39,7 @@
             void   hold();
             void   endMove(float finalTarget);
             float  target();
+            float  error();
             
         private:
             int        _PWMread(int pin);
