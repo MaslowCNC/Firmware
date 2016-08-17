@@ -103,6 +103,14 @@ void  returnPoz(){
             Serial.println("mm");
         }
         
+        chainLengthsToXY(xAxis.setpoint(), yAxis.setpoint(), &X, &Y);
+        
+        Serial.print("pt(");
+        Serial.print(X/_inchesToMMConversion);
+        Serial.print(", ");
+        Serial.print(Y/_inchesToMMConversion);
+        Serial.print(", 0.0)");
+        
         lastRan = millis();
     }
     
