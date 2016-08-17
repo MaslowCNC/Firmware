@@ -98,6 +98,10 @@ int    Axis::updatePositionFromEncoder(){
 
 }
 
+float  Axis::error(){
+    return abs(_axisPosition - _pidSetpoint)*_mmPerRotation;
+}
+
 int    Axis::detach(){
     
     if (_motor.attached()){

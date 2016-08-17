@@ -201,6 +201,37 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
 }
 
+int   rapidMove(float xEnd, float yEnd, float zEnd){
+    Serial.println ("in rapid move");
+    
+    float aChainLength;
+    float bChainLength;
+    
+    xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
+    
+    xAxis.attach();
+    yAxis.attach();
+    
+    
+    while(true){
+        xAxis.updatePositionFromEncoder();
+        yAxis.updatePositionFromEncoder();
+        
+        xAxis.write(aChainLength);
+        yAxis.write(bChainLength);
+        
+        returnPoz();
+        
+        if (xAxis.error() < 10 && yAxis.error() < 10){
+            break;
+        }
+    }
+    
+    xAxis.endMove(aChainLength);
+    yAxis.endMove(bChainLength);
+    
+}
+
 void  holdPosition(){
     xAxis.hold();
     yAxis.hold();
@@ -237,6 +268,7 @@ int   G1(String readString){
     float ygoto;
     float zgoto;
     float gospeed;
+    int   isNotRapid;
     
     readString.toUpperCase(); //Make the string all uppercase to remove variability
     
@@ -244,10 +276,13 @@ int   G1(String readString){
     float currentYPos;
     chainLengthsToXY(xAxis.target(), yAxis.target(), &currentXPos, &currentYPos);
     
-    xgoto    = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
-    ygoto    = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
-    zgoto    = _inchesToMMConversion*extractGcodeValue(readString, 'Z', 0.0);
-    feedrate = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
+    xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
+    ygoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
+    zgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Z', 0.0);
+    feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
+    isNotRapid = extractGcodeValue(readString, 'G', 1);
+    Serial.println("is not rapid");
+    Serial.println(isNotRapid);
     
     if (zgoto != 0){
         Serial.print("Message: Please adjust Z-Axis to a depth of ");
@@ -264,7 +299,12 @@ int   G1(String readString){
         
     }
     
-    Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
+    if (isNotRapid){
+        Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
+    }
+    else{
+        rapidMove(xgoto, ygoto, zgoto);
+    }
 }
 
 int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float mmPerSecond, int direction){
