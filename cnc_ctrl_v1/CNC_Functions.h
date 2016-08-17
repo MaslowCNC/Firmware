@@ -82,8 +82,9 @@ void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* 
 
 void  returnPoz(){
     static unsigned long lastRan = millis();
+    int                  timeout = 200;
     
-    if (millis() - lastRan > 200){
+    if (millis() - lastRan > timeout){
         
         float X;
         float Y;

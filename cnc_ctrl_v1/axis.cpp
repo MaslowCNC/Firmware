@@ -124,8 +124,9 @@ int    Axis::attach(){
 }
 
 void   Axis::hold(){
+    int timeout   = 20000;
     
-    if (millis() - _timeLastMoved < 2000){
+    if (millis() - _timeLastMoved < timeout){
         updatePositionFromEncoder();
         write(_axisTarget*_mmPerRotation);
     }
