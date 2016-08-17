@@ -78,7 +78,7 @@ float  Axis::read(){
         return _axisPosition*_mmPerRotation;
     }
     else{
-        return _pidSetpoint*_mmPerRotation;
+        return _axisPosition*_mmPerRotation;
     }
 }
 
