@@ -75,7 +75,7 @@ int    Axis::write(float targetPosition){
 float  Axis::read(){
     
     if (_motor.attached()){
-        return _pidSetpoint*_mmPerRotation;
+        return _axisPosition*_mmPerRotation;
     }
     else{
         return _pidSetpoint*_mmPerRotation;
@@ -84,6 +84,10 @@ float  Axis::read(){
 
 float  Axis::target(){
     return _axisTarget*_mmPerRotation;
+}
+
+float Axis::setpoint(){
+    return _pidSetpoint*_mmPerRotation;
 }
 
 int    Axis::set(float newAxisPosition){

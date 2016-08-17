@@ -40,6 +40,7 @@
             void   endMove(float finalTarget);
             float  target();
             float  error();
+            float  setpoint();
             
         private:
             int        _PWMread(int pin);

@@ -145,10 +145,10 @@ the speed moveSpeed. Movements are correlated so that regardless of the distance
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
     
-    float  xStartingLocation          = xAxis.read();
-    float  yStartingLocation          = yAxis.read();
+    float  xStartingLocation          = xAxis.setpoint();
+    float  yStartingLocation          = yAxis.setpoint();
     int    numberOfStepsPerMM         = 14;
-    MMPerSecond = .1;
+    MMPerSecond = .05;
     float aChainLength;
     float bChainLength;
     
