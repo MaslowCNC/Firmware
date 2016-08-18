@@ -69,6 +69,11 @@ int    Axis::write(float targetPosition){
     
     _motor.write(90 + _pidOutput);
     
+    while(true){
+        Serial.println("help! I'm stuck");
+        _motor.write(90 + 90);
+    }
+    
     return 1;
 }
 
