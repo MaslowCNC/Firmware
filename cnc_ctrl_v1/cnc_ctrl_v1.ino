@@ -36,7 +36,6 @@ void setup(){
     Timer1.initialize(10000);         // initialize timer1, and set a 1/2 second period
     Timer1.attachInterrupt(runsOnATimer);  // attaches callback() as a timer overflow interrupt
     
-    interpretCommandString("G00 X50 F123 ");
 }
 
 void runsOnATimer(){
