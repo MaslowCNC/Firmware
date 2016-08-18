@@ -124,33 +124,26 @@ void  returnPoz(){
     
 }
 
-void  fakeMove(){
-    
-    float aChainLength;
-    float bChainLength;
-    float X1 = 24.0;
-    float Y1 = 300.0;
-    
-    Serial.println("Input: ");
-    Serial.println(X1);
-    Serial.println(Y1);
-    
-    xyToChainLengths(X1,Y1,&aChainLength,&bChainLength);
-    
-    
-    Serial.println("Intermediate:");
-    Serial.println(aChainLength);
-    Serial.println(bChainLength);
-    
-    float X2;
-    float Y2;
-    chainLengthsToXY(aChainLength, bChainLength, &X2, &Y2);
-    
-    Serial.println("Output: ");
-    Serial.println(X2);
-    Serial.println(Y2);
-    
-    Serial.println("\n\n\n\n\n\n\n\n\n\n");
+void  test(){
+    yAxis.detach();
+    xAxis.attach();
+    int i = 0;
+    int dist = 10000;
+    while(true){
+        Serial.println("50");
+        while (i < dist){
+            xAxis.write(-50);
+            i++;
+        }
+        i = 0;
+        Serial.println("0");
+        while (i < dist){
+            xAxis.write(0);
+            i++;
+        }
+        i = 0;
+        
+    }
     
 }
 

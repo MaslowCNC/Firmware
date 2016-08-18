@@ -23,6 +23,7 @@
     #include "PID_v1.h"
     #include <EEPROM.h>
     #include "Encoder.h"
+    #include "TimerThree.h"
     
 
     class Axis{
@@ -57,7 +58,7 @@
             int        _previousAngle;
             double     _timeLastMoved;
             double     _pidSetpoint, _pidInput, _pidOutput;
-            double     _Kp=500, _Ki=.1, _Kd=100;
+            double     _Kp=400, _Ki=0, _Kd=0;
             PID        _pidController;
             int        _eepromAdr;
             float      _mmPerRotation;

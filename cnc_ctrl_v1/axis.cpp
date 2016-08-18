@@ -53,6 +53,8 @@ _encoder(encoderPin1,encoderPin2)
         set(_readFloat(_eepromAdr));
     }
     
+    //setup timer to call compute PID module
+    
 }
 
 void   Axis::initializePID(){
@@ -124,7 +126,7 @@ int    Axis::attach(){
 }
 
 void   Axis::hold(){
-    int timeout   = 2000;
+    int timeout   = 20000;
     
     if (millis() - _timeLastMoved < timeout){
         updatePositionFromEncoder();
@@ -145,6 +147,7 @@ void   Axis::endMove(float finalTarget){
 
 int    Axis::returnPidMode(){
     return _pidController.GetMode();
+    Serial.println("return pid mode ran");
 }
 
 float  Axis::_readFloat(unsigned int addr){
