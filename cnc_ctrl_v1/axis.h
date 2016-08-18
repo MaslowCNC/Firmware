@@ -23,7 +23,6 @@
     #include "PID_v1.h"
     #include <EEPROM.h>
     #include "Encoder.h"
-    #include "TimerThree.h"
     
 
     class Axis{
@@ -33,7 +32,6 @@
             float  read();
             int    set(float newAxisPosition);
             int    updatePositionFromEncoder();
-            int    returnPidMode();
             void   initializePID();
             int    detach();
             int    attach();
@@ -42,6 +40,7 @@
             float  target();
             float  error();
             float  setpoint();
+            void   computePID();
             
         private:
             int        _PWMread(int pin);

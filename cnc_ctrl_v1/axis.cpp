@@ -53,7 +53,6 @@ _encoder(encoderPin1,encoderPin2)
         set(_readFloat(_eepromAdr));
     }
     
-    //setup timer to call compute PID module
     
 }
 
@@ -66,10 +65,6 @@ int    Axis::write(float targetPosition){
     
     _pidInput      =  _axisPosition;
     _pidSetpoint   =  targetPosition/_mmPerRotation;
-    
-    _pidController.Compute();
-    
-    _motor.write(90 + _pidOutput);
     
     return 1;
 }
@@ -88,7 +83,7 @@ float  Axis::target(){
     return _axisTarget*_mmPerRotation;
 }
 
-float Axis::setpoint(){
+float  Axis::setpoint(){
     return _pidSetpoint*_mmPerRotation;
 }
 
@@ -102,6 +97,11 @@ int    Axis::updatePositionFromEncoder(){
     
     _axisPosition = _direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS;
 
+}
+
+void   Axis::computePID(){
+    _pidController.Compute();
+    _motor.write(90 + _pidOutput);
 }
 
 float  Axis::error(){
@@ -143,11 +143,6 @@ void   Axis::endMove(float finalTarget){
     _timeLastMoved = millis();
     _axisTarget    = finalTarget/_mmPerRotation;
     
-}
-
-int    Axis::returnPidMode(){
-    return _pidController.GetMode();
-    Serial.println("return pid mode ran");
 }
 
 float  Axis::_readFloat(unsigned int addr){

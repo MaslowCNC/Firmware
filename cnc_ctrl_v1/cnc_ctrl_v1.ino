@@ -19,6 +19,7 @@
 
 #include "MyTypes.h"
 #include "CNC_Functions.h"
+#include "TimerOne.h"
 
 
 String readString;
@@ -32,6 +33,13 @@ void setup(){
     xAxis.initializePID();
     yAxis.initializePID();
     
+    Timer1.initialize(10000);         // initialize timer1, and set a 1/2 second period
+    Timer1.attachInterrupt(runsOnATimer);  // attaches callback() as a timer overflow interrupt
+}
+
+void runsOnATimer(){
+    xAxis.computePID();
+    yAxis.computePID();
 }
 
 void loop(){
