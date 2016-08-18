@@ -124,36 +124,6 @@ void  returnPoz(){
     
 }
 
-void  fakeMove(){
-    
-    float aChainLength;
-    float bChainLength;
-    float X1 = 24.0;
-    float Y1 = 300.0;
-    
-    Serial.println("Input: ");
-    Serial.println(X1);
-    Serial.println(Y1);
-    
-    xyToChainLengths(X1,Y1,&aChainLength,&bChainLength);
-    
-    
-    Serial.println("Intermediate:");
-    Serial.println(aChainLength);
-    Serial.println(bChainLength);
-    
-    float X2;
-    float Y2;
-    chainLengthsToXY(aChainLength, bChainLength, &X2, &Y2);
-    
-    Serial.println("Output: ");
-    Serial.println(X2);
-    Serial.println(Y2);
-    
-    Serial.println("\n\n\n\n\n\n\n\n\n\n");
-    
-}
-
 int   Move(float xEnd, float yEnd, float zEnd, float MMPerSecond){
     
 /*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 

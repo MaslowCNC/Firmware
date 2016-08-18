@@ -32,7 +32,6 @@
             float  read();
             int    set(float newAxisPosition);
             int    updatePositionFromEncoder();
-            int    returnPidMode();
             void   initializePID();
             int    detach();
             int    attach();
@@ -41,6 +40,7 @@
             float  target();
             float  error();
             float  setpoint();
+            void   computePID();
             
         private:
             int        _PWMread(int pin);
@@ -57,7 +57,7 @@
             int        _previousAngle;
             double     _timeLastMoved;
             double     _pidSetpoint, _pidInput, _pidOutput;
-            double     _Kp=1000, _Ki=100, _Kd=200;
+            double     _Kp=400, _Ki=0, _Kd=0;
             PID        _pidController;
             int        _eepromAdr;
             float      _mmPerRotation;
