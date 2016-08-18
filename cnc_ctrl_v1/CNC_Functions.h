@@ -124,29 +124,6 @@ void  returnPoz(){
     
 }
 
-void  test(){
-    yAxis.detach();
-    xAxis.attach();
-    int i = 0;
-    int dist = 10000;
-    while(true){
-        Serial.println("50");
-        while (i < dist){
-            xAxis.write(-50);
-            i++;
-        }
-        i = 0;
-        Serial.println("0");
-        while (i < dist){
-            xAxis.write(0);
-            i++;
-        }
-        i = 0;
-        
-    }
-    
-}
-
 int   Move(float xEnd, float yEnd, float zEnd, float MMPerSecond){
     
 /*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
