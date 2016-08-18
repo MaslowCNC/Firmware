@@ -71,13 +71,8 @@ void GearMotor::write(int speed){
     */
     if (_attachedState == 1){
         
-        int pwmFrequency = (speed - 90)*2.8333;
-        
-        Serial.println(pwmFrequency);
-        //target range is 0-255
-        analogWrite(_pwmPin, abs(pwmFrequency));
-        
-        if (pwmFrequency > 0){
+        //set direction range is 0-180
+        if (speed > 90){
             digitalWrite(_pin1 , HIGH);
             digitalWrite(_pin2 , LOW );
         }
@@ -85,6 +80,29 @@ void GearMotor::write(int speed){
             digitalWrite(_pin1 , LOW);
             digitalWrite(_pin2 , HIGH );
         }
+        
+        
+        speed = abs(speed); //remove sign from input
+        speed = (90 - speed); //range is 0-90
+        Serial.println("speed is:");
+        Serial.println(speed);
+        
+        int pwmFrequency;
+        
+        if(speed == 0){
+            pwmFrequency = 0;
+        }
+        else if(speed >= 90){
+            pwmFrequency = 255;
+        }
+        else{
+            float scalor = (255.0-_deadBand)/90.0;
+            pwmFrequency = round((scalor*speed) + _deadBand);
+        }
+        
+        analogWrite(_pwmPin, pwmFrequency);
+        
+        
     }
     
 }
