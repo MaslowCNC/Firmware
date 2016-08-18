@@ -82,10 +82,8 @@ void GearMotor::write(int speed){
         }
         
         
+        speed = (speed - 90); //range is +-0-90
         speed = abs(speed); //remove sign from input
-        speed = (90 - speed); //range is 0-90
-        Serial.println("speed is:");
-        Serial.println(speed);
         
         int pwmFrequency;
         
