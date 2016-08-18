@@ -42,7 +42,6 @@ _encoder(encoderPin1,encoderPin2)
     //initialize variables
     _direction    = encoderDirection;
     _axisName     = axisName;
-    _axisPosition = 0.0;
     _axisTarget   = 0.0;
     _direction    = BACKWARD;
     _eepromAdr    = eepromAdr;
@@ -63,7 +62,6 @@ void   Axis::initializePID(){
 
 int    Axis::write(float targetPosition){
     
-    _pidInput      =  _axisPosition;
     _pidSetpoint   =  targetPosition/_mmPerRotation;
     
     return 1;
@@ -72,10 +70,10 @@ int    Axis::write(float targetPosition){
 float  Axis::read(){
     
     if (_motor.attached()){
-        return _axisPosition*_mmPerRotation;
+        return (_direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
     }
     else{
-        return _axisPosition*_mmPerRotation;
+        return (_direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
     }
 }
 
@@ -88,24 +86,18 @@ float  Axis::setpoint(){
 }
 
 int    Axis::set(float newAxisPosition){
-    _axisPosition =  newAxisPosition/_mmPerRotation;
     _axisTarget   =  newAxisPosition/_mmPerRotation;
     _encoder.write((_direction*newAxisPosition*NUMBER_OF_ENCODER_STEPS)/_mmPerRotation);
 }
 
-int    Axis::updatePositionFromEncoder(){
-    
-    _axisPosition = _direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS;
-
-}
-
 void   Axis::computePID(){
+    _pidInput      =  _direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS;
     _pidController.Compute();
     _motor.write(90 + _pidOutput);
 }
 
 float  Axis::error(){
-    return abs(_axisPosition - _pidSetpoint)*_mmPerRotation;
+    return abs((_direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS) - _pidSetpoint)*_mmPerRotation;
 }
 
 int    Axis::detach(){
@@ -129,7 +121,6 @@ void   Axis::hold(){
     int timeout   = 20000;
     
     if (millis() - _timeLastMoved < timeout){
-        updatePositionFromEncoder();
         write(_axisTarget*_mmPerRotation);
     }
     else{

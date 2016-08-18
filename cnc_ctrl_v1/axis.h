@@ -51,7 +51,6 @@
             int        _direction;
             int        _encoderPin;
             String     _axisName;
-            float      _axisPosition;
             float      _axisTarget;
             int        _currentAngle;
             int        _previousAngle;

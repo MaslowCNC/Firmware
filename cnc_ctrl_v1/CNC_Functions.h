@@ -169,9 +169,6 @@ and G01 commands. The units at this point should all be in rotations or rotation
         
         delay(timePerStep);
         
-        xAxis.updatePositionFromEncoder();
-        yAxis.updatePositionFromEncoder();
-        
         xAxis.write(whereXShouldBeAtThisStep);
         yAxis.write(whereYShouldBeAtThisStep);
         
@@ -199,8 +196,6 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     
     
     while(true){
-        xAxis.updatePositionFromEncoder();
-        yAxis.updatePositionFromEncoder();
         
         xAxis.write(aChainLength);
         yAxis.write(bChainLength);
@@ -325,10 +320,6 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
         
         xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
-        
-        
-        xAxis.updatePositionFromEncoder();
-        yAxis.updatePositionFromEncoder();
         
         
         xAxis.write(aChainLength);
