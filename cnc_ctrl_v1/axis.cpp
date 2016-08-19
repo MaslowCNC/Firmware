@@ -37,7 +37,7 @@ _encoder(encoderPin1,encoderPin2)
     //initialize motor
     _motor.setupMotor(pwmPin, directionPin1, directionPin2);
     
-    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _Ki, _Kd, REVERSE);
+    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _KiFar, _Kd, REVERSE);
     
     //initialize variables
     _direction    = encoderDirection;
@@ -91,9 +91,30 @@ int    Axis::set(float newAxisPosition){
 }
 
 void   Axis::computePID(){
+    
+    //antiWindup code
+    if (abs(_pidOutput) > 10){ //if the actuator is saturated
+        _pidController.SetTunings(_Kp, _KiFar, _Kd); //disable the integration term
+    }
+    else{
+        if (abs(_pidInput - _pidSetpoint) < .1){
+            //This second check catches the corner case where the setpoint has just jumped, but compute has not been run yet
+            _pidController.SetTunings(_Kp, _KiClose, _Kd);
+        }
+    }
+    
     _pidInput      =  _direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS;
     _pidController.Compute();
     _motor.write(90 + _pidOutput);
+    
+    //if (_axisName == "Right-axis"){
+    //    Serial.print(0);
+    //    Serial.print( " " );
+    //    Serial.print((_pidInput - _pidSetpoint)*1000);
+    //    Serial.print( " " );
+    //    Serial.println(-1*_pidOutput);
+    //    
+    //}
 }
 
 float  Axis::error(){

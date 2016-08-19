@@ -87,16 +87,8 @@ void GearMotor::write(int speed){
         
         int pwmFrequency;
         
-        if(speed == 0){
-            pwmFrequency = 0;
-        }
-        else if(speed >= 90){
-            pwmFrequency = 255;
-        }
-        else{
-            float scalor = (255.0-_deadBand)/90.0;
-            pwmFrequency = round((scalor*speed) + _deadBand);
-        }
+        float scalor = (255.0-_deadBand)/90.0;
+        pwmFrequency = round((scalor*speed) + _deadBand);
         
         analogWrite(_pwmPin, pwmFrequency);
         

@@ -33,7 +33,7 @@
             int _pin1;
             int _pin2;
             bool _attachedState;
-            int _deadBand = 28;
+            int _deadBand = 15;
     };
 
     #endif
