@@ -82,8 +82,9 @@ void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* 
 
 void  returnPoz(){
     static unsigned long lastRan = millis();
+    int                  timeout = 200;
     
-    if (millis() - lastRan > 200){
+    if (millis() - lastRan > timeout){
         
         float X;
         float Y;
@@ -103,39 +104,54 @@ void  returnPoz(){
             Serial.println("mm");
         }
         
+        chainLengthsToXY(xAxis.setpoint(), yAxis.setpoint(), &X, &Y);
+        
+        Serial.print("pt(");
+        Serial.print(X/_inchesToMMConversion);
+        Serial.print(", ");
+        Serial.print(Y/_inchesToMMConversion);
+        Serial.print(", 0.0)");
+        
+        if (_inchesToMMConversion == INCHES){
+            Serial.println("in");
+        }
+        else{
+            Serial.println("mm");
+        }
+        
         lastRan = millis();
     }
     
 }
 
-void  fakeMove(){
+void goAroundInCircle(){
     
     float aChainLength;
     float bChainLength;
-    float X1 = 24.0;
-    float Y1 = 300.0;
     
-    Serial.println("Input: ");
-    Serial.println(X1);
-    Serial.println(Y1);
-    
-    xyToChainLengths(X1,Y1,&aChainLength,&bChainLength);
-    
-    
-    Serial.println("Intermediate:");
-    Serial.println(aChainLength);
-    Serial.println(bChainLength);
-    
-    float X2;
-    float Y2;
-    chainLengthsToXY(aChainLength, bChainLength, &X2, &Y2);
-    
-    Serial.println("Output: ");
-    Serial.println(X2);
-    Serial.println(Y2);
-    
-    Serial.println("\n\n\n\n\n\n\n\n\n\n");
-    
+    float pi = 3.14159;
+    float i = 0;
+    while(true){
+        
+        float whereXShouldBeAtThisStep = 100 * cos(i*pi);
+        float whereYShouldBeAtThisStep = 100 * sin(i*pi);
+        
+        xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+        
+        
+        xAxis.write(aChainLength);
+        yAxis.write(bChainLength);
+        
+        delay(15);
+        
+        returnPoz();
+        
+        i = i +.0001;
+        
+        if (i > 2){
+            i = 0;
+        }
+    }
 }
 
 int   Move(float xEnd, float yEnd, float zEnd, float MMPerSecond){
@@ -145,10 +161,10 @@ the speed moveSpeed. Movements are correlated so that regardless of the distance
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
     
-    float  xStartingLocation          = xAxis.read();
-    float  yStartingLocation          = yAxis.read();
-    int    numberOfStepsPerMM         = 14;
-    MMPerSecond = .1;
+    float  xStartingLocation          = xAxis.setpoint();
+    float  yStartingLocation          = yAxis.setpoint();
+    int    numberOfStepsPerMM         = 100;
+    MMPerSecond = .5;
     float aChainLength;
     float bChainLength;
     
@@ -183,9 +199,6 @@ and G01 commands. The units at this point should all be in rotations or rotation
         
         delay(timePerStep);
         
-        xAxis.updatePositionFromEncoder();
-        yAxis.updatePositionFromEncoder();
-        
         xAxis.write(whereXShouldBeAtThisStep);
         yAxis.write(whereYShouldBeAtThisStep);
         
@@ -213,8 +226,6 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     
     
     while(true){
-        xAxis.updatePositionFromEncoder();
-        yAxis.updatePositionFromEncoder();
         
         xAxis.write(aChainLength);
         yAxis.write(bChainLength);
@@ -339,10 +350,6 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
         
         xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
-        
-        
-        xAxis.updatePositionFromEncoder();
-        yAxis.updatePositionFromEncoder();
         
         
         xAxis.write(aChainLength);

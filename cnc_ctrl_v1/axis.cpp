@@ -37,12 +37,11 @@ _encoder(encoderPin1,encoderPin2)
     //initialize motor
     _motor.setupMotor(pwmPin, directionPin1, directionPin2);
     
-    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _Ki, _Kd, REVERSE);
+    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _KiFar, _Kd, REVERSE);
     
     //initialize variables
     _direction    = encoderDirection;
     _axisName     = axisName;
-    _axisPosition = 0.0;
     _axisTarget   = 0.0;
     _direction    = BACKWARD;
     _eepromAdr    = eepromAdr;
@@ -53,6 +52,7 @@ _encoder(encoderPin1,encoderPin2)
         set(_readFloat(_eepromAdr));
     }
     
+    
 }
 
 void   Axis::initializePID(){
@@ -62,12 +62,7 @@ void   Axis::initializePID(){
 
 int    Axis::write(float targetPosition){
     
-    _pidInput      =  _axisPosition;
     _pidSetpoint   =  targetPosition/_mmPerRotation;
-    
-    _pidController.Compute();
-    
-    _motor.write(90 + _pidOutput);
     
     return 1;
 }
@@ -75,10 +70,10 @@ int    Axis::write(float targetPosition){
 float  Axis::read(){
     
     if (_motor.attached()){
-        return _pidSetpoint*_mmPerRotation;
+        return (_direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
     }
     else{
-        return _pidSetpoint*_mmPerRotation;
+        return (_direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
     }
 }
 
@@ -86,20 +81,44 @@ float  Axis::target(){
     return _axisTarget*_mmPerRotation;
 }
 
+float  Axis::setpoint(){
+    return _pidSetpoint*_mmPerRotation;
+}
+
 int    Axis::set(float newAxisPosition){
-    _axisPosition =  newAxisPosition/_mmPerRotation;
     _axisTarget   =  newAxisPosition/_mmPerRotation;
     _encoder.write((_direction*newAxisPosition*NUMBER_OF_ENCODER_STEPS)/_mmPerRotation);
 }
 
-int    Axis::updatePositionFromEncoder(){
+void   Axis::computePID(){
     
-    _axisPosition = _direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS;
-
+    //antiWindup code
+    if (abs(_pidOutput) > 10){ //if the actuator is saturated
+        _pidController.SetTunings(_Kp, _KiFar, _Kd); //disable the integration term
+    }
+    else{
+        if (abs(_pidInput - _pidSetpoint) < .1){
+            //This second check catches the corner case where the setpoint has just jumped, but compute has not been run yet
+            _pidController.SetTunings(_Kp, _KiClose, _Kd);
+        }
+    }
+    
+    _pidInput      =  _direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS;
+    _pidController.Compute();
+    _motor.write(90 + _pidOutput);
+    
+    //if (_axisName == "Right-axis"){
+    //    Serial.print(0);
+    //    Serial.print( " " );
+    //    Serial.print((_pidInput - _pidSetpoint)*1000);
+    //    Serial.print( " " );
+    //    Serial.println(-1*_pidOutput);
+    //    
+    //}
 }
 
 float  Axis::error(){
-    return abs(_axisPosition - _pidSetpoint)*_mmPerRotation;
+    return abs((_direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS) - _pidSetpoint)*_mmPerRotation;
 }
 
 int    Axis::detach(){
@@ -120,9 +139,9 @@ int    Axis::attach(){
 }
 
 void   Axis::hold(){
+    int timeout   = 10000;
     
-    if (millis() - _timeLastMoved < 2000){
-        updatePositionFromEncoder();
+    if (millis() - _timeLastMoved < timeout){
         write(_axisTarget*_mmPerRotation);
     }
     else{
@@ -136,10 +155,6 @@ void   Axis::endMove(float finalTarget){
     _timeLastMoved = millis();
     _axisTarget    = finalTarget/_mmPerRotation;
     
-}
-
-int    Axis::returnPidMode(){
-    return _pidController.GetMode();
 }
 
 float  Axis::_readFloat(unsigned int addr){
