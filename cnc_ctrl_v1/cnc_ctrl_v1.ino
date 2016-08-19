@@ -37,7 +37,7 @@ void setup(){
     Timer1.attachInterrupt(runsOnATimer);  // attaches callback() as a timer overflow interrupt
     
     
-    goAroundInCircle();
+    //goAroundInCircle();
 }
 
 void runsOnATimer(){
