@@ -107,16 +107,14 @@ void   Axis::computePID(){
     _pidController.Compute();
     _motor.write(90 + _pidOutput);
     
-    //_motor.write(90 + 2);
-    
-    if (_axisName == "Right-axis"){
-        Serial.print(0);
-        Serial.print( " " );
-        Serial.print((_pidInput - _pidSetpoint)*1000);
-        Serial.print( " " );
-        Serial.println(-1*_pidOutput);
-        
-    }
+    //if (_axisName == "Right-axis"){
+    //    Serial.print(0);
+    //    Serial.print( " " );
+    //    Serial.print((_pidInput - _pidSetpoint)*1000);
+    //    Serial.print( " " );
+    //    Serial.println(-1*_pidOutput);
+    //    
+    //}
 }
 
 float  Axis::error(){
