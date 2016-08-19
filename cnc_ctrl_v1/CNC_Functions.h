@@ -124,6 +124,36 @@ void  returnPoz(){
     
 }
 
+void goAroundInCircle(){
+    
+    float aChainLength;
+    float bChainLength;
+    
+    float pi = 3.14159;
+    float i = 0;
+    while(true){
+        
+        float whereXShouldBeAtThisStep = 100 * cos(i*pi);
+        float whereYShouldBeAtThisStep = 100 * sin(i*pi);
+        
+        xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+        
+        
+        xAxis.write(aChainLength);
+        yAxis.write(bChainLength);
+        
+        delay(150);
+        
+        returnPoz();
+        
+        i = i +.001;
+        
+        if (i > 2){
+            i = 0;
+        }
+    }
+}
+
 int   Move(float xEnd, float yEnd, float zEnd, float MMPerSecond){
     
 /*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
