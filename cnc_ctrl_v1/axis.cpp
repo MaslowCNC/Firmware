@@ -91,9 +91,31 @@ int    Axis::set(float newAxisPosition){
 }
 
 void   Axis::computePID(){
+    
+    //antiWindup code
+    if (abs(_pidOutput) > 0){ //if the actuator is saturated
+        _pidController.SetTunings(_Kp, 0, _Kd); //disable the integration term
+    }
+    else{
+        _pidController.SetTunings(_Kp, _Ki, _Kd);
+        Serial.print("s: ");
+        Serial.println(_pidOutput);
+    }
+    
     _pidInput      =  _direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS;
     _pidController.Compute();
     _motor.write(90 + _pidOutput);
+    
+    //_motor.write(90 + 2);
+    
+    if (_axisName == "Right-axis"){
+        Serial.print(0);
+        Serial.print( " " );
+        Serial.print((_pidInput - _pidSetpoint)*1000);
+        Serial.print( " " );
+        Serial.println(-1*_pidOutput);
+        
+    }
 }
 
 float  Axis::error(){

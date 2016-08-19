@@ -83,7 +83,7 @@ void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* 
 void  returnPoz(){
     static unsigned long lastRan = millis();
     int                  timeout = 200;
-    
+    /*
     if (millis() - lastRan > timeout){
         
         float X;
@@ -121,7 +121,7 @@ void  returnPoz(){
         
         lastRan = millis();
     }
-    
+    */
 }
 
 void goAroundInCircle(){
@@ -142,11 +142,11 @@ void goAroundInCircle(){
         xAxis.write(aChainLength);
         yAxis.write(bChainLength);
         
-        delay(150);
+        delay(15);
         
         returnPoz();
         
-        i = i +.001;
+        i = i +.0001;
         
         if (i > 2){
             i = 0;
