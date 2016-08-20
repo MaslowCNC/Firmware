@@ -58,7 +58,7 @@
             int        _previousAngle;
             double     _timeLastMoved;
             double     _pidSetpoint, _pidInput, _pidOutput;
-            double     _Kp=700, _KiClose=200, _KiFar = 0, _Kd=75;
+            double     _Kp=700, _KiClose=200, _KiFar = 0, _Kd=35;
             PID        _pidController;
             int        _eepromAdr;
             float      _mmPerRotation;

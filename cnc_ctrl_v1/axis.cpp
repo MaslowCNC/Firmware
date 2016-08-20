@@ -93,7 +93,7 @@ int    Axis::set(float newAxisPosition){
 void   Axis::computePID(){
     float centerLine = 0;
     
-    if (_change(_sign(_oldSetpoint - _pidSetpoint))){
+    if (_change(_sign(_oldSetpoint - _pidSetpoint))){ //check to see if the direction of actuation has reversed, if so flush integrator 
         centerLine = 5;
         _pidController.FlushIntegrator();
     }
@@ -119,7 +119,7 @@ void   Axis::computePID(){
         Serial.print( " " );
         Serial.print((_pidInput - _pidSetpoint)*1000);
         Serial.print( " " );
-        Serial.print(_pidController.GetIterm());
+        Serial.print(_pidOutput);
         Serial.print("\n");
         
         
