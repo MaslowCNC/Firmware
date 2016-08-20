@@ -45,13 +45,6 @@ void runsOnATimer(){
 
 void loop(){
     readString = "";
-    while(true){
-        interpretCommandString("G00 X30 Y30 F123 ");
-        interpretCommandString("G01 X0 Y30 F123 ");
-        interpretCommandString("G01 X0 Y0 F123 ");
-        interpretCommandString("G01 X30 Y0 F123 ");
-        interpretCommandString("G01 X30 Y30 F123 ");
-    }
     if (Serial.available()){
         while (true) {
             if (Serial.available() > 0) {
