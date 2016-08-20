@@ -97,7 +97,7 @@ void   Axis::computePID(){
         _pidController.SetTunings(_Kp, _KiFar, _Kd); //disable the integration term
     }
     else{
-        if (abs(_pidInput - _pidSetpoint) < .0){
+        if (abs(_pidInput - _pidSetpoint) < .02){
             //This second check catches the corner case where the setpoint has just jumped, but compute has not been run yet
             _pidController.SetTunings(_Kp, _KiClose, _Kd);
         }
@@ -112,7 +112,9 @@ void   Axis::computePID(){
         Serial.print( " " );
         Serial.print((_pidInput - _pidSetpoint)*1000);
         Serial.print( " " );
-        Serial.println(-1*_pidOutput);
+        Serial.print(-1*_pidOutput);
+        Serial.print("\n");
+        
         
     }
 }
