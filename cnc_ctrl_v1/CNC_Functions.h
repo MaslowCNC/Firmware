@@ -161,17 +161,13 @@ the speed moveSpeed. Movements are correlated so that regardless of the distance
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
     
-    float  xStartingLocation          = xAxis.setpoint();
-    float  yStartingLocation          = yAxis.setpoint();
+    float  xStartingLocation;
+    float  yStartingLocation;
     int    numberOfStepsPerMM         = 100;
     MMPerSecond = .5;
-    float aChainLength;
-    float bChainLength;
     
-    xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
     
-    xEnd = aChainLength;
-    yEnd = bChainLength;
+    chainLengthsToXY(xAxis.target(), yAxis.target(), &xStartingLocation, &yStartingLocation);
     
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
@@ -192,19 +188,25 @@ and G01 commands. The units at this point should all be in rotations or rotation
     xAxis.attach();
     yAxis.attach();
     
+    float aChainLength;
+    float bChainLength;
+    
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
         float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
         float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
         
-        delay(timePerStep);
+        xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
-        xAxis.write(whereXShouldBeAtThisStep);
-        yAxis.write(whereYShouldBeAtThisStep);
+        
+        xAxis.write(aChainLength);
+        yAxis.write(bChainLength);
         
         numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
         
         returnPoz();
+        
+        delay(timePerStep);
     }
     
     xAxis.endMove(xEnd);
