@@ -92,7 +92,11 @@ int    Axis::set(float newAxisPosition){
 
 void   Axis::computePID(){
     float centerLine = 0;
-    centerLine = _change(_sign(_oldSetpoint - _pidSetpoint));
+    
+    if (_change(_sign(_oldSetpoint - _pidSetpoint))){
+        centerLine = 5;
+        _pidController.FlushIntegrator();
+    }
     _oldSetpoint = _pidSetpoint;
     
     //antiWindup code

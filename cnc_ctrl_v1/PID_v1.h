@@ -47,6 +47,8 @@ class PID
 										  
 										  
 										  
+    void FlushIntegrator();               //delete the accumulated value of the integrator 
+                                          
   //Display functions ****************************************************************
 	double GetKp();						  // These functions query the pid for interal values.
 	double GetKi();						  //  they were created mainly for the pid front-end,
