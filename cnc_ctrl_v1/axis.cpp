@@ -92,7 +92,7 @@ int    Axis::set(float newAxisPosition){
 
 void   Axis::computePID(){
     
-    if (_change(_sign(_oldSetpoint - _pidSetpoint))){
+    if (_change(_sign(_oldSetpoint - _pidSetpoint))){ //this determines if the axis has changed direction of movement and flushes the acumulator in the PID if it has
         _pidController.FlushIntegrator();
     }
     _oldSetpoint = _pidSetpoint;
