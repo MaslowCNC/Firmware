@@ -124,7 +124,7 @@ void  returnPoz(){
     
 }
 
-void goAroundInCircle(){
+void  goAroundInCircle(){
     
     float aChainLength;
     float bChainLength;

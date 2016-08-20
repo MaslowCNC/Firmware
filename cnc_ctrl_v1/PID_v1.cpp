@@ -187,6 +187,10 @@ void PID::SetControllerDirection(int Direction)
    controllerDirection = Direction;
 }
 
+void PID::FlushIntegrator(){
+    ITerm = 0;
+}
+
 /* Status Funcions*************************************************************
  * Just because you set the Kp=-1 doesn't mean it actually happened.  these
  * functions query the internal state of the PID.  they're here for display 
@@ -197,4 +201,5 @@ double PID::GetKi(){ return  dispKi;}
 double PID::GetKd(){ return  dispKd;}
 int PID::GetMode(){ return  inAuto ? AUTOMATIC : MANUAL;}
 int PID::GetDirection(){ return controllerDirection;}
+double PID::GetIterm(){ return ITerm; }
 

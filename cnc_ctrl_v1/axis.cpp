@@ -92,12 +92,17 @@ int    Axis::set(float newAxisPosition){
 
 void   Axis::computePID(){
     
+    if (_change(_sign(_oldSetpoint - _pidSetpoint))){ //this determines if the axis has changed direction of movement and flushes the acumulator in the PID if it has
+        _pidController.FlushIntegrator();
+    }
+    _oldSetpoint = _pidSetpoint;
+    
     //antiWindup code
     if (abs(_pidOutput) > 10){ //if the actuator is saturated
         _pidController.SetTunings(_Kp, _KiFar, _Kd); //disable the integration term
     }
     else{
-        if (abs(_pidInput - _pidSetpoint) < .1){
+        if (abs(_pidInput - _pidSetpoint) < .02){
             //This second check catches the corner case where the setpoint has just jumped, but compute has not been run yet
             _pidController.SetTunings(_Kp, _KiClose, _Kd);
         }
@@ -108,12 +113,12 @@ void   Axis::computePID(){
     _motor.write(90 + _pidOutput);
     
     //if (_axisName == "Right-axis"){
-    //    Serial.print(0);
+    //    Serial.print(centerLine);
     //    Serial.print( " " );
     //    Serial.print((_pidInput - _pidSetpoint)*1000);
     //    Serial.print( " " );
-    //    Serial.println(-1*_pidOutput);
-    //    
+    //    Serial.print(_pidController.GetIterm());
+    //    Serial.print("\n"); 
     //}
 }
 
@@ -181,5 +186,22 @@ void   Axis::_writeFloat(unsigned int addr, float x){
     data.f = x;
     for(int i = 0; i < 4; i++){
         EEPROM.write(addr+i, data.b[i]);
+    }
+}
+
+int   Axis::_sign(float val){
+    if (val < 0) return -1;
+    if (val==0) return 0;
+    return 1;
+}
+
+int   Axis::_change(float val){
+    if (val != _oldVal){
+        _oldVal = val;
+        return true;
+    }
+    else{
+        _oldVal = val;
+        return false;
     }
 }
