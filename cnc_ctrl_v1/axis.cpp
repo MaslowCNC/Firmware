@@ -91,10 +91,8 @@ int    Axis::set(float newAxisPosition){
 }
 
 void   Axis::computePID(){
-    float centerLine = 0;
     
     if (_change(_sign(_oldSetpoint - _pidSetpoint))){
-        centerLine = 5;
         _pidController.FlushIntegrator();
     }
     _oldSetpoint = _pidSetpoint;
@@ -114,16 +112,14 @@ void   Axis::computePID(){
     _pidController.Compute();
     _motor.write(90 + _pidOutput);
     
-    if (_axisName == "Right-axis"){
-        Serial.print(centerLine);
-        Serial.print( " " );
-        Serial.print((_pidInput - _pidSetpoint)*1000);
-        Serial.print( " " );
-        Serial.print(_pidController.GetIterm());
-        Serial.print("\n");
-        
-        
-    }
+    //if (_axisName == "Right-axis"){
+    //    Serial.print(centerLine);
+    //    Serial.print( " " );
+    //    Serial.print((_pidInput - _pidSetpoint)*1000);
+    //    Serial.print( " " );
+    //    Serial.print(_pidController.GetIterm());
+    //    Serial.print("\n"); 
+    //}
 }
 
 float  Axis::error(){
