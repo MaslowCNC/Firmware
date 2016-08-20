@@ -91,6 +91,9 @@ int    Axis::set(float newAxisPosition){
 }
 
 void   Axis::computePID(){
+    float centerLine = 0;
+    centerLine = 1000.0*(_oldSetpoint - _pidSetpoint);
+    _oldSetpoint = _pidSetpoint;
     
     //antiWindup code
     if (abs(_pidOutput) > 10){ //if the actuator is saturated
@@ -108,11 +111,11 @@ void   Axis::computePID(){
     _motor.write(90 + _pidOutput);
     
     if (_axisName == "Right-axis"){
-        Serial.print(0);
+        Serial.print(centerLine);
         Serial.print( " " );
         Serial.print((_pidInput - _pidSetpoint)*1000);
         Serial.print( " " );
-        Serial.print(-1*_pidOutput);
+        Serial.print(_pidController.GetIterm());
         Serial.print("\n");
         
         
@@ -184,4 +187,10 @@ void   Axis::_writeFloat(unsigned int addr, float x){
     for(int i = 0; i < 4; i++){
         EEPROM.write(addr+i, data.b[i]);
     }
+}
+
+int   Axis::_sign(float val){
+    if (val < 0) return -1;
+    if (val==0) return 0;
+    return 1;
 }

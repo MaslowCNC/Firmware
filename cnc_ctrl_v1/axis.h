@@ -46,6 +46,7 @@
             int        _PWMread(int pin);
             void       _writeFloat(unsigned int addr, float x);
             float      _readFloat(unsigned int addr);
+            int        _sign(float val);
             
             GearMotor  _motor;
             int        _direction;
@@ -56,11 +57,12 @@
             int        _previousAngle;
             double     _timeLastMoved;
             double     _pidSetpoint, _pidInput, _pidOutput;
-            double     _Kp=700, _KiClose=100, _KiFar = 0, _Kd=75;
+            double     _Kp=700, _KiClose=200, _KiFar = 0, _Kd=75;
             PID        _pidController;
             int        _eepromAdr;
             float      _mmPerRotation;
             Encoder    _encoder;
+            float      _oldSetpoint;
     };
 
     #endif
