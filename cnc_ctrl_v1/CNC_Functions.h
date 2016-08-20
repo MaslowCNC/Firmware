@@ -90,7 +90,7 @@ void  returnPoz(){
         float Y;
         
         chainLengthsToXY(xAxis.read(), yAxis.read(), &X, &Y);
-        
+        /*
         Serial.print("pz(");
         Serial.print(X/_inchesToMMConversion);
         Serial.print(", ");
@@ -118,13 +118,13 @@ void  returnPoz(){
         else{
             Serial.println("mm");
         }
-        
+        */
         lastRan = millis();
     }
     
 }
 
-void goAroundInCircle(){
+void  goAroundInCircle(){
     
     float aChainLength;
     float bChainLength;
