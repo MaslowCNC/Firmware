@@ -48,6 +48,8 @@ class PID
 										  
 										  
     void FlushIntegrator();               //delete the accumulated value of the integrator 
+    
+    void FlipIntegrator();                //invert the value of the integrator term 
                                           
   //Display functions ****************************************************************
 	double GetKp();						  // These functions query the pid for interal values.
