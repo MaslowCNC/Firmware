@@ -92,7 +92,7 @@ int    Axis::set(float newAxisPosition){
 
 void   Axis::computePID(){
     float centerLine = 0;
-    centerLine = 1000.0*(_oldSetpoint - _pidSetpoint);
+    centerLine = _change(_sign(_oldSetpoint - _pidSetpoint));
     _oldSetpoint = _pidSetpoint;
     
     //antiWindup code
@@ -193,4 +193,15 @@ int   Axis::_sign(float val){
     if (val < 0) return -1;
     if (val==0) return 0;
     return 1;
+}
+
+int   Axis::_change(float val){
+    if (val != _oldVal){
+        _oldVal = val;
+        return true;
+    }
+    else{
+        _oldVal = val;
+        return false;
+    }
 }

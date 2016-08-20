@@ -47,6 +47,7 @@
             void       _writeFloat(unsigned int addr, float x);
             float      _readFloat(unsigned int addr);
             int        _sign(float val);
+            int        _change(float val);
             
             GearMotor  _motor;
             int        _direction;
@@ -63,6 +64,7 @@
             float      _mmPerRotation;
             Encoder    _encoder;
             float      _oldSetpoint;
+            float      _oldVal;
     };
 
     #endif
