@@ -33,8 +33,8 @@ void setup(){
     xAxis.initializePID();
     yAxis.initializePID();
     
-    Timer1.initialize(10000);         // initialize timer1, and set a 1/2 second period
-    Timer1.attachInterrupt(runsOnATimer);  // attaches callback() as a timer overflow interrupt
+    Timer1.initialize(10000);
+    Timer1.attachInterrupt(runsOnATimer);
     
 }
 
@@ -45,6 +45,13 @@ void runsOnATimer(){
 
 void loop(){
     readString = "";
+    while(true){
+        interpretCommandString("G00 X30 Y30 F123 ");
+        interpretCommandString("G01 X0 Y30 F123 ");
+        interpretCommandString("G01 X0 Y0 F123 ");
+        interpretCommandString("G01 X30 Y0 F123 ");
+        interpretCommandString("G01 X30 Y30 F123 ");
+    }
     if (Serial.available()){
         while (true) {
             if (Serial.available() > 0) {
