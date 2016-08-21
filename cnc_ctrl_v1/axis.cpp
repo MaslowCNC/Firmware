@@ -93,12 +93,12 @@ int    Axis::set(float newAxisPosition){
 void   Axis::computePID(){
     
     if (_change(_sign(_oldSetpoint - _pidSetpoint))){ //this determines if the axis has changed direction of movement and flushes the acumulator in the PID if it has
-        _pidController.FlushIntegrator();
+        _pidController.FlipIntegrator();
     }
     _oldSetpoint = _pidSetpoint;
     
     //antiWindup code
-    if (abs(_pidOutput) > 10){ //if the actuator is saturated
+    if (abs(_pidOutput) > 20){ //if the actuator is saturated
         _pidController.SetTunings(_Kp, _KiFar, _Kd); //disable the integration term
     }
     else{
@@ -113,11 +113,11 @@ void   Axis::computePID(){
     _motor.write(90 + _pidOutput);
     
     //if (_axisName == "Right-axis"){
-    //    Serial.print(centerLine);
+    //    Serial.print(0);
     //    Serial.print( " " );
     //    Serial.print((_pidInput - _pidSetpoint)*1000);
     //    Serial.print( " " );
-    //    Serial.print(_pidController.GetIterm());
+    //    Serial.print(.5*_pidController.GetIterm());
     //    Serial.print("\n"); 
     //}
 }
