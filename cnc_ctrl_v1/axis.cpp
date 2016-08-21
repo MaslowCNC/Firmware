@@ -96,17 +96,15 @@ void   Axis::computePID(){
         _pidController.FlipIntegrator();
     }
     _oldSetpoint = _pidSetpoint;
-    int centerLine = 0;
+    
     //antiWindup code
     if (abs(_pidOutput) > 20){ //if the actuator is saturated
         _pidController.SetTunings(_Kp, _KiFar, _Kd); //disable the integration term
-        centerLine = 1;
     }
     else{
         if (abs(_pidInput - _pidSetpoint) < .02){
             //This second check catches the corner case where the setpoint has just jumped, but compute has not been run yet
             _pidController.SetTunings(_Kp, _KiClose, _Kd);
-            centerLine = -1;
         }
     }
     

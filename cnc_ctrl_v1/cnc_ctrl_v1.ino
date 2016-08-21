@@ -36,13 +36,6 @@ void setup(){
     Timer1.initialize(10000);
     Timer1.attachInterrupt(runsOnATimer);
     
-    
-    //interpretCommandString("G01 X30 Y30");
-    //interpretCommandString("G01 X0 Y30");
-    //interpretCommandString("G01 X0 Y0");
-    //interpretCommandString("G01 X30 Y0");
-    //interpretCommandString("G01 X30 Y30");
-    //interpretCommandString("G01 X0 Y0");
 }
 
 void runsOnATimer(){
