@@ -188,13 +188,6 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float aChainLength;
     float bChainLength;
     
-    Serial.println("values: ");
-    Serial.println(xEnd);
-    Serial.println(xStartingLocation + (finalNumberOfSteps*xStepSize));
-    Serial.println(xStartingLocation);
-    Serial.println(finalNumberOfSteps);
-    Serial.println(xStepSize);
-    
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
         float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
