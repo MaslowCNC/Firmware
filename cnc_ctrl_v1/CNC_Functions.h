@@ -173,14 +173,14 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
     float  yDistanceToMoveInMM        = yEnd - yStartingLocation;
     float  millisecondsForMove        = numberOfStepsPerMM*(distanceToMoveInMM/MMPerSecond);
-    int    finalNumberOfSteps         = distanceToMoveInMM*numberOfStepsPerMM;
-    float  timePerStep                = millisecondsForMove/float(finalNumberOfSteps);
+    long   finalNumberOfSteps         = abs(distanceToMoveInMM*numberOfStepsPerMM);
+    float  timePerStep                = abs(millisecondsForMove/float(finalNumberOfSteps));
     
     float  xStepSize                  = (xDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM);
     float  yStepSize                  = (yDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM);
     
     
-    int numberOfStepsTaken            =  0;
+    long   numberOfStepsTaken         =  0;
     
     xAxis.attach();
     yAxis.attach();
@@ -199,7 +199,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
         xAxis.write(aChainLength);
         yAxis.write(bChainLength);
         
-        numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
+        numberOfStepsTaken++;
         
         returnPoz();
         
@@ -294,8 +294,16 @@ int   G1(String readString){
     
     if (zgoto != 0){
         Serial.print("Message: Please adjust Z-Axis to a depth of ");
-        Serial.print(zgoto);
-        Serial.println(" mm");
+        if (zgoto > 0){
+            Serial.print("+");
+        }
+        Serial.print(zgoto/_inchesToMMConversion);
+        if (_inchesToMMConversion == INCHES){
+            Serial.println(" in");
+        }
+        else{
+            Serial.println(" mm");
+        }
         
         int    waitTimeMs = 1000;
         double startTime  = millis();
