@@ -301,8 +301,13 @@ int   G1(String readString){
     
     if (zgoto != 0){
         Serial.print("Message: Please adjust Z-Axis to a depth of ");
-        Serial.print(zgoto);
-        Serial.println(" mm");
+        Serial.print(zgoto/_inchesToMMConversion);
+        if (_inchesToMMConversion == INCHES){
+            Serial.println(" in");
+        }
+        else{
+            Serial.println(" mm");
+        }
         
         int    waitTimeMs = 1000;
         double startTime  = millis();
