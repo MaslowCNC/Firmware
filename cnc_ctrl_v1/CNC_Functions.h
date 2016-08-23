@@ -231,7 +231,7 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
         
         returnPoz();
         
-        if (xAxis.error() < 10 && yAxis.error() < 10){
+        if (xAxis.error() < 1 && yAxis.error() < 1){
             break;
         }
     }
