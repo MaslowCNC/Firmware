@@ -154,9 +154,9 @@ void  goAroundInCircle(){
     }
 }
 
-int   Move(float xEnd, float yEnd, float zEnd, float MMPerSecond){
+int   move(float xEnd, float yEnd, float zEnd, float MMPerSecond){
     
-/*The Move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
+/*The move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
 the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
@@ -196,10 +196,9 @@ and G01 commands. The units at this point should all be in rotations or rotation
         xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
         
-        xAxis.write(aChainLength);
-        yAxis.write(bChainLength);
-        
-        numberOfStepsTaken++;
+        if (xAxis.write(aChainLength) && yAxis.write(bChainLength)){
+            numberOfStepsTaken++;
+        }
         
         returnPoz();
         
@@ -316,7 +315,7 @@ int   G1(String readString){
     }
     
     if (isNotRapid){
-        Move(xgoto, ygoto, zgoto, feedrate); //The move is performed
+        move(xgoto, ygoto, zgoto, feedrate); //The move is performed
     }
     else{
         rapidMove(xgoto, ygoto, zgoto);
