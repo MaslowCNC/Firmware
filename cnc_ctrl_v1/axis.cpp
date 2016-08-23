@@ -64,7 +64,14 @@ int    Axis::write(float targetPosition){
     
     _pidSetpoint   =  targetPosition/_mmPerRotation;
     
-    return 1;
+    
+    int acceptableError = 20;
+    if (abs( ((_direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS) - _pidSetpoint)*1000 ) < acceptableError){
+        return 1;
+    }
+    else{
+        return 0;
+    }
 }
 
 float  Axis::read(){
