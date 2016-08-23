@@ -173,8 +173,8 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
     float  yDistanceToMoveInMM        = yEnd - yStartingLocation;
     float  millisecondsForMove        = numberOfStepsPerMM*(distanceToMoveInMM/MMPerSecond);
-    int    finalNumberOfSteps         = distanceToMoveInMM*numberOfStepsPerMM;
-    float  timePerStep                = millisecondsForMove/float(finalNumberOfSteps);
+    int    finalNumberOfSteps         = abs(distanceToMoveInMM*numberOfStepsPerMM);
+    float  timePerStep                = abs(millisecondsForMove/float(finalNumberOfSteps));
     
     float  xStepSize                  = (xDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM);
     float  yStepSize                  = (yDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM);
@@ -189,9 +189,9 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float bChainLength;
     
     Serial.println("values: ");
-    Serial.println(xEnd);
-    Serial.println(xStartingLocation + (finalNumberOfSteps*xStepSize));
+    Serial.println(finalNumberOfSteps);
     Serial.println(xStepSize);
+    Serial.println(timePerStep);
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
@@ -204,7 +204,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
         xAxis.write(aChainLength);
         yAxis.write(bChainLength);
         
-        numberOfStepsTaken = numberOfStepsTaken + finalNumberOfSteps/abs(finalNumberOfSteps);
+        numberOfStepsTaken++;
         
         returnPoz();
         
