@@ -189,6 +189,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     Serial.println("values: ");
     Serial.println(xEnd);
     Serial.println(xStartingLocation + (finalNumberOfSteps*xStepSize));
+    Serial.println(xStepSize);
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
