@@ -166,6 +166,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     int    numberOfStepsPerMM         = 100;
     MMPerSecond = .5;
     
+    
     chainLengthsToXY(xAxis.target(), yAxis.target(), &xStartingLocation, &yStartingLocation);
     
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
@@ -173,10 +174,11 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float  yDistanceToMoveInMM        = yEnd - yStartingLocation;
     float  millisecondsForMove        = numberOfStepsPerMM*(distanceToMoveInMM/MMPerSecond);
     int    finalNumberOfSteps         = distanceToMoveInMM*numberOfStepsPerMM;
-    float  timePerStep                = abs(millisecondsForMove/float(finalNumberOfSteps));
+    float  timePerStep                = millisecondsForMove/float(finalNumberOfSteps);
     
-    float  xStepSize                  = abs((xDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM));
-    float  yStepSize                  = abs((yDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM));
+    float  xStepSize                  = (xDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM);
+    float  yStepSize                  = (yDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM);
+    
     
     int numberOfStepsTaken            =  0;
     
@@ -235,7 +237,7 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
         
         returnPoz();
         
-        if (xAxis.error() < 5 && yAxis.error() < 5){
+        if (xAxis.error() < 10 && yAxis.error() < 10){
             break;
         }
     }
@@ -282,6 +284,7 @@ int   G1(String readString){
     float zgoto;
     float gospeed;
     int   isNotRapid;
+    
     readString.toUpperCase(); //Make the string all uppercase to remove variability
     
     float currentXPos;
@@ -296,13 +299,8 @@ int   G1(String readString){
     
     if (zgoto != 0){
         Serial.print("Message: Please adjust Z-Axis to a depth of ");
-        Serial.print(zgoto/_inchesToMMConversion);
-        if (_inchesToMMConversion == INCHES){
-            Serial.println(" in");
-        }
-        else{
-            Serial.println(" mm");
-        }
+        Serial.print(zgoto);
+        Serial.println(" mm");
         
         int    waitTimeMs = 1000;
         double startTime  = millis();
@@ -423,6 +421,7 @@ void  setInchesToMillimetersConversion(float newConversionFactor){
 void interpretCommandString(String readString){
     int i = 0;
     char sect[22];
+    
     while (i < 23){
         sect[i] = ' ';
         i++;
