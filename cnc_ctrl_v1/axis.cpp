@@ -113,6 +113,9 @@ void   Axis::computePID(){
             //This second check catches the corner case where the setpoint has just jumped, but compute has not been run yet
             _pidController.SetTunings(_Kp, _KiClose, _Kd);
         }
+        if (abs(_pidInput - _pidSetpoint) < .06){
+            _pidController.SetTunings(_Kp, _KiMid, _Kd);
+        }
     }
     
     _pidInput      =  _direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS;
