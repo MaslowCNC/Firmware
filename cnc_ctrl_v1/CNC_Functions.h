@@ -33,8 +33,8 @@
 #define YDIRECTION BACKWARD
 #define ZDIRECTION BACKWARD
 
-#define MACHINEHEIGHT    1219.2
-#define MACHINEWIDTH     3048.0
+#define MACHINEHEIGHT    1219.2+220 //this is the distance from the motors to the center of the work space
+#define MACHINEWIDTH     2946.0 //this is the distance between the motors
 #define ORIGINCHAINLEN   sqrt(sq(MACHINEHEIGHT/2.0)+ sq(MACHINEWIDTH/2.0))
 
 #define MILLIMETERS 1
