@@ -33,9 +33,11 @@
 #define YDIRECTION BACKWARD
 #define ZDIRECTION BACKWARD
 
-#define MACHINEHEIGHT    1219.2+220 //this is the distance from the motors to the center of the work space
-#define MACHINEWIDTH     2946.0 //this is the distance between the motors
-#define ORIGINCHAINLEN   sqrt(sq(MACHINEHEIGHT/2.0)+ sq(MACHINEWIDTH/2.0))
+#define MACHINEHEIGHT    1219.2 //this is the distance from the motors to the center of the work space
+#define MACHINEWIDTH     2438.4 //this is the distance between the motors
+#define MOTOROFFSETX     258.8
+#define MOTOROFFSETY     220
+#define ORIGINCHAINLEN   sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
 
 #define MILLIMETERS 1
 #define INCHES      25.4
@@ -65,6 +67,38 @@ void  chainLengthsToXY(float chainALength, float chainBlength, float* X, float* 
     *X   = (b*cos(theta)) - MACHINEWIDTH/2.0;
 }
 
+void  NewChainLengthsToXY(float chainALength, float chainBlength, float* X, float* Y){
+    
+    
+    float La  = chainBlength + ORIGINCHAINLEN;
+    float Lb  = -1*(chainALength - ORIGINCHAINLEN);
+    float Ax  = 0;
+    float Ay  = 0;
+    float Bx  = MACHINEWIDTH;
+    float By  = 0;
+    float b   = 300;
+    float h   = 130;
+    
+    
+    Serial.println("sdf");
+    Serial.println(chainBlength);
+    Serial.println(ORIGINCHAINLEN);
+    
+    float thetaCAB = acos( (sq(La)+sq(Bx)-sq(Lb)) / (2*La*Bx) );
+    float thetaACB = acos( (sq(La)+sq(Lb)-sq(Bx)) / (2*La*Lb) );
+    
+    float Cx = La*(sq(La)+sq(Bx)-sq(Lb))/(2*La*Bx);
+    float Cy = La*sin(acos((sq(La)+sq(Bx)-sq(Lb))/(2*La*Bx)));
+    
+    float offset = (h-(b/2)/tan(thetaACB/2));
+        
+    float Fy = (MACHINEHEIGHT - Cy) - offset;
+    float Fx = Cx;
+    
+    Serial.println(offset);
+    
+}
+
 void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     
     float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
@@ -90,6 +124,7 @@ void  returnPoz(){
         float Y;
         
         chainLengthsToXY(xAxis.read(), yAxis.read(), &X, &Y);
+        NewChainLengthsToXY(xAxis.read(), yAxis.read(), &X, &Y);
         
         Serial.print("pz(");
         Serial.print(X/_inchesToMMConversion);
