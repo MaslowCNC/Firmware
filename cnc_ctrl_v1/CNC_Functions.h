@@ -35,9 +35,11 @@
 
 #define MACHINEHEIGHT    1219.2 //this is the distance from the motors to the center of the work space
 #define MACHINEWIDTH     2438.4 //this is the distance between the motors
-#define MOTOROFFSETX     258.8
-#define MOTOROFFSETY     220
-#define ORIGINCHAINLEN   sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0 - 50)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
+#define MOTOROFFSETX     260
+#define MOTOROFFSETY     235
+#define ORIGINCHAINLEN   sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
+#define SLEDWIDTH        310
+#define SLEDHEIGHT       139
 
 #define MILLIMETERS 1
 #define INCHES      25.4
@@ -79,47 +81,12 @@ void  NewChainLengthsToXY(float chainALength, float chainBLength, float* X, floa
     float   c   = MACHINEWIDTH+2*MOTOROFFSETX;
     float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
     
-    float thetaACB = 2*(1.5708-theta);
-    
-    float base = 300;
-    float h    = 130;
-    float offset = (h-(base/2)/tan(thetaACB/2));
+    float offset = SLEDHEIGHT-(SLEDWIDTH/2)*tan(theta);
     
     Serial.println(offset);
     
-    *Y   = MOTOROFFSETY + MACHINEHEIGHT/2 - (b*sin(theta)) - offset;
+    *Y   = (MOTOROFFSETY + MACHINEHEIGHT/2) - ((b*sin(theta)) + offset);
     *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
-    
-    /*float La  = chainALength + ORIGINCHAINLEN;
-    float Lb  = ORIGINCHAINLEN - chainBLength;
-    float Ax  = 0;
-    float Ay  = 0;
-    float Bx  = MACHINEWIDTH+2*MOTOROFFSETX;
-    float By  = 0;
-    float b   = 300;
-    float h   = 130;
-    
-    float thetaCAB = acos( (sq(La)+sq(Bx)-sq(Lb)) / (2*La*Bx) );
-    float thetaACB = acos( (sq(La)+sq(Lb)-sq(Bx)) / (2*La*Lb) );
-    
-    float Cx = La*(sq(La)+sq(Bx)-sq(Lb))/(2*La*Bx);
-    float Cy = La*sin(acos((sq(La)+sq(Bx)-sq(Lb))/(2*La*Bx)));
-    
-    float offset = (h-(b/2)/tan(thetaACB/2));
-        
-    float Fy = (MACHINEHEIGHT + MOTOROFFSETY - Cy) - offset;
-    Fy = Fy - 606.87;
-    float Fx = Cx - (MACHINEWIDTH+2*MOTOROFFSETX)/2;
-    
-    Serial.println("$$$");
-    Serial.println(Cy);
-    Serial.println(offset);
-    Serial.println(MACHINEHEIGHT);
-    Serial.println(MOTOROFFSETY);
-    
-    *Y = Fy;
-    *X = Fx;*/
-    
 }
 
 void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
@@ -146,7 +113,7 @@ void  returnPoz(){
         float X;
         float Y;
         
-        NewChainLengthsToXY(xAxis.read(), yAxis.read(), &X, &Y);
+        chainLengthsToXY(xAxis.read(), yAxis.read(), &X, &Y);
         
         Serial.print("pz(");
         Serial.print(X/_inchesToMMConversion);
