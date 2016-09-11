@@ -59,30 +59,49 @@ void  chainLengthsToXY(float chainALength, float chainBlength, float* X, float* 
     
     //Use the law of cosines to find the angle between the two chains
     float   a   = chainBlength + chainLengthAtCenterInMM;
+    float   b   = -1*chainALength + chainLengthAtCenterInMM;
+    float   c   = MACHINEWIDTH+2*MOTOROFFSETX;
+    float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
+    
+    *Y   = MOTOROFFSETY + MACHINEHEIGHT/2 - (b*sin(theta));
+    *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
+}
+
+void  NewChainLengthsToXY(float chainALength, float chainBLength, float* X, float* Y){
+    
+    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
+    
+    
+    
+    //Use the law of cosines to find the angle between the two chains
+    float   a   = chainBLength + chainLengthAtCenterInMM;
     float   b   = -1*(chainALength - chainLengthAtCenterInMM);
     float   c   = MACHINEWIDTH;
     float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
     
-    *Y   = MACHINEHEIGHT/2 - (b*sin(theta));
-    *X   = (b*cos(theta)) - MACHINEWIDTH/2.0;
-}
-
-void  NewChainLengthsToXY(float chainALength, float chainBlength, float* X, float* Y){
+    float Cx = (b*cos(theta)) - MACHINEWIDTH/2.0;
+    float Cy = MACHINEHEIGHT/2 - (b*sin(theta));
     
     
-    float La  = chainBlength + ORIGINCHAINLEN;
-    float Lb  = -1*(chainALength - ORIGINCHAINLEN);
+    float thetaACB = 2*(1.5708-theta);
+    
+    b   = 300;
+    float h   = 130;
+    float offset = (h-(b/2)/tan(thetaACB/2));
+    
+    Serial.println(offset);
+    
+    *Y   = Cy - offset;
+    *X   = Cx;
+    
+    /*float La  = chainALength + ORIGINCHAINLEN;
+    float Lb  = ORIGINCHAINLEN - chainBLength;
     float Ax  = 0;
     float Ay  = 0;
-    float Bx  = MACHINEWIDTH;
+    float Bx  = MACHINEWIDTH+2*MOTOROFFSETX;
     float By  = 0;
     float b   = 300;
     float h   = 130;
-    
-    
-    Serial.println("sdf");
-    Serial.println(chainBlength);
-    Serial.println(ORIGINCHAINLEN);
     
     float thetaCAB = acos( (sq(La)+sq(Bx)-sq(Lb)) / (2*La*Bx) );
     float thetaACB = acos( (sq(La)+sq(Lb)-sq(Bx)) / (2*La*Lb) );
@@ -92,10 +111,18 @@ void  NewChainLengthsToXY(float chainALength, float chainBlength, float* X, floa
     
     float offset = (h-(b/2)/tan(thetaACB/2));
         
-    float Fy = (MACHINEHEIGHT - Cy) - offset;
-    float Fx = Cx;
+    float Fy = (MACHINEHEIGHT + MOTOROFFSETY - Cy) - offset;
+    Fy = Fy - 606.87;
+    float Fx = Cx - (MACHINEWIDTH+2*MOTOROFFSETX)/2;
     
+    Serial.println("$$$");
+    Serial.println(Cy);
     Serial.println(offset);
+    Serial.println(MACHINEHEIGHT);
+    Serial.println(MOTOROFFSETY);
+    
+    *Y = Fy;
+    *X = Fx;*/
     
 }
 
@@ -103,9 +130,9 @@ void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* 
     
     float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
     
-    float X1 = MACHINEWIDTH/2.0   + xTarget;
-    float X2 = MACHINEWIDTH/2.0   - xTarget;
-    float Y  = MACHINEHEIGHT/2.0  - yTarget;
+    float X1 = MOTOROFFSETX + MACHINEWIDTH/2.0   + xTarget;
+    float X2 = MOTOROFFSETX + MACHINEWIDTH/2.0   - xTarget;
+    float Y  = MOTOROFFSETY + MACHINEHEIGHT/2.0  - yTarget;
     
     float La = sqrt( sq(X1) + sq(Y) );
     float Lb = sqrt( sq(X2) + sq(Y) );
@@ -124,7 +151,6 @@ void  returnPoz(){
         float Y;
         
         chainLengthsToXY(xAxis.read(), yAxis.read(), &X, &Y);
-        NewChainLengthsToXY(xAxis.read(), yAxis.read(), &X, &Y);
         
         Serial.print("pz(");
         Serial.print(X/_inchesToMMConversion);
