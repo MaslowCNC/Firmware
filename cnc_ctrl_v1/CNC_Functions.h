@@ -37,7 +37,7 @@
 #define MACHINEWIDTH     2438.4 //this is the distance between the motors
 #define MOTOROFFSETX     258.8
 #define MOTOROFFSETY     220
-#define ORIGINCHAINLEN   sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
+#define ORIGINCHAINLEN   sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0 - 50)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
 
 #define MILLIMETERS 1
 #define INCHES      25.4
