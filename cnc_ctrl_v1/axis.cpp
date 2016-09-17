@@ -25,7 +25,7 @@
 #define EEPROMVALIDDATA 56
 #define EEPROMFLAG 18
 
-#define NUMBER_OF_ENCODER_STEPS 4096.0
+#define NUMBER_OF_ENCODER_STEPS 12596.0
 
 
 
@@ -122,14 +122,6 @@ void   Axis::computePID(){
     _pidController.Compute();
     _motor.write(90 + _pidOutput);
     
-    //if (_axisName == "Right-axis"){
-    //    Serial.print(0);
-    //    Serial.print( " " );
-    //    Serial.print((_pidInput - _pidSetpoint)*1000);
-    //    Serial.print( " " );
-    //    Serial.print(.5*_pidController.GetIterm());
-    //    Serial.print("\n"); 
-    //}
 }
 
 float  Axis::error(){
