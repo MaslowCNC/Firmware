@@ -43,7 +43,6 @@ _encoder(encoderPin1,encoderPin2)
     _direction    = encoderDirection;
     _axisName     = axisName;
     _axisTarget   = 0.0;
-    _direction    = BACKWARD;
     _eepromAdr    = eepromAdr;
     _mmPerRotation= mmPerRotation;
     
@@ -120,7 +119,15 @@ void   Axis::computePID(){
     
     _pidInput      =  _direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS;
     _pidController.Compute();
-    _motor.write(90 + _pidOutput);
+    
+    int boost = 0;
+    
+    if (_direction*_pidOutput > 0){
+       //motor is under more stress when moving in the "up" direction
+       boost = 19;
+    }
+    
+    _motor.write(90 + _direction*_pidOutput + boost);
     
 }
 
