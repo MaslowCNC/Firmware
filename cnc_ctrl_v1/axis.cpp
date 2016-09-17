@@ -119,14 +119,15 @@ void   Axis::computePID(){
     
     _pidInput      =  _direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS;
     _pidController.Compute();
-    _motor.write(90 + _direction*_pidOutput);
+    
+    int boost = 0;
     
     if (_direction*_pidOutput > 0){
-        Serial.println("up");
+       //motor is under more stress when moving in the "up" direction
+       boost = 19;
     }
-    else{
-        Serial.println("down");
-    }
+    
+    _motor.write(90 + _direction*_pidOutput + boost);
     
 }
 
