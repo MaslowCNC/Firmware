@@ -43,7 +43,6 @@ _encoder(encoderPin1,encoderPin2)
     _direction    = encoderDirection;
     _axisName     = axisName;
     _axisTarget   = 0.0;
-    _direction    = BACKWARD;
     _eepromAdr    = eepromAdr;
     _mmPerRotation= mmPerRotation;
     
@@ -120,7 +119,14 @@ void   Axis::computePID(){
     
     _pidInput      =  _direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS;
     _pidController.Compute();
-    _motor.write(90 + _pidOutput);
+    _motor.write(90 + _direction*_pidOutput);
+    
+    if (_direction*_pidOutput > 0){
+        Serial.println("up");
+    }
+    else{
+        Serial.println("down");
+    }
     
 }
 
