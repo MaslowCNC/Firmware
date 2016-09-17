@@ -26,7 +26,7 @@
 #define EEPROMFLAG 18
 
 //13968 is correct
-#define NUMBER_OF_ENCODER_STEPS 13596.0 
+#define NUMBER_OF_ENCODER_STEPS 13968.0 
 
 
 
