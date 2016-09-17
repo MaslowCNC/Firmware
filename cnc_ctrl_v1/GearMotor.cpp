@@ -71,6 +71,14 @@ void GearMotor::write(int speed){
     */
     if (_attachedState == 1){
         
+        if (speed > 180){
+            speed = 180;
+        }
+        
+        if (speed < 0){
+            speed = 0;
+        }
+        
         //set direction range is 0-180
         if (speed > 90){
             digitalWrite(_pin1 , HIGH);
