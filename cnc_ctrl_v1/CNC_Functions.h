@@ -35,8 +35,8 @@
 
 #define MACHINEHEIGHT    1219.2 //this is the distance from the motors to the center of the work space
 #define MACHINEWIDTH     2438.4 //this is the distance between the motors
-#define MOTOROFFSETX     260
-#define MOTOROFFSETY     235
+#define MOTOROFFSETX     270
+#define MOTOROFFSETY     463
 #define ORIGINCHAINLEN   sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
 #define SLEDWIDTH        310
 #define SLEDHEIGHT       139
@@ -348,6 +348,7 @@ int   G1(String readString){
 
 int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float mmPerSecond, int direction){
     
+    mmPerSecond = .5;
     float pi                     =  3.1415;
     float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
     float distanceBetweenPoints  =  sqrt( sq(  X2 - X1   ) + sq(    Y2  - Y1) );
@@ -361,7 +362,8 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     int   finalNumberOfSteps     =  arcLengthMM*numberOfStepsPerMM;
     float stepSizeRadians        =  theta/finalNumberOfSteps;
     
-    float stepDelayMs              =  1000*((60*arcLengthMM)/mmPerSecond)/finalNumberOfSteps;
+    float  millisecondsForMove     = numberOfStepsPerMM*(arcLengthMM/mmPerSecond);
+    float stepDelayMs              =  20;
     
     int numberOfStepsTaken         =  0;
     
