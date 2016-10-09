@@ -17,7 +17,7 @@ typedef struct {
 } location_st;
 
 //xpos is position
-//xangle is th angle
+//xangle is the angle
 //xcarry is legacy and should be removed
 
 #endif 
