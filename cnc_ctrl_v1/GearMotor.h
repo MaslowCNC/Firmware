@@ -24,7 +24,7 @@
         public:
             GearMotor();
             void attach(int pin);
-            int setupMotor(int pwmPin, int pin1, int pin2);
+            int  setupMotor(int pwmPin, int pin1, int pin2);
             void detach();
             void write(int speed);
             int attached();
