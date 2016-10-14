@@ -16,9 +16,9 @@
 libraries*/
     
     
-#include "MyTypes.h"
 #include "GearMotor.h"
 #include "Axis.h"
+#include "Kinematics.h"
 
 
 #define FORWARD           1
@@ -32,13 +32,6 @@ libraries*/
 #define YDIRECTION BACKWARD
 #define ZDIRECTION BACKWARD
 
-#define MACHINEHEIGHT    1219.2 //this is the distance from the motors to the center of the work space
-#define MACHINEWIDTH     2438.4 //this is the distance between the motors
-#define MOTOROFFSETX     270
-#define MOTOROFFSETY     463
-#define ORIGINCHAINLEN   sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
-#define SLEDWIDTH        310
-#define SLEDHEIGHT       139
 
 #define MILLIMETERS 1
 #define INCHES      25.4
@@ -52,56 +45,6 @@ Axis yAxis(6,12,13, FORWARD, 2, 3, "Right-axis", 10, DIST_PER_ROTATION);
 float feedrate             =  125;
 float _inchesToMMConversion =  1;
 String prependString;
-
-void  forward(float chainALength, float chainBLength, float* X, float* Y){
-    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
-    
-    
-    
-    //Use the law of cosines to find the angle between the two chains
-    float   a   = chainBLength + chainLengthAtCenterInMM;
-    float   b   = -1*chainALength + chainLengthAtCenterInMM;
-    float   c   = MACHINEWIDTH+2*MOTOROFFSETX;
-    float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
-    
-    *Y   = MOTOROFFSETY + MACHINEHEIGHT/2 - (b*sin(theta));
-    *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
-}
-
-void  NewForward(float chainALength, float chainBLength, float* X, float* Y){
-    
-    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
-    
-    
-    
-    //Use the law of cosines to find the angle between the two chains
-    float   a   = chainBLength + chainLengthAtCenterInMM;
-    float   b   = -1*chainALength + chainLengthAtCenterInMM;
-    float   c   = MACHINEWIDTH+2*MOTOROFFSETX;
-    float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
-    
-    float offset = SLEDHEIGHT-(SLEDWIDTH/2)*tan(theta);
-    
-    Serial.println(offset);
-    
-    *Y   = (MOTOROFFSETY + MACHINEHEIGHT/2) - ((b*sin(theta)) + offset);
-    *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
-}
-
-void  inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
-    
-    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
-    
-    float X1 = MOTOROFFSETX + MACHINEWIDTH/2.0   + xTarget;
-    float X2 = MOTOROFFSETX + MACHINEWIDTH/2.0   - xTarget;
-    float Y  = MOTOROFFSETY + MACHINEHEIGHT/2.0  - yTarget;
-    
-    float La = sqrt( sq(X1) + sq(Y) );
-    float Lb = sqrt( sq(X2) + sq(Y) );
-    
-    *aChainLength = -1*(La - chainLengthAtCenterInMM);
-    *bChainLength = Lb - chainLengthAtCenterInMM;
-}
 
 void  returnPoz(){
     static unsigned long lastRan = millis();
