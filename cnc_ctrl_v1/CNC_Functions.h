@@ -12,7 +12,10 @@
     Copyright 2014 Bar Smith*/
     
     
-
+/*Right now this file is a catch all for functions which will be broken out into
+libraries*/
+    
+    
 #include "MyTypes.h"
 #include "GearMotor.h"
 #include "Axis.h"
@@ -50,7 +53,7 @@ float feedrate             =  125;
 float _inchesToMMConversion =  1;
 String prependString;
 
-void  chainLengthsToXY(float chainALength, float chainBLength, float* X, float* Y){
+void  forward(float chainALength, float chainBLength, float* X, float* Y){
     float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
     
     
@@ -65,7 +68,7 @@ void  chainLengthsToXY(float chainALength, float chainBLength, float* X, float* 
     *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
 }
 
-void  NewChainLengthsToXY(float chainALength, float chainBLength, float* X, float* Y){
+void  NewForward(float chainALength, float chainBLength, float* X, float* Y){
     
     float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
     
@@ -85,7 +88,7 @@ void  NewChainLengthsToXY(float chainALength, float chainBLength, float* X, floa
     *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
 }
 
-void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     
     float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
     
@@ -109,7 +112,7 @@ void  returnPoz(){
         float X;
         float Y;
         
-        chainLengthsToXY(xAxis.read(), yAxis.read(), &X, &Y);
+        forward(xAxis.read(), yAxis.read(), &X, &Y);
         
         Serial.print("pz(");
         Serial.print(X/_inchesToMMConversion);
@@ -124,7 +127,7 @@ void  returnPoz(){
             Serial.println("mm");
         }
         
-        chainLengthsToXY(xAxis.setpoint(), yAxis.setpoint(), &X, &Y);
+        forward(xAxis.setpoint(), yAxis.setpoint(), &X, &Y);
         
         Serial.print("pt(");
         Serial.print(X/_inchesToMMConversion);
@@ -156,7 +159,7 @@ void  goAroundInCircle(){
         float whereXShouldBeAtThisStep = 100 * cos(i*pi);
         float whereYShouldBeAtThisStep = 100 * sin(i*pi);
         
-        xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+        inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
         
         xAxis.write(aChainLength);
@@ -187,7 +190,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     MMPerSecond = .5;
     
     
-    chainLengthsToXY(xAxis.target(), yAxis.target(), &xStartingLocation, &yStartingLocation);
+    forward(xAxis.target(), yAxis.target(), &xStartingLocation, &yStartingLocation);
     
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
@@ -213,7 +216,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
         float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
         float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
         
-        xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+        inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
         
         if (xAxis.write(aChainLength) && yAxis.write(bChainLength)){
@@ -225,7 +228,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
         delay(timePerStep);
     }
     
-    xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
+    inverse(xEnd,yEnd,&aChainLength,&bChainLength);
     xAxis.endMove(aChainLength);
     yAxis.endMove(bChainLength);
     
@@ -238,7 +241,7 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     float aChainLength;
     float bChainLength;
     
-    xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
+    inverse(xEnd,yEnd,&aChainLength,&bChainLength);
     
     xAxis.attach();
     yAxis.attach();
@@ -303,7 +306,7 @@ int   G1(String readString){
     
     float currentXPos;
     float currentYPos;
-    chainLengthsToXY(xAxis.target(), yAxis.target(), &currentXPos, &currentYPos);
+    forward(xAxis.target(), yAxis.target(), &currentXPos, &currentYPos);
     
     xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
     ygoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
@@ -378,7 +381,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
         whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
         
-        xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+        inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
         
         xAxis.write(aChainLength);
@@ -391,7 +394,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         numberOfStepsTaken = numberOfStepsTaken + 1;
     }
     
-    xyToChainLengths(X2,Y2,&aChainLength,&bChainLength);
+    inverse(X2,Y2,&aChainLength,&bChainLength);
     xAxis.endMove(aChainLength);
     yAxis.endMove(bChainLength);
 }
@@ -400,7 +403,7 @@ int   G2(String readString){
     
     float X1;
     float Y1;
-    chainLengthsToXY(xAxis.target(), yAxis.target(), &X1, &Y1);
+    forward(xAxis.target(), yAxis.target(), &X1, &Y1);
     
     float X2      = _inchesToMMConversion*extractGcodeValue(readString, 'X', 0.0);
     float Y2      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', 0.0);
