@@ -12,10 +12,13 @@
     Copyright 2014 Bar Smith*/
     
     
-
-#include "MyTypes.h"
+/*Right now this file is a catch all for functions which will be broken out into
+libraries*/
+    
+    
 #include "GearMotor.h"
 #include "Axis.h"
+#include "Kinematics.h"
 
 
 #define FORWARD           1
@@ -29,13 +32,6 @@
 #define YDIRECTION BACKWARD
 #define ZDIRECTION BACKWARD
 
-#define MACHINEHEIGHT    1219.2 //this is the distance from the motors to the center of the work space
-#define MACHINEWIDTH     2438.4 //this is the distance between the motors
-#define MOTOROFFSETX     270
-#define MOTOROFFSETY     463
-#define ORIGINCHAINLEN   sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
-#define SLEDWIDTH        310
-#define SLEDHEIGHT       139
 
 #define MILLIMETERS 1
 #define INCHES      25.4
@@ -46,59 +42,11 @@
 Axis xAxis(7, 8, 9, BACKWARD, 18, 19, "Left-axis", 5, DIST_PER_ROTATION);
 Axis yAxis(6,12,13, FORWARD, 2, 3, "Right-axis", 10, DIST_PER_ROTATION);
 
+Kinematics kinematics;
+
 float feedrate             =  125;
 float _inchesToMMConversion =  1;
 String prependString;
-
-void  chainLengthsToXY(float chainALength, float chainBLength, float* X, float* Y){
-    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
-    
-    
-    
-    //Use the law of cosines to find the angle between the two chains
-    float   a   = chainBLength + chainLengthAtCenterInMM;
-    float   b   = -1*chainALength + chainLengthAtCenterInMM;
-    float   c   = MACHINEWIDTH+2*MOTOROFFSETX;
-    float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
-    
-    *Y   = MOTOROFFSETY + MACHINEHEIGHT/2 - (b*sin(theta));
-    *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
-}
-
-void  NewChainLengthsToXY(float chainALength, float chainBLength, float* X, float* Y){
-    
-    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
-    
-    
-    
-    //Use the law of cosines to find the angle between the two chains
-    float   a   = chainBLength + chainLengthAtCenterInMM;
-    float   b   = -1*chainALength + chainLengthAtCenterInMM;
-    float   c   = MACHINEWIDTH+2*MOTOROFFSETX;
-    float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
-    
-    float offset = SLEDHEIGHT-(SLEDWIDTH/2)*tan(theta);
-    
-    Serial.println(offset);
-    
-    *Y   = (MOTOROFFSETY + MACHINEHEIGHT/2) - ((b*sin(theta)) + offset);
-    *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
-}
-
-void  xyToChainLengths(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
-    
-    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
-    
-    float X1 = MOTOROFFSETX + MACHINEWIDTH/2.0   + xTarget;
-    float X2 = MOTOROFFSETX + MACHINEWIDTH/2.0   - xTarget;
-    float Y  = MOTOROFFSETY + MACHINEHEIGHT/2.0  - yTarget;
-    
-    float La = sqrt( sq(X1) + sq(Y) );
-    float Lb = sqrt( sq(X2) + sq(Y) );
-    
-    *aChainLength = -1*(La - chainLengthAtCenterInMM);
-    *bChainLength = Lb - chainLengthAtCenterInMM;
-}
 
 void  returnPoz(){
     static unsigned long lastRan = millis();
@@ -109,7 +57,7 @@ void  returnPoz(){
         float X;
         float Y;
         
-        chainLengthsToXY(xAxis.read(), yAxis.read(), &X, &Y);
+        kinematics.forward(xAxis.read(), yAxis.read(), &X, &Y);
         
         Serial.print("pz(");
         Serial.print(X/_inchesToMMConversion);
@@ -124,7 +72,7 @@ void  returnPoz(){
             Serial.println("mm");
         }
         
-        chainLengthsToXY(xAxis.setpoint(), yAxis.setpoint(), &X, &Y);
+        kinematics.forward(xAxis.setpoint(), yAxis.setpoint(), &X, &Y);
         
         Serial.print("pt(");
         Serial.print(X/_inchesToMMConversion);
@@ -156,7 +104,7 @@ void  goAroundInCircle(){
         float whereXShouldBeAtThisStep = 100 * cos(i*pi);
         float whereYShouldBeAtThisStep = 100 * sin(i*pi);
         
-        xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+        kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
         
         xAxis.write(aChainLength);
@@ -187,7 +135,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     MMPerSecond = .5;
     
     
-    chainLengthsToXY(xAxis.target(), yAxis.target(), &xStartingLocation, &yStartingLocation);
+    kinematics.forward(xAxis.target(), yAxis.target(), &xStartingLocation, &yStartingLocation);
     
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
@@ -213,7 +161,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
         float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
         float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
         
-        xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+        kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
         
         if (xAxis.write(aChainLength) && yAxis.write(bChainLength)){
@@ -225,7 +173,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
         delay(timePerStep);
     }
     
-    xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
+    kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
     xAxis.endMove(aChainLength);
     yAxis.endMove(bChainLength);
     
@@ -238,7 +186,7 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     float aChainLength;
     float bChainLength;
     
-    xyToChainLengths(xEnd,yEnd,&aChainLength,&bChainLength);
+    kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
     
     xAxis.attach();
     yAxis.attach();
@@ -303,7 +251,7 @@ int   G1(String readString){
     
     float currentXPos;
     float currentYPos;
-    chainLengthsToXY(xAxis.target(), yAxis.target(), &currentXPos, &currentYPos);
+    kinematics.forward(xAxis.target(), yAxis.target(), &currentXPos, &currentYPos);
     
     xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
     ygoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
@@ -378,7 +326,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
         whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
         
-        xyToChainLengths(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+        kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
         
         xAxis.write(aChainLength);
@@ -391,7 +339,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         numberOfStepsTaken = numberOfStepsTaken + 1;
     }
     
-    xyToChainLengths(X2,Y2,&aChainLength,&bChainLength);
+    kinematics.inverse(X2,Y2,&aChainLength,&bChainLength);
     xAxis.endMove(aChainLength);
     yAxis.endMove(bChainLength);
 }
@@ -400,7 +348,7 @@ int   G2(String readString){
     
     float X1;
     float Y1;
-    chainLengthsToXY(xAxis.target(), yAxis.target(), &X1, &Y1);
+    kinematics.forward(xAxis.target(), yAxis.target(), &X1, &Y1);
     
     float X2      = _inchesToMMConversion*extractGcodeValue(readString, 'X', 0.0);
     float Y2      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', 0.0);
