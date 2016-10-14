@@ -24,8 +24,9 @@
         public:
             Kinematics();
             void forward(float chainALength, float chainBLength, float* X, float* Y);
-            void NewForward(float chainALength, float chainBLength, float* X, float* Y);
+            void newForward(float chainALength, float chainBLength, float* X, float* Y);
             void inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
+            void newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
     };
 
     #endif

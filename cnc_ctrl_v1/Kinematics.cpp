@@ -52,7 +52,7 @@ void  Kinematics::forward(float chainALength, float chainBLength, float* X, floa
     *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
 }
 
-void  Kinematics::NewForward(float chainALength, float chainBLength, float* X, float* Y){
+void  Kinematics::newForward(float chainALength, float chainBLength, float* X, float* Y){
     
     float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
     
@@ -70,6 +70,21 @@ void  Kinematics::NewForward(float chainALength, float chainBLength, float* X, f
     
     *Y   = (MOTOROFFSETY + MACHINEHEIGHT/2) - ((b*sin(theta)) + offset);
     *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
+}
+
+void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    
+    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
+    
+    float X1 = MOTOROFFSETX + MACHINEWIDTH/2.0   + xTarget;
+    float X2 = MOTOROFFSETX + MACHINEWIDTH/2.0   - xTarget;
+    float Y  = MOTOROFFSETY + MACHINEHEIGHT/2.0  - yTarget;
+    
+    float La = sqrt( sq(X1) + sq(Y) );
+    float Lb = sqrt( sq(X2) + sq(Y) );
+    
+    *aChainLength = -1*(La - chainLengthAtCenterInMM);
+    *bChainLength = Lb - chainLengthAtCenterInMM;
 }
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
