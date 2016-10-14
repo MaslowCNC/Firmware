@@ -36,7 +36,6 @@ Kinematics::Kinematics(){
   
 }
 
-
 void  Kinematics::forward(float chainALength, float chainBLength, float* X, float* Y){
     float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
     
@@ -100,5 +99,9 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     
     *aChainLength = -1*(La - chainLengthAtCenterInMM);
     *bChainLength = Lb - chainLengthAtCenterInMM;
+}
+
+void Kinematics::test(){
+    Serial.println("test kinematics");
 }
 
