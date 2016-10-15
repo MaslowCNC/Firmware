@@ -102,6 +102,34 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 }
 
 void Kinematics::test(){
-    Serial.println("test kinematics");
+    /*
+    Known good values for testing (from simulation)
+    
+    Pos: Middle center
+    La:1672.4
+    Lb:1672.4
+    X:1219.2
+    Y:605.97
+    Offset: -50.6
+    
+    Pos: Middle Top
+    La:1507.45
+    Lb:1507.45
+    X:1219.2
+    Y:1042.7
+    Offset:-100
+    
+    Pos: Middle Bottom
+    La:2052.77
+    Lb:2052.77
+    X:1219.21
+    Y:29.1
+    Offset: 14.46
+    
+    
+    */
+    Serial.println("test kinematics begin");
+    
+    
 }
 
