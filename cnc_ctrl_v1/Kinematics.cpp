@@ -84,13 +84,15 @@ void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, f
     Serial.println(Py);
     
     float triangleTipY = ((Py-By)/(Px-Bx))*(xTarget-Bx)+By;
+    float triangleTipX = xTarget;
     
     Serial.println("Triangle tip y: ");
     Serial.println(triangleTipY);
+    Serial.println(triangleTipX);
     
-    float X1 = MOTOROFFSETX + MACHINEWIDTH/2.0   + xTarget;
-    float X2 = MOTOROFFSETX + MACHINEWIDTH/2.0   - xTarget;
-    float Y  = MOTOROFFSETY + MACHINEHEIGHT/2.0  - yTarget;
+    float X1 = MOTOROFFSETX + MACHINEWIDTH/2.0   + triangleTipX;
+    float X2 = MOTOROFFSETX + MACHINEWIDTH/2.0   - triangleTipX;
+    float Y  = MOTOROFFSETY + MACHINEHEIGHT/2.0  - triangleTipY;
     
     float La = sqrt( sq(X1) + sq(Y) );
     float Lb = sqrt( sq(X2) + sq(Y) );
