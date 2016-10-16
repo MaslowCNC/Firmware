@@ -39,8 +39,6 @@ Kinematics::Kinematics(){
 void  Kinematics::forward(float chainALength, float chainBLength, float* X, float* Y){
     float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
     
-    
-    
     //Use the law of cosines to find the angle between the two chains
     float   a   = chainBLength + chainLengthAtCenterInMM;
     float   b   = -1*chainALength + chainLengthAtCenterInMM;
@@ -65,6 +63,7 @@ void  Kinematics::newForward(float chainALength, float chainBLength, float* X, f
     
     float offset = SLEDHEIGHT-(SLEDWIDTH/2)*tan(theta);
     
+    Serial.print("Offset: ");
     Serial.println(offset);
     
     *Y   = (MOTOROFFSETY + MACHINEHEIGHT/2) - ((b*sin(theta)) + offset);
@@ -130,6 +129,28 @@ void Kinematics::test(){
     */
     Serial.println("test kinematics begin");
     
+    float chainA = -10;//ORIGINCHAINLEN - 1672.4;
+    float chainB = 10; //ORIGINCHAINLEN - 1672.4;
+    float X = 0;
+    float Y = 0; 
     
+    Serial.print("La: ");
+    Serial.println(chainA);
+    Serial.print("Lb: ");
+    Serial.println(chainB);
+    
+    newForward(chainA, chainB, &X, &Y);
+    
+    Serial.print("X: ");
+    Serial.println(X);
+    Serial.print("Y: ");
+    Serial.println(Y);
+    
+    newInverse(X,Y, &chainA, &chainB);
+    
+    Serial.print("La: ");
+    Serial.println(chainA);
+    Serial.print("Lb: ");
+    Serial.println(chainB);
 }
 
