@@ -63,8 +63,8 @@ void  Kinematics::newForward(float chainALength, float chainBLength, float* X, f
     
     float offset = SLEDHEIGHT-(SLEDWIDTH/2)*tan(theta);
     
-    Serial.print("Offset: ");
-    Serial.println(offset);
+    //Serial.print("Offset: ");
+    //Serial.println(offset);
     
     *Y   = (MOTOROFFSETY + MACHINEHEIGHT/2) - ((b*sin(theta)) + offset);
     *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
@@ -79,16 +79,12 @@ void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, f
     float Px = xTarget + SLEDWIDTH/2;
     float Py = yTarget + SLEDHEIGHT;
     
-    Serial.println("PxPy:");
-    Serial.println(Px);
-    Serial.println(Py);
-    
     float triangleTipY = ((Py-By)/(Px-Bx))*(xTarget-Bx)+By;
     float triangleTipX = xTarget;
     
-    Serial.println("Triangle tip y: ");
-    Serial.println(triangleTipY);
+    Serial.println("Tip: ");
     Serial.println(triangleTipX);
+    Serial.println(triangleTipY);
     
     float X1 = MOTOROFFSETX + MACHINEWIDTH/2.0   + triangleTipX;
     float X2 = MOTOROFFSETX + MACHINEWIDTH/2.0   - triangleTipX;
@@ -143,10 +139,10 @@ void Kinematics::test(){
     
     
     */
-    Serial.println("test kinematics begin");
+    Serial.println("test kinematics begin-------------------------------------------------------");
     
-    float chainA = -10;//ORIGINCHAINLEN - 1672.4;
-    float chainB = 10; //ORIGINCHAINLEN - 1672.4;
+    float chainA = 100;//ORIGINCHAINLEN - 1672.4;
+    float chainB = 100; //ORIGINCHAINLEN - 1672.4;
     float X = 0;
     float Y = 0; 
     
