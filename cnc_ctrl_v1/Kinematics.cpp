@@ -51,23 +51,10 @@ void  Kinematics::forward(float chainALength, float chainBLength, float* X, floa
 
 void  Kinematics::newForward(float chainALength, float chainBLength, float* X, float* Y){
     
-    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
     
     
-    
-    //Use the law of cosines to find the angle between the two chains
-    float   a   = chainBLength + chainLengthAtCenterInMM;
-    float   b   = -1*chainALength + chainLengthAtCenterInMM;
-    float   c   = MACHINEWIDTH+2*MOTOROFFSETX;
-    float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
-    
-    float offset = SLEDHEIGHT-(SLEDWIDTH/2)*tan(theta);
-    
-    //Serial.print("Offset: ");
-    //Serial.println(offset);
-    
-    *Y   = (MOTOROFFSETY + MACHINEHEIGHT/2) - ((b*sin(theta)) + offset);
-    *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
+    *Y   = 1;
+    *X   = 1;
 }
 
 void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){

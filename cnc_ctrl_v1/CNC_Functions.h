@@ -201,6 +201,8 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
         
         returnPoz();
         
+        delay(20);
+        
         if (xAxis.error() < 1 && yAxis.error() < 1){
             break;
         }
