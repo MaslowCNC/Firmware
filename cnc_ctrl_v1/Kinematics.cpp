@@ -31,6 +31,11 @@ in X-Y space.
 #define SLEDWIDTH        310
 #define SLEDHEIGHT       139
 
+#define AX               -1*MACHINEWIDTH/2 - MOTOROFFSETX
+#define AY               MACHINEHEIGHT/2 + MOTOROFFSETY
+#define BX               MACHINEWIDTH/2 + MOTOROFFSETX
+#define BY               MACHINEHEIGHT/2 + MOTOROFFSETY
+
 Kinematics::Kinematics(){
   
   
@@ -64,28 +69,35 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     *bChainLength = Lb - chainLengthAtCenterInMM;
 }
 
-void  Kinematics::newForward(float chainALength, float chainBLength, float* X, float* Y){
+void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     
-    
+    float a = -1*sq(AY)+sq(Lac);
+    float b = -1*sq(BY)+sq(Lbd);
+    float c = SLEDWIDTH - AX + BX;
+    float inner = sq(a) - 2*a*b - 2*a*sq(c)+sq(b)-2*b*sq(c)+sq(c)*sq(c);
+    float y = ( 8*sq(c)*AY- sq(64*sq(c)*sq(c)*sq(AY) - 16*sq(c)*(inner) ) )/(8*sq(c));
+    Serial.print("inner: ");
+    Serial.println(inner);
     
     *Y   = 1;
     *X   = 1;
 }
 
 void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
-    float Ax = -1*MACHINEWIDTH/2 - MOTOROFFSETX;
-    float Ay = MACHINEHEIGHT/2 + MOTOROFFSETY;
-    float Bx = MACHINEWIDTH/2 + MOTOROFFSETX;
-    float By = Ay;
     
     float Cx = xTarget - SLEDWIDTH/2;
     float Cy = yTarget + SLEDHEIGHT;
     float Dx = xTarget + SLEDWIDTH/2;
     float Dy = Cy;
     
+    Serial.println("Cx, Cy, Dx, Dy:");
+    Serial.println(Cx);
+    Serial.println(Cy);
+    Serial.println(Dx);
+    Serial.println(Dy);
     
-    float Lac = sqrt(sq(Ax-Cx) + sq(Ay-Cy));
-    float Lbd = sqrt(sq(Bx-Dx) + sq(By-Dy));
+    float Lac = sqrt(sq(AX-Cx) + sq(AY-Cy));
+    float Lbd = sqrt(sq(BX-Dx) + sq(BY-Dy));
     
     *aChainLength = Lac;
     *bChainLength = Lbd;
@@ -104,9 +116,9 @@ void Kinematics::test(){
     */
     Serial.println("test kinematics begin-------------------------------------------------------");
     
-    float chainA = 100;//ORIGINCHAINLEN - 1672.4;
-    float chainB = 100; //ORIGINCHAINLEN - 1672.4;
-    float X = -100;
+    float chainA = 100;
+    float chainB = 100;
+    float X = 0;
     float Y = 0; 
     
     Serial.print("X: ");
