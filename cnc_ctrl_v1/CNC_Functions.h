@@ -38,13 +38,13 @@ libraries*/
 
 #define DIST_PER_ROTATION 10*6.35//#teeth*pitch of chain
 
-#define ENCODER1A 18
-#define ENCODER1B 19
+#define ENCODER1A 19
+#define ENCODER1B 18
 #define ENCODER2A 3
 #define ENCODER2B 2
 
 Axis xAxis(7, 8, 9, BACKWARD, ENCODER1A, ENCODER1B, "Left-axis", 5, DIST_PER_ROTATION);
-Axis yAxis(6,12,13, FORWARD , ENCODER2A, ENCODER2B, "Right-axis", 10, DIST_PER_ROTATION);
+Axis yAxis(6,12,13, BACKWARD , ENCODER2A, ENCODER2B, "Right-axis", 10, DIST_PER_ROTATION);
 
 Kinematics kinematics;
 
