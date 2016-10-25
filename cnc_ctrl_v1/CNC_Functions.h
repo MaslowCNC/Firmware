@@ -51,8 +51,8 @@ libraries*/
 #define ENA 6
 #define ENB 7
 
-Axis xAxis(ENA, IN1, IN2, BACKWARD, ENCODER1A, ENCODER1B, "Left-axis", 5, DIST_PER_ROTATION);
-Axis yAxis(ENB,IN4,IN3, FORWARD , ENCODER2A, ENCODER2B, "Right-axis", 10, DIST_PER_ROTATION);
+Axis yAxis(ENA, IN1, IN2, BACKWARD, ENCODER1A, ENCODER1B, "Left-axis", 5, DIST_PER_ROTATION);
+Axis xAxis(ENB,IN4,IN3, FORWARD , ENCODER2A, ENCODER2B, "Right-axis", 10, DIST_PER_ROTATION);
 
 Kinematics kinematics;
 
