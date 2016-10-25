@@ -52,7 +52,7 @@ libraries*/
 #define ENB 7
 
 Axis xAxis(ENA, IN3, IN4, BACKWARD, ENCODER1A, ENCODER1B, "Left-axis", 5, DIST_PER_ROTATION);
-Axis yAxis(ENB,IN1,IN2, BACKWARD , ENCODER2A, ENCODER2B, "Right-axis", 10, DIST_PER_ROTATION);
+Axis yAxis(ENB,IN2,IN1, FORWARD , ENCODER2A, ENCODER2B, "Right-axis", 10, DIST_PER_ROTATION);
 
 Kinematics kinematics;
 
