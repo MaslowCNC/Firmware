@@ -42,18 +42,24 @@ libraries*/
 #define ENCODER1B 19
 #define ENCODER2A 2
 #define ENCODER2B 3
+#define ENCODER3A 20
+#define ENCODER3B 21
 
 #define IN1 8
 #define IN2 9
 #define IN3 12
 #define IN4 13
+#define IN5 14
+#define IN6 15
 
 #define ENA 6
 #define ENB 7
+#define ENC 10
 
 
 Axis xAxis(ENB,IN4,IN3, FORWARD , ENCODER2A, ENCODER2B, "Left-axis", 5, DIST_PER_ROTATION);
 Axis yAxis(ENA, IN1, IN2, BACKWARD, ENCODER1A, ENCODER1B, "Right-axis", 10, DIST_PER_ROTATION);
+Axis zAxis(ENC, IN5, IN6, FORWARD, ENCODER3A, ENCODER3B, "Z-Axis, 15, DIST_PER_ROTATION");
 
 
 Kinematics kinematics;
