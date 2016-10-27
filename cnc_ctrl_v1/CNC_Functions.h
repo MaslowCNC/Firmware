@@ -60,7 +60,7 @@ libraries*/
 
 Axis xAxis(ENB, IN4, IN3, FORWARD , ENCODER2A, ENCODER2B, "Left-axis",  5,  DIST_PER_ROTATION);
 Axis yAxis(ENA, IN1, IN2, BACKWARD, ENCODER1A, ENCODER1B, "Right-axis", 10, DIST_PER_ROTATION);
-Axis zAxis(ENC, IN5, IN6, FORWARD , ENCODER3A, ENCODER3B, "Z-Axis",     15, DIST_PER_ROTATION);
+Axis zAxis(ENC, IN5, IN6, FORWARD , ENCODER3A, ENCODER3B, "Z-Axis",     15, DIST_PER_ROTATION/10);
 
 
 Kinematics kinematics;
@@ -85,7 +85,7 @@ void  returnPoz(){
         Serial.print(", ");
         Serial.print(Y/_inchesToMMConversion);
         Serial.print(", ");
-        Serial.print(zAxis.read());
+        Serial.print(zAxis.read()/_inchesToMMConversion);
         Serial.print(")");
         
         if (_inchesToMMConversion == INCHES){
