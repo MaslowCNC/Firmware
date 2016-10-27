@@ -286,16 +286,21 @@ int   G1(String readString){
     float currentXPos;
     float currentYPos;
     kinematics.forward(xAxis.target(), yAxis.target(), &currentXPos, &currentYPos);
+    float currentZPos = zAxis.read();
     
     xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
     ygoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
-    zgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Z', 0.0);
+    zgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Z', currentZPos/_inchesToMMConversion);
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
-    isNotRapid = extractGcodeValue(readString, 'G', 1);
+    isNotRapid = true;//extractGcodeValue(readString, 'G', 1);
     
     
     if (isNotRapid){
         move(xgoto, ygoto, zgoto, feedrate); //The move is performed
+        if (zgoto != currentZPos/_inchesToMMConversion){
+            Serial.println("z changed");
+            rapidMove(xgoto, ygoto, zgoto);
+        }
     }
     else{
         rapidMove(xgoto, ygoto, zgoto);
