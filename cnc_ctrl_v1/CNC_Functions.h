@@ -57,9 +57,9 @@ libraries*/
 #define ENC 10
 
 
-Axis xAxis(ENB,IN4,IN3, FORWARD , ENCODER2A, ENCODER2B, "Left-axis", 5, DIST_PER_ROTATION);
+Axis xAxis(ENB, IN4, IN3, FORWARD , ENCODER2A, ENCODER2B, "Left-axis",  5,  DIST_PER_ROTATION);
 Axis yAxis(ENA, IN1, IN2, BACKWARD, ENCODER1A, ENCODER1B, "Right-axis", 10, DIST_PER_ROTATION);
-Axis zAxis(ENC, IN5, IN6, FORWARD, ENCODER3A, ENCODER3B, "Z-Axis, 15, DIST_PER_ROTATION");
+Axis zAxis(ENC, IN5, IN6, FORWARD , ENCODER3A, ENCODER3B, "Z-Axis",     15, DIST_PER_ROTATION);
 
 
 Kinematics kinematics;
@@ -151,9 +151,12 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     float  xStartingLocation;
     float  yStartingLocation;
+    float  zStartingLocation;
     int    numberOfStepsPerMM         = 100;
     MMPerSecond = .5;
     
+    Serial.println("zEnd is:");
+    Serial.println(zEnd);
     
     kinematics.forward(xAxis.target(), yAxis.target(), &xStartingLocation, &yStartingLocation);
     
@@ -208,24 +211,30 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
     
+    Serial.println("z-end rapid:");
+    Serial.println(zEnd);
+    
     xAxis.attach();
     yAxis.attach();
+    zAxis.attach();
     
     
     while(true){
         
         xAxis.write(aChainLength);
         yAxis.write(bChainLength);
+        zAxis.write(zEnd);
         
         returnPoz();
         
-        if (xAxis.error() < 1 && yAxis.error() < 1){
+        if (xAxis.error() < 1 && yAxis.error() < 1 && zAxis.error() < 1){
             break;
         }
     }
     
     xAxis.endMove(aChainLength);
     yAxis.endMove(bChainLength);
+    zAxis.endMove(zEnd);
     
 }
 
@@ -279,28 +288,6 @@ int   G1(String readString){
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     isNotRapid = extractGcodeValue(readString, 'G', 1);
     
-    if (zgoto != 0){
-        Serial.print("Message: Please adjust Z-Axis to a depth of ");
-        if (zgoto > 0){
-            Serial.print("+");
-        }
-        Serial.print(zgoto/_inchesToMMConversion);
-        if (_inchesToMMConversion == INCHES){
-            Serial.println(" in");
-        }
-        else{
-            Serial.println(" mm");
-        }
-        
-        int    waitTimeMs = 1000;
-        double startTime  = millis();
-        
-        while (millis() - startTime < waitTimeMs){
-            delay(1);
-            holdPosition();
-        } 
-        
-    }
     
     if (isNotRapid){
         move(xgoto, ygoto, zgoto, feedrate); //The move is performed
