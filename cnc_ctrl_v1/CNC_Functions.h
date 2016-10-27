@@ -37,6 +37,7 @@ libraries*/
 #define INCHES      25.4
 
 #define DIST_PER_ROTATION 10*6.35//#teeth*pitch of chain
+#define Z_DIST_PER_ROTATION 635 //1/8inch in mm
 
 #define ENCODER1A 18
 #define ENCODER1B 19
@@ -385,15 +386,19 @@ void  G10(String readString){
     
     xAxis.set(0);
     yAxis.set(0);
+    zAxis.set(0);
     
     xAxis.endMove(0);
     yAxis.endMove(0);
+    zAxis.endMove(0);
     
     xAxis.attach();
     yAxis.attach();
+    zAxis.attach();
     
     xAxis.detach();
     yAxis.detach();
+    zAxis.detach();
     
 }
 
