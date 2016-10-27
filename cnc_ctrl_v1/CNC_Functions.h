@@ -83,7 +83,9 @@ void  returnPoz(){
         Serial.print(X/_inchesToMMConversion);
         Serial.print(", ");
         Serial.print(Y/_inchesToMMConversion);
-        Serial.print(", 0.0)");
+        Serial.print(", ");
+        Serial.print(zAxis.read());
+        Serial.print(")");
         
         if (_inchesToMMConversion == INCHES){
             Serial.println("in");
@@ -235,6 +237,8 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     xAxis.endMove(aChainLength);
     yAxis.endMove(bChainLength);
     zAxis.endMove(zEnd);
+    Serial.println("end of rapid:");
+    Serial.println(zAxis.read());
     
 }
 
