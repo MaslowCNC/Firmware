@@ -158,9 +158,6 @@ and G01 commands. The units at this point should all be in rotations or rotation
     int    numberOfStepsPerMM         = 100;
     MMPerSecond = .5;
     
-    Serial.println("zEnd is:");
-    Serial.println(zEnd);
-    
     kinematics.forward(xAxis.target(), yAxis.target(), &xStartingLocation, &yStartingLocation);
     
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
@@ -214,9 +211,6 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
     
-    Serial.println("z-end rapid:");
-    Serial.println(zEnd);
-    
     xAxis.attach();
     yAxis.attach();
     zAxis.attach();
@@ -238,14 +232,13 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     xAxis.endMove(aChainLength);
     yAxis.endMove(bChainLength);
     zAxis.endMove(zEnd);
-    Serial.println("end of rapid:");
-    Serial.println(zAxis.read());
     
 }
 
 void  holdPosition(){
     xAxis.hold();
     yAxis.hold();
+    zAxis.hold();
 }
     
 float extractGcodeValue(String readString, char target,float defaultReturn){
@@ -298,7 +291,6 @@ int   G1(String readString){
     if (isNotRapid){
         move(xgoto, ygoto, zgoto, feedrate); //The move is performed
         if (zgoto != currentZPos/_inchesToMMConversion){
-            Serial.println("z changed");
             rapidMove(xgoto, ygoto, zgoto);
         }
     }
