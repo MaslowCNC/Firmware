@@ -46,8 +46,8 @@ libraries*/
 #define ENCODER3A 21
 #define ENCODER3B 20
 
-#define IN1 8
-#define IN2 9
+#define IN1 9
+#define IN2 8
 #define IN3 12
 #define IN4 13
 #define IN5 14
@@ -58,8 +58,8 @@ libraries*/
 #define ENC 10
 
 
-Axis xAxis(ENB, IN3, IN4, BACKWARD , ENCODER2B, ENCODER2A, "Left-axis",  5,  DIST_PER_ROTATION);
-Axis yAxis(ENA, IN1, IN2, BACKWARD, ENCODER1A, ENCODER1B, "Right-axis", 10, DIST_PER_ROTATION);
+Axis xAxis(ENB, IN3, IN4, BACKWARD , ENCODER2B, ENCODER2A, "Left-axis",   5, DIST_PER_ROTATION);
+Axis yAxis(ENA, IN1, IN2, FORWARD  , ENCODER1A, ENCODER1B, "Right-axis", 10, DIST_PER_ROTATION);
 Axis zAxis(ENC, IN5, IN6, BACKWARD , ENCODER3A, ENCODER3B, "Z-Axis",     15, DIST_PER_ROTATION/10);
 
 
@@ -285,7 +285,7 @@ int   G1(String readString){
     ygoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
     zgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Z', currentZPos/_inchesToMMConversion);
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
-    isNotRapid = true;//extractGcodeValue(readString, 'G', 1);
+    isNotRapid = extractGcodeValue(readString, 'G', 1);
     
     
     if (isNotRapid){
