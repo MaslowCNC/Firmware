@@ -20,6 +20,7 @@ libraries*/
 #include "Axis.h"
 #include "Kinematics.h"
 
+#define ZAXIS
 
 #define FORWARD           1
 #define BACKWARD         -1
@@ -287,6 +288,30 @@ int   G1(String readString){
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     isNotRapid = extractGcodeValue(readString, 'G', 1);
     
+    
+    #ifndef ZAXIS
+    if (zgoto != 0){
+        Serial.print("Message: Please adjust Z-Axis to a depth of ");
+        if (zgoto > 0){
+            Serial.print("+");
+        }
+        Serial.print(zgoto/_inchesToMMConversion);
+        if (_inchesToMMConversion == INCHES){
+            Serial.println(" in");
+        }
+        else{
+            Serial.println(" mm");
+        }
+        
+        int    waitTimeMs = 1000;
+        double startTime  = millis();
+        
+        while (millis() - startTime < waitTimeMs){
+            delay(1);
+            holdPosition();
+        } 
+    }
+    #endif
     
     if (isNotRapid){
         move(xgoto, ygoto, zgoto, feedrate); //The move is performed
