@@ -313,14 +313,19 @@ int   G1(String readString){
     }
     #endif
     
+    
     if (isNotRapid){
         move(xgoto, ygoto, zgoto, feedrate); //The move is performed
+        #ifdef ZAXIS
         if (zgoto != currentZPos/_inchesToMMConversion){
             rapidMove(xgoto, ygoto, zgoto);
         }
+        #endif
     }
     else{
+        #ifdef ZAXIS
         rapidMove(xgoto, ygoto, zgoto);
+        #endif
     }
 }
 
