@@ -26,7 +26,7 @@
 #define EEPROMFLAG 18
 
 //13968 is correct
-#define NUMBER_OF_ENCODER_STEPS 13968.0 
+#define NUMBER_OF_ENCODER_STEPS 8148.0 
 
 
 
@@ -63,7 +63,6 @@ void   Axis::initializePID(){
 int    Axis::write(float targetPosition){
     
     _pidSetpoint   =  targetPosition/_mmPerRotation;
-    
     
     int acceptableError = 20;
     if (abs( ((_encoder.read()/NUMBER_OF_ENCODER_STEPS) - _pidSetpoint)*1000 ) < acceptableError){

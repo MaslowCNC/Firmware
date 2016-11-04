@@ -31,7 +31,6 @@ GearMotor::GearMotor(){
 }
 
 int GearMotor::setupMotor(int pwmPin, int pin1, int pin2){
-  //Serial.println("created gear motor");
   
   //store pin numbers as private variables
   _pwmPin = pwmPin;
