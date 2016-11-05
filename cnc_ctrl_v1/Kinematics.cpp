@@ -38,8 +38,9 @@ in X-Y space.
 #define BY               MACHINEHEIGHT/2 + MOTOROFFSETY
 
 Kinematics::Kinematics(){
-  
-  
+   
+    BigNumber::begin ();
+    
 }
 
 void  Kinematics::forward(float chainALength, float chainBLength, float* X, float* Y){
@@ -76,14 +77,35 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     Serial.println(Lac);
     
     
-    BigNumber a = 1501215.8;//-1*sq(AY)+sq(Lac); //alpha
+    Serial.println("this:~~~~~~~~~~~~~~~~~~~~~~");
+    BigNumber a, b, c, d, e;
+    BigNumber::setScale (2);
+    a = AY;
+    b = a.pow(2);
+    c = Lac;
+    d = c.pow(2);
+    e = d-b;
+    
+    Serial.print ("AY = ");
+    printBignum (a);
+    Serial.print ("AY^2 = ");
+    printBignum (b);
+    Serial.print ("Lac = ");
+    printBignum (c);
+    Serial.print ("Lac^2 = ");
+    printBignum (d);
+    Serial.print ("Total = ");
+    printBignum (e);
+    
+    
+    /*BigNumber a = -1*sq(AY)+sq(Lac); //alpha
     BigNumber b = -1*sq(BY)+sq(Lbd); //beta
     BigNumber c = SLEDWIDTH - AX + BX; //gamma
     BigNumber e = -16*sq(c); //epsilon
-    BigNumber inner = 12354;
+    BigNumber inner = 123546;
     Serial.print("inner: ");
     printBignum(inner);
-    Serial.println("$#$");
+    Serial.println("$#$");*/
     
     *Y   = 1;
     *X   = 1;
@@ -123,7 +145,6 @@ void Kinematics::test(){
     
     Serial.println("test kinematics begin-------------------------------------------------------");
     
-    BigNumber::begin ();
     
     float chainA = 100;
     float chainB = 100;
@@ -148,6 +169,7 @@ void Kinematics::test(){
     Serial.println(X);
     Serial.print("Y: ");
     Serial.println(Y);
+    
 }
 
 void Kinematics::printBignum (BigNumber n){
