@@ -22,6 +22,7 @@ in X-Y space.
 
 #include "Arduino.h"
 #include "Kinematics.h"
+#include "libraries/BigNumber/BigNumber.h"
 
 #define MACHINEHEIGHT    1219.2 //this is the distance from the motors to the center of the work space
 #define MACHINEWIDTH     2438.4 //this is the distance between the motors
