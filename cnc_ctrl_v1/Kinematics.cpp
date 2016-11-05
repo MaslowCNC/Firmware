@@ -71,11 +71,11 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 
 void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     
-    float a = -1*sq(AY)+sq(Lac);
-    float b = -1*sq(BY)+sq(Lbd);
-    float c = SLEDWIDTH - AX + BX;
-    float inner = sq(a) - 2*a*b - 2*a*sq(c)+sq(b)-2*b*sq(c)+sq(c)*sq(c);
-    float y = ( 8*sq(c)*AY- sq(64*sq(c)*sq(c)*sq(AY) - 16*sq(c)*(inner) ) )/(8*sq(c));
+    float a = -1*sq(AY)+sq(Lac); //alpha
+    float b = -1*sq(BY)+sq(Lbd); //beta
+    float c = SLEDWIDTH - AX + BX; //gamma
+    float e = -16*sq(c); //epsilon
+    float inner = 100.0*50000000.0;
     Serial.print("inner: ");
     Serial.println(inner);
     
