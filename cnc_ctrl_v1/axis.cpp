@@ -26,7 +26,7 @@
 #define EEPROMFLAG 18
 
 //13968 is correct
-#define NUMBER_OF_ENCODER_STEPS 13968.0 
+#define NUMBER_OF_ENCODER_STEPS 8148.0 
 
 
 
@@ -64,9 +64,8 @@ int    Axis::write(float targetPosition){
     
     _pidSetpoint   =  targetPosition/_mmPerRotation;
     
-    
     int acceptableError = 20;
-    if (abs( ((_direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS) - _pidSetpoint)*1000 ) < acceptableError){
+    if (abs( ((_encoder.read()/NUMBER_OF_ENCODER_STEPS) - _pidSetpoint)*1000 ) < acceptableError){
         return 1;
     }
     else{
@@ -77,10 +76,10 @@ int    Axis::write(float targetPosition){
 float  Axis::read(){
     
     if (_motor.attached()){
-        return (_direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
+        return (_encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
     }
     else{
-        return (_direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
+        return (_encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
     }
 }
 
@@ -94,7 +93,7 @@ float  Axis::setpoint(){
 
 int    Axis::set(float newAxisPosition){
     _axisTarget   =  newAxisPosition/_mmPerRotation;
-    _encoder.write((_direction*newAxisPosition*NUMBER_OF_ENCODER_STEPS)/_mmPerRotation);
+    _encoder.write((newAxisPosition*NUMBER_OF_ENCODER_STEPS)/_mmPerRotation);
 }
 
 void   Axis::computePID(){
@@ -118,7 +117,7 @@ void   Axis::computePID(){
         }
     }
     
-    _pidInput      =  _direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS;
+    _pidInput      =  _encoder.read()/NUMBER_OF_ENCODER_STEPS;
     _pidController.Compute();
     
     int boost = 0;
@@ -133,7 +132,7 @@ void   Axis::computePID(){
 }
 
 float  Axis::error(){
-    return abs((_direction * _encoder.read()/NUMBER_OF_ENCODER_STEPS) - _pidSetpoint)*_mmPerRotation;
+    return abs((_encoder.read()/NUMBER_OF_ENCODER_STEPS) - _pidSetpoint)*_mmPerRotation;
 }
 
 int    Axis::detach(){

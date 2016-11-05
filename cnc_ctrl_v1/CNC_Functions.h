@@ -20,6 +20,7 @@ libraries*/
 #include "Axis.h"
 #include "Kinematics.h"
 
+#define ZAXIS
 
 #define FORWARD           1
 #define BACKWARD         -1
@@ -37,10 +38,31 @@ libraries*/
 #define INCHES      25.4
 
 #define DIST_PER_ROTATION 10*6.35//#teeth*pitch of chain
+#define Z_DIST_PER_ROTATION 635 //1/8inch in mm
+
+#define ENCODER1A 18
+#define ENCODER1B 19
+#define ENCODER2A 2
+#define ENCODER2B 3
+#define ENCODER3A 21
+#define ENCODER3B 20
+
+#define IN1 9
+#define IN2 8
+#define IN3 12
+#define IN4 13
+#define IN5 14
+#define IN6 15
+
+#define ENA 6
+#define ENB 7
+#define ENC 10
 
 
-Axis xAxis(7, 8, 9, BACKWARD, 18, 19, "Left-axis", 5, DIST_PER_ROTATION);
-Axis yAxis(6,12,13, FORWARD, 2, 3, "Right-axis", 10, DIST_PER_ROTATION);
+Axis xAxis(ENB, IN3, IN4, BACKWARD , ENCODER2B, ENCODER2A, "Left-axis",   5, DIST_PER_ROTATION);
+Axis yAxis(ENA, IN1, IN2, FORWARD  , ENCODER1A, ENCODER1B, "Right-axis", 10, DIST_PER_ROTATION);
+Axis zAxis(ENC, IN5, IN6, BACKWARD , ENCODER3A, ENCODER3B, "Z-Axis",     15, DIST_PER_ROTATION/19);
+
 
 Kinematics kinematics;
 
@@ -65,7 +87,9 @@ void  returnPoz(){
         Serial.print(X/_inchesToMMConversion);
         Serial.print(", ");
         Serial.print(Y/_inchesToMMConversion);
-        Serial.print(", 0.0)");
+        Serial.print(", ");
+        Serial.print(zAxis.read()/_inchesToMMConversion);
+        Serial.print(")");
         
         if (_inchesToMMConversion == INCHES){
             Serial.println("in");
@@ -133,9 +157,9 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     float  xStartingLocation;
     float  yStartingLocation;
+    float  zStartingLocation;
     int    numberOfStepsPerMM         = 100;
     MMPerSecond = .5;
-    
     
     kinematics.forward(xAxis.target(), yAxis.target(), &xStartingLocation, &yStartingLocation);
     
@@ -192,30 +216,34 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     
     xAxis.attach();
     yAxis.attach();
+    zAxis.attach();
     
     
     while(true){
         
         xAxis.write(aChainLength);
         yAxis.write(bChainLength);
+        zAxis.write(zEnd);
         
         returnPoz();
         
         delay(20);
-        
-        if (xAxis.error() < 1 && yAxis.error() < 1){
+
+        if (xAxis.error() < 1 && yAxis.error() < 1 && zAxis.error() < 1){
             break;
         }
     }
     
     xAxis.endMove(aChainLength);
     yAxis.endMove(bChainLength);
+    zAxis.endMove(zEnd);
     
 }
 
 void  holdPosition(){
     xAxis.hold();
     yAxis.hold();
+    zAxis.hold();
 }
     
 float extractGcodeValue(String readString, char target,float defaultReturn){
@@ -256,13 +284,16 @@ int   G1(String readString){
     float currentXPos;
     float currentYPos;
     kinematics.forward(xAxis.target(), yAxis.target(), &currentXPos, &currentYPos);
+    float currentZPos = zAxis.read();
     
     xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
     ygoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
-    zgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Z', 0.0);
+    zgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Z', currentZPos/_inchesToMMConversion);
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     isNotRapid = extractGcodeValue(readString, 'G', 1);
     
+    
+    #ifndef ZAXIS
     if (zgoto != 0){
         Serial.print("Message: Please adjust Z-Axis to a depth of ");
         if (zgoto > 0){
@@ -283,14 +314,22 @@ int   G1(String readString){
             delay(1);
             holdPosition();
         } 
-        
     }
+    #endif
+    
     
     if (isNotRapid){
         move(xgoto, ygoto, zgoto, feedrate); //The move is performed
+        #ifdef ZAXIS
+        if (zgoto != currentZPos/_inchesToMMConversion){
+            rapidMove(xgoto, ygoto, zgoto);
+        }
+        #endif
     }
     else{
+        #ifdef ZAXIS
         rapidMove(xgoto, ygoto, zgoto);
+        #endif
     }
 }
 
@@ -378,15 +417,19 @@ void  G10(String readString){
     
     xAxis.set(0);
     yAxis.set(0);
+    zAxis.set(0);
     
     xAxis.endMove(0);
     yAxis.endMove(0);
+    zAxis.endMove(0);
     
     xAxis.attach();
     yAxis.attach();
+    zAxis.attach();
     
     xAxis.detach();
     yAxis.detach();
+    zAxis.detach();
     
 }
 

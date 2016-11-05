@@ -29,6 +29,7 @@ void setup(){
     
     xAxis.initializePID();
     yAxis.initializePID();
+    zAxis.initializePID();
     
     Timer1.initialize(10000);
     Timer1.attachInterrupt(runsOnATimer);
@@ -37,6 +38,7 @@ void setup(){
 void runsOnATimer(){
     xAxis.computePID();
     yAxis.computePID();
+    zAxis.computePID();
 }
 
 void loop(){
