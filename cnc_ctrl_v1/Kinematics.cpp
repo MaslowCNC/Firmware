@@ -22,7 +22,7 @@ in X-Y space.
 
 #include "Arduino.h"
 #include "Kinematics.h"
-#include "libraries/BigNumber/BigNumber.h"
+
 
 #define MACHINEHEIGHT    1219.2 //this is the distance from the motors to the center of the work space
 #define MACHINEWIDTH     2438.4 //this is the distance between the motors
@@ -71,14 +71,19 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 }
 
 void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
+    Serial.println("starting numbers:");
+    Serial.println(AY);
+    Serial.println(Lac);
     
-    float a = -1*sq(AY)+sq(Lac); //alpha
-    float b = -1*sq(BY)+sq(Lbd); //beta
-    float c = SLEDWIDTH - AX + BX; //gamma
-    float e = -16*sq(c); //epsilon
-    float inner = 100.0*50000000.0;
+    
+    BigNumber a = 1501215.8;//-1*sq(AY)+sq(Lac); //alpha
+    BigNumber b = -1*sq(BY)+sq(Lbd); //beta
+    BigNumber c = SLEDWIDTH - AX + BX; //gamma
+    BigNumber e = -16*sq(c); //epsilon
+    BigNumber inner = 12354;
     Serial.print("inner: ");
-    Serial.println(inner);
+    printBignum(inner);
+    Serial.println("$#$");
     
     *Y   = 1;
     *X   = 1;
@@ -115,7 +120,10 @@ void Kinematics::test(){
     
     
     */
+    
     Serial.println("test kinematics begin-------------------------------------------------------");
+    
+    BigNumber::begin ();
     
     float chainA = 100;
     float chainB = 100;
@@ -142,3 +150,9 @@ void Kinematics::test(){
     Serial.println(Y);
 }
 
+void Kinematics::printBignum (BigNumber n){
+    // function to display a big number and free it afterwards
+    char * s = n.toString ();
+    Serial.println (s);
+    free (s);
+}  

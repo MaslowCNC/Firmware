@@ -19,6 +19,7 @@
     #define Kinematics_h
 
     #include "Arduino.h"
+    #include "libraries/BigNumber/BigNumber.h"
 
     class Kinematics{
         public:
@@ -28,6 +29,8 @@
             void inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void test();
+        private:
+            void printBignum (BigNumber n);
     };
 
     #endif
