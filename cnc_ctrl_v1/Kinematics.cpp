@@ -72,31 +72,33 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 }
 
 void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
-    Serial.println("starting numbers:");
-    Serial.println(AY);
-    Serial.println(Lac);
+    
+    BigNumber::setScale (1);
+    
+    //store variables in BigNumber form
+    BigNumber AYb  = AY;
+    BigNumber AXb  = AX;
+    BigNumber BXb  = BX;
+    BigNumber Lacb = Lac;
+    BigNumber Lbdb = Lbd;
     
     
     Serial.println("this:~~~~~~~~~~~~~~~~~~~~~~");
-    BigNumber a, b, c, d, e;
-    BigNumber::setScale (2);
-    a = AY;
-    b = a.pow(2);
-    c = Lac;
-    d = c.pow(2);
-    e = d-b;
     
-    Serial.print ("AY = ");
-    printBignum (a);
-    Serial.print ("AY^2 = ");
-    printBignum (b);
-    Serial.print ("Lac = ");
-    printBignum (c);
-    Serial.print ("Lac^2 = ");
-    printBignum (d);
-    Serial.print ("Total = ");
-    printBignum (e);
+    //Do pre-calculations
+    BigNumber alpha   = Lacb.pow(2) - AYb.pow(2);
+    BigNumber beta    = Lbdb.pow(2) - AYb.pow(2);
+    BigNumber gamma   = SLEDWIDTH - AXb + BXb;
+    BigNumber epsilon = -16*gamma.pow(2);
     
+    Serial.print("alpha = "  );
+    printBignum (alpha  );
+    Serial.print("beta = "   );
+    printBignum (beta   );
+    Serial.print("gamma = "  );
+    printBignum (gamma  );
+    Serial.print("epsilon = ");
+    printBignum (epsilon);
     
     /*BigNumber a = -1*sq(AY)+sq(Lac); //alpha
     BigNumber b = -1*sq(BY)+sq(Lbd); //beta
