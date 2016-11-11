@@ -103,7 +103,12 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     BigNumber beta    = Lbdb.pow(2) - AYb.pow(2);
     BigNumber gamma   = SLEDWIDTH - AXb + BXb;
     BigNumber b16     = -16.0;
+    BigNumber b8      = 8.0;
+    BigNumber b2      = 2.0; 
+    BigNumber b64     = 64.0;
     BigNumber epsilon = b16*gamma.pow(2);
+    BigNumber first = b8*gamma.pow(2)*AYb;
+    
     
     Serial.print("alpha = "  );
     printBignum (alpha  );
@@ -113,15 +118,9 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     printBignum (gamma  );
     Serial.print("epsilon = ");
     printBignum (epsilon);
+    Serial.print("first");
+    printBignum(first);
     
-    /*BigNumber a = -1*sq(AY)+sq(Lac); //alpha
-    BigNumber b = -1*sq(BY)+sq(Lbd); //beta
-    BigNumber c = SLEDWIDTH - AX + BX; //gamma
-    BigNumber e = -16*sq(c); //epsilon
-    BigNumber inner = 123546;
-    Serial.print("inner: ");
-    printBignum(inner);
-    Serial.println("$#$");*/
     
     *Y   = 1;
     *X   = 1;
