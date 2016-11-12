@@ -73,7 +73,7 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 
 void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     
-    BigNumber::setScale (1);
+    BigNumber::setScale (3);
     
     //store variables in BigNumber form
     BigNumber AYb  = AY;
