@@ -101,20 +101,23 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     Serial.println("this:~~~~~~~~~~~~~~~~~~~~~~");
     
     //Do pre-calculations
-    BigNumber alpha   = Lacb.pow(2) - AYb.pow(2);
-    BigNumber beta    = Lbdb.pow(2) - AYb.pow(2);
-    BigNumber widthb   = ("310.0");
-    BigNumber gamma   = BXb - AXb - widthb;//widthb - AXb + BXb;
-    BigNumber b16     = 16.0;
-    BigNumber b8      = 8.0;
-    BigNumber b2      = 2.0; 
-    BigNumber b64     = 64.0;
+    BigNumber alpha        = Lacb.pow(2) - AYb.pow(2);
+    BigNumber beta         = Lbdb.pow(2) - AYb.pow(2);
+    BigNumber widthb       = ("310.0");
+    BigNumber gamma        = BXb - AXb - widthb;//widthb - AXb + BXb;
+    BigNumber b16          = 16.0;
+    BigNumber b8           = 8.0;
+    BigNumber b2           = 2.0; 
+    BigNumber b64          = 64.0;
     BigNumber partOne      = b8*gamma.pow(2)*AYb;
     BigNumber partTwo      = b64*gamma.pow(4)*AYb.pow(2);
     BigNumber partThree    = b16*gamma.pow(2);
     BigNumber partFour     = alpha.pow(2) - b2*alpha*beta - b2*alpha*gamma.pow(2) + beta.pow(2) - b2*beta*gamma.pow(2)+gamma.pow(4);
     BigNumber partFive     = b8*gamma.pow(2);
-    BigNumber Cyb          = partFive;
+    
+    BigNumber insideRoot   = partTwo - (partThree*partFour);
+    
+    BigNumber Cyb          = (partOne - insideRoot.sqrt())/partFive;
     BigNumber Fyb          = SLEDHEIGHT;
     
     
