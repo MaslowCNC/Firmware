@@ -139,12 +139,19 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     printBignum(partFive);
     Serial.print("Cyb = ");
     printBignum(Cyb);
-    Serial.print("Fyb = ");
-    printBignum(Fyb);
     
+    float Cy = Cyb;
+    float Cx = 1;
+    Serial.println(Cy);
     
-    *Y   = 1;
-    *X   = 1;
+    float Fx = Cx + SLEDWIDTH/2;
+    float Fy = Cy - SLEDHEIGHT;
+    
+    Serial.print("Y = ");
+    Serial.println(Fy);
+    
+    *X   = Fx;
+    *Y   = Fy;
 }
 
 void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
