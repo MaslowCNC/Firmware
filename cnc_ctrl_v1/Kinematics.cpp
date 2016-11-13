@@ -76,29 +76,12 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     BigNumber::setScale (3);
     
     //store variables in BigNumber form
-    BigNumber AYb  = ("1072.6");//AY;
-    BigNumber AXb  = ("-1489.2");//AX;
-    BigNumber BXb  = ("1489.2");//BX;
-    BigNumber Lacb = ("1628.4");//Lac;
-    BigNumber Lbdb = ("1628.4");//Lbd;
+    BigNumber AYb  = ("1072.6");  //AY;
+    BigNumber AXb  = ("-1489.2"); //AX;
+    BigNumber BXb  = ("1489.2");  //BX;
+    BigNumber Lacb = Lac;
+    BigNumber Lbdb = Lbd;
     
-    Serial.print("Ay = "  );
-    printBignum (AYb  );
-    Serial.print("#define AX = ");
-    Serial.println(AX);
-    Serial.print("Ax = "   );
-    printBignum (AXb   );
-    Serial.print("BX = "  );
-    printBignum (BXb  );
-    Serial.print("Lac = ");
-    printBignum (Lacb);
-    Serial.print("Lbd = ");
-    printBignum (Lbdb);
-    Serial.print("W = ");
-    Serial.println(SLEDWIDTH);
-    
-    
-    Serial.println("this:~~~~~~~~~~~~~~~~~~~~~~");
     
     //Do pre-calculations
     BigNumber alpha        = Lacb.pow(2) - AYb.pow(2);
@@ -118,10 +101,11 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     BigNumber insideRoot   = partTwo - (partThree*partFour);
     
     BigNumber Cyb          = (partOne - insideRoot.sqrt())/partFive;
-    BigNumber Fyb          = SLEDHEIGHT;
+    BigNumber inside       = Lacb.pow(2) - AYb.pow(2) + b2*AYb*Cyb - Cyb.pow(2);
+    BigNumber Cxb          = AXb + inside.sqrt();
     
     
-    Serial.print("alpha = "  );
+    /*Serial.print("alpha = "  );
     printBignum (alpha  );
     Serial.print("beta = "   );
     printBignum (beta   );
@@ -138,17 +122,17 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     Serial.print("partFive = ");
     printBignum(partFive);
     Serial.print("Cyb = ");
-    printBignum(Cyb);
+    printBignum(Cyb);*/
     
     float Cy = Cyb;
-    float Cx = 1;
-    Serial.println(Cy);
+    float Cx = Cxb;
+    //Serial.println(Cy);
     
     float Fx = Cx + SLEDWIDTH/2;
     float Fy = Cy - SLEDHEIGHT;
     
-    Serial.print("Y = ");
-    Serial.println(Fy);
+    //Serial.print("Cx = ");
+    //Serial.println(Cx);
     
     *X   = Fx;
     *Y   = Fy;
@@ -160,12 +144,6 @@ void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, f
     float Cy = yTarget + SLEDHEIGHT;
     float Dx = xTarget + SLEDWIDTH/2;
     float Dy = Cy;
-    
-    Serial.println("Cx, Cy, Dx, Dy:");
-    Serial.println(Cx);
-    Serial.println(Cy);
-    Serial.println(Dx);
-    Serial.println(Dy);
     
     float Lac = sqrt(sq(AX-Cx) + sq(AY-Cy));
     float Lbd = sqrt(sq(BX-Dx) + sq(BY-Dy));
@@ -189,10 +167,10 @@ void Kinematics::test(){
     Serial.println("test kinematics begin-------------------------------------------------------");
     
     
-    float chainA = 100;
-    float chainB = 100;
-    float X = 0;
-    float Y = 0; 
+    float chainA;
+    float chainB;
+    float X = -500;
+    float Y = -10; 
     
     Serial.print("X: ");
     Serial.println(X);
