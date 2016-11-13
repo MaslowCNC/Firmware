@@ -76,12 +76,18 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     BigNumber::setScale (3);
     
     //store variables in BigNumber form
+    BigNumber scale = ("10.00");
     BigNumber AYb  = ("1072.6");  //AY;
     BigNumber AXb  = ("-1489.2"); //AX;
     BigNumber BXb  = ("1489.2");  //BX;
-    BigNumber Lacb = Lac;
-    BigNumber Lbdb = Lbd;
+    BigNumber Lacb = Lac*10.0;
+    BigNumber Lbdb = Lbd*10.0;
+    Lacb = Lacb / scale;
+    Lbdb = Lbdb / scale;
     
+    
+    Serial.print("Lacb = ");
+    printBignum (Lacb);
     
     //Do pre-calculations
     BigNumber alpha        = Lacb.pow(2) - AYb.pow(2);
@@ -92,6 +98,8 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     BigNumber b8           = 8.0;
     BigNumber b2           = 2.0; 
     BigNumber b64          = 64.0;
+    
+    //Do calculations
     BigNumber partOne      = b8*gamma.pow(2)*AYb;
     BigNumber partTwo      = b64*gamma.pow(4)*AYb.pow(2);
     BigNumber partThree    = b16*gamma.pow(2);
@@ -104,35 +112,11 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     BigNumber inside       = Lacb.pow(2) - AYb.pow(2) + b2*AYb*Cyb - Cyb.pow(2);
     BigNumber Cxb          = AXb + inside.sqrt();
     
-    
-    /*Serial.print("alpha = "  );
-    printBignum (alpha  );
-    Serial.print("beta = "   );
-    printBignum (beta   );
-    Serial.print("gamma = "  );
-    printBignum (gamma  );
-    Serial.print("partOne = ");
-    printBignum (partOne);
-    Serial.print("partTwo = ");
-    printBignum(partTwo);
-    Serial.print("partThree = ");
-    printBignum(partThree);
-    Serial.print("partFour = ");
-    printBignum(partFour);
-    Serial.print("partFive = ");
-    printBignum(partFive);
-    Serial.print("Cyb = ");
-    printBignum(Cyb);*/
-    
     float Cy = Cyb;
     float Cx = Cxb;
-    //Serial.println(Cy);
     
     float Fx = Cx + SLEDWIDTH/2;
     float Fy = Cy - SLEDHEIGHT;
-    
-    //Serial.print("Cx = ");
-    //Serial.println(Cx);
     
     *X   = Fx;
     *Y   = Fy;
