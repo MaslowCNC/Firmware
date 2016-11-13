@@ -76,14 +76,16 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     BigNumber::setScale (3);
     
     //store variables in BigNumber form
-    BigNumber AYb  = AY;
-    BigNumber AXb  = AX;
-    BigNumber BXb  = BX;
-    BigNumber Lacb = Lac;
-    BigNumber Lbdb = Lbd;
+    BigNumber AYb  = ("1072.6");//AY;
+    BigNumber AXb  = ("-1489.2");//AX;
+    BigNumber BXb  = ("1489.2");//BX;
+    BigNumber Lacb = ("1628.4");//Lac;
+    BigNumber Lbdb = ("1628.4");//Lbd;
     
     Serial.print("Ay = "  );
     printBignum (AYb  );
+    Serial.print("#define AX = ");
+    Serial.println(AX);
     Serial.print("Ax = "   );
     printBignum (AXb   );
     Serial.print("BX = "  );
@@ -101,21 +103,19 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     //Do pre-calculations
     BigNumber alpha   = Lacb.pow(2) - AYb.pow(2);
     BigNumber beta    = Lbdb.pow(2) - AYb.pow(2);
-    BigNumber gamma   = SLEDWIDTH - AXb + BXb;
-    BigNumber b16     = -16.0;
+    BigNumber widthb   = ("310.0");
+    BigNumber gamma   = BXb - AXb - widthb;//widthb - AXb + BXb;
+    BigNumber b16     = 16.0;
     BigNumber b8      = 8.0;
     BigNumber b2      = 2.0; 
     BigNumber b64     = 64.0;
-    BigNumber epsilon      = b16*gamma.pow(2);
-    BigNumber first        = b8*gamma.pow(2)*AYb;
-    BigNumber firstInner   = b64*gamma.pow(4)*AYb.pow(2);
-    BigNumber inBrackets   = alpha.pow(2) - b2*alpha*beta - b2*alpha*gamma.pow(2) + beta.pow(2) - b2*beta*gamma.pow(2)+gamma.pow(4);
-    BigNumber secondInner  = epsilon*inBrackets;
-    BigNumber inner        = firstInner - secondInner;
-    BigNumber second       = inner.sqrt();
-    BigNumber top          = first - second;
-    BigNumber bottom       = b8*gamma.pow(2);
-    BigNumber Cyb          = top/bottom;
+    BigNumber partOne      = b8*gamma.pow(2)*AYb;
+    BigNumber partTwo      = b64*gamma.pow(4)*AYb.pow(2);
+    BigNumber partThree    = b16*gamma.pow(2);
+    BigNumber partFour     = alpha.pow(2) - b2*alpha*beta - b2*alpha*gamma.pow(2) + beta.pow(2) - b2*beta*gamma.pow(2)+gamma.pow(4);
+    BigNumber partFive     = b8*gamma.pow(2);
+    BigNumber Cyb          = partFive;
+    BigNumber Fyb          = SLEDHEIGHT;
     
     
     Serial.print("alpha = "  );
@@ -124,26 +124,20 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     printBignum (beta   );
     Serial.print("gamma = "  );
     printBignum (gamma  );
-    Serial.print("epsilon = ");
-    printBignum (epsilon);
-    Serial.print("first = ");
-    printBignum(first);
-    Serial.print("firstInner = ");
-    printBignum(firstInner);
-    Serial.print("inBrackets = ");
-    printBignum(inBrackets);
-    Serial.print("secondInner = ");
-    printBignum(secondInner);
-    Serial.print("inner = ");
-    printBignum(inner);
-    Serial.print("second = ");
-    printBignum(second);
-    Serial.print("top = ");
-    printBignum(top);
-    Serial.print("bottom = ");
-    printBignum(bottom);
+    Serial.print("partOne = ");
+    printBignum (partOne);
+    Serial.print("partTwo = ");
+    printBignum(partTwo);
+    Serial.print("partThree = ");
+    printBignum(partThree);
+    Serial.print("partFour = ");
+    printBignum(partFour);
+    Serial.print("partFive = ");
+    printBignum(partFive);
     Serial.print("Cyb = ");
     printBignum(Cyb);
+    Serial.print("Fyb = ");
+    printBignum(Fyb);
     
     
     *Y   = 1;
