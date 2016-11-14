@@ -20,6 +20,7 @@
 
     #include "Arduino.h"
     #include "libraries/BigNumber/BigNumber.h"
+    #include "libraries/FormatDouble/FormatDouble.h"
 
     class Kinematics{
         public:

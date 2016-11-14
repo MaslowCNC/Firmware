@@ -76,14 +76,28 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     BigNumber::setScale (3);
     
     //store variables in BigNumber form
-    BigNumber scale = ("10.00");
+    
+    //To Do:
+    //there is a limiting factor here which is that to convert the floating point number Lac
+    //to be of BigNumber type it passes through an int type which scales it. Adding the scale variable
+    //improves the resolution somewhat but it's still crap.
+    
+    
+    BigNumber scaleb = ("10.0");
+    float     scalef = 10.0;
+    
     BigNumber AYb  = ("1072.6");  //AY;
     BigNumber AXb  = ("-1489.2"); //AX;
     BigNumber BXb  = ("1489.2");  //BX;
-    BigNumber Lacb = Lac*10.0;
-    BigNumber Lbdb = Lbd*10.0;
-    Lacb = Lacb / scale;
-    Lbdb = Lbdb / scale;
+    
+    
+    char buf [20];
+    fmtDouble (Lac, 6, buf, sizeof buf);
+    BigNumber Lacb = BigNumber (buf);
+    
+    
+    
+    BigNumber Lbdb = Lbd;
     
     
     Serial.print("Lacb = ");
@@ -112,8 +126,11 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     BigNumber inside       = Lacb.pow(2) - AYb.pow(2) + b2*AYb*Cyb - Cyb.pow(2);
     BigNumber Cxb          = AXb + inside.sqrt();
     
-    float Cy = Cyb;
-    float Cx = Cxb;
+    float Cy = Cyb*scaleb;
+    Cy       = Cy/scalef;
+    
+    float Cx = Cxb*scaleb;
+    Cx       = Cx/scalef;
     
     float Fx = Cx + SLEDWIDTH/2;
     float Fy = Cy - SLEDHEIGHT;
