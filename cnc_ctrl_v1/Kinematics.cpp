@@ -76,24 +76,15 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     BigNumber::setScale (3);
     
     //store variables in BigNumber form
-    
-    //To Do:
-    //there is a limiting factor here which is that to convert the floating point number Lac
-    //to be of BigNumber type it passes through an int type which scales it. Adding the scale variable
-    //improves the resolution somewhat but it's still crap.
-    
-    
     BigNumber AYb  = ("1072.6");  //AY;
     BigNumber AXb  = ("-1489.2"); //AX;
     BigNumber BXb  = ("1489.2");  //BX;
     
     
-    BigNumber Lacb = float2BigNum(Lac);
-    BigNumber Lbdb = float2BigNum(Lbd);
     
-    
-    Serial.print("Lacb = ");
-    printBignum (Lacb);
+    float chainLengthAtCenterInMM = 1628.4037;
+    BigNumber Lacb = float2BigNum(Lac + chainLengthAtCenterInMM);
+    BigNumber Lbdb = float2BigNum(-1*Lbd + chainLengthAtCenterInMM);
     
     //Do pre-calculations
     BigNumber alpha        = Lacb.pow(2) - AYb.pow(2);
@@ -118,8 +109,8 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     BigNumber inside       = Lacb.pow(2) - AYb.pow(2) + b2*AYb*Cyb - Cyb.pow(2);
     BigNumber Cxb          = AXb + inside.sqrt();
     
-    BigNumber scaleb = ("1000.0");
-    float     scalef = 1000.0;
+    BigNumber scaleb = ("10000.0");
+    float     scalef = 10000.0;
     
     float Cy = Cyb*scaleb;
     Cy       = Cy/scalef;
@@ -144,8 +135,10 @@ void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, f
     float Lac = sqrt(sq(AX-Cx) + sq(AY-Cy));
     float Lbd = sqrt(sq(BX-Dx) + sq(BY-Dy));
     
-    *aChainLength = Lac;
-    *bChainLength = Lbd;
+    
+    float chainLengthAtCenterInMM = 1628.4037;
+    *aChainLength = -1*(Lac - chainLengthAtCenterInMM);
+    *bChainLength = Lbd - chainLengthAtCenterInMM;
 }
 
 void Kinematics::test(){
@@ -165,16 +158,26 @@ void Kinematics::test(){
     
     float chainA;
     float chainB;
-    float X = -500.123;
-    float Y = -10.789; 
+    float X = -500.0;
+    float Y = 500.0; 
     
     Serial.print("X: ");
     Serial.println(X);
     Serial.print("Y: ");
     Serial.println(Y);
     
-    newInverse(X,Y, &chainA, &chainB);
     
+    inverse(X,Y, &chainA, &chainB);
+    
+    Serial.println("Old: ");
+    Serial.print("La: ");
+    Serial.println(chainA);
+    Serial.print("Lb: ");
+    Serial.println(chainB);
+    
+    
+    newInverse(X,Y, &chainA, &chainB);
+    Serial.println("New: ");
     Serial.print("La: ");
     Serial.println(chainA);
     Serial.print("Lb: ");
