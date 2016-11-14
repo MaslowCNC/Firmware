@@ -32,6 +32,7 @@
             void test();
         private:
             void printBignum (BigNumber n);
+            BigNumber float2BigNum (float value);
     };
 
     #endif

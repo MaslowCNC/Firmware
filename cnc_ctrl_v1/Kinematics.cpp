@@ -91,13 +91,8 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     BigNumber BXb  = ("1489.2");  //BX;
     
     
-    char buf [20];
-    fmtDouble (Lac, 6, buf, sizeof buf);
-    BigNumber Lacb = BigNumber (buf);
-    
-    
-    
-    BigNumber Lbdb = Lbd;
+    BigNumber Lacb = float2BigNum(Lac);
+    BigNumber Lbdb = float2BigNum(Lbd);
     
     
     Serial.print("Lacb = ");
@@ -170,8 +165,8 @@ void Kinematics::test(){
     
     float chainA;
     float chainB;
-    float X = -500;
-    float Y = -10; 
+    float X = -500.123;
+    float Y = -10.789; 
     
     Serial.print("X: ");
     Serial.println(X);
@@ -200,3 +195,11 @@ void Kinematics::printBignum (BigNumber n){
     Serial.println (s);
     free (s);
 }  
+
+BigNumber Kinematics::float2BigNum (float value){
+    char buf [20];
+    fmtDouble (value, 6, buf, sizeof buf);
+    BigNumber bigVal = BigNumber (buf);
+    
+    return bigVal;
+}
