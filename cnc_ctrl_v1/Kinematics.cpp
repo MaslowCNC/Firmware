@@ -72,6 +72,7 @@ void  Kinematics::oldInverse(float xTarget,float yTarget, float* aChainLength, f
 }
 
 void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
+    //Compute xy postion from chain lengths
     
     BigNumber::setScale (3);
     
@@ -83,8 +84,8 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     
     
     float chainLengthAtCenterInMM = 1628.4037;
-    BigNumber Lacb = float2BigNum(Lac + chainLengthAtCenterInMM);
-    BigNumber Lbdb = float2BigNum(-1*Lbd + chainLengthAtCenterInMM);
+    BigNumber Lacb = float2BigNum(-1*Lac + chainLengthAtCenterInMM);
+    BigNumber Lbdb = float2BigNum(Lbd + chainLengthAtCenterInMM);
     
     //Do pre-calculations
     BigNumber alpha        = Lacb.pow(2) - AYb.pow(2);
@@ -126,6 +127,7 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
 }
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    //compute chain lengths from an XY position
     
     float Cx = xTarget - SLEDWIDTH/2;
     float Cy = yTarget + SLEDHEIGHT;
