@@ -83,9 +83,6 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     //improves the resolution somewhat but it's still crap.
     
     
-    BigNumber scaleb = ("10.0");
-    float     scalef = 10.0;
-    
     BigNumber AYb  = ("1072.6");  //AY;
     BigNumber AXb  = ("-1489.2"); //AX;
     BigNumber BXb  = ("1489.2");  //BX;
@@ -120,6 +117,9 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     BigNumber Cyb          = (partOne - insideRoot.sqrt())/partFive;
     BigNumber inside       = Lacb.pow(2) - AYb.pow(2) + b2*AYb*Cyb - Cyb.pow(2);
     BigNumber Cxb          = AXb + inside.sqrt();
+    
+    BigNumber scaleb = ("1000.0");
+    float     scalef = 1000.0;
     
     float Cy = Cyb*scaleb;
     Cy       = Cy/scalef;
