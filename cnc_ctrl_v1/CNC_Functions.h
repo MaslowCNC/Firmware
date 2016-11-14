@@ -74,8 +74,6 @@ void  returnPoz(){
     static unsigned long lastRan = millis();
     int                  timeout = 200;
     
-    kinematics.test();
-    
     if (millis() - lastRan > timeout){
         
         float X;

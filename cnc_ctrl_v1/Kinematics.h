@@ -25,10 +25,10 @@
     class Kinematics{
         public:
             Kinematics();
-            void forward(float chainALength, float chainBLength, float* X, float* Y);
-            void newForward(float chainALength, float chainBLength, float* X, float* Y);
-            void inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
-            void newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
+            void oldForward(float chainALength, float chainBLength, float* X, float* Y);
+            void forward   (float chainALength, float chainBLength, float* X, float* Y);
+            void oldInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
+            void inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void test();
         private:
             void printBignum (BigNumber n);

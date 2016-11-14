@@ -43,7 +43,7 @@ Kinematics::Kinematics(){
     
 }
 
-void  Kinematics::forward(float chainALength, float chainBLength, float* X, float* Y){
+void  Kinematics::oldForward(float chainALength, float chainBLength, float* X, float* Y){
     float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
     
     //Use the law of cosines to find the angle between the two chains
@@ -56,7 +56,7 @@ void  Kinematics::forward(float chainALength, float chainBLength, float* X, floa
     *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
 }
 
-void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  Kinematics::oldInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     
     float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
     
@@ -71,7 +71,7 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     *bChainLength = Lb - chainLengthAtCenterInMM;
 }
 
-void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
+void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     
     BigNumber::setScale (3);
     
@@ -125,7 +125,7 @@ void  Kinematics::newForward(float Lac, float Lbd, float* X, float* Y){
     *Y   = Fy;
 }
 
-void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     
     float Cx = xTarget - SLEDWIDTH/2;
     float Cy = yTarget + SLEDHEIGHT;
@@ -167,7 +167,7 @@ void Kinematics::test(){
     Serial.println(Y);
     
     
-    inverse(X,Y, &chainA, &chainB);
+    oldInverse(X,Y, &chainA, &chainB);
     
     Serial.println("Old: ");
     Serial.print("La: ");
@@ -176,14 +176,14 @@ void Kinematics::test(){
     Serial.println(chainB);
     
     
-    newInverse(X,Y, &chainA, &chainB);
+    inverse(X,Y, &chainA, &chainB);
     Serial.println("New: ");
     Serial.print("La: ");
     Serial.println(chainA);
     Serial.print("Lb: ");
     Serial.println(chainB);
     
-    newForward(chainA, chainB, &X, &Y);
+    forward(chainA, chainB, &X, &Y);
     
     Serial.print("X: ");
     Serial.println(X);
