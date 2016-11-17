@@ -31,7 +31,6 @@
             void inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void test();
         private:
-            void printBignum (BigNumber n);
             BigNumber float2BigNum (float value);
     };
 

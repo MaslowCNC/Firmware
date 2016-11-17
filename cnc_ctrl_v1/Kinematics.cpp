@@ -43,34 +43,6 @@ Kinematics::Kinematics(){
     
 }
 
-void  Kinematics::oldForward(float chainALength, float chainBLength, float* X, float* Y){
-    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
-    
-    //Use the law of cosines to find the angle between the two chains
-    float   a   = chainBLength + chainLengthAtCenterInMM;
-    float   b   = -1*chainALength + chainLengthAtCenterInMM;
-    float   c   = MACHINEWIDTH+2*MOTOROFFSETX;
-    float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
-    
-    *Y   = MOTOROFFSETY + MACHINEHEIGHT/2 - (b*sin(theta));
-    *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
-}
-
-void  Kinematics::oldInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
-    
-    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
-    
-    float X1 = MOTOROFFSETX + MACHINEWIDTH/2.0   + xTarget;
-    float X2 = MOTOROFFSETX + MACHINEWIDTH/2.0   - xTarget;
-    float Y  = MOTOROFFSETY + MACHINEHEIGHT/2.0  - yTarget;
-    
-    float La = sqrt( sq(X1) + sq(Y) );
-    float Lb = sqrt( sq(X2) + sq(Y) );
-    
-    *aChainLength = -1*(La - chainLengthAtCenterInMM);
-    *bChainLength = Lb - chainLengthAtCenterInMM;
-}
-
 void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     //Compute xy postion from chain lengths
     
@@ -92,12 +64,13 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     BigNumber beta         = Lbdb.pow(2) - AYb.pow(2);
     BigNumber widthb       = ("310.0");
     BigNumber gamma        = BXb - AXb - widthb;//widthb - AXb + BXb;
+    BigNumber b64          = 64.0;
     BigNumber b16          = 16.0;
     BigNumber b8           = 8.0;
     BigNumber b2           = 2.0; 
-    BigNumber b64          = 64.0;
     
     //Do calculations
+    //Derivation can be found at robotics.stackexchange.com/questions/10607/forward-and-revers-kinematics-for-modified-hanging-plotter
     BigNumber partOne      = b8*gamma.pow(2)*AYb;
     BigNumber partTwo      = b64*gamma.pow(4)*AYb.pow(2);
     BigNumber partThree    = b16*gamma.pow(2);
@@ -144,16 +117,6 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 }
 
 void Kinematics::test(){
-    /*
-    
-    (0,0) --> 1628.4,1628.4
-    (0, 100) --> 1573.21,1573.21
-    (0, -100) --> 1687.73,1687.73
-    (100, 0) --> 1711.30,1547.53
-    (-100, 0) --> 1547.53,1711.30
-    
-    
-    */
     
     Serial.println("test kinematics begin-------------------------------------------------------");
     
@@ -193,13 +156,6 @@ void Kinematics::test(){
     Serial.println(Y);
     
 }
-
-void Kinematics::printBignum (BigNumber n){
-    // function to display a big number and free it afterwards
-    char * s = n.toString ();
-    Serial.println (s);
-    free (s);
-}  
 
 BigNumber Kinematics::float2BigNum (float value){
     char buf [20];
