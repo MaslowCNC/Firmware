@@ -13,10 +13,8 @@
     Copyright 2014 Bar Smith*/
     
     
-
-#include "MyTypes.h"
 #include "CNC_Functions.h"
-#include "TimerOne.h"
+#include "libraries/TimerOne/TimerOne.h"
 
 
 String readString;
