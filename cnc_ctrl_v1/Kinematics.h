@@ -19,13 +19,17 @@
     #define Kinematics_h
 
     #include "Arduino.h"
+    #include "libraries/BigNumber/BigNumber.h"
+    #include "libraries/FormatDouble/FormatDouble.h"
 
     class Kinematics{
         public:
             Kinematics();
-            void forward(float chainALength, float chainBLength, float* X, float* Y);
-            void NewForward(float chainALength, float chainBLength, float* X, float* Y);
-            void inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
+            void forward   (float chainALength, float chainBLength, float* X, float* Y);
+            void inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
+            void test();
+        private:
+            BigNumber float2BigNum (float value);
     };
 
     #endif
