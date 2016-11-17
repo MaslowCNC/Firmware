@@ -62,7 +62,7 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     //Do pre-calculations
     BigNumber alpha        = Lacb.pow(2) - AYb.pow(2);
     BigNumber beta         = Lbdb.pow(2) - AYb.pow(2);
-    BigNumber widthb       = ("310.0");
+    BigNumber widthb       = float2BigNum(SLEDWIDTH);
     BigNumber gamma        = BXb - AXb - widthb;//widthb - AXb + BXb;
     BigNumber b64          = 64.0;
     BigNumber b16          = 16.0;

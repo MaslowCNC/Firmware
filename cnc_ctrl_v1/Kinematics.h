@@ -25,9 +25,7 @@
     class Kinematics{
         public:
             Kinematics();
-            void oldForward(float chainALength, float chainBLength, float* X, float* Y);
             void forward   (float chainALength, float chainBLength, float* X, float* Y);
-            void oldInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void test();
         private:
