@@ -47,14 +47,14 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     //Compute xy postion from chain lengths
     
     BigNumber::setScale (3);
+    BigNumber neg1 = ("-1");
     
     //store variables in BigNumber form
     BigNumber AYb  = float2BigNum(AY);
-    BigNumber AXb  = float2BigNum(AX);
+    BigNumber AXb  = neg1*float2BigNum(AX);
     BigNumber BXb  = float2BigNum(BX);
     
-    
-    
+
     float chainLengthAtCenterInMM = 1628.4037;
     BigNumber Lacb = float2BigNum(-1*Lac + chainLengthAtCenterInMM);
     BigNumber Lbdb = float2BigNum(Lbd + chainLengthAtCenterInMM);
@@ -62,7 +62,7 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     //Do pre-calculations
     BigNumber alpha        = Lacb.pow(2) - AYb.pow(2);
     BigNumber beta         = Lbdb.pow(2) - AYb.pow(2);
-    BigNumber widthb       = float2BigNum(SLEDWIDTH);
+    BigNumber widthb       = ("310.0");
     BigNumber gamma        = BXb - AXb - widthb;//widthb - AXb + BXb;
     BigNumber b64          = 64.0;
     BigNumber b16          = 16.0;
