@@ -131,17 +131,8 @@ void Kinematics::test(){
     Serial.print("Y: ");
     Serial.println(Y);
     
-    
-    oldInverse(X,Y, &chainA, &chainB);
-    
-    Serial.println("Old: ");
-    Serial.print("La: ");
-    Serial.println(chainA);
-    Serial.print("Lb: ");
-    Serial.println(chainB);
-    
-    
     inverse(X,Y, &chainA, &chainB);
+    
     Serial.println("New: ");
     Serial.print("La: ");
     Serial.println(chainA);
