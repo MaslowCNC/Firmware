@@ -41,6 +41,7 @@
             float  error();
             float  setpoint();
             void   computePID();
+            void   computeBoost();
             
         private:
             int        _PWMread(int pin);

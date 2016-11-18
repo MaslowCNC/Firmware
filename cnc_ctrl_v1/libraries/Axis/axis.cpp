@@ -214,3 +214,17 @@ int   Axis::_change(float val){
         return false;
     }
 }
+
+void Axis::computeBoost(){
+    Serial.print(_axisName);
+    Serial.print(" boost values are ");
+    
+    int negBoost = 0;
+    int posBoost = 0;
+    
+    
+    
+    Serial.print(negBoost);
+    Serial.print(" and ");
+    Serial.println(posBoost);
+}

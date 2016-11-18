@@ -510,6 +510,14 @@ void interpretCommandString(String readString){
         readString = "";
     }
     
+    if(readString.substring(0, 3) == "B01"){
+        Serial.println("test runs");
+        xAxis.computeBoost();
+        yAxis.computeBoost();
+        readString = "";
+        Serial.println("gready");
+    }
+    
     if(readString.substring(0, 3) == "B05"){
         Serial.println("Firmware Version .59");
         readString = "";
