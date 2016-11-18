@@ -511,9 +511,10 @@ void interpretCommandString(String readString){
     }
     
     if(readString.substring(0, 3) == "B01"){
-        Serial.println("test runs");
+        
         xAxis.computeBoost();
         yAxis.computeBoost();
+        
         readString = "";
         Serial.println("gready");
     }

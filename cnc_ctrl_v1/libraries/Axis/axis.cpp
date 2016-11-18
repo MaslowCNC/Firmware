@@ -216,14 +216,61 @@ int   Axis::_change(float val){
 }
 
 void Axis::computeBoost(){
-    Serial.print(_axisName);
-    Serial.print(" boost values are ");
     
     int negBoost = 0;
     int posBoost = 0;
     
+    long originalEncoderPos = _encoder.read();
     
+    attach();
     
+    int i = 0;
+    while (i < 35){
+        _motor.write(90+i);
+        
+        delay(1000);
+        Serial.print(".");
+        delay(1000);
+        Serial.print(".");
+        
+        if (abs(originalEncoderPos - _encoder.read()) > 75){
+            break;
+        }
+        
+        i++;
+    }
+    posBoost = i;
+    Serial.println(" ");
+    
+    _motor.write(90);
+        
+    delay(1000);
+    Serial.print(".");
+    delay(1000);
+    Serial.print(".");
+    
+    i                   = 0;
+    originalEncoderPos  = _encoder.read();
+    while (i < 35){
+        _motor.write(90-i);
+        
+        delay(1000);
+        Serial.print(".");
+        delay(1000);
+        Serial.print(".");
+        
+        if (abs(originalEncoderPos - _encoder.read()) > 75){
+            break;
+        }
+        
+        i++;
+    }
+    negBoost = i;
+    _motor.write(90);
+    
+    Serial.println(" ");
+    Serial.print(_axisName);
+    Serial.print(" boost values are ");
     Serial.print(negBoost);
     Serial.print(" and ");
     Serial.println(posBoost);

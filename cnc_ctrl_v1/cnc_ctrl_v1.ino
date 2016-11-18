@@ -29,8 +29,8 @@ void setup(){
     yAxis.initializePID();
     zAxis.initializePID();
     
-    Timer1.initialize(10000);
-    Timer1.attachInterrupt(runsOnATimer);
+    //Timer1.initialize(10000);
+    //Timer1.attachInterrupt(runsOnATimer);
 }
 
 void runsOnATimer(){
