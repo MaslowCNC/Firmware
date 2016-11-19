@@ -98,6 +98,10 @@ int    Axis::set(float newAxisPosition){
 
 void   Axis::computePID(){
     
+    if (_disableAxisForTesting == true){
+        return;
+    }
+    
     if (_change(_sign(_oldSetpoint - _pidSetpoint))){ //this determines if the axis has changed direction of movement and flushes the acumulator in the PID if it has
         _pidController.FlipIntegrator();
     }
@@ -120,14 +124,15 @@ void   Axis::computePID(){
     _pidInput      =  _encoder.read()/NUMBER_OF_ENCODER_STEPS;
     _pidController.Compute();
     
-    int boost = 0;
-    
     if (_direction*_pidOutput > 0){
        //motor is under more stress when moving in the "up" direction
-       boost = 19;
+       _motor.write(90 + _direction*_pidOutput + _negBoost);
+    }
+    else{
+       _motor.write(90 + _direction*_pidOutput - _posBoost);
     }
     
-    _motor.write(90 + _direction*_pidOutput + boost);
+    
     
 }
 
@@ -198,13 +203,13 @@ void   Axis::_writeFloat(unsigned int addr, float x){
     }
 }
 
-int   Axis::_sign(float val){
+int    Axis::_sign(float val){
     if (val < 0) return -1;
     if (val==0) return 0;
     return 1;
 }
 
-int   Axis::_change(float val){
+int    Axis::_change(float val){
     if (val != _oldVal){
         _oldVal = val;
         return true;
@@ -215,10 +220,9 @@ int   Axis::_change(float val){
     }
 }
 
-void Axis::computeBoost(){
+void   Axis::computeBoost(){
     
-    int negBoost = 0;
-    int posBoost = 0;
+    _disableAxisForTesting = true;
     
     long originalEncoderPos = _encoder.read();
     
@@ -239,7 +243,7 @@ void Axis::computeBoost(){
         
         i++;
     }
-    posBoost = i;
+    _posBoost = i;
     Serial.println(" ");
     
     _motor.write(90);
@@ -265,13 +269,15 @@ void Axis::computeBoost(){
         
         i++;
     }
-    negBoost = i;
+    _negBoost = i;
     _motor.write(90);
     
     Serial.println(" ");
     Serial.print(_axisName);
     Serial.print(" boost values are ");
-    Serial.print(negBoost);
+    Serial.print(_negBoost);
     Serial.print(" and ");
-    Serial.println(posBoost);
+    Serial.println(_posBoost);
+    
+    _disableAxisForTesting = false;
 }
