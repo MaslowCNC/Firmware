@@ -59,9 +59,9 @@ libraries*/
 #define ENC 10
 
 
-Axis xAxis(ENB, IN3, IN4, BACKWARD , ENCODER2B, ENCODER2A, "Left-axis",   5, DIST_PER_ROTATION);
-Axis yAxis(ENA, IN1, IN2, FORWARD  , ENCODER1A, ENCODER1B, "Right-axis", 10, DIST_PER_ROTATION);
-Axis zAxis(ENC, IN5, IN6, BACKWARD , ENCODER3A, ENCODER3B, "Z-Axis",     15, DIST_PER_ROTATION/19);
+Axis leftAxis (ENB, IN4, IN3, ENCODER2A, ENCODER2B, "Left-axis",   5, DIST_PER_ROTATION);
+Axis rightAxis(ENA, IN2, IN1, ENCODER1B, ENCODER1A, "Right-axis", 10, DIST_PER_ROTATION);
+Axis zAxis    (ENC, IN5, IN6, ENCODER3A, ENCODER3B, "Z-Axis",     15, DIST_PER_ROTATION/19);
 
 
 Kinematics kinematics;
@@ -79,7 +79,7 @@ void  returnPoz(){
         float X;
         float Y;
         
-        kinematics.forward(xAxis.read(), yAxis.read(), &X, &Y);
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &X, &Y);
         
         Serial.print("pz(");
         Serial.print(X/_inchesToMMConversion);
@@ -96,7 +96,7 @@ void  returnPoz(){
             Serial.println("mm");
         }
         
-        kinematics.forward(xAxis.setpoint(), yAxis.setpoint(), &X, &Y);
+        kinematics.forward(leftAxis.setpoint(), rightAxis.setpoint(), &X, &Y);
         
         Serial.print("pt(");
         Serial.print(X/_inchesToMMConversion);
@@ -131,8 +131,8 @@ void  goAroundInCircle(){
         kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
         
-        xAxis.write(aChainLength);
-        yAxis.write(bChainLength);
+        leftAxis.write(aChainLength);
+        rightAxis.write(bChainLength);
         
         delay(15);
         
@@ -159,7 +159,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     int    numberOfStepsPerMM         = 100;
     MMPerSecond = .5;
     
-    kinematics.forward(xAxis.target(), yAxis.target(), &xStartingLocation, &yStartingLocation);
+    kinematics.forward(leftAxis.target(), rightAxis.target(), &xStartingLocation, &yStartingLocation);
     
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
@@ -174,8 +174,8 @@ and G01 commands. The units at this point should all be in rotations or rotation
     
     long   numberOfStepsTaken         =  0;
     
-    xAxis.attach();
-    yAxis.attach();
+    leftAxis.attach();
+    rightAxis.attach();
     
     float aChainLength;
     float bChainLength;
@@ -188,8 +188,8 @@ and G01 commands. The units at this point should all be in rotations or rotation
         kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
         
-        xAxis.write(aChainLength);
-        yAxis.write(bChainLength);
+        leftAxis.write(aChainLength);
+        rightAxis.write(bChainLength);
         numberOfStepsTaken++;
         
         returnPoz();
@@ -198,8 +198,8 @@ and G01 commands. The units at this point should all be in rotations or rotation
     }
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
-    xAxis.endMove(aChainLength);
-    yAxis.endMove(bChainLength);
+    leftAxis.endMove(aChainLength);
+    rightAxis.endMove(bChainLength);
     
     return(1);
     
@@ -212,35 +212,39 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
     
-    xAxis.attach();
-    yAxis.attach();
+    leftAxis.attach();
+    rightAxis.attach();
     zAxis.attach();
     
     
     while(true){
         
-        xAxis.write(aChainLength);
-        yAxis.write(bChainLength);
+        leftAxis.write(aChainLength);
+        rightAxis.write(bChainLength);
         zAxis.write(zEnd);
         
         returnPoz();
         
         delay(20);
 
-        if (xAxis.error() < 1 && yAxis.error() < 1 && zAxis.error() < 1){
+        if (leftAxis.error() < 1 && rightAxis.error() < 1 && zAxis.error() < 1){
             break;
         }
     }
     
-    xAxis.endMove(aChainLength);
-    yAxis.endMove(bChainLength);
+    leftAxis.endMove(aChainLength);
+    rightAxis.endMove(bChainLength);
     zAxis.endMove(zEnd);
+    
+    
+    
+    Serial.println("end of move");
     
 }
 
 void  holdPosition(){
-    xAxis.hold();
-    yAxis.hold();
+    leftAxis.hold();
+    rightAxis.hold();
     zAxis.hold();
 }
     
@@ -281,7 +285,7 @@ int   G1(String readString){
     
     float currentXPos;
     float currentYPos;
-    kinematics.forward(xAxis.target(), yAxis.target(), &currentXPos, &currentYPos);
+    kinematics.forward(leftAxis.target(), rightAxis.target(), &currentXPos, &currentYPos);
     float currentZPos = zAxis.read();
     
     xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
@@ -370,8 +374,8 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
         
-        xAxis.write(aChainLength);
-        yAxis.write(bChainLength);
+        leftAxis.write(aChainLength);
+        rightAxis.write(bChainLength);
         
         delay(stepDelayMs);
         
@@ -381,15 +385,15 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     }
     
     kinematics.inverse(X2,Y2,&aChainLength,&bChainLength);
-    xAxis.endMove(aChainLength);
-    yAxis.endMove(bChainLength);
+    leftAxis.endMove(aChainLength);
+    rightAxis.endMove(bChainLength);
 }
 
 int   G2(String readString){
     
     float X1;
     float Y1;
-    kinematics.forward(xAxis.target(), yAxis.target(), &X1, &Y1);
+    kinematics.forward(leftAxis.target(), rightAxis.target(), &X1, &Y1);
     
     float X2      = _inchesToMMConversion*extractGcodeValue(readString, 'X', 0.0);
     float Y2      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', 0.0);
@@ -413,20 +417,20 @@ void  G10(String readString){
 
 /*The G10() function handles the G10 gcode which re-zeroes one or all of the machine's axes.*/
     
-    xAxis.set(0);
-    yAxis.set(0);
+    leftAxis.set(0);
+    rightAxis.set(0);
     zAxis.set(0);
     
-    xAxis.endMove(0);
-    yAxis.endMove(0);
+    leftAxis.endMove(0);
+    rightAxis.endMove(0);
     zAxis.endMove(0);
     
-    xAxis.attach();
-    yAxis.attach();
+    leftAxis.attach();
+    rightAxis.attach();
     zAxis.attach();
     
-    xAxis.detach();
-    yAxis.detach();
+    leftAxis.detach();
+    rightAxis.detach();
     zAxis.detach();
     
 }
@@ -512,8 +516,8 @@ void interpretCommandString(String readString){
     
     if(readString.substring(0, 3) == "B01"){
         
-        xAxis.computeBoost();
-        yAxis.computeBoost();
+        leftAxis.computeBoost();
+        rightAxis.computeBoost();
         
         readString = "";
         Serial.println("gready");

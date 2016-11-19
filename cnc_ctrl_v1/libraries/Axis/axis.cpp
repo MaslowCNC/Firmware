@@ -30,7 +30,7 @@
 
 
 
-Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderDirection, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation)
+Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation)
 :
 _encoder(encoderPin1,encoderPin2)
 {
@@ -41,7 +41,7 @@ _encoder(encoderPin1,encoderPin2)
     _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _KiFar, _Kd, REVERSE);
     
     //initialize variables
-    _direction    = encoderDirection;
+    _direction    = FORWARD;
     _axisName     = axisName;
     _axisTarget   = 0.0;
     _eepromAdr    = eepromAdr;
