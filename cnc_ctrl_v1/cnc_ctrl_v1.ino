@@ -25,8 +25,8 @@ void setup(){
     Serial.println("ready");
     Serial.println("gready");
     
-    xAxis.initializePID();
-    yAxis.initializePID();
+    leftAxis.initializePID();
+    rightAxis.initializePID();
     zAxis.initializePID();
     
     Timer1.initialize(10000);
@@ -34,8 +34,8 @@ void setup(){
 }
 
 void runsOnATimer(){
-    xAxis.computePID();
-    yAxis.computePID();
+    leftAxis.computePID();
+    rightAxis.computePID();
     zAxis.computePID();
 }
 
