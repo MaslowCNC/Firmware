@@ -188,9 +188,9 @@ and G01 commands. The units at this point should all be in rotations or rotation
         kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
         
-        if (xAxis.write(aChainLength) && yAxis.write(bChainLength)){
-            numberOfStepsTaken++;
-        }
+        xAxis.write(aChainLength);
+        yAxis.write(bChainLength);
+        numberOfStepsTaken++;
         
         returnPoz();
         
