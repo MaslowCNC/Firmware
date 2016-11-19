@@ -20,7 +20,7 @@ libraries*/
 #include "libraries/Axis/Axis.h"
 #include "libraries/Kinematics/Kinematics.h"
 
-//#define ZAXIS
+#define ZAXIS
 
 #define FORWARD           1
 #define BACKWARD         -1
@@ -59,8 +59,8 @@ libraries*/
 #define ENC 10
 
 
-Axis leftAxis(ENB, IN4, IN3, BACKWARD , ENCODER2B, ENCODER2A, "Left-axis",   5, DIST_PER_ROTATION);
-Axis rightAxis(ENA, IN1, IN2, FORWARD  , ENCODER1A, ENCODER1B, "Right-axis", 10, DIST_PER_ROTATION);
+Axis leftAxis(ENB, IN3, IN4, BACKWARD , ENCODER2A, ENCODER2B, "Left-axis",   5, DIST_PER_ROTATION);
+Axis rightAxis(ENA, IN2, IN1, FORWARD  , ENCODER1B, ENCODER1A, "Right-axis", 10, DIST_PER_ROTATION);
 Axis zAxis(ENC, IN5, IN6, BACKWARD , ENCODER3A, ENCODER3B, "Z-Axis",     15, DIST_PER_ROTATION/19);
 
 
@@ -235,6 +235,10 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     leftAxis.endMove(aChainLength);
     rightAxis.endMove(bChainLength);
     zAxis.endMove(zEnd);
+    
+    
+    
+    Serial.println("end of move");
     
 }
 
