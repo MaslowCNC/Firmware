@@ -59,9 +59,9 @@ libraries*/
 #define ENC 10
 
 
-Axis leftAxis(ENB, IN3, IN4, BACKWARD , ENCODER2A, ENCODER2B, "Left-axis",   5, DIST_PER_ROTATION);
-Axis rightAxis(ENA, IN2, IN1, FORWARD  , ENCODER1B, ENCODER1A, "Right-axis", 10, DIST_PER_ROTATION);
-Axis zAxis(ENC, IN5, IN6, BACKWARD , ENCODER3A, ENCODER3B, "Z-Axis",     15, DIST_PER_ROTATION/19);
+Axis leftAxis (ENB, IN4, IN3, ENCODER2A, ENCODER2B, "Left-axis",   5, DIST_PER_ROTATION);
+Axis rightAxis(ENA, IN2, IN1, ENCODER1B, ENCODER1A, "Right-axis", 10, DIST_PER_ROTATION);
+Axis zAxis    (ENC, IN5, IN6, ENCODER3A, ENCODER3B, "Z-Axis",     15, DIST_PER_ROTATION/19);
 
 
 Kinematics kinematics;
