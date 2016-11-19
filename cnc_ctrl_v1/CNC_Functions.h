@@ -20,7 +20,7 @@ libraries*/
 #include "libraries/Axis/Axis.h"
 #include "libraries/Kinematics/Kinematics.h"
 
-#define ZAXIS
+//#define ZAXIS
 
 #define FORWARD           1
 #define BACKWARD         -1
@@ -321,17 +321,16 @@ int   G1(String readString){
     
     
     if (isNotRapid){
-        move(xgoto, ygoto, zgoto, feedrate); //The move is performed
+        move(xgoto, ygoto, zgoto, feedrate); //The XY move is performed
         #ifdef ZAXIS
         if (zgoto != currentZPos/_inchesToMMConversion){
-            rapidMove(xgoto, ygoto, zgoto);
+            rapidMove(xgoto, ygoto, zgoto);  //The Z move is performed 
         }
         #endif
     }
     else{
-        #ifdef ZAXIS
+        //if this is a rapid move
         rapidMove(xgoto, ygoto, zgoto);
-        #endif
     }
 }
 
