@@ -220,6 +220,10 @@ int    Axis::_change(float val){
     }
 }
 
+void   Axis::computeLinearityOfMotor(){
+    Serial.println("compute linearity");
+}
+
 void   Axis::computeBoost(){
     
     _disableAxisForTesting = true;

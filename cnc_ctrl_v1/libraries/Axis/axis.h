@@ -42,6 +42,7 @@
             float  setpoint();
             void   computePID();
             void   computeBoost();
+            void   computeLinearityOfMotor();
             
         private:
             int        _PWMread(int pin);
