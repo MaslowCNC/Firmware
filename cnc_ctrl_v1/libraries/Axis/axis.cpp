@@ -124,12 +124,12 @@ void   Axis::computePID(){
     _pidInput      =  _encoder.read()/NUMBER_OF_ENCODER_STEPS;
     _pidController.Compute();
     
-    if (_direction*_pidOutput > 0){
+    if (_pidOutput > 0){
        //motor is under more stress when moving in the "up" direction
-       _motor.write(90 + _direction*_pidOutput + _negBoost);
+       _motor.write(90 + _pidOutput + _negBoost);
     }
     else{
-       _motor.write(90 + _direction*_pidOutput - _posBoost);
+       _motor.write(90 + _pidOutput - _posBoost);
     }
     
     
@@ -220,7 +220,7 @@ int    Axis::_change(float val){
     }
 }
 
-void   Axis::computeLinearityOfMotor(int speed){
+void   Axis::computeSymetryOfMotor(int speed){
     _disableAxisForTesting = true;
     attach();
     
@@ -229,17 +229,23 @@ void   Axis::computeLinearityOfMotor(int speed){
     
     long originalEncoderPos = _encoder.read();
     
-    _motor.write(90 + speed);
+    _motor.write(90 + speed + _posBoost);
     delay(1000);
     
+    
+    long posEncoderDelta = abs(originalEncoderPos - _encoder.read());
+    originalEncoderPos = _encoder.read();
     Serial.print(" - ");
     
-    _motor.write(90 - speed);
+    _motor.write(90 - speed - _negBoost);
     delay(1000);
+    
+    long negEncoderDelta = abs(originalEncoderPos - _encoder.read());
     
     _motor.write(90);
     
     Serial.println("done");
+    Serial.println(posEncoderDelta - negEncoderDelta);
     
     _disableAxisForTesting = false;
 }

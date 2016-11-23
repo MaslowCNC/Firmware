@@ -515,8 +515,8 @@ void interpretCommandString(String readString){
     
     if(readString.substring(0, 3) == "B01"){
         
-        leftAxis.computeLinearityOfMotor(50);
-        rightAxis.computeLinearityOfMotor(50);
+        leftAxis.computeSymetryOfMotor(50);
+        rightAxis.computeSymetryOfMotor(50);
         
         readString = "";
         Serial.println("gready");
