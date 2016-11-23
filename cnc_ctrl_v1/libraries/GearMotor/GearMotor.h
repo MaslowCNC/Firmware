@@ -34,6 +34,8 @@
             int _pin2;
             bool _attachedState;
             int _deadBand = 15;
+            int _posBoost = 4;
+            int _negBoost = 17;
     };
 
     #endif

@@ -68,8 +68,6 @@
             float      _oldSetpoint;
             float      _oldVal;
             bool       _disableAxisForTesting = false;
-            int        _posBoost = 4;
-            int        _negBoost = 17;
     };
 
     #endif

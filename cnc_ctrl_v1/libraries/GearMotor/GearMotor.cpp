@@ -70,13 +70,7 @@ void GearMotor::write(int speed){
     */
     if (_attachedState == 1){
         
-        if (speed > 180){
-            speed = 180;
-        }
         
-        if (speed < 0){
-            speed = 0;
-        }
         
         //set direction range is 0-180
         if (speed > 90){
@@ -88,6 +82,10 @@ void GearMotor::write(int speed){
             digitalWrite(_pin2 , HIGH );
         }
         
+        //enforce range
+        if (speed > 180){speed = 180;}
+        
+        if (speed < 0)  {speed = 0;  }
         
         speed = (speed - 90); //range is +-0-90
         speed = abs(speed); //remove sign from input

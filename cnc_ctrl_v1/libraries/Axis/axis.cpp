@@ -124,13 +124,8 @@ void   Axis::computePID(){
     _pidInput      =  _encoder.read()/NUMBER_OF_ENCODER_STEPS;
     _pidController.Compute();
     
-    if (_pidOutput > 0){
-       //motor is under more stress when moving in the "up" direction
-       _motor.write(90 + _pidOutput + _negBoost);
-    }
-    else{
-       _motor.write(90 + _pidOutput - _posBoost);
-    }
+    
+    _motor.write(90 + _pidOutput);
     
     
     
@@ -229,7 +224,7 @@ void   Axis::computeSymetryOfMotor(int speed){
     
     long originalEncoderPos = _encoder.read();
     
-    _motor.write(90 + speed + _posBoost);
+    _motor.write(90 + speed);
     delay(1000);
     
     
@@ -237,7 +232,7 @@ void   Axis::computeSymetryOfMotor(int speed){
     originalEncoderPos = _encoder.read();
     Serial.print(" - ");
     
-    _motor.write(90 - speed - _negBoost);
+    _motor.write(90 - speed);
     delay(1000);
     
     long negEncoderDelta = abs(originalEncoderPos - _encoder.read());
@@ -273,7 +268,7 @@ void   Axis::computeBoost(){
         
         i++;
     }
-    _posBoost = i;
+    int posBoost = i;
     Serial.println(" ");
     
     _motor.write(90);
@@ -299,15 +294,15 @@ void   Axis::computeBoost(){
         
         i++;
     }
-    _negBoost = i;
+    int negBoost = i;
     _motor.write(90);
     
     Serial.println(" ");
     Serial.print(_axisName);
     Serial.print(" boost values are ");
-    Serial.print(_negBoost);
+    Serial.print(negBoost);
     Serial.print(" and ");
-    Serial.println(_posBoost);
+    Serial.println(posBoost);
     
     _disableAxisForTesting = false;
 }
