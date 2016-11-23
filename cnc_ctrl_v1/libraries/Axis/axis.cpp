@@ -220,8 +220,28 @@ int    Axis::_change(float val){
     }
 }
 
-void   Axis::computeLinearityOfMotor(){
-    Serial.println("compute linearity");
+void   Axis::computeLinearityOfMotor(int speed){
+    _disableAxisForTesting = true;
+    attach();
+    
+    Serial.print("compute linearity of ");
+    Serial.print(_axisName);
+    
+    long originalEncoderPos = _encoder.read();
+    
+    _motor.write(90 + speed);
+    delay(1000);
+    
+    Serial.print(" - ");
+    
+    _motor.write(90 - speed);
+    delay(1000);
+    
+    _motor.write(90);
+    
+    Serial.println("done");
+    
+    _disableAxisForTesting = false;
 }
 
 void   Axis::computeBoost(){
