@@ -70,16 +70,24 @@ void GearMotor::write(int speed){
     */
     if (_attachedState == 1){
         
-        
+        int boost;
         
         //set direction range is 0-180
         if (speed > 90){
             digitalWrite(_pin1 , HIGH);
             digitalWrite(_pin2 , LOW );
+            boost = _posBoost;
+            Serial.println(boost);
+        }
+        else if (speed == 90){
+            boost = 0;
+            Serial.println(boost);
         }
         else{
             digitalWrite(_pin1 , LOW);
             digitalWrite(_pin2 , HIGH );
+            boost = _negBoost;
+            Serial.println(boost);
         }
         
         //enforce range
@@ -97,13 +105,17 @@ void GearMotor::write(int speed){
         
         analogWrite(_pwmPin, pwmFrequency);
         
-        
     }
-    
 }
 
 int GearMotor::attached(){
     
     return _attachedState;
+}
+
+void GearMotor::setBoost(int negBoost, int posBoost){
+    
+    _negBoost = negBoost;
+    _posBoost = posBoost;
 }
 

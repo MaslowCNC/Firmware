@@ -27,7 +27,8 @@
             int  setupMotor(int pwmPin, int pin1, int pin2);
             void detach();
             void write(int speed);
-            int attached();
+            int  attached();
+            void setBoost(int negBoost, int posBoost);
         private:
             int _pwmPin;
             int _pin1;

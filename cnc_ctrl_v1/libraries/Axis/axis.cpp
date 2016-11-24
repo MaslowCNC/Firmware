@@ -124,7 +124,7 @@ void   Axis::computePID(){
     _pidInput      =  _encoder.read()/NUMBER_OF_ENCODER_STEPS;
     _pidController.Compute();
     
-    
+    Serial.println(_disableAxisForTesting);
     _motor.write(90 + _pidOutput);
     
     
@@ -216,7 +216,7 @@ int    Axis::_change(float val){
 }
 
 void   Axis::computeSymetryOfMotor(int speed){
-    _disableAxisForTesting = true;
+    _disableAxisForTesting = 56;
     attach();
     
     Serial.print("compute linearity of ");
@@ -224,7 +224,7 @@ void   Axis::computeSymetryOfMotor(int speed){
     
     long originalEncoderPos = _encoder.read();
     
-    _motor.write(90 + speed);
+    //_motor.write(90 + speed);
     delay(1000);
     
     
@@ -232,17 +232,17 @@ void   Axis::computeSymetryOfMotor(int speed){
     originalEncoderPos = _encoder.read();
     Serial.print(" - ");
     
-    _motor.write(90 - speed);
+    //_motor.write(90 - speed);
     delay(1000);
     
     long negEncoderDelta = abs(originalEncoderPos - _encoder.read());
     
-    _motor.write(90);
+    //_motor.write(90);
     
     Serial.println("done");
     Serial.println(posEncoderDelta - negEncoderDelta);
     
-    _disableAxisForTesting = false;
+    //_disableAxisForTesting = false;
 }
 
 void   Axis::computeBoost(){
