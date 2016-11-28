@@ -248,7 +248,6 @@ void   Axis::computeSymetryOfMotor(int speed){
     _motor.write(90);
     
     Serial.println("done");
-    Serial.println(posEncoderDelta - negEncoderDelta);
     
     _disableAxisForTesting = false;
 }
