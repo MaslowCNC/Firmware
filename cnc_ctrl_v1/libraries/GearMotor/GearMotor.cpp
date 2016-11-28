@@ -94,10 +94,10 @@ void GearMotor::write(int speed){
         speed = (speed - 90); //range is +-0-90
         speed = abs(speed); //remove sign from input
         
-        int pwmFrequency;
         
+        //stretch to be in range 0-255
         float scalor = (255.0)/90.0;
-        pwmFrequency = round((scalor*speed));
+        int pwmFrequency = round((scalor*speed));
         
         analogWrite(_pwmPin, pwmFrequency);
         

@@ -101,7 +101,7 @@ void   Axis::computePID(){
     if (_disableAxisForTesting){
         return;
     }
-    /*
+    
     if (_change(_sign(_oldSetpoint - _pidSetpoint))){ //this determines if the axis has changed direction of movement and flushes the acumulator in the PID if it has
         _pidController.FlipIntegrator();
     }
@@ -125,7 +125,7 @@ void   Axis::computePID(){
     _pidController.Compute();
     
     _motor.write(90 + _pidOutput);
-    */
+    
 }
 
 float  Axis::error(){

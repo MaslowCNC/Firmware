@@ -514,8 +514,14 @@ void interpretCommandString(String readString){
         leftAxis.computeBoost();
         rightAxis.computeBoost();
         
-        leftAxis.computeSymetryOfMotor(50);
-        rightAxis.computeSymetryOfMotor(50);
+        leftAxis.computeSymetryOfMotor(10);
+        rightAxis.computeSymetryOfMotor(10);
+        
+        leftAxis.computeSymetryOfMotor(40);
+        rightAxis.computeSymetryOfMotor(40);
+        
+        leftAxis.computeSymetryOfMotor(70);
+        rightAxis.computeSymetryOfMotor(70);
         
         readString = "";
         Serial.println("gready");
