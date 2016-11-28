@@ -219,8 +219,8 @@ void   Axis::computeSymetryOfMotor(int speed){
     for a given speed input. If the motor response is perfectly linear, the result will be the same
     in each direction so the idea outcome is zero.
     
-    A result > 0 indicates that the motor is moving more in the positive direction than the negative
-    direction so the posBoost is too large or the negBoost is too small.
+    A result > 0 the posBoost is too large
+    A result < 0 means the negBoost is too large
     
     */
     
@@ -230,24 +230,30 @@ void   Axis::computeSymetryOfMotor(int speed){
     Serial.print("compute linearity of ");
     Serial.print(_axisName);
     
+    //move pos for 1 sec at speed then measure dist moved
     long originalEncoderPos = _encoder.read();
-    
     _motor.write(90 + speed);
     delay(1000);
-    
-    
     long posEncoderDelta = abs(originalEncoderPos - _encoder.read());
-    originalEncoderPos = _encoder.read();
-    Serial.print(" - ");
     
+    
+    //pause to let motor stop
+    _motor.write(90);
+    Serial.print(" -");
+    delay(200);
+    Serial.print("- ");
+    
+    
+    //move neg for 1 sec at speed then measure dist moved
+    originalEncoderPos = _encoder.read();
     _motor.write(90 - speed);
     delay(1000);
-    
     long negEncoderDelta = abs(originalEncoderPos - _encoder.read());
     
+    //Stop motor and compute result
     _motor.write(90);
-    
     Serial.println("done");
+    Serial.println((posEncoderDelta - negEncoderDelta)/(.5*(abs(posEncoderDelta)+abs(negEncoderDelta))));
     
     _disableAxisForTesting = false;
 }
