@@ -219,6 +219,9 @@ void   Axis::computeSymetryOfMotor(int speed){
     for a given speed input. If the motor response is perfectly linear, the result will be the same
     in each direction so the idea outcome is zero.
     
+    A result > 0 indicates that the motor is moving more in the positive direction than the negative
+    direction so the posBoost is too large or the negBoost is too small.
+    
     */
     
     _disableAxisForTesting = true;
@@ -274,6 +277,9 @@ void   Axis::computeBoost(){
         i++;
     }
     int posBoost = i;
+    if (posBoost < 10){
+        posBoost = 0;
+    }
     Serial.println(" ");
     
     _motor.write(90);
@@ -300,16 +306,19 @@ void   Axis::computeBoost(){
         i++;
     }
     int negBoost = i;
+    if (negBoost < 10){
+        negBoost = 0;
+    }
     _motor.write(90);
     
     Serial.println(" ");
     Serial.print(_axisName);
-    Serial.print(" boost values are ");
+    Serial.print(" boost values are n:");
     Serial.print(negBoost);
-    Serial.print(" and ");
+    Serial.print(" and p:");
     Serial.println(posBoost);
     
-    _motor.setBoost(negBoost, posBoost);
+    _motor.setBoost(0, 0);
     
     _disableAxisForTesting = false;
 }

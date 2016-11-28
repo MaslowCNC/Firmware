@@ -236,10 +236,6 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     rightAxis.endMove(bChainLength);
     zAxis.endMove(zEnd);
     
-    
-    
-    Serial.println("end of move");
-    
 }
 
 void  holdPosition(){
