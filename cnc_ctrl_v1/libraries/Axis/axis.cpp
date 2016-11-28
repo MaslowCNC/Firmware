@@ -101,7 +101,7 @@ void   Axis::computePID(){
     if (_disableAxisForTesting){
         return;
     }
-    
+    /*
     if (_change(_sign(_oldSetpoint - _pidSetpoint))){ //this determines if the axis has changed direction of movement and flushes the acumulator in the PID if it has
         _pidController.FlipIntegrator();
     }
@@ -125,7 +125,7 @@ void   Axis::computePID(){
     _pidController.Compute();
     
     _motor.write(90 + _pidOutput);
-    
+    */
 }
 
 float  Axis::error(){
@@ -270,16 +270,13 @@ void   Axis::computeBoost(){
         delay(1000);
         Serial.print(".");
         
-        if (abs(originalEncoderPos - _encoder.read()) > 75){
+        if (abs(originalEncoderPos - _encoder.read()) > 200){
             break;
         }
         
         i++;
     }
     int posBoost = i;
-    if (posBoost < 10){
-        posBoost = 0;
-    }
     Serial.println(" ");
     
     _motor.write(90);
@@ -299,16 +296,13 @@ void   Axis::computeBoost(){
         delay(1000);
         Serial.print(".");
         
-        if (abs(originalEncoderPos - _encoder.read()) > 75){
+        if (abs(originalEncoderPos - _encoder.read()) > 200){
             break;
         }
         
         i++;
     }
     int negBoost = i;
-    if (negBoost < 10){
-        negBoost = 0;
-    }
     _motor.write(90);
     
     Serial.println(" ");
@@ -318,7 +312,7 @@ void   Axis::computeBoost(){
     Serial.print(" and p:");
     Serial.println(posBoost);
     
-    _motor.setBoost(0, 0);
+    _motor.setBoost(negBoost, posBoost);
     
     _disableAxisForTesting = false;
 }
