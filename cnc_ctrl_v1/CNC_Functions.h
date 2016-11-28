@@ -514,14 +514,13 @@ void interpretCommandString(String readString){
         leftAxis.computeBoost();
         rightAxis.computeBoost();
         
-        leftAxis.computeSymetryOfMotor(10);
-        rightAxis.computeSymetryOfMotor(10);
+        float  leftAxisSymmetry = (leftAxis.computeSymmetryOfMotor(10)  + leftAxis.computeSymmetryOfMotor(40)  + leftAxis.computeSymmetryOfMotor(70) )/3.0;
+        float rightAxisSymmetry = (rightAxis.computeSymmetryOfMotor(10) + rightAxis.computeSymmetryOfMotor(40) + rightAxis.computeSymmetryOfMotor(70))/3.0;
         
-        leftAxis.computeSymetryOfMotor(40);
-        rightAxis.computeSymetryOfMotor(40);
-        
-        leftAxis.computeSymetryOfMotor(70);
-        rightAxis.computeSymetryOfMotor(70);
+        Serial.print("Final Symmetry: Left: ");
+        Serial.print(leftAxisSymmetry);
+        Serial.print(" Right: ");
+        Serial.println(rightAxisSymmetry);
         
         readString = "";
         Serial.println("gready");
