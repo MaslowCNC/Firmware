@@ -242,9 +242,9 @@ float   Axis::computeSymmetryOfMotor(int speed){
     
     //pause to let motor stop
     _motor.write(90);
-    Serial.print(" -");
+    Serial.print(" .");
     delay(200);
-    Serial.print("- ");
+    Serial.print(". ");
     
     
     //move neg for 1 sec at speed then measure dist moved
@@ -322,10 +322,10 @@ void   Axis::computeBoost(){
     _motor.write(90);
     
     if (posBoost > negBoost){
-        posBoost = posBoost + 4;
+        posBoost = posBoost + 6;
     }
     else{
-        negBoost = negBoost + 4;
+        negBoost = negBoost + 6;
     }
     
     Serial.println(" ");
