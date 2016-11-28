@@ -77,17 +77,17 @@ void GearMotor::write(int speed){
             digitalWrite(_pin1 , HIGH);
             digitalWrite(_pin2 , LOW );
             boost = _posBoost;
-            Serial.println(boost);
+            //Serial.println(boost);
         }
         else if (speed == 90){
             boost = 0;
-            Serial.println(boost);
+            //Serial.println(boost);
         }
         else{
             digitalWrite(_pin1 , LOW);
             digitalWrite(_pin2 , HIGH );
             boost = _negBoost;
-            Serial.println(boost);
+            //Serial.println(boost);
         }
         
         //enforce range

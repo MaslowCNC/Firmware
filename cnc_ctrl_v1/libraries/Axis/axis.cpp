@@ -98,7 +98,7 @@ int    Axis::set(float newAxisPosition){
 
 void   Axis::computePID(){
     
-    if (_disableAxisForTesting == true){
+    if (_disableAxisForTesting){
         return;
     }
     
@@ -124,10 +124,7 @@ void   Axis::computePID(){
     _pidInput      =  _encoder.read()/NUMBER_OF_ENCODER_STEPS;
     _pidController.Compute();
     
-    Serial.println(_disableAxisForTesting);
     _motor.write(90 + _pidOutput);
-    
-    
     
 }
 
@@ -216,7 +213,15 @@ int    Axis::_change(float val){
 }
 
 void   Axis::computeSymetryOfMotor(int speed){
-    _disableAxisForTesting = 56;
+    /*
+    
+    This function computes the difference in distance moved in one direction vs the other direction
+    for a given speed input. If the motor response is perfectly linear, the result will be the same
+    in each direction so the idea outcome is zero.
+    
+    */
+    
+    _disableAxisForTesting = true;
     attach();
     
     Serial.print("compute linearity of ");
@@ -224,7 +229,7 @@ void   Axis::computeSymetryOfMotor(int speed){
     
     long originalEncoderPos = _encoder.read();
     
-    //_motor.write(90 + speed);
+    _motor.write(90 + speed);
     delay(1000);
     
     
@@ -232,17 +237,17 @@ void   Axis::computeSymetryOfMotor(int speed){
     originalEncoderPos = _encoder.read();
     Serial.print(" - ");
     
-    //_motor.write(90 - speed);
+    _motor.write(90 - speed);
     delay(1000);
     
     long negEncoderDelta = abs(originalEncoderPos - _encoder.read());
     
-    //_motor.write(90);
+    _motor.write(90);
     
     Serial.println("done");
     Serial.println(posEncoderDelta - negEncoderDelta);
     
-    //_disableAxisForTesting = false;
+    _disableAxisForTesting = false;
 }
 
 void   Axis::computeBoost(){
@@ -303,6 +308,8 @@ void   Axis::computeBoost(){
     Serial.print(negBoost);
     Serial.print(" and ");
     Serial.println(posBoost);
+    
+    _motor.setBoost(negBoost, posBoost);
     
     _disableAxisForTesting = false;
 }

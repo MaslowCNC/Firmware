@@ -515,6 +515,9 @@ void interpretCommandString(String readString){
     
     if(readString.substring(0, 3) == "B01"){
         
+        leftAxis.computeBoost();
+        rightAxis.computeBoost();
+        
         leftAxis.computeSymetryOfMotor(50);
         rightAxis.computeSymetryOfMotor(50);
         
