@@ -350,7 +350,7 @@ void   Axis::measureMotorSpeed(int speed){
     attach();
     
     int numberOfStepsToTest = 2000;
-    int timeOutMS           = 45000;
+    int timeOutMS           = 30000;
     
     Serial.print(_axisName);
     Serial.print(" cmd ");
@@ -373,7 +373,7 @@ void   Axis::measureMotorSpeed(int speed){
     _motor.write(90);
     delay(200);
     
-    //run the motor for 2,000 steps negative and record the time taken
+    //run the motor for numberOfStepsToTest steps negative and record the time taken
     originalEncoderPos  = _encoder.read();
     startTime = millis();
     while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
@@ -381,8 +381,13 @@ void   Axis::measureMotorSpeed(int speed){
         if (millis() - startTime > timeOutMS){break;}
     }
     long negTime = millis() - startTime;
-    
     Serial.println(negTime);
     
+    //reset to start point
     _disableAxisForTesting = false;
+    _timeLastMoved = millis();
+    for (long startTime = millis(); millis() - startTime < 2000; millis()){
+        hold();
+        delay(10);
+    }
 }
