@@ -43,6 +43,7 @@
             void   computePID();
             void   computeBoost();
             float  computeSymmetryOfMotor(int speed);
+            void   measureMotorSpeed(int speed)
             
         private:
             int        _PWMread(int pin);

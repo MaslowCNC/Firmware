@@ -228,7 +228,9 @@ float   Axis::computeSymmetryOfMotor(int speed){
     _disableAxisForTesting = true;
     attach();
     
-    Serial.print("compute linearity of ");
+    Serial.print("Sym ");
+    Serial.print(speed);
+    Serial.print(" ");
     Serial.print(_axisName);
     
     //move pos for 1 sec at speed then measure dist moved
@@ -242,9 +244,9 @@ float   Axis::computeSymmetryOfMotor(int speed){
     
     //pause to let motor stop
     _motor.write(90);
-    Serial.print(" .");
+    Serial.print(".");
     delay(200);
-    Serial.print(". ");
+    Serial.print(".");
     
     
     //move neg for 1 sec at speed then measure dist moved
@@ -258,11 +260,14 @@ float   Axis::computeSymmetryOfMotor(int speed){
     //Stop motor and compute result
     _motor.write(90);
     float symmetry = (posEncoderDelta - negEncoderDelta)/(.5*(abs(posEncoderDelta)+abs(negEncoderDelta)));
-    Serial.println(symmetry);
+    Serial.print(symmetry);
+    Serial.print("->");
+    Serial.print(posEncoderDelta);
+    Serial.print(",");
+    Serial.println(negEncoderDelta);
     
     //delay and finish
     delay(200);
-    Serial.println("done");
     
     _disableAxisForTesting = false;
     
@@ -322,10 +327,10 @@ void   Axis::computeBoost(){
     _motor.write(90);
     
     if (posBoost > negBoost){
-        posBoost = posBoost + 6;
+        posBoost = posBoost + 0;
     }
     else{
-        negBoost = negBoost + 6;
+        negBoost = negBoost + 0;
     }
     
     Serial.println(" ");
@@ -338,4 +343,37 @@ void   Axis::computeBoost(){
     _motor.setBoost(negBoost, posBoost);
     
     _disableAxisForTesting = false;
+}
+
+void   Axis::measureMotorSpeed(int speed){
+    
+    Serial.print(_axisName);
+    Serial.print(" cmd ");
+    Serial.print(speed);
+    Serial.print("->");
+    
+    //run the motor for 4,000 steps positive and record the time taken
+    long originalEncoderPos  = _encoder.read();
+    long startTime = millis();
+    while (abs(originalEncoderPos - _encoder.read()) < 4000){
+        _motor.write(90 + speed);
+    }
+    long posTime = millis() - startTime;
+    
+    Serial.print(posTime);
+    Serial.print(',');
+    
+    //pause
+    _motor.write(90);
+    delay(200);
+    
+    //run the motor for 4,000 steps negative and record the time taken
+    originalEncoderPos  = _encoder.read();
+    startTime = millis();
+    while (abs(originalEncoderPos - _encoder.read()) < 4000){
+        _motor.write(90 - speed);
+    }
+    long negTime = millis() - startTime;
+    
+    Serial.println(negTime);
 }
