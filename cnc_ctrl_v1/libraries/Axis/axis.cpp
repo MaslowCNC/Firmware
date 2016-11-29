@@ -251,7 +251,7 @@ float   Axis::computeSymmetryOfMotor(int speed){
     
     //move neg for 1 sec at speed then measure dist moved
     originalEncoderPos = _encoder.read();
-    _motor.write(speed);
+    _motor.write(-1*speed);
     delay(1000);
     Serial.print('.');
     delay(1000);
@@ -310,7 +310,7 @@ void   Axis::computeBoost(){
     i                   = 0;
     originalEncoderPos  = _encoder.read();
     while (i < 35){
-        _motor.write(i);
+        _motor.write(-1*i);
         
         delay(1000);
         Serial.print(".");
@@ -377,7 +377,7 @@ void   Axis::measureMotorSpeed(int speed){
     originalEncoderPos  = _encoder.read();
     startTime = millis();
     while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
-        _motor.write(speed);
+        _motor.write(-1*speed);
         if (millis() - startTime > timeOutMS){break;}
     }
     long negTime = millis() - startTime;
