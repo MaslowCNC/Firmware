@@ -511,30 +511,19 @@ void interpretCommandString(String readString){
     
     if(readString.substring(0, 3) == "B01"){
         
-        leftAxis.computeBoost();
-        rightAxis.computeBoost();
+        //leftAxis.computeBoost();
+        //rightAxis.computeBoost();
         
         
-        float  leftAxisSymmetry;
+        leftAxis.measureMotorSpeed(10);
+        leftAxis.measureMotorSpeed(30);
+        
+        /*float  leftAxisSymmetry;
         for (int i = 1; i < 90; i = i+1){
             leftAxisSymmetry = leftAxisSymmetry + leftAxis.computeSymmetryOfMotor(i);
         }
         leftAxisSymmetry = leftAxisSymmetry / 17.0;
-        
-        Serial.println(" ");
-        
-        float rightAxisSymmetry;
-        for (int i = 1; i < 90; i = i+1){
-            rightAxisSymmetry    = rightAxisSymmetry + rightAxis.computeSymmetryOfMotor(i);
-        }
-        rightAxisSymmetry = rightAxisSymmetry / 17.0;
-        
-        
-        
-        Serial.print("Final Symmetry: Left: ");
-        Serial.print(leftAxisSymmetry);
-        Serial.print(" Right: ");
-        Serial.println(rightAxisSymmetry);
+        */
         
         readString = "";
         Serial.println("gready");

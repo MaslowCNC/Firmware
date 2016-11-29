@@ -346,17 +346,23 @@ void   Axis::computeBoost(){
 }
 
 void   Axis::measureMotorSpeed(int speed){
+    _disableAxisForTesting = true;
+    attach();
+    
+    int numberOfStepsToTest = 2000;
+    int timeOutMS           = 45000;
     
     Serial.print(_axisName);
     Serial.print(" cmd ");
     Serial.print(speed);
     Serial.print("->");
     
-    //run the motor for 4,000 steps positive and record the time taken
+    //run the motor for numberOfStepsToTest steps positive and record the time taken
     long originalEncoderPos  = _encoder.read();
     long startTime = millis();
-    while (abs(originalEncoderPos - _encoder.read()) < 4000){
+    while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
         _motor.write(90 + speed);
+        if (millis() - startTime > timeOutMS){break;}
     }
     long posTime = millis() - startTime;
     
@@ -367,13 +373,16 @@ void   Axis::measureMotorSpeed(int speed){
     _motor.write(90);
     delay(200);
     
-    //run the motor for 4,000 steps negative and record the time taken
+    //run the motor for 2,000 steps negative and record the time taken
     originalEncoderPos  = _encoder.read();
     startTime = millis();
-    while (abs(originalEncoderPos - _encoder.read()) < 4000){
+    while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
         _motor.write(90 - speed);
+        if (millis() - startTime > timeOutMS){break;}
     }
     long negTime = millis() - startTime;
     
     Serial.println(negTime);
+    
+    _disableAxisForTesting = false;
 }
