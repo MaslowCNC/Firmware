@@ -25,7 +25,7 @@
 #define EEPROMVALIDDATA 56
 #define EEPROMFLAG 18
 
-//13968 is correct
+//13968 is correct for old motors
 #define NUMBER_OF_ENCODER_STEPS 8148.0 
 
 
@@ -57,7 +57,7 @@ _encoder(encoderPin1,encoderPin2)
 
 void   Axis::initializePID(){
     _pidController.SetMode(AUTOMATIC);
-    _pidController.SetOutputLimits(-90, 90);
+    _pidController.SetOutputLimits(-255, 255);
 }
 
 int    Axis::write(float targetPosition){
@@ -124,7 +124,7 @@ void   Axis::computePID(){
     _pidInput      =  _encoder.read()/NUMBER_OF_ENCODER_STEPS;
     _pidController.Compute();
     
-    _motor.write(90 + _pidOutput);
+    _motor.write(_pidOutput);
     
 }
 
@@ -235,7 +235,7 @@ float   Axis::computeSymmetryOfMotor(int speed){
     
     //move pos for 1 sec at speed then measure dist moved
     long originalEncoderPos = _encoder.read();
-    _motor.write(90 + speed);
+    _motor.write(speed);
     delay(1000);
     Serial.print(".");
     delay(1000);
@@ -243,7 +243,7 @@ float   Axis::computeSymmetryOfMotor(int speed){
     
     
     //pause to let motor stop
-    _motor.write(90);
+    _motor.write(0);
     Serial.print(".");
     delay(200);
     Serial.print(".");
@@ -251,14 +251,14 @@ float   Axis::computeSymmetryOfMotor(int speed){
     
     //move neg for 1 sec at speed then measure dist moved
     originalEncoderPos = _encoder.read();
-    _motor.write(90 - speed);
+    _motor.write(-1*speed);
     delay(1000);
     Serial.print('.');
     delay(1000);
     long negEncoderDelta = abs(originalEncoderPos - _encoder.read());
     
     //Stop motor and compute result
-    _motor.write(90);
+    _motor.write(0);
     float symmetry = (posEncoderDelta - negEncoderDelta)/(.5*(abs(posEncoderDelta)+abs(negEncoderDelta)));
     Serial.print(symmetry);
     Serial.print("->");
@@ -284,7 +284,7 @@ void   Axis::computeBoost(){
     
     int i = 0;
     while (i < 35){
-        _motor.write(90+i);
+        _motor.write(i);
         
         delay(1000);
         Serial.print(".");
@@ -300,7 +300,7 @@ void   Axis::computeBoost(){
     int posBoost = i;
     Serial.println(" ");
     
-    _motor.write(90);
+    _motor.write(0);
         
     delay(1000);
     Serial.print(".");
@@ -310,7 +310,7 @@ void   Axis::computeBoost(){
     i                   = 0;
     originalEncoderPos  = _encoder.read();
     while (i < 35){
-        _motor.write(90-i);
+        _motor.write(-1*i);
         
         delay(1000);
         Serial.print(".");
@@ -324,7 +324,7 @@ void   Axis::computeBoost(){
         i++;
     }
     int negBoost = i;
-    _motor.write(90);
+    _motor.write(0);
     
     if (posBoost > negBoost){
         posBoost = posBoost + 0;
@@ -361,7 +361,7 @@ void   Axis::measureMotorSpeed(int speed){
     long originalEncoderPos  = _encoder.read();
     long startTime = millis();
     while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
-        _motor.write(90 + speed);
+        _motor.write(speed);
         if (millis() - startTime > timeOutMS){break;}
     }
     long posTime = millis() - startTime;
@@ -370,14 +370,14 @@ void   Axis::measureMotorSpeed(int speed){
     Serial.print(',');
     
     //pause
-    _motor.write(90);
+    _motor.write(0);
     delay(200);
     
     //run the motor for numberOfStepsToTest steps negative and record the time taken
     originalEncoderPos  = _encoder.read();
     startTime = millis();
     while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
-        _motor.write(90 - speed);
+        _motor.write(-1*speed);
         if (millis() - startTime > timeOutMS){break;}
     }
     long negTime = millis() - startTime;

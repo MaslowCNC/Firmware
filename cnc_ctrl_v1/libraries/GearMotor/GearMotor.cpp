@@ -18,6 +18,7 @@
 /*
 The GearMotor module imitates the behavior of the Arduino servo module. It allows a gear motor (or any electric motor)
 to be a drop in replacement for a continuous rotation servo.
+
 */
 
 #include "Arduino.h"
@@ -66,18 +67,18 @@ void GearMotor::detach(){
 
 void GearMotor::write(int speed){
     /*
-    Mirrors the behavior of the servo.write() function. Speed = 90 is stopped, 0 is full reverse, 180 is full ahead.
+    Sets motor speed from input. Speed = 0 is stopped, -255 is full reverse, 255 is full ahead.
     */
     if (_attachedState == 1){
         
         
         //set direction range is 0-180
-        if (speed > 90){
+        if (speed > 0){
             digitalWrite(_pin1 , HIGH);
             digitalWrite(_pin2 , LOW );
             speed = speed + _posBoost;
         }
-        else if (speed == 90){
+        else if (speed == 0){
             speed = speed;
         }
         else{
@@ -87,17 +88,13 @@ void GearMotor::write(int speed){
         }
         
         //enforce range
-        if (speed > 180){speed = 180;}
+        if (speed > 255){speed = 255;}
         
-        if (speed < 0)  {speed = 0;  }
+        if (speed < -255)  {speed = -255;  }
         
-        speed = (speed - 90); //range is +-0-90
-        speed = abs(speed); //remove sign from input
+        speed = abs(speed); //remove sign from input because direction is set by control pins on H-bridge
         
-        
-        //stretch to be in range 0-255
-        float scalor = (255.0)/90.0;
-        int pwmFrequency = round((scalor*speed));
+        int pwmFrequency = round(speed);
         
         analogWrite(_pwmPin, pwmFrequency);
         
