@@ -514,16 +514,9 @@ void interpretCommandString(String readString){
         //leftAxis.computeBoost();
         //rightAxis.computeBoost();
         
-        
-        leftAxis.measureMotorSpeed(10);
-        leftAxis.measureMotorSpeed(30);
-        
-        /*float  leftAxisSymmetry;
         for (int i = 1; i < 90; i = i+1){
-            leftAxisSymmetry = leftAxisSymmetry + leftAxis.computeSymmetryOfMotor(i);
+            leftAxis.measureMotorSpeed(i);
         }
-        leftAxisSymmetry = leftAxisSymmetry / 17.0;
-        */
         
         readString = "";
         Serial.println("gready");
