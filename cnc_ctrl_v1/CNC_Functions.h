@@ -434,7 +434,7 @@ void  setInchesToMillimetersConversion(float newConversionFactor){
     _inchesToMMConversion = newConversionFactor;
 }
 
-void interpretCommandString(String readString){
+void  interpretCommandString(String readString){
     int i = 0;
     char sect[22];
     
@@ -511,15 +511,15 @@ void interpretCommandString(String readString){
     
     if(readString.substring(0, 3) == "B01"){
         
-        //leftAxis.computeBoost();
-        //rightAxis.computeBoost();
+        rightAxis.computeBoost();
+        leftAxis.computeBoost();
         
-        for (int i = 1; i < 90; i = i+1){
+        /*for (int i = 1; i < 90; i = i+1){
             leftAxis.measureMotorSpeed(i);
         }
         
         readString = "";
-        Serial.println("gready");
+        Serial.println("gready");*/
     }
     
     if(readString.substring(0, 3) == "B05"){

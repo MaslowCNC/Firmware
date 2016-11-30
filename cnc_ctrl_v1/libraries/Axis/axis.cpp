@@ -283,7 +283,7 @@ void   Axis::computeBoost(){
     attach();
     
     int i = 0;
-    while (i < 35){
+    while (i < 100){
         _motor.write(i);
         
         delay(1000);
@@ -295,13 +295,33 @@ void   Axis::computeBoost(){
             break;
         }
         
-        i++;
+        i = i + 5;
     }
     int posBoost = i;
     Serial.println(" ");
     
-    _motor.write(0);
-        
+    //_motor.write(0);
+    
+    
+    Serial.println("Now");
+    delay(1000);
+    Serial.print(".");
+    delay(1000);
+    Serial.print(".");
+    delay(1000);
+    Serial.print(".");
+    delay(1000);
+    Serial.print(".");
+    delay(1000);
+    Serial.print(".");
+    delay(1000);
+    Serial.print(".");
+    delay(1000);
+    Serial.print(".");
+    delay(1000);
+    Serial.print(".");
+    delay(1000);
+    Serial.print(".");
     delay(1000);
     Serial.print(".");
     delay(1000);
@@ -309,7 +329,7 @@ void   Axis::computeBoost(){
     
     i                   = 0;
     originalEncoderPos  = _encoder.read();
-    while (i < 35){
+    while (i < 100){
         _motor.write(-1*i);
         
         delay(1000);

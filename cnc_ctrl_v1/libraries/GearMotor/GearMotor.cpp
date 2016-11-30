@@ -41,13 +41,13 @@ int GearMotor::setupMotor(int pwmPin, int pin1, int pin2){
   
   //set pinmodes
   pinMode(_pwmPin,   OUTPUT); 
-  pinMode(_pin1,   OUTPUT); 
-  pinMode(_pin2, OUTPUT);
+  pinMode(_pin1,     OUTPUT); 
+  pinMode(_pin2,     OUTPUT);
   
   //stop the motor
-  digitalWrite(_pin1, HIGH);
-  digitalWrite(_pin2, LOW) ;
-  digitalWrite(_pwmPin, LOW);
+  digitalWrite(_pin1,    HIGH);
+  digitalWrite(_pin2,    LOW) ;
+  digitalWrite(_pwmPin,  LOW);
   
   return 1;
 }
@@ -60,9 +60,9 @@ void GearMotor::detach(){
     _attachedState = 0;
     
     //stop the motor
-    digitalWrite(_pin1, HIGH);
-    digitalWrite(_pin2, LOW) ;
-    digitalWrite(_pwmPin, LOW);
+    digitalWrite(_pin1,    HIGH);
+    digitalWrite(_pin2,    LOW) ;
+    digitalWrite(_pwmPin,  LOW);
 }
 
 void GearMotor::write(int speed){
