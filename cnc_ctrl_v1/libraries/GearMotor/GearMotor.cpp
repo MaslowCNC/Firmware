@@ -24,6 +24,9 @@ to be a drop in replacement for a continuous rotation servo.
 #include "Arduino.h"
 #include "GearMotor.h"
 
+int positivePoint = 162.4;
+int negativePoint = -162.4;
+
 GearMotor::GearMotor(){
   //Serial.println("created gear motor");
   
@@ -71,6 +74,8 @@ void GearMotor::write(int speed){
     */
     if (_attachedState == 1){
         
+        //linearize the motor
+        speed = _convolve(speed);
         
         //set direction range is 0-180
         if (speed > 0){
@@ -104,6 +109,41 @@ void GearMotor::write(int speed){
 int GearMotor::attached(){
     
     return _attachedState;
+}
+
+int GearMotor::_convolve(int input){
+    /*
+    This function distorts the input signal in a manner which is the inverse of the way
+    the mechanics of the motor distort it to give a linear response.
+    */
+    
+    
+    int output = input;
+    //return output;
+    
+    //|-255-------|-90---------|0---------|90-----------|255
+    
+    if (input < negativePoint){
+        //do most negative thing
+        return output;
+    }
+    else if(input < 0){
+        //do less negative conversion
+        return output;
+    }
+    else if(input > positivePoint){
+        //do more positive thing
+        output = (input - 113.4)/0.54;
+        return output;
+    }
+    else if(input > 0){
+        //do less positive thing
+        output = (input + 46.68)/2.32;
+        return output;
+    }
+    
+    
+    return output;
 }
 
 void GearMotor::setBoost(int negBoost, int posBoost){

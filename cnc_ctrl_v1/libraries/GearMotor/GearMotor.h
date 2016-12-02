@@ -29,6 +29,7 @@
             void write(int speed);
             int  attached();
             void setBoost(int negBoost, int posBoost);
+            int _convolve(int input);
         private:
             int _pwmPin;
             int _pin1;
@@ -36,6 +37,7 @@
             bool _attachedState;
             int _posBoost = 0;
             int _negBoost = 0;
+            
     };
 
     #endif

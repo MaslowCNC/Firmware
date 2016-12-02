@@ -306,26 +306,6 @@ void   Axis::computeBoost(){
     Serial.println("Now");
     delay(1000);
     Serial.print(".");
-    delay(1000);
-    Serial.print(".");
-    delay(1000);
-    Serial.print(".");
-    delay(1000);
-    Serial.print(".");
-    delay(1000);
-    Serial.print(".");
-    delay(1000);
-    Serial.print(".");
-    delay(1000);
-    Serial.print(".");
-    delay(1000);
-    Serial.print(".");
-    delay(1000);
-    Serial.print(".");
-    delay(1000);
-    Serial.print(".");
-    delay(1000);
-    Serial.print(".");
     
     i                   = 0;
     originalEncoderPos  = _encoder.read();

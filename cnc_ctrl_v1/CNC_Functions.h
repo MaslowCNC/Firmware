@@ -524,10 +524,20 @@ void  interpretCommandString(String readString){
         leftAxis.measureMotorSpeed(80);
         leftAxis.measureMotorSpeed(90);
         leftAxis.measureMotorSpeed(100);
+        leftAxis.measureMotorSpeed(110);
         leftAxis.measureMotorSpeed(120);
+        leftAxis.measureMotorSpeed(130);
+        leftAxis.measureMotorSpeed(140);
         leftAxis.measureMotorSpeed(150);
+        leftAxis.measureMotorSpeed(160);
         leftAxis.measureMotorSpeed(170);
+        leftAxis.measureMotorSpeed(180);
+        leftAxis.measureMotorSpeed(190);
         leftAxis.measureMotorSpeed(200);
+        leftAxis.measureMotorSpeed(210);
+        leftAxis.measureMotorSpeed(220);
+        leftAxis.measureMotorSpeed(230);
+        leftAxis.measureMotorSpeed(240);
         leftAxis.measureMotorSpeed(250);
         
         readString = "";
