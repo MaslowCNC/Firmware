@@ -57,7 +57,7 @@ GearMotor::GearMotor(){
   //segment 3 less than  256 and more than   161 
   
   _linSegments[3].slope          =   0.54;
-  _linSegments[3].intercept      =  113.4;
+  _linSegments[3].intercept      = -113.4;
   _linSegments[3].positiveBound  =    256;
   _linSegments[3].negativeBound  =    161;
 }
@@ -154,30 +154,13 @@ int GearMotor::_convolve(int input){
     for (int i = 0; i <= arrayLen; i++){
         if (input > _linSegments[i].negativeBound and input < _linSegments[i].positiveBound){
             output = (input + _linSegments[i].intercept)/_linSegments[i].slope;
+            //Serial.print(" ");
+            //Serial.print(_linSegments[i].intercept);
+            //Serial.print(" ");
+            //Serial.print(output);
+            //Serial.print(" ");
         }
     }
-    
-    /*if (input < negativePoint){
-        //do most negative thing
-        output = (input +23.1)/0.7;
-        return output;
-    }
-    else if(input < 0){
-        //do less negative conversion
-        output = (input-137.0)/1.9;
-        return output;
-    }
-    else if(input > positivePoint){
-        //do more positive thing
-        output = (input - 113.4)/0.54;
-        return output;
-    }
-    else if(input > 0){
-        //do less positive thing
-        output = (input + 46.68)/2.32;
-        return output;
-    }*/
-    
     
     return output;
 }

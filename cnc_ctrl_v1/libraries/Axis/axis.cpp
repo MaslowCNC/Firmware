@@ -278,69 +278,8 @@ void   Axis::computeBoost(){
     
     _disableAxisForTesting = true;
     
-    long originalEncoderPos = _encoder.read();
-    
-    attach();
-    
-    int i = 0;
-    while (i < 100){
-        _motor.write(i);
-        
-        delay(1000);
-        Serial.print(".");
-        delay(1000);
-        Serial.print(".");
-        
-        if (abs(originalEncoderPos - _encoder.read()) > 200){
-            break;
-        }
-        
-        i = i + 5;
-    }
-    int posBoost = i;
-    Serial.println(" ");
-    
-    //_motor.write(0);
-    
-    
-    Serial.println("Now");
-    delay(1000);
-    Serial.print(".");
-    
-    i                   = 0;
-    originalEncoderPos  = _encoder.read();
-    while (i < 100){
-        _motor.write(-1*i);
-        
-        delay(1000);
-        Serial.print(".");
-        delay(1000);
-        Serial.print(".");
-        
-        if (abs(originalEncoderPos - _encoder.read()) > 200){
-            break;
-        }
-        
-        i++;
-    }
-    int negBoost = i;
-    _motor.write(0);
-    
-    if (posBoost > negBoost){
-        posBoost = posBoost + 0;
-    }
-    else{
-        negBoost = negBoost + 0;
-    }
-    
-    Serial.println(" ");
-    Serial.print(_axisName);
-    Serial.print(" boost values are n:");
-    Serial.print(negBoost);
-    Serial.print(" and p:");
-    Serial.println(posBoost);
-    
-    _motor.setBoost(negBoost, posBoost);
+    Serial.print("-10 -> ");
+    Serial.println(_motor._convolve(-10));
     
     _disableAxisForTesting = false;
 }
