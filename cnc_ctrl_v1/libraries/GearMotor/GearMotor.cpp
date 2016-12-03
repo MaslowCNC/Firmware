@@ -117,14 +117,19 @@ int GearMotor::_convolve(int input){
     the mechanics of the motor distort it to give a linear response.
     */
     
-    Serial.println(_linSegment.slope);
+    Serial.println(sizeof(_linSegments)/sizeof(_linSegments[1]));
     
     int output = input;
-    //return output;
+    
     
     //|-255-------|-90---------|0---------|90-----------|255
     
-    if (input < negativePoint){
+    int arrayLen = sizeof(_linSegments)/sizeof(_linSegments[1]);
+    for (int i = 0; i <= arrayLen; i++){
+        Serial.println(_linSegments[i].slope);
+    }
+    
+    /*if (input < negativePoint){
         //do most negative thing
         output = (input +23.1)/0.7;
         return output;
@@ -143,7 +148,7 @@ int GearMotor::_convolve(int input){
         //do less positive thing
         output = (input + 46.68)/2.32;
         return output;
-    }
+    }*/
     
     
     return output;
