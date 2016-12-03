@@ -125,12 +125,12 @@ int GearMotor::_convolve(int input){
     
     if (input < negativePoint){
         //do most negative thing
-        output = (input -  23.1)/0.7;
+        output = (input +23.1)/0.7;
         return output;
     }
     else if(input < 0){
         //do less negative conversion
-        output = (input + 136.3)/1.9;
+        output = (input-137.0)/1.9;
         return output;
     }
     else if(input > positivePoint){
