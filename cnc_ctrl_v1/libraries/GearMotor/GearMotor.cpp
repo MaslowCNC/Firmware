@@ -24,14 +24,42 @@ to be a drop in replacement for a continuous rotation servo.
 #include "Arduino.h"
 #include "GearMotor.h"
 
-int positivePoint =  162.4;
-int negativePoint = -115.3;
+int positivePoint =  162;
+int negativePoint = -115;
 
 GearMotor::GearMotor(){
   //Serial.println("created gear motor");
   
   _attachedState = 0;
   
+  
+  //segment 0 less than -115 and more than -256
+  
+  _linSegments[0].slope          =   0.7;
+  _linSegments[0].intercept      =  23.1;
+  _linSegments[0].positiveBound  =  -115;
+  _linSegments[0].negativeBound  =  -256;
+  
+  //segment 1 less than   0  and more than -114
+  
+  _linSegments[1].slope          =    1.9;
+  _linSegments[1].intercept      = -137.0;
+  _linSegments[1].positiveBound  =      0;
+  _linSegments[1].negativeBound  =   -114;
+  
+  //segment 2 less than  162 and more than   0
+   
+  _linSegments[2].slope          =   2.32;
+  _linSegments[2].intercept      =  46.68;
+  _linSegments[2].positiveBound  =    162;
+  _linSegments[2].negativeBound  =      0;
+  
+  //segment 3 less than  256 and more than   161 
+  
+  _linSegments[3].slope          =   0.54;
+  _linSegments[3].intercept      =  113.4;
+  _linSegments[3].positiveBound  =    256;
+  _linSegments[3].negativeBound  =    161;
 }
 
 int GearMotor::setupMotor(int pwmPin, int pin1, int pin2){
@@ -117,8 +145,6 @@ int GearMotor::_convolve(int input){
     the mechanics of the motor distort it to give a linear response.
     */
     
-    Serial.println(sizeof(_linSegments)/sizeof(_linSegments[1]));
-    
     int output = input;
     
     
@@ -126,7 +152,9 @@ int GearMotor::_convolve(int input){
     
     int arrayLen = sizeof(_linSegments)/sizeof(_linSegments[1]);
     for (int i = 0; i <= arrayLen; i++){
-        Serial.println(_linSegments[i].slope);
+        if (input > _linSegments[i].negativeBound and input < _linSegments[i].positiveBound){
+            Serial.println('T');
+        }
     }
     
     /*if (input < negativePoint){

@@ -22,7 +22,9 @@
     
     struct LinSegment{
         float slope  = 1;
-        float offset = 0;
+        float intercept = 0;
+        //The bounds are strict, so if the bounds are 0,1 .9 would work
+        //but 1 and 0 will not
         int positiveBound = 0;
         int negativeBound = 0;
     };
@@ -46,7 +48,7 @@
             bool _attachedState;
             int _posBoost = 0;
             int _negBoost = 0;
-            LinSegment _linSegments[4] = {{1,2,3,4},{5,6,7,8},{9,10,11,12},{13,14,15,16}};
+            LinSegment _linSegments[4];
             
     };
 
