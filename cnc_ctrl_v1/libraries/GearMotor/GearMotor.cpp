@@ -117,6 +117,7 @@ int GearMotor::_convolve(int input){
     the mechanics of the motor distort it to give a linear response.
     */
     
+    Serial.println(_linSegment.slope);
     
     int output = input;
     //return output;

@@ -19,7 +19,14 @@
     #define GearMotor_h
 
     #include "Arduino.h"
-
+    
+    struct LinSegment{
+        float slope  = 1;
+        float offset = 2;
+        int positiveBound = 3;
+        int negativeBound = 4;
+    };
+    
     class GearMotor{
         public:
             GearMotor();
@@ -37,6 +44,7 @@
             bool _attachedState;
             int _posBoost = 0;
             int _negBoost = 0;
+            LinSegment _linSegment;
             
     };
 
