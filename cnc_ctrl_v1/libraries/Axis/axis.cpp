@@ -224,7 +224,7 @@ int    Axis::_change(float val){
     }
 }
 
-float   Axis::computeSymmetryOfMotor(int speed){
+float  Axis::computeSymmetryOfMotor(int speed){
     /*
     
     This function computes the difference in distance moved in one direction vs the other direction
@@ -290,9 +290,12 @@ void   Axis::computeBoost(){
     
     _disableAxisForTesting = true;
     
-    Serial.print("-10 -> ");
-    Serial.println(_motor._convolve(-10));
-    
+    for(int i = -255; i < 255; i = i+10){
+        Serial.print(i);
+        Serial.print(" -> ");
+        Serial.println(_motor._convolve(i));
+    }
+     
     _disableAxisForTesting = false;
 }
 

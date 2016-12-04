@@ -119,18 +119,13 @@ int  GearMotor::_convolve(int input){
     */
     
     int output = input;
-    //Serial.println(input);
     
     int arrayLen = sizeof(_linSegments)/sizeof(_linSegments[1]);
-    for (int i = 0; i <= arrayLen; i++){
+    for (int i = 0; i <= arrayLen - 1; i++){
         if (input > _linSegments[i].negativeBound and input < _linSegments[i].positiveBound){
             output = (input + _linSegments[i].intercept)/_linSegments[i].slope;
-            //Serial.println(output);
+            break;
         }
-    }
-    
-    if (output > 9000){
-        Serial.println("This should never run, just keeps the compiler from throwing away output");
     }
     
     return output;
