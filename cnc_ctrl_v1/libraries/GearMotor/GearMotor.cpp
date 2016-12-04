@@ -24,17 +24,15 @@ to be a drop in replacement for a continuous rotation servo.
 #include "Arduino.h"
 #include "GearMotor.h"
 
-int positivePoint =  162.4;
-int negativePoint = -115.3;
-
 GearMotor::GearMotor(){
   //Serial.println("created gear motor");
   
   _attachedState = 0;
   
+    
 }
 
-int GearMotor::setupMotor(int pwmPin, int pin1, int pin2){
+int  GearMotor::setupMotor(int pwmPin, int pin1, int pin2){
   
   //store pin numbers as private variables
   _pwmPin = pwmPin;
@@ -106,46 +104,39 @@ void GearMotor::write(int speed){
     }
 }
 
-int GearMotor::attached(){
+int  GearMotor::attached(){
     
     return _attachedState;
 }
 
-int GearMotor::_convolve(int input){
+int  GearMotor::_convolve(int input){
     /*
     This function distorts the input signal in a manner which is the inverse of the way
     the mechanics of the motor distort it to give a linear response.
     */
     
-    
     int output = input;
-    //return output;
     
-    //|-255-------|-90---------|0---------|90-----------|255
-    
-    if (input < negativePoint){
-        //do most negative thing
-        output = (input +23.1)/0.7;
-        return output;
+    int arrayLen = sizeof(_linSegments)/sizeof(_linSegments[1]);
+    for (int i = 0; i <= arrayLen - 1; i++){
+        if (input > _linSegments[i].negativeBound and input < _linSegments[i].positiveBound){
+            output = (input + _linSegments[i].intercept)/_linSegments[i].slope;
+            break;
+        }
     }
-    else if(input < 0){
-        //do less negative conversion
-        output = (input-137.0)/1.9;
-        return output;
-    }
-    else if(input > positivePoint){
-        //do more positive thing
-        output = (input - 113.4)/0.54;
-        return output;
-    }
-    else if(input > 0){
-        //do less positive thing
-        output = (input + 46.68)/2.32;
-        return output;
-    }
-    
     
     return output;
+}
+
+void GearMotor::setSegment(int index, float slope, float intercept, int negativeBound, int positiveBound){
+    
+    //Adds a linearizion segment to the linSegments object in location index
+    
+    _linSegments[index].slope          =          slope;
+    _linSegments[index].intercept      =      intercept;
+    _linSegments[index].positiveBound  =  positiveBound;
+    _linSegments[index].negativeBound  =  negativeBound;
+    
 }
 
 void GearMotor::setBoost(int negBoost, int posBoost){
