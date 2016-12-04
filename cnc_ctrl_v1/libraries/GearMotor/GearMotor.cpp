@@ -32,14 +32,7 @@ GearMotor::GearMotor(){
   
   _attachedState = 0;
   
-  
-  //segment 0 less than -115 and more than -256
-  
-  setSegment(1 ,  1.9,  -137.0,     0,  -114);
-  setSegment(0 ,  0.7,    23.1,  -115,  -256);
-  setSegment(3 , 0.54,  -113.4,   256,   161);
-  setSegment(2 , 2.32,   46.68,   162,     0);
-  
+    
 }
 
 int  GearMotor::setupMotor(int pwmPin, int pin1, int pin2){
