@@ -20,7 +20,7 @@ libraries*/
 #include "libraries/Axis/Axis.h"
 #include "libraries/Kinematics/Kinematics.h"
 
-//#define ZAXIS
+#define ZAXIS
 
 #define FORWARD           1
 #define BACKWARD         -1
