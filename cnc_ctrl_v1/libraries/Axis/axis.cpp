@@ -224,69 +224,7 @@ int    Axis::_change(float val){
     }
 }
 
-float  Axis::computeSymmetryOfMotor(int speed){
-    /*
-    
-    This function computes the difference in distance moved in one direction vs the other direction
-    for a given speed input. If the motor response is perfectly linear, the result will be the same
-    in each direction so the idea outcome is zero.
-    
-    A result > 0 the posBoost is too large
-    A result < 0 means the negBoost is too large
-    
-    Returns the symmetry
-    */
-    
-    _disableAxisForTesting = true;
-    attach();
-    
-    Serial.print("Sym ");
-    Serial.print(speed);
-    Serial.print(" ");
-    Serial.print(_axisName);
-    
-    //move pos for 1 sec at speed then measure dist moved
-    long originalEncoderPos = _encoder.read();
-    _motor.write(speed);
-    delay(1000);
-    Serial.print(".");
-    delay(1000);
-    long posEncoderDelta = abs(originalEncoderPos - _encoder.read());
-    
-    
-    //pause to let motor stop
-    _motor.write(0);
-    Serial.print(".");
-    delay(200);
-    Serial.print(".");
-    
-    
-    //move neg for 1 sec at speed then measure dist moved
-    originalEncoderPos = _encoder.read();
-    _motor.write(-1*speed);
-    delay(1000);
-    Serial.print('.');
-    delay(1000);
-    long negEncoderDelta = abs(originalEncoderPos - _encoder.read());
-    
-    //Stop motor and compute result
-    _motor.write(0);
-    float symmetry = (posEncoderDelta - negEncoderDelta)/(.5*(abs(posEncoderDelta)+abs(negEncoderDelta)));
-    Serial.print(symmetry);
-    Serial.print("->");
-    Serial.print(posEncoderDelta);
-    Serial.print(",");
-    Serial.println(negEncoderDelta);
-    
-    //delay and finish
-    delay(200);
-    
-    _disableAxisForTesting = false;
-    
-    return symmetry;
-}
-
-void   Axis::computeBoost(){
+void   Axis::printBoost(){
     
     _disableAxisForTesting = true;
     
