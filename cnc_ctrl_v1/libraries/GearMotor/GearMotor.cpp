@@ -129,6 +129,10 @@ int  GearMotor::_convolve(int input){
         }
     }
     
+    if (output > 9000){
+        Serial.println("This should never run, just keeps the compiler from throwing away output");
+    }
+    
     return output;
 }
 

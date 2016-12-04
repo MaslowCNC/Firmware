@@ -52,10 +52,19 @@ _encoder(encoderPin1,encoderPin2)
         set(_readFloat(_eepromAdr));
     }
     
-    _motor.setSegment(1 ,  1.9,  -137.0,     0,  -114);
-    _motor.setSegment(0 ,  0.7,    23.1,  -115,  -256);
-    _motor.setSegment(3 , 0.54,  -113.4,   256,   161);
-    _motor.setSegment(2 , 2.32,   46.68,   162,     0);
+    if (_axisName == "Left-axis"){
+        _motor.setSegment(1 ,  1.9,  -137.0,     0,  -114);
+        _motor.setSegment(0 ,  0.7,    23.1,  -115,  -256);
+        _motor.setSegment(3 , 0.54,  -113.4,   256,   161);
+        _motor.setSegment(2 , 2.32,   46.68,   162,     0);
+    }
+    
+    if (_axisName == "Right-axis"){
+        _motor.setSegment(1 ,  1.9,  -137.0,   0,   0);
+        _motor.setSegment(0 ,  0.7,    23.1,   0,   0);
+        _motor.setSegment(3 , 0.54,  -113.4,   0,   0);
+        _motor.setSegment(2 , 2.32,   46.68,   0,   0);
+    }
 }
 
 void   Axis::initializePID(){

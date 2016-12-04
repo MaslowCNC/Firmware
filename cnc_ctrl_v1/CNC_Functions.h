@@ -511,34 +511,34 @@ void  interpretCommandString(String readString){
     
     if(readString.substring(0, 3) == "B01"){
         
-        leftAxis.computeBoost();
+        rightAxis.computeBoost();
         //rightAxis.computeBoost();
         
-        leftAxis.measureMotorSpeed(10);
-        leftAxis.measureMotorSpeed(20);
-        leftAxis.measureMotorSpeed(30);
-        leftAxis.measureMotorSpeed(40);
-        leftAxis.measureMotorSpeed(50);
-        leftAxis.measureMotorSpeed(60);
-        leftAxis.measureMotorSpeed(70);
-        leftAxis.measureMotorSpeed(80);
-        leftAxis.measureMotorSpeed(90);
-        leftAxis.measureMotorSpeed(100);
-        leftAxis.measureMotorSpeed(110);
-        leftAxis.measureMotorSpeed(120);
-        leftAxis.measureMotorSpeed(130);
-        leftAxis.measureMotorSpeed(140);
-        leftAxis.measureMotorSpeed(150);
-        leftAxis.measureMotorSpeed(160);
-        leftAxis.measureMotorSpeed(170);
-        leftAxis.measureMotorSpeed(180);
-        leftAxis.measureMotorSpeed(190);
-        leftAxis.measureMotorSpeed(200);
-        leftAxis.measureMotorSpeed(210);
-        leftAxis.measureMotorSpeed(220);
-        leftAxis.measureMotorSpeed(230);
-        leftAxis.measureMotorSpeed(240);
-        leftAxis.measureMotorSpeed(250);
+        rightAxis.measureMotorSpeed(10);
+        rightAxis.measureMotorSpeed(20);
+        rightAxis.measureMotorSpeed(30);
+        rightAxis.measureMotorSpeed(40);
+        rightAxis.measureMotorSpeed(50);
+        rightAxis.measureMotorSpeed(60);
+        rightAxis.measureMotorSpeed(70);
+        rightAxis.measureMotorSpeed(80);
+        rightAxis.measureMotorSpeed(90);
+        rightAxis.measureMotorSpeed(100);
+        rightAxis.measureMotorSpeed(110);
+        rightAxis.measureMotorSpeed(120);
+        rightAxis.measureMotorSpeed(130);
+        rightAxis.measureMotorSpeed(140);
+        rightAxis.measureMotorSpeed(150);
+        rightAxis.measureMotorSpeed(160);
+        rightAxis.measureMotorSpeed(170);
+        rightAxis.measureMotorSpeed(180);
+        rightAxis.measureMotorSpeed(190);
+        rightAxis.measureMotorSpeed(200);
+        rightAxis.measureMotorSpeed(210);
+        rightAxis.measureMotorSpeed(220);
+        rightAxis.measureMotorSpeed(230);
+        rightAxis.measureMotorSpeed(240);
+        rightAxis.measureMotorSpeed(250);
         
         readString = "";
         Serial.println("gready");
