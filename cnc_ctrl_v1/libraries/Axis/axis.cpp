@@ -53,17 +53,17 @@ _encoder(encoderPin1,encoderPin2)
     }
     
     if (_axisName == "Left-axis"){
-        _motor.setSegment(0 ,  1.9,  -137.0,     0,  -114);
-        _motor.setSegment(1 ,  0.7,    23.1,  -115,  -256);
-        _motor.setSegment(3 , 0.54,  -113.4,   256,   161);
-        _motor.setSegment(2 , 2.32,   46.68,   162,     0);
+        _motor.setSegment(0 ,  0.7,    23.1,  -256,  -115);
+        _motor.setSegment(1 ,  1.9,  -137.0,  -114,     0);
+        _motor.setSegment(2 , 2.32,   46.68,     0,   162);
+        _motor.setSegment(3 , 0.54,  -113.4,   161,   256);
     }
     
     if (_axisName == "Right-axis"){
-        _motor.setSegment(0 ,  2.4,   -39.8,     0,   -90);
-        _motor.setSegment(1 ,  .48,   131.9,   -89,  -256);
-        _motor.setSegment(3 ,  1.9,   117.2,   130,     0);
-        _motor.setSegment(2 ,  .69,   -44.2,   256,   129);
+        _motor.setSegment(0 ,  .48,   131.9,  -256,  -174);
+        _motor.setSegment(1 ,  2.4,   -39.8,  -175,     0);
+        _motor.setSegment(3 ,  1.9,   117.2,     0,   134);
+        _motor.setSegment(2 ,  .69,   -44.2,   133,   256);
     }
 }
 

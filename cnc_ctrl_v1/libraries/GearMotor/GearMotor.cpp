@@ -121,9 +121,9 @@ int  GearMotor::_convolve(int input){
     for (int i = 0; i <= arrayLen - 1; i++){
         if (input > _linSegments[i].negativeBound and input < _linSegments[i].positiveBound){
             output = (input + _linSegments[i].intercept)/_linSegments[i].slope;
-            Serial.print(" ");
-            Serial.print(_linSegments[i].slope);
-            Serial.print(" ");
+            //Serial.print(" ");
+            //Serial.print(_linSegments[i].slope);
+            //Serial.print(" ");
             break;
         }
     }
@@ -131,7 +131,7 @@ int  GearMotor::_convolve(int input){
     return output;
 }
 
-void GearMotor::setSegment(int index, float slope, float intercept, int positiveBound, int negativeBound){
+void GearMotor::setSegment(int index, float slope, float intercept, int negativeBound, int positiveBound){
     
     //Adds a linearizion segment to the linSegments object in location index
     
