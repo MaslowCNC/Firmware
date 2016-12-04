@@ -24,9 +24,6 @@ to be a drop in replacement for a continuous rotation servo.
 #include "Arduino.h"
 #include "GearMotor.h"
 
-int positivePoint =  162;
-int negativePoint = -115;
-
 GearMotor::GearMotor(){
   //Serial.println("created gear motor");
   
@@ -124,6 +121,9 @@ int  GearMotor::_convolve(int input){
     for (int i = 0; i <= arrayLen - 1; i++){
         if (input > _linSegments[i].negativeBound and input < _linSegments[i].positiveBound){
             output = (input + _linSegments[i].intercept)/_linSegments[i].slope;
+            Serial.print(" ");
+            Serial.print(_linSegments[i].slope);
+            Serial.print(" ");
             break;
         }
     }

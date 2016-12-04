@@ -511,8 +511,8 @@ void  interpretCommandString(String readString){
     
     if(readString.substring(0, 3) == "B01"){
         
-        leftAxis.computeBoost();
-        //rightAxis.computeBoost();
+        //leftAxis.computeBoost();
+       rightAxis.computeBoost();
         
         /*rightAxis.measureMotorSpeed(10);
         rightAxis.measureMotorSpeed(20);

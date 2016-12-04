@@ -60,10 +60,10 @@ _encoder(encoderPin1,encoderPin2)
     }
     
     if (_axisName == "Right-axis"){
-        _motor.setSegment(0 ,  2.4,    39.8,     0,   -90);
+        _motor.setSegment(0 ,  2.4,   -39.8,     0,   -90);
         _motor.setSegment(1 ,  .48,   131.9,   -89,  -256);
-        _motor.setSegment(3 ,  1.9,   117.2,     0,   130);
-        _motor.setSegment(2 ,  .69,   -44.2,   129,   256);
+        _motor.setSegment(3 ,  1.9,   117.2,   130,     0);
+        _motor.setSegment(2 ,  .69,   -44.2,   256,   129);
     }
 }
 
