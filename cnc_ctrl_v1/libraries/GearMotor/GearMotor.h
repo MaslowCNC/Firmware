@@ -40,7 +40,8 @@
             void write(int speed);
             int  attached();
             void setBoost(int negBoost, int posBoost);
-            int _convolve(int input);
+            int  _convolve(int input);
+            void setSegment(int index, float slope, float intercept, int positiveBound, int negativeBound);
         private:
             int _pwmPin;
             int _pin1;

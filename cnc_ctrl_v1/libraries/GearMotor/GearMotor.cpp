@@ -35,34 +35,14 @@ GearMotor::GearMotor(){
   
   //segment 0 less than -115 and more than -256
   
-  _linSegments[0].slope          =   0.7;
-  _linSegments[0].intercept      =  23.1;
-  _linSegments[0].positiveBound  =  -115;
-  _linSegments[0].negativeBound  =  -256;
+  setSegment(1 ,  1.9,  -137.0,     0,  -114);
+  setSegment(0 ,  0.7,    23.1,  -115,  -256);
+  setSegment(3 , 0.54,  -113.4,   256,   161);
+  setSegment(2 , 2.32,   46.68,   162,     0);
   
-  //segment 1 less than   0  and more than -114
-  
-  _linSegments[1].slope          =    1.9;
-  _linSegments[1].intercept      = -137.0;
-  _linSegments[1].positiveBound  =      0;
-  _linSegments[1].negativeBound  =   -114;
-  
-  //segment 2 less than  162 and more than   0
-   
-  _linSegments[2].slope          =   2.32;
-  _linSegments[2].intercept      =  46.68;
-  _linSegments[2].positiveBound  =    162;
-  _linSegments[2].negativeBound  =      0;
-  
-  //segment 3 less than  256 and more than   161 
-  
-  _linSegments[3].slope          =   0.54;
-  _linSegments[3].intercept      = -113.4;
-  _linSegments[3].positiveBound  =    256;
-  _linSegments[3].negativeBound  =    161;
 }
 
-int GearMotor::setupMotor(int pwmPin, int pin1, int pin2){
+int  GearMotor::setupMotor(int pwmPin, int pin1, int pin2){
   
   //store pin numbers as private variables
   _pwmPin = pwmPin;
@@ -134,35 +114,40 @@ void GearMotor::write(int speed){
     }
 }
 
-int GearMotor::attached(){
+int  GearMotor::attached(){
     
     return _attachedState;
 }
 
-int GearMotor::_convolve(int input){
+int  GearMotor::_convolve(int input){
     /*
     This function distorts the input signal in a manner which is the inverse of the way
     the mechanics of the motor distort it to give a linear response.
     */
     
     int output = input;
-    
-    
-    //|-255-------|-90---------|0---------|90-----------|255
+    //Serial.println(input);
     
     int arrayLen = sizeof(_linSegments)/sizeof(_linSegments[1]);
     for (int i = 0; i <= arrayLen; i++){
         if (input > _linSegments[i].negativeBound and input < _linSegments[i].positiveBound){
             output = (input + _linSegments[i].intercept)/_linSegments[i].slope;
-            //Serial.print(" ");
-            //Serial.print(_linSegments[i].intercept);
-            //Serial.print(" ");
-            //Serial.print(output);
-            //Serial.print(" ");
+            //Serial.println(output);
         }
     }
     
     return output;
+}
+
+void GearMotor::setSegment(int index, float slope, float intercept, int positiveBound, int negativeBound){
+    
+    //Adds a linearizion segment to the linSegments object in location index
+    
+    _linSegments[index].slope          =          slope;
+    _linSegments[index].intercept      =      intercept;
+    _linSegments[index].positiveBound  =  positiveBound;
+    _linSegments[index].negativeBound  =  negativeBound;
+    
 }
 
 void GearMotor::setBoost(int negBoost, int posBoost){
