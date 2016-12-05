@@ -138,13 +138,13 @@ void   Axis::computePID(){
     
     _motor.write(_pidOutput);
     
-        if(_axisName == "Left-axis"){
+    /*if(_axisName == "Left-axis"){
         Serial.print(2000*(_pidSetpoint-_pidInput));
         Serial.print(" ");
         Serial.print(_pidOutput/2);
         Serial.print(" ");
         Serial.println(0);
-    }
+    }*/
     
 }
 

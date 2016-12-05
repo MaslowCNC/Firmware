@@ -74,8 +74,6 @@ void  returnPoz(){
     static unsigned long lastRan = millis();
     int                  timeout = 200;
     
-    return;
-    
     if (millis() - lastRan > timeout){
         
         float X;
@@ -445,7 +443,7 @@ void  interpretCommandString(String readString){
         i++;
     }
     
-    //Serial.println(readString);
+    Serial.println(readString);
     
     if(readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G02" || readString.substring(0, 3) == "G03" || readString.substring(0, 2) == "G0" || readString.substring(0, 2) == "G1" || readString.substring(0, 2) == "G2" || readString.substring(0, 2) == "G3"){
         prependString = readString.substring(0, 3);
@@ -459,8 +457,8 @@ void  interpretCommandString(String readString){
     if(readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G0 " || readString.substring(0, 3) == "G1 "){
         
         G1(readString);
-        //Serial.println("gready");
-        //Serial.println("ready");
+        Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     

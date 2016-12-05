@@ -60,6 +60,6 @@ void loop(){
     
     returnPoz();
     
-    interpretCommandString("G01 X-10 ");
-    interpretCommandString("G01 X10 ");
+    //interpretCommandString("G01 X-10 ");
+    //interpretCommandString("G01 X10 ");
 }
