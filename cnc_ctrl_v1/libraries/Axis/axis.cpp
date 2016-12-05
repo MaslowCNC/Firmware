@@ -236,6 +236,10 @@ void   Axis::printBoost(){
     _disableAxisForTesting = false;
 }
 
+void   Axis::computeMotorResponse(){
+    Serial.println("Compute motor response");
+}
+
 float  Axis::measureMotorSpeed(int speed){
     _disableAxisForTesting = true;
     attach();

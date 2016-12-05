@@ -511,34 +511,8 @@ void  interpretCommandString(String readString){
     
     if(readString.substring(0, 3) == "B01"){
         
-        //leftAxis.computeBoost();
+        leftAxis.computeMotorResponse();
         //rightAxis.computeBoost();
-        
-        rightAxis.measureMotorSpeed(10);
-        rightAxis.measureMotorSpeed(20);
-        rightAxis.measureMotorSpeed(30);
-        rightAxis.measureMotorSpeed(40);
-        rightAxis.measureMotorSpeed(50);
-        rightAxis.measureMotorSpeed(60);
-        rightAxis.measureMotorSpeed(70);
-        rightAxis.measureMotorSpeed(80);
-        rightAxis.measureMotorSpeed(90);
-        rightAxis.measureMotorSpeed(100);
-        rightAxis.measureMotorSpeed(110);
-        rightAxis.measureMotorSpeed(120);
-        rightAxis.measureMotorSpeed(130);
-        rightAxis.measureMotorSpeed(140);
-        rightAxis.measureMotorSpeed(150);
-        rightAxis.measureMotorSpeed(160);
-        rightAxis.measureMotorSpeed(170);
-        rightAxis.measureMotorSpeed(180);
-        rightAxis.measureMotorSpeed(190);
-        rightAxis.measureMotorSpeed(200);
-        rightAxis.measureMotorSpeed(210);
-        rightAxis.measureMotorSpeed(220);
-        rightAxis.measureMotorSpeed(230);
-        rightAxis.measureMotorSpeed(240);
-        rightAxis.measureMotorSpeed(250);
         
         readString = "";
         Serial.println("gready");
