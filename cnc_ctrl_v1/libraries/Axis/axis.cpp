@@ -299,6 +299,9 @@ void   Axis::computeMotorResponse(){
     
     Serial.print("Intercept 2: ");
     Serial.println(I2);
+    
+    _motor.setSegment(2 , M1, I1,    0, Y2);
+    _motor.setSegment(3 , M2, I2, Y2-1, Y3);
 }
 
 float  Axis::measureMotorSpeed(int speed){
