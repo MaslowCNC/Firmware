@@ -25,7 +25,6 @@
 #define EEPROMVALIDDATA 56
 #define EEPROMFLAG 18
 
-//13968 is correct for old motors
 #define NUMBER_OF_ENCODER_STEPS 8148.0 
 
 

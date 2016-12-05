@@ -79,7 +79,7 @@ void GearMotor::write(int speed){
         if (speed > 0){
             digitalWrite(_pin1 , HIGH);
             digitalWrite(_pin2 , LOW );
-            speed = speed + _posBoost;
+            speed = speed;
         }
         else if (speed == 0){
             speed = speed;
@@ -87,7 +87,7 @@ void GearMotor::write(int speed){
         else{
             digitalWrite(_pin1 , LOW);
             digitalWrite(_pin2 , HIGH );
-            speed = speed - _negBoost;
+            speed = speed;
         }
         
         //enforce range
@@ -138,10 +138,3 @@ void GearMotor::setSegment(int index, float slope, float intercept, int negative
     _linSegments[index].negativeBound  =  negativeBound;
     
 }
-
-void GearMotor::setBoost(int negBoost, int posBoost){
-    
-    _negBoost = negBoost;
-    _posBoost = posBoost;
-}
-

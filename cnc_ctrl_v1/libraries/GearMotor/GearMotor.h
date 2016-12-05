@@ -39,7 +39,6 @@
             void detach();
             void write(int speed);
             int  attached();
-            void setBoost(int negBoost, int posBoost);
             int  _convolve(int input);
             void setSegment(int index, float slope, float intercept, int negativeBound, int positiveBound);
         private:
@@ -47,8 +46,6 @@
             int _pin1;
             int _pin2;
             bool _attachedState;
-            int _posBoost = 0;
-            int _negBoost = 0;
             LinSegment _linSegments[4];
             
     };
