@@ -188,9 +188,9 @@ and G01 commands. The units at this point should all be in rotations or rotation
         kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
         
-        if (leftAxis.write(aChainLength) && rightAxis.write(bChainLength)){
-            numberOfStepsTaken++;
-        }
+        leftAxis.write(aChainLength);
+        rightAxis.write(bChainLength);
+        numberOfStepsTaken++;
         
         returnPoz();
         
@@ -235,10 +235,6 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     leftAxis.endMove(aChainLength);
     rightAxis.endMove(bChainLength);
     zAxis.endMove(zEnd);
-    
-    
-    
-    Serial.println("end of move");
     
 }
 
@@ -321,17 +317,16 @@ int   G1(String readString){
     
     
     if (isNotRapid){
-        move(xgoto, ygoto, zgoto, feedrate); //The move is performed
+        move(xgoto, ygoto, zgoto, feedrate); //The XY move is performed
         #ifdef ZAXIS
         if (zgoto != currentZPos/_inchesToMMConversion){
-            rapidMove(xgoto, ygoto, zgoto);
+            rapidMove(xgoto, ygoto, zgoto);  //The Z move is performed 
         }
         #endif
     }
     else{
-        #ifdef ZAXIS
+        //if this is a rapid move
         rapidMove(xgoto, ygoto, zgoto);
-        #endif
     }
 }
 
@@ -439,7 +434,7 @@ void  setInchesToMillimetersConversion(float newConversionFactor){
     _inchesToMMConversion = newConversionFactor;
 }
 
-void interpretCommandString(String readString){
+void  interpretCommandString(String readString){
     int i = 0;
     char sect[22];
     
@@ -512,6 +507,41 @@ void interpretCommandString(String readString){
     if(readString.substring(0, 3) == "M06"){ //Tool change are default so no action is taken
         Serial.println("gready");
         readString = "";
+    }
+    
+    if(readString.substring(0, 3) == "B01"){
+        
+        //leftAxis.computeBoost();
+        //rightAxis.computeBoost();
+        
+        rightAxis.measureMotorSpeed(10);
+        rightAxis.measureMotorSpeed(20);
+        rightAxis.measureMotorSpeed(30);
+        rightAxis.measureMotorSpeed(40);
+        rightAxis.measureMotorSpeed(50);
+        rightAxis.measureMotorSpeed(60);
+        rightAxis.measureMotorSpeed(70);
+        rightAxis.measureMotorSpeed(80);
+        rightAxis.measureMotorSpeed(90);
+        rightAxis.measureMotorSpeed(100);
+        rightAxis.measureMotorSpeed(110);
+        rightAxis.measureMotorSpeed(120);
+        rightAxis.measureMotorSpeed(130);
+        rightAxis.measureMotorSpeed(140);
+        rightAxis.measureMotorSpeed(150);
+        rightAxis.measureMotorSpeed(160);
+        rightAxis.measureMotorSpeed(170);
+        rightAxis.measureMotorSpeed(180);
+        rightAxis.measureMotorSpeed(190);
+        rightAxis.measureMotorSpeed(200);
+        rightAxis.measureMotorSpeed(210);
+        rightAxis.measureMotorSpeed(220);
+        rightAxis.measureMotorSpeed(230);
+        rightAxis.measureMotorSpeed(240);
+        rightAxis.measureMotorSpeed(250);
+        
+        readString = "";
+        Serial.println("gready");
     }
     
     if(readString.substring(0, 3) == "B05"){

@@ -18,6 +18,7 @@
 /*
 The GearMotor module imitates the behavior of the Arduino servo module. It allows a gear motor (or any electric motor)
 to be a drop in replacement for a continuous rotation servo.
+
 */
 
 #include "Arduino.h"
@@ -28,9 +29,10 @@ GearMotor::GearMotor(){
   
   _attachedState = 0;
   
+    
 }
 
-int GearMotor::setupMotor(int pwmPin, int pin1, int pin2){
+int  GearMotor::setupMotor(int pwmPin, int pin1, int pin2){
   
   //store pin numbers as private variables
   _pwmPin = pwmPin;
@@ -40,13 +42,13 @@ int GearMotor::setupMotor(int pwmPin, int pin1, int pin2){
   
   //set pinmodes
   pinMode(_pwmPin,   OUTPUT); 
-  pinMode(_pin1,   OUTPUT); 
-  pinMode(_pin2, OUTPUT);
+  pinMode(_pin1,     OUTPUT); 
+  pinMode(_pin2,     OUTPUT);
   
   //stop the motor
-  digitalWrite(_pin1, HIGH);
-  digitalWrite(_pin2, LOW) ;
-  digitalWrite(_pwmPin, LOW);
+  digitalWrite(_pin1,    HIGH);
+  digitalWrite(_pin2,    LOW) ;
+  digitalWrite(_pwmPin,  LOW);
   
   return 1;
 }
@@ -59,53 +61,80 @@ void GearMotor::detach(){
     _attachedState = 0;
     
     //stop the motor
-    digitalWrite(_pin1, HIGH);
-    digitalWrite(_pin2, LOW) ;
-    digitalWrite(_pwmPin, LOW);
+    digitalWrite(_pin1,    HIGH);
+    digitalWrite(_pin2,    LOW) ;
+    digitalWrite(_pwmPin,  LOW);
 }
 
 void GearMotor::write(int speed){
     /*
-    Mirrors the behavior of the servo.write() function. Speed = 90 is stopped, 0 is full reverse, 180 is full ahead.
+    Sets motor speed from input. Speed = 0 is stopped, -255 is full reverse, 255 is full ahead.
     */
     if (_attachedState == 1){
         
-        if (speed > 180){
-            speed = 180;
-        }
-        
-        if (speed < 0){
-            speed = 0;
-        }
+        //linearize the motor
+        speed = _convolve(speed);
         
         //set direction range is 0-180
-        if (speed > 90){
+        if (speed > 0){
             digitalWrite(_pin1 , HIGH);
             digitalWrite(_pin2 , LOW );
+            speed = speed;
+        }
+        else if (speed == 0){
+            speed = speed;
         }
         else{
             digitalWrite(_pin1 , LOW);
             digitalWrite(_pin2 , HIGH );
+            speed = speed;
         }
         
+        //enforce range
+        if (speed > 255){speed = 255;}
         
-        speed = (speed - 90); //range is +-0-90
-        speed = abs(speed); //remove sign from input
+        if (speed < -255)  {speed = -255;  }
         
-        int pwmFrequency;
+        speed = abs(speed); //remove sign from input because direction is set by control pins on H-bridge
         
-        float scalor = (255.0-_deadBand)/90.0;
-        pwmFrequency = round((scalor*speed) + _deadBand);
+        int pwmFrequency = round(speed);
         
         analogWrite(_pwmPin, pwmFrequency);
         
-        
     }
-    
 }
 
-int GearMotor::attached(){
+int  GearMotor::attached(){
     
     return _attachedState;
 }
 
+int  GearMotor::_convolve(int input){
+    /*
+    This function distorts the input signal in a manner which is the inverse of the way
+    the mechanics of the motor distort it to give a linear response.
+    */
+    
+    int output = input;
+    
+    int arrayLen = sizeof(_linSegments)/sizeof(_linSegments[1]);
+    for (int i = 0; i <= arrayLen - 1; i++){
+        if (input > _linSegments[i].negativeBound and input < _linSegments[i].positiveBound){
+            output = (input + _linSegments[i].intercept)/_linSegments[i].slope;
+            break;
+        }
+    }
+    
+    return output;
+}
+
+void GearMotor::setSegment(int index, float slope, float intercept, int negativeBound, int positiveBound){
+    
+    //Adds a linearizion segment to the linSegments object in location index
+    
+    _linSegments[index].slope          =          slope;
+    _linSegments[index].intercept      =      intercept;
+    _linSegments[index].positiveBound  =  positiveBound;
+    _linSegments[index].negativeBound  =  negativeBound;
+    
+}

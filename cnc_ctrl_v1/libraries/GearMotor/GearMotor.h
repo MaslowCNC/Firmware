@@ -19,7 +19,18 @@
     #define GearMotor_h
 
     #include "Arduino.h"
-
+    
+    struct LinSegment{
+        float slope  = 1;
+        float intercept = 0;
+        //The bounds are strict, so if the bounds are 0,1 .9 would work
+        //but 1 and 0 will not
+        int positiveBound = 0;
+        int negativeBound = 0;
+    };
+    
+    
+    
     class GearMotor{
         public:
             GearMotor();
@@ -27,13 +38,16 @@
             int  setupMotor(int pwmPin, int pin1, int pin2);
             void detach();
             void write(int speed);
-            int attached();
+            int  attached();
+            int  _convolve(int input);
+            void setSegment(int index, float slope, float intercept, int negativeBound, int positiveBound);
         private:
             int _pwmPin;
             int _pin1;
             int _pin2;
             bool _attachedState;
-            int _deadBand = 15;
+            LinSegment _linSegments[4];
+            
     };
 
     #endif

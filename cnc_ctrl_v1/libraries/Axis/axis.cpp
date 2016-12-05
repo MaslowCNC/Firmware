@@ -25,7 +25,6 @@
 #define EEPROMVALIDDATA 56
 #define EEPROMFLAG 18
 
-//13968 is correct
 #define NUMBER_OF_ENCODER_STEPS 8148.0 
 
 
@@ -52,12 +51,24 @@ _encoder(encoderPin1,encoderPin2)
         set(_readFloat(_eepromAdr));
     }
     
+    if (_axisName == "Left-axis"){
+        _motor.setSegment(0 ,  0.7,    23.1,  -256,  -115);
+        _motor.setSegment(1 ,  1.9,  -137.0,  -114,     0);
+        _motor.setSegment(2 , 2.32,   46.68,     0,   162);
+        _motor.setSegment(3 , 0.54,  -113.4,   161,   256);
+    }
     
+    if (_axisName == "Right-axis"){
+        _motor.setSegment(0 ,  .48,   131.9,  -256,  -174);
+        _motor.setSegment(1 ,  2.4,   -39.8,  -175,     0);
+        _motor.setSegment(3 ,  1.9,   117.2,     0,   134);
+        _motor.setSegment(2 ,  .69,   -44.2,   133,   256);
+    }
 }
 
 void   Axis::initializePID(){
     _pidController.SetMode(AUTOMATIC);
-    _pidController.SetOutputLimits(-90, 90);
+    _pidController.SetOutputLimits(-255, 255);
 }
 
 int    Axis::write(float targetPosition){
@@ -98,6 +109,10 @@ int    Axis::set(float newAxisPosition){
 
 void   Axis::computePID(){
     
+    if (_disableAxisForTesting){
+        return;
+    }
+    
     if (_change(_sign(_oldSetpoint - _pidSetpoint))){ //this determines if the axis has changed direction of movement and flushes the acumulator in the PID if it has
         _pidController.FlipIntegrator();
     }
@@ -120,14 +135,7 @@ void   Axis::computePID(){
     _pidInput      =  _encoder.read()/NUMBER_OF_ENCODER_STEPS;
     _pidController.Compute();
     
-    int boost = 0;
-    
-    if (_direction*_pidOutput > 0){
-       //motor is under more stress when moving in the "up" direction
-       boost = 19;
-    }
-    
-    _motor.write(90 + _direction*_pidOutput + boost);
+    _motor.write(_pidOutput);
     
 }
 
@@ -198,13 +206,13 @@ void   Axis::_writeFloat(unsigned int addr, float x){
     }
 }
 
-int   Axis::_sign(float val){
+int    Axis::_sign(float val){
     if (val < 0) return -1;
     if (val==0) return 0;
     return 1;
 }
 
-int   Axis::_change(float val){
+int    Axis::_change(float val){
     if (val != _oldVal){
         _oldVal = val;
         return true;
@@ -212,5 +220,65 @@ int   Axis::_change(float val){
     else{
         _oldVal = val;
         return false;
+    }
+}
+
+void   Axis::printBoost(){
+    
+    _disableAxisForTesting = true;
+    
+    for(int i = -255; i < 255; i = i+10){
+        Serial.print(i);
+        Serial.print(" -> ");
+        Serial.println(_motor._convolve(i));
+    }
+     
+    _disableAxisForTesting = false;
+}
+
+void   Axis::measureMotorSpeed(int speed){
+    _disableAxisForTesting = true;
+    attach();
+    
+    int numberOfStepsToTest = 2000;
+    int timeOutMS           = 30000;
+    
+    Serial.print(_axisName);
+    Serial.print(" cmd ");
+    Serial.print(speed);
+    Serial.print("->");
+    
+    //run the motor for numberOfStepsToTest steps positive and record the time taken
+    long originalEncoderPos  = _encoder.read();
+    long startTime = millis();
+    while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
+        _motor.write(speed);
+        if (millis() - startTime > timeOutMS){break;}
+    }
+    long posTime = millis() - startTime;
+    
+    Serial.print(posTime);
+    Serial.print(',');
+    
+    //pause
+    _motor.write(0);
+    delay(200);
+    
+    //run the motor for numberOfStepsToTest steps negative and record the time taken
+    originalEncoderPos  = _encoder.read();
+    startTime = millis();
+    while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
+        _motor.write(-1*speed);
+        if (millis() - startTime > timeOutMS){break;}
+    }
+    long negTime = millis() - startTime;
+    Serial.println(negTime);
+    
+    //reset to start point
+    _disableAxisForTesting = false;
+    _timeLastMoved = millis();
+    for (long startTime = millis(); millis() - startTime < 2000; millis()){
+        hold();
+        delay(10);
     }
 }
