@@ -236,7 +236,7 @@ void   Axis::printBoost(){
     _disableAxisForTesting = false;
 }
 
-void   Axis::measureMotorSpeed(int speed){
+float  Axis::measureMotorSpeed(int speed){
     _disableAxisForTesting = true;
     attach();
     
@@ -257,22 +257,11 @@ void   Axis::measureMotorSpeed(int speed){
     }
     long posTime = millis() - startTime;
     
-    Serial.print(posTime);
-    Serial.print(',');
+    Serial.println(posTime);
     
     //pause
     _motor.write(0);
     delay(200);
-    
-    //run the motor for numberOfStepsToTest steps negative and record the time taken
-    originalEncoderPos  = _encoder.read();
-    startTime = millis();
-    while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
-        _motor.write(-1*speed);
-        if (millis() - startTime > timeOutMS){break;}
-    }
-    long negTime = millis() - startTime;
-    Serial.println(negTime);
     
     //reset to start point
     _disableAxisForTesting = false;
@@ -281,4 +270,6 @@ void   Axis::measureMotorSpeed(int speed){
         hold();
         delay(10);
     }
+    
+    return posTime;
 }
