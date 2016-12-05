@@ -239,26 +239,48 @@ void   Axis::printBoost(){
 void   Axis::computeMotorResponse(){
     Serial.println("Compute motor response");
     
-    int i = 16;
-    int motorMS =  35000;                                                                                                                                     
+    float scale = 255/measureMotorSpeed(255); //Y3*scale = 255 -> scale = 255/Y3
+    
+    
+    int i = 15;
+    float motorSpeed;                                                                                                                                     
     while (i < 255){
-        motorMS = measureMotorSpeed(i);
+        motorSpeed = measureMotorSpeed(i);
         
-        if (motorMS < 30000){
+        if (motorSpeed > 0){
             break;
         }
         
         i++;
     }
     
-    int X1 = i;
+    float X1 = i;
     i = 0;
-    int Y1 = 
+    float Y1 = scale*motorSpeed;
+    
+    float X2 = (255 - X1)/2;
+    float Y2 = scale*measureMotorSpeed(X2);
+    
+    float X3 = 255;
+    float Y3 = 255;
+    
     
     Serial.print("First point: (");
-    Serial.print(i);
+    Serial.print(X1);
     Serial.print(", ");
-    Serial.print(motorMS);
+    Serial.print(Y1);
+    Serial.println(")");
+    
+    Serial.print("Second point: (");
+    Serial.print(X2);
+    Serial.print(", ");
+    Serial.print(Y2);
+    Serial.println(")");
+    
+    Serial.print("Third point: (");
+    Serial.print(X3);
+    Serial.print(", ");
+    Serial.print(Y3);
     Serial.println(")");
 }
 
@@ -273,23 +295,27 @@ float  Axis::measureMotorSpeed(int speed){
     int numberOfStepsToTest = 2000;
     int timeOutMS           = 30000;
     
-    Serial.print(_axisName);
-    Serial.print(" cmd ");
-    Serial.print(speed);
-    Serial.print("->");
+    //Serial.print(_axisName);
+    //Serial.print(" cmd ");
+    //Serial.print(speed);
+    //Serial.print("->");
     
     //run the motor for numberOfStepsToTest steps positive and record the time taken
     long originalEncoderPos  = _encoder.read();
     long startTime = millis();
     while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
         _motor.write(speed);
-        if (millis() - startTime > timeOutMS){break;}
+        if (millis() - startTime > timeOutMS ){break;}
     }
     int posTime = millis() - startTime;
     
     float RPM = 60.0*1000.0 * 1.0/(4.0*float(posTime));
     
-    Serial.println(RPM);
+    if (posTime > timeOutMS){
+        RPM = 0;
+    }
+    
+    //Serial.println(RPM);
     
     //pause
     _motor.write(0);
