@@ -238,9 +238,35 @@ void   Axis::printBoost(){
 
 void   Axis::computeMotorResponse(){
     Serial.println("Compute motor response");
+    
+    int i = 16;
+    int motorMS =  35000;                                                                                                                                     
+    while (i < 255){
+        motorMS = measureMotorSpeed(i);
+        
+        if (motorMS < 30000){
+            break;
+        }
+        
+        i++;
+    }
+    
+    int X1 = i;
+    i = 0;
+    int Y1 = 
+    
+    Serial.print("First point: (");
+    Serial.print(i);
+    Serial.print(", ");
+    Serial.print(motorMS);
+    Serial.println(")");
 }
 
 float  Axis::measureMotorSpeed(int speed){
+    /*
+    Returns the motors speed in RPM at a given input value
+    */
+    
     _disableAxisForTesting = true;
     attach();
     
@@ -259,9 +285,11 @@ float  Axis::measureMotorSpeed(int speed){
         _motor.write(speed);
         if (millis() - startTime > timeOutMS){break;}
     }
-    long posTime = millis() - startTime;
+    int posTime = millis() - startTime;
     
-    Serial.println(posTime);
+    float RPM = 60.0*1000.0 * 1.0/(4.0*float(posTime));
+    
+    Serial.println(RPM);
     
     //pause
     _motor.write(0);
@@ -275,5 +303,5 @@ float  Axis::measureMotorSpeed(int speed){
         delay(10);
     }
     
-    return posTime;
+    return RPM;
 }
