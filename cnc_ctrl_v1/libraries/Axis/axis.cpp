@@ -264,6 +264,11 @@ void   Axis::computeMotorResponse(){
     float X3 = 255;
     float Y3 = 255;
     
+    float M1 = (Y1 - Y2)/(X1 - X2);
+    float M2 = (Y2 - Y3)/(X2 - X3);
+    
+    float I1 = Y1 - (M1*X1);
+    float I2 = Y2 - (M2*X2);
     
     Serial.print("First point: (");
     Serial.print(X1);
@@ -282,6 +287,18 @@ void   Axis::computeMotorResponse(){
     Serial.print(", ");
     Serial.print(Y3);
     Serial.println(")");
+    
+    Serial.print("Slope 1: ");
+    Serial.println(M1);
+    
+    Serial.print("Slope 2: ");
+    Serial.println(M2);
+    
+    Serial.print("Intercept 1: ");
+    Serial.println(I1);
+    
+    Serial.print("Intercept 2: ");
+    Serial.println(I2);
 }
 
 float  Axis::measureMotorSpeed(int speed){
