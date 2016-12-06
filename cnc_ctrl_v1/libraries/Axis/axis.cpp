@@ -245,10 +245,12 @@ void   Axis::computeMotorResponse(){
     _motor.setSegment(2 , 1, 0, 0, 0);
     _motor.setSegment(3 , 1, 0, 0, 0);
     
+    //In the positive direction
+    //-----------------------------------------------------------------------------------
+    
     float scale = 255/measureMotorSpeed(255); //Y3*scale = 255 -> scale = 255/Y3
     
-    
-    int i = 15;
+    int i = 0;
     float motorSpeed;                                                                                                                                     
     while (i < 255){
         motorSpeed = measureMotorSpeed(i);
@@ -261,7 +263,6 @@ void   Axis::computeMotorResponse(){
     }
     
     float X1 = i;
-    i = 0;
     float Y1 = scale*motorSpeed;
     
     float X2 = (255 - X1)/2;
@@ -275,6 +276,44 @@ void   Axis::computeMotorResponse(){
     
     float I1 = -1*(Y1 - (M1*X1));
     float I2 = -1*(Y2 - (M2*X2));
+    
+    _motor.setSegment(2 , M1, I1,    0,   Y2);
+    _motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
+    
+    
+    //In the negative direction
+    //-----------------------------------------------------------------------------
+    
+    scale = -255/measureMotorSpeed(-255); //Y3*scale = 255 -> scale = 255/Y3
+    
+    i = 0;                                                                                                                                  
+    while (i > -255){
+        motorSpeed = measureMotorSpeed(i);
+        
+        if (motorSpeed < 0){
+            break;
+        }
+        
+        i--;
+    }
+    
+    X1 = i;
+    Y1 = scale*motorSpeed;
+    
+    X2 = (255 - X1)/2;
+    Y2 = scale*measureMotorSpeed(X2);
+    
+    X3 = 255;
+    Y3 = 255;
+    
+    M1 = (Y1 - Y2)/(X1 - X2);
+    M2 = (Y2 - Y3)/(X2 - X3);
+    
+    I1 = -1*(Y1 - (M1*X1));
+    I2 = -1*(Y2 - (M2*X2));
+    
+    _motor.setSegment(0 , M1, I1,    0,   Y2);
+    _motor.setSegment(1 , M2, I2, Y2-1, Y3+1);
     
     Serial.print("First point: (");
     Serial.print(X1);
@@ -309,11 +348,6 @@ void   Axis::computeMotorResponse(){
     Serial.print("Scale: ");
     Serial.println(scale);
     
-    
-    //_motor.setSegment(2 , 2.32,   46.68,     0,   162);
-    //_motor.setSegment(3 , 0.54,  -113.4,   161,   256);
-    _motor.setSegment(2 , M1, I1,    0,   Y2);
-    _motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
 }
 
 float  Axis::measureMotorSpeed(int speed){
