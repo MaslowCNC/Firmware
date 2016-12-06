@@ -325,9 +325,9 @@ float  Axis::measureMotorSpeed(int speed){
     attach();
     
     int numberOfStepsToTest = 2000;
-    int timeOutMS           = 30000;
+    int timeOutMS           = 50000;
     int quickTimeOut        = 1000;
-    int quickTimeOutDist    = 100;
+    int quickTimeOutDist    = 50;
     bool timeout            = false;
     
     //run the motor for numberOfStepsToTest steps positive and record the time taken
