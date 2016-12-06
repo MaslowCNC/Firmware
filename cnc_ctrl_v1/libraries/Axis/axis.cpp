@@ -273,8 +273,8 @@ void   Axis::computeMotorResponse(){
     float M1 = (Y1 - Y2)/(X1 - X2);
     float M2 = (Y2 - Y3)/(X2 - X3);
     
-    float I1 = Y1 - (M1*X1);
-    float I2 = Y2 - (M2*X2);
+    float I1 = -1*(Y1 - (M1*X1));
+    float I2 = -1*(Y2 - (M2*X2));
     
     Serial.print("First point: (");
     Serial.print(X1);
@@ -309,8 +309,11 @@ void   Axis::computeMotorResponse(){
     Serial.print("Scale: ");
     Serial.println(scale);
     
-    //_motor.setSegment(2 , M1, I1,    0, Y2);
-    //_motor.setSegment(3 , M2, I2, Y2-1, Y3);
+    
+    //_motor.setSegment(2 , 2.32,   46.68,     0,   162);
+    //_motor.setSegment(3 , 0.54,  -113.4,   161,   256);
+    _motor.setSegment(2 , M1, I1,    0,   Y2);
+    _motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
 }
 
 float  Axis::measureMotorSpeed(int speed){
