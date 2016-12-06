@@ -239,6 +239,12 @@ void   Axis::printBoost(){
 void   Axis::computeMotorResponse(){
     Serial.println("Compute motor response");
     
+    //remove whatever transform is applied
+    _motor.setSegment(0 , 1, 0, 0, 0);
+    _motor.setSegment(1 , 1, 0, 0, 0);
+    _motor.setSegment(2 , 1, 0, 0, 0);
+    _motor.setSegment(3 , 1, 0, 0, 0);
+    
     float scale = 255/measureMotorSpeed(255); //Y3*scale = 255 -> scale = 255/Y3
     
     
@@ -300,8 +306,11 @@ void   Axis::computeMotorResponse(){
     Serial.print("Intercept 2: ");
     Serial.println(I2);
     
-    _motor.setSegment(2 , M1, I1,    0, Y2);
-    _motor.setSegment(3 , M2, I2, Y2-1, Y3);
+    Serial.print("Scale: ");
+    Serial.println(scale);
+    
+    //_motor.setSegment(2 , M1, I1,    0, Y2);
+    //_motor.setSegment(3 , M2, I2, Y2-1, Y3);
 }
 
 float  Axis::measureMotorSpeed(int speed){
@@ -314,32 +323,31 @@ float  Axis::measureMotorSpeed(int speed){
     
     int numberOfStepsToTest = 2000;
     int timeOutMS           = 30000;
-    
-    //Serial.print(_axisName);
-    //Serial.print(" cmd ");
-    //Serial.print(speed);
-    //Serial.print("->");
+    int quickTimeOut        = 1000;
+    int quickTimeOutDist    = 100;
+    bool timeout            = false;
     
     //run the motor for numberOfStepsToTest steps positive and record the time taken
     long originalEncoderPos  = _encoder.read();
     long startTime = millis();
     while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
         _motor.write(speed);
-        if (millis() - startTime > timeOutMS ){break;}
+        if (millis() - startTime > timeOutMS ){
+            timeout = true;
+            break;
+        } //timeout
+        if (millis() - startTime > quickTimeOut && abs(originalEncoderPos - _encoder.read()) < quickTimeOutDist){
+            timeout = true;
+            break;
+        }
     }
     int posTime = millis() - startTime;
     
     float RPM = 60.0*1000.0 * 1.0/(4.0*float(posTime));
     
-    if (posTime > timeOutMS){
+    if (timeout){
         RPM = 0;
     }
-    
-    //Serial.println(RPM);
-    
-    //pause
-    _motor.write(0);
-    delay(200);
     
     //reset to start point
     _disableAxisForTesting = false;
