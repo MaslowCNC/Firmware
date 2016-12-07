@@ -42,7 +42,8 @@
             float  setpoint();
             void   computePID();
             void   printBoost();
-            void   measureMotorSpeed(int speed);
+            float  measureMotorSpeed(int speed);
+            void   computeMotorResponse();
             
         private:
             int        _PWMread(int pin);

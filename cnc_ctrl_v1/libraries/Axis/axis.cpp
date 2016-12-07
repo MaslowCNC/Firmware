@@ -236,43 +236,164 @@ void   Axis::printBoost(){
     _disableAxisForTesting = false;
 }
 
-void   Axis::measureMotorSpeed(int speed){
+void   Axis::computeMotorResponse(){
+    Serial.println("Compute motor response");
+    
+    //remove whatever transform is applied
+    _motor.setSegment(0 , 1, 0, 0, 0);
+    _motor.setSegment(1 , 1, 0, 0, 0);
+    _motor.setSegment(2 , 1, 0, 0, 0);
+    _motor.setSegment(3 , 1, 0, 0, 0);
+    
+    //In the positive direction
+    //-----------------------------------------------------------------------------------
+    
+    float scale = 255/measureMotorSpeed(255); //Y3*scale = 255 -> scale = 255/Y3
+    
+    int i = 15;
+    float motorSpeed;                                                                                                                                     
+    while (i < 255){
+        motorSpeed = measureMotorSpeed(i);
+        
+        if (motorSpeed > 0){
+            break;
+        }
+        
+        Serial.print(".");
+        
+        i++;
+    }
+    
+    float X1 = i;
+    float Y1 = scale*motorSpeed;
+    
+    float X2 = (255 - X1)/2;
+    float Y2 = scale*measureMotorSpeed(X2);
+    
+    float X3 = 255;
+    float Y3 = 255;
+    
+    float M1 = (Y1 - Y2)/(X1 - X2);
+    float M2 = (Y2 - Y3)/(X2 - X3);
+    
+    float I1 = -1*(Y1 - (M1*X1));
+    float I2 = -1*(Y2 - (M2*X2));
+    
+    _motor.setSegment(2 , M1, I1,    0,   Y2);
+    _motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
+    
+    Serial.println("pos done");
+    //In the negative direction
+    //-----------------------------------------------------------------------------
+    
+    scale = -255/measureMotorSpeed(-255); //Y3*scale = 255 -> scale = 255/Y3
+    
+    i = -30;                                                                                                                                  
+    while (i > -255){
+        motorSpeed = measureMotorSpeed(i);
+        
+        if (motorSpeed < 0){
+            break;
+        }
+        
+        Serial.print(".");
+        
+        i--;
+    }
+    
+    X1 = i;
+    Y1 = scale*motorSpeed;
+    
+    X2 = (-255 - X1)/3 + X1;
+    Y2 = scale*measureMotorSpeed(X2);
+    
+    X3 = -255;
+    Y3 = -255;
+    
+    M1 = (Y1 - Y2)/(X1 - X2);
+    M2 = (Y2 - Y3)/(X2 - X3);
+    
+    I1 = -1*(Y1 - (M1*X1));
+    I2 = -1*(Y2 - (M2*X2));
+    
+    
+    //_motor.setSegment(0 ,  1.9,  -137.0,  -114,     0);
+    //_motor.setSegment(1 ,  0.7,    23.1,  -256,  -115);
+    _motor.setSegment(0 , M1, I1,   Y2,    0);
+    _motor.setSegment(1 , M2, I2, Y3-1, Y2+1);
+    
+    Serial.print("First point: (");
+    Serial.print(X1);
+    Serial.print(", ");
+    Serial.print(Y1);
+    Serial.println(")");
+    
+    Serial.print("Second point: (");
+    Serial.print(X2);
+    Serial.print(", ");
+    Serial.print(Y2);
+    Serial.println(")");
+    
+    Serial.print("Third point: (");
+    Serial.print(X3);
+    Serial.print(", ");
+    Serial.print(Y3);
+    Serial.println(")");
+    
+    Serial.print("Slope 1: ");
+    Serial.println(M1);
+    
+    Serial.print("Slope 2: ");
+    Serial.println(M2);
+    
+    Serial.print("Intercept 1: ");
+    Serial.println(I1);
+    
+    Serial.print("Intercept 2: ");
+    Serial.println(I2);
+    
+    Serial.print("Scale: ");
+    Serial.println(scale);
+    
+}
+
+float  Axis::measureMotorSpeed(int speed){
+    /*
+    Returns the motors speed in RPM at a given input value
+    */
+    
+    int sign = speed/abs(speed);
+    
     _disableAxisForTesting = true;
     attach();
     
     int numberOfStepsToTest = 2000;
-    int timeOutMS           = 30000;
-    
-    Serial.print(_axisName);
-    Serial.print(" cmd ");
-    Serial.print(speed);
-    Serial.print("->");
+    int timeOutMS           = 30*1000; //30 seconds
+    int quickTimeOut        = 1000;
+    int quickTimeOutDist    = 50;
+    bool timeout            = false;
     
     //run the motor for numberOfStepsToTest steps positive and record the time taken
     long originalEncoderPos  = _encoder.read();
     long startTime = millis();
     while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
         _motor.write(speed);
-        if (millis() - startTime > timeOutMS){break;}
+        if (millis() - startTime > timeOutMS ){
+            timeout = true;
+            break;
+        } //timeout
+        if (millis() - startTime > quickTimeOut && abs(originalEncoderPos - _encoder.read()) < quickTimeOutDist){
+            timeout = true;
+            break;
+        }
     }
-    long posTime = millis() - startTime;
+    int posTime = millis() - startTime;
     
-    Serial.print(posTime);
-    Serial.print(',');
+    float RPM = float(sign)*60.0*1000.0 * 1.0/(4.0*float(posTime));
     
-    //pause
-    _motor.write(0);
-    delay(200);
-    
-    //run the motor for numberOfStepsToTest steps negative and record the time taken
-    originalEncoderPos  = _encoder.read();
-    startTime = millis();
-    while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
-        _motor.write(-1*speed);
-        if (millis() - startTime > timeOutMS){break;}
+    if (timeout){
+        RPM = 0;
     }
-    long negTime = millis() - startTime;
-    Serial.println(negTime);
     
     //reset to start point
     _disableAxisForTesting = false;
@@ -281,4 +402,6 @@ void   Axis::measureMotorSpeed(int speed){
         hold();
         delay(10);
     }
+    
+    return RPM;
 }
