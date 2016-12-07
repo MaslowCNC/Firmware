@@ -512,15 +512,15 @@ void  interpretCommandString(String readString){
     if(readString.substring(0, 3) == "B01"){
         
         leftAxis.computeMotorResponse();
-        //rightAxis.computeBoost();
+        rightAxis.computeMotorResponse();
         
         Serial.println("Begin motion testing: ");
         
-        for(int i = 0; i > -256; i = i - 10){
+        /*for(int i = 0; i > -256; i = i - 10){
             Serial.print(i);
             Serial.print("->");
             Serial.println(leftAxis.measureMotorSpeed(i));
-        }
+        }*/
         
         readString = "";
         Serial.println("gready");
