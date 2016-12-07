@@ -300,7 +300,7 @@ void   Axis::computeMotorResponse(){
     X1 = i;
     Y1 = scale*motorSpeed;
     
-    X2 = (-255 - X1)/2 + X1;
+    X2 = (-255 - X1)/3 + X1;
     Y2 = scale*measureMotorSpeed(X2);
     
     X3 = -255;
@@ -312,8 +312,11 @@ void   Axis::computeMotorResponse(){
     I1 = -1*(Y1 - (M1*X1));
     I2 = -1*(Y2 - (M2*X2));
     
-    //_motor.setSegment(0 , M1, I1,    0,   Y2);
-    //_motor.setSegment(1 , M2, I2, Y2-1, Y3+1);
+    
+    //_motor.setSegment(0 ,  1.9,  -137.0,  -114,     0);
+    //_motor.setSegment(1 ,  0.7,    23.1,  -256,  -115);
+    _motor.setSegment(0 , M1, I1,   Y2,    0);
+    _motor.setSegment(1 , M2, I2, Y3-1, Y2+1);
     
     Serial.print("First point: (");
     Serial.print(X1);
