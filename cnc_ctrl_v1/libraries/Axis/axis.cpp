@@ -259,6 +259,8 @@ void   Axis::computeMotorResponse(){
             break;
         }
         
+        Serial.print(".");
+        
         i++;
     }
     
@@ -293,6 +295,8 @@ void   Axis::computeMotorResponse(){
         if (motorSpeed < 0){
             break;
         }
+        
+        Serial.print(".");
         
         i--;
     }

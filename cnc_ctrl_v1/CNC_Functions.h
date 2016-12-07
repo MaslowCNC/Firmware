@@ -514,7 +514,7 @@ void  interpretCommandString(String readString){
         leftAxis.computeMotorResponse();
         rightAxis.computeMotorResponse();
         
-        Serial.println("Begin motion testing: ");
+        //Serial.println("Begin motion testing: ");
         
         /*for(int i = 0; i > -256; i = i - 10){
             Serial.print(i);
