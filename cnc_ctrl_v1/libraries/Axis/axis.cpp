@@ -250,7 +250,7 @@ void   Axis::computeMotorResponse(){
     
     float scale = 255/measureMotorSpeed(255); //Y3*scale = 255 -> scale = 255/Y3
     
-    int i = 0;
+    int i = 15;
     float motorSpeed;                                                                                                                                     
     while (i < 255){
         motorSpeed = measureMotorSpeed(i);
@@ -280,13 +280,13 @@ void   Axis::computeMotorResponse(){
     _motor.setSegment(2 , M1, I1,    0,   Y2);
     _motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
     
-    
+    Serial.println("pos done");
     //In the negative direction
     //-----------------------------------------------------------------------------
     
     scale = -255/measureMotorSpeed(-255); //Y3*scale = 255 -> scale = 255/Y3
     
-    i = 0;                                                                                                                                  
+    i = -30;                                                                                                                                  
     while (i > -255){
         motorSpeed = measureMotorSpeed(i);
         
@@ -300,11 +300,11 @@ void   Axis::computeMotorResponse(){
     X1 = i;
     Y1 = scale*motorSpeed;
     
-    X2 = (255 - X1)/2;
+    X2 = (-255 - X1)/2;
     Y2 = scale*measureMotorSpeed(X2);
     
-    X3 = 255;
-    Y3 = 255;
+    X3 = -255;
+    Y3 = -255;
     
     M1 = (Y1 - Y2)/(X1 - X2);
     M2 = (Y2 - Y3)/(X2 - X3);
@@ -355,6 +355,8 @@ float  Axis::measureMotorSpeed(int speed){
     Returns the motors speed in RPM at a given input value
     */
     
+    int sign = speed/abs(speed);
+    
     _disableAxisForTesting = true;
     attach();
     
@@ -380,7 +382,7 @@ float  Axis::measureMotorSpeed(int speed){
     }
     int posTime = millis() - startTime;
     
-    float RPM = 60.0*1000.0 * 1.0/(4.0*float(posTime));
+    float RPM = float(sign)*60.0*1000.0 * 1.0/(4.0*float(posTime));
     
     if (timeout){
         RPM = 0;

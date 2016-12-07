@@ -511,7 +511,7 @@ void  interpretCommandString(String readString){
     
     if(readString.substring(0, 3) == "B01"){
         
-        leftAxis.computeMotorResponse();
+        //leftAxis.computeMotorResponse();
         //rightAxis.computeBoost();
         
         Serial.println("Begin motion testing: ");
