@@ -250,19 +250,29 @@ void   Axis::computeMotorResponse(){
     
     float scale = 255/measureMotorSpeed(255); //Y3*scale = 255 -> scale = 255/Y3
     
-    int i = 15;
+    //Get to within 5 of the target
+    int i = 0;
     float motorSpeed;                                                                                                                                     
     while (i < 255){
+        
         motorSpeed = measureMotorSpeed(i);
-        
-        if (motorSpeed > 0){
-            break;
-        }
-        
+        if (motorSpeed > 0){break;}
         Serial.print(".");
-        
-        i++;
+        i = i + 5;
+    
     }
+    i = i - 5;
+    //Find exact value
+    while (i < 255){
+        
+        motorSpeed = measureMotorSpeed(i);
+        if (motorSpeed > 0){break;}
+        Serial.print("*");
+        i = i + 1;
+    
+    }
+    
+    
     
     float X1 = i;
     float Y1 = scale*motorSpeed;
@@ -288,17 +298,23 @@ void   Axis::computeMotorResponse(){
     
     scale = -255/measureMotorSpeed(-255); //Y3*scale = 255 -> scale = 255/Y3
     
-    i = -30;                                                                                                                                  
+    //Get to within 5 of target
+    i = 0;                                                                                                                                  
+    while (i > -255){
+        
+        motorSpeed = measureMotorSpeed(i);
+        if (motorSpeed < 0){break;}
+        Serial.print(".");
+        i = i - 5;
+        
+    }
+    i = i + 5;
+    //Find exact value
     while (i > -255){
         motorSpeed = measureMotorSpeed(i);
-        
-        if (motorSpeed < 0){
-            break;
-        }
-        
-        Serial.print(".");
-        
-        i--;
+        if (motorSpeed < 0){break;}
+        Serial.print("*");
+        i = i - 1;
     }
     
     X1 = i;
