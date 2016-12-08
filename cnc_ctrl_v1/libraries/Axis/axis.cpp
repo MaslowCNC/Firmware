@@ -237,7 +237,7 @@ void   Axis::printBoost(){
 }
 
 void   Axis::computeMotorResponse(){
-    Serial.println("Compute motor response");
+    //Serial.println("Compute motor response");
     
     //remove whatever transform is applied
     _motor.setSegment(0 , 1, 0, 0, 0);
@@ -250,16 +250,27 @@ void   Axis::computeMotorResponse(){
     
     float scale = 255/measureMotorSpeed(255); //Y3*scale = 255 -> scale = 255/Y3
     
-    //Get to within 5 of the target
     int i = 0;
-    float motorSpeed;                                                                                                                                     
+    float motorSpeed;
+    
+    //Increments of 10
     while (i < 255){
         Serial.print(".");
         motorSpeed = measureMotorSpeed(i);
         if (motorSpeed > 0){break;}
-        i = i + 5;
+        i = i + 10;
     }
-    i = i - 5;
+    i = i - 10;
+    
+    //Increments of 2
+    while (i < 255){
+        Serial.print("~");
+        motorSpeed = measureMotorSpeed(i);
+        if (motorSpeed > 0){break;}
+        i = i + 2;
+    }
+    i = i - 2;
+    
     //Find exact value
     while (i < 255){
         Serial.print("*");
@@ -294,15 +305,22 @@ void   Axis::computeMotorResponse(){
     
     scale = -255/measureMotorSpeed(-255); //Y3*scale = 255 -> scale = 255/Y3
     
-    //Get to within 5 of target
+    //Increments of 10
     i = 0;                                                                                                                                  
     while (i > -255){
         Serial.print(".");
         motorSpeed = measureMotorSpeed(i);
         if (motorSpeed < 0){break;}
-        i = i - 5;
+        i = i - 10;
     }
-    i = i + 5;
+    i = i + 10;
+    while (i > -255){
+        Serial.print("~");
+        motorSpeed = measureMotorSpeed(i);
+        if (motorSpeed < 0){break;}
+        i = i - 2;
+    }
+    i = i + 2;
     //Find exact value
     while (i > -255){
         Serial.print("*");
@@ -310,6 +328,8 @@ void   Axis::computeMotorResponse(){
         if (motorSpeed < 0){break;}
         i = i - 1;
     }
+    
+    Serial.println("-");
     
     X1 = i;
     Y1 = scale*motorSpeed;
@@ -332,7 +352,7 @@ void   Axis::computeMotorResponse(){
     _motor.setSegment(0 , M1, I1,   Y2,    0);
     _motor.setSegment(1 , M2, I2, Y3-1, Y2+1);
     
-    Serial.print("First point: (");
+    /*Serial.print("First point: (");
     Serial.print(X1);
     Serial.print(", ");
     Serial.print(Y1);
@@ -363,7 +383,7 @@ void   Axis::computeMotorResponse(){
     Serial.println(I2);
     
     Serial.print("Scale: ");
-    Serial.println(scale);
+    Serial.println(scale);*/
     
 }
 
