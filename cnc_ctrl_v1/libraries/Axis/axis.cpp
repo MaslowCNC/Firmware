@@ -237,7 +237,6 @@ void   Axis::printBoost(){
 }
 
 void   Axis::computeMotorResponse(){
-    //Serial.println("Compute motor response");
     
     //remove whatever transform is applied
     _motor.setSegment(0 , 1, 0, 0, 0);
@@ -262,7 +261,7 @@ void   Axis::computeMotorResponse(){
     }
     i = i - 10;
     
-    //Increments of 2
+    //Increments of 5
     while (i < 255){
         Serial.print("~");
         motorSpeed = measureMotorSpeed(i);
@@ -314,6 +313,7 @@ void   Axis::computeMotorResponse(){
         i = i - 10;
     }
     i = i + 10;
+    //Increments of 5
     while (i > -255){
         Serial.print("~");
         motorSpeed = measureMotorSpeed(i);
