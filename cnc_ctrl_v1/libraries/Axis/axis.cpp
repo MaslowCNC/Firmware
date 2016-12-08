@@ -404,16 +404,32 @@ float  Axis::measureMotorSpeed(int speed){
     bool timeout            = false;
     
     //run the motor for numberOfStepsToTest steps positive and record the time taken
+    
+    //Future options to improve the speed of this section. 1) Use a newton-raphson type search where it tries over, 
+    //under...over..under until it converges on a value. 2) Compute the speed with every cycle of the while loop and
+    //kick out if the total speed ever drops below a threshold. The motor tends to go a little bit at first and then stall
+    //So continuously monitoring would help quite a bit with catching that.
     long originalEncoderPos  = _encoder.read();
     long startTime = millis();
     while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
         _motor.write(speed);
+        
+        //long timeout
         if (millis() - startTime > timeOutMS ){
             timeout = true;
             break;
-        } //timeout
+        } 
+        
+        //very quick timeout if it doesn't move at all
         if (millis() - startTime > quickTimeOut && abs(originalEncoderPos - _encoder.read()) < quickTimeOutDist){
             timeout = true;
+            break;
+        }
+        
+        //medium timeout if it starts to move, then conks out.
+        if (millis() - startTime > quickTimeOut/3 && abs(originalEncoderPos - _encoder.read()) < quickTimeOutDist/4){
+            timeout = true;
+            Serial.print("^");
             break;
         }
     }
