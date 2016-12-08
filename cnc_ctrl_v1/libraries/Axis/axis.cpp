@@ -237,7 +237,6 @@ void   Axis::printBoost(){
 }
 
 void   Axis::computeMotorResponse(){
-    Serial.println("Compute motor response");
     
     //remove whatever transform is applied
     _motor.setSegment(0 , 1, 0, 0, 0);
@@ -250,19 +249,36 @@ void   Axis::computeMotorResponse(){
     
     float scale = 255/measureMotorSpeed(255); //Y3*scale = 255 -> scale = 255/Y3
     
-    int i = 15;
-    float motorSpeed;                                                                                                                                     
+    int i = 0;
+    float motorSpeed;
+    
+    //Increments of 10
     while (i < 255){
-        motorSpeed = measureMotorSpeed(i);
-        
-        if (motorSpeed > 0){
-            break;
-        }
-        
         Serial.print(".");
-        
-        i++;
+        motorSpeed = measureMotorSpeed(i);
+        if (motorSpeed > 0){break;}
+        i = i + 10;
     }
+    i = i - 10;
+    
+    //Increments of 5
+    while (i < 255){
+        Serial.print("~");
+        motorSpeed = measureMotorSpeed(i);
+        if (motorSpeed > 0){break;}
+        i = i + 5;
+    }
+    i = i - 5;
+    
+    //Find exact value
+    while (i < 255){
+        Serial.print("*");
+        motorSpeed = measureMotorSpeed(i);
+        if (motorSpeed > 0){break;}
+        i = i + 1;
+    }
+    
+    
     
     float X1 = i;
     float Y1 = scale*motorSpeed;
@@ -282,24 +298,38 @@ void   Axis::computeMotorResponse(){
     _motor.setSegment(2 , M1, I1,    0,   Y2);
     _motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
     
-    Serial.println("pos done");
+    Serial.println("+");
     //In the negative direction
     //-----------------------------------------------------------------------------
     
     scale = -255/measureMotorSpeed(-255); //Y3*scale = 255 -> scale = 255/Y3
     
-    i = -30;                                                                                                                                  
+    //Increments of 10
+    i = 0;                                                                                                                                  
     while (i > -255){
-        motorSpeed = measureMotorSpeed(i);
-        
-        if (motorSpeed < 0){
-            break;
-        }
-        
         Serial.print(".");
-        
-        i--;
+        motorSpeed = measureMotorSpeed(i);
+        if (motorSpeed < 0){break;}
+        i = i - 10;
     }
+    i = i + 10;
+    //Increments of 5
+    while (i > -255){
+        Serial.print("~");
+        motorSpeed = measureMotorSpeed(i);
+        if (motorSpeed < 0){break;}
+        i = i - 5;
+    }
+    i = i + 5;
+    //Find exact value
+    while (i > -255){
+        Serial.print("*");
+        motorSpeed = measureMotorSpeed(i);
+        if (motorSpeed < 0){break;}
+        i = i - 1;
+    }
+    
+    Serial.println("-");
     
     X1 = i;
     Y1 = scale*motorSpeed;
@@ -322,7 +352,7 @@ void   Axis::computeMotorResponse(){
     _motor.setSegment(0 , M1, I1,   Y2,    0);
     _motor.setSegment(1 , M2, I2, Y3-1, Y2+1);
     
-    Serial.print("First point: (");
+    /*Serial.print("First point: (");
     Serial.print(X1);
     Serial.print(", ");
     Serial.print(Y1);
@@ -353,7 +383,7 @@ void   Axis::computeMotorResponse(){
     Serial.println(I2);
     
     Serial.print("Scale: ");
-    Serial.println(scale);
+    Serial.println(scale);*/
     
 }
 
@@ -374,16 +404,32 @@ float  Axis::measureMotorSpeed(int speed){
     bool timeout            = false;
     
     //run the motor for numberOfStepsToTest steps positive and record the time taken
+    
+    //Future options to improve the speed of this section. 1) Use a newton-raphson type search where it tries over, 
+    //under...over..under until it converges on a value. 2) Compute the speed with every cycle of the while loop and
+    //kick out if the total speed ever drops below a threshold. The motor tends to go a little bit at first and then stall
+    //So continuously monitoring would help quite a bit with catching that.
     long originalEncoderPos  = _encoder.read();
     long startTime = millis();
     while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
         _motor.write(speed);
+        
+        //long timeout
         if (millis() - startTime > timeOutMS ){
             timeout = true;
             break;
-        } //timeout
+        } 
+        
+        //very quick timeout if it doesn't move at all
         if (millis() - startTime > quickTimeOut && abs(originalEncoderPos - _encoder.read()) < quickTimeOutDist){
             timeout = true;
+            break;
+        }
+        
+        //medium timeout if it starts to move, then conks out.
+        if (millis() - startTime > quickTimeOut/3 && abs(originalEncoderPos - _encoder.read()) < quickTimeOutDist/4){
+            timeout = true;
+            Serial.print("^");
             break;
         }
     }
