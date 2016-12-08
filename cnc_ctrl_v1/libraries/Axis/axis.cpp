@@ -267,9 +267,9 @@ void   Axis::computeMotorResponse(){
         Serial.print("~");
         motorSpeed = measureMotorSpeed(i);
         if (motorSpeed > 0){break;}
-        i = i + 2;
+        i = i + 5;
     }
-    i = i - 2;
+    i = i - 5;
     
     //Find exact value
     while (i < 255){
@@ -318,9 +318,9 @@ void   Axis::computeMotorResponse(){
         Serial.print("~");
         motorSpeed = measureMotorSpeed(i);
         if (motorSpeed < 0){break;}
-        i = i - 2;
+        i = i - 5;
     }
-    i = i + 2;
+    i = i + 5;
     //Find exact value
     while (i > -255){
         Serial.print("*");
