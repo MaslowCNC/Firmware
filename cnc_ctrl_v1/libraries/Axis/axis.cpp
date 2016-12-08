@@ -254,22 +254,18 @@ void   Axis::computeMotorResponse(){
     int i = 0;
     float motorSpeed;                                                                                                                                     
     while (i < 255){
-        
+        Serial.print(".");
         motorSpeed = measureMotorSpeed(i);
         if (motorSpeed > 0){break;}
-        Serial.print(".");
         i = i + 5;
-    
     }
     i = i - 5;
     //Find exact value
     while (i < 255){
-        
+        Serial.print("*");
         motorSpeed = measureMotorSpeed(i);
         if (motorSpeed > 0){break;}
-        Serial.print("*");
         i = i + 1;
-    
     }
     
     
@@ -292,7 +288,7 @@ void   Axis::computeMotorResponse(){
     _motor.setSegment(2 , M1, I1,    0,   Y2);
     _motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
     
-    Serial.println("pos done");
+    Serial.println("+");
     //In the negative direction
     //-----------------------------------------------------------------------------
     
@@ -301,19 +297,17 @@ void   Axis::computeMotorResponse(){
     //Get to within 5 of target
     i = 0;                                                                                                                                  
     while (i > -255){
-        
+        Serial.print(".");
         motorSpeed = measureMotorSpeed(i);
         if (motorSpeed < 0){break;}
-        Serial.print(".");
         i = i - 5;
-        
     }
     i = i + 5;
     //Find exact value
     while (i > -255){
+        Serial.print("*");
         motorSpeed = measureMotorSpeed(i);
         if (motorSpeed < 0){break;}
-        Serial.print("*");
         i = i - 1;
     }
     
