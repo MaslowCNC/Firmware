@@ -49,18 +49,18 @@ libraries*/
 
 #define IN1 9
 #define IN2 8
-#define IN3 12
-#define IN4 13
+#define IN3 10
+#define IN4 11
 #define IN5 14
 #define IN6 15
 
 #define ENA 6
 #define ENB 7
-#define ENC 10
+#define ENC 5
 
 
 Axis leftAxis (ENB, IN4, IN3, ENCODER2A, ENCODER2B, "Left-axis",   5, DIST_PER_ROTATION);
-Axis rightAxis(ENA, IN2, IN1, ENCODER1B, ENCODER1A, "Right-axis", 10, DIST_PER_ROTATION);
+Axis rightAxis(ENA, IN2, IN1, ENCODER1A, ENCODER1B, "Right-axis", 10, DIST_PER_ROTATION);
 Axis zAxis    (ENC, IN5, IN6, ENCODER3B, ENCODER3A, "Z-Axis",     15, DIST_PER_ROTATION/19);
 
 
