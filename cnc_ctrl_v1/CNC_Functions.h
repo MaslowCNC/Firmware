@@ -16,9 +16,9 @@
 libraries*/
     
     
-#include "libraries/GearMotor/GearMotor.h"
-#include "libraries/Axis/Axis.h"
-#include "libraries/Kinematics/Kinematics.h"
+#include "GearMotor.h"
+#include "Axis.h"
+#include "Kinematics.h"
 
 #define ZAXIS
 

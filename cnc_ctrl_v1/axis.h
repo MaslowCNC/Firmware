@@ -19,10 +19,10 @@
     #define Axis_h
 
     #include "Arduino.h"
-    #include "../GearMotor/GearMotor.h"
-    #include "../PID/PID_v1.h"
+    #include "GearMotor.h"
+    #include "PID_v1.h"
     #include <EEPROM.h>
-    #include "../Encoder/Encoder.h"
+    #include "Encoder.h"
     
 
     class Axis{
