@@ -14,7 +14,7 @@
     
     
 #include "CNC_Functions.h"
-#include "libraries/TimerOne/TimerOne.h"
+#include "TimerOne.h"
 
 
 String readString;
