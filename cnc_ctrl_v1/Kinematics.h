@@ -19,8 +19,8 @@
     #define Kinematics_h
 
     #include "Arduino.h"
-    #include "../BigNumber/BigNumber.h"
-    #include "../FormatDouble/FormatDouble.h"
+    #include "BigNumber.h"
+    #include "FormatDouble.h"
 
     class Kinematics{
         public:
