@@ -34,8 +34,8 @@ libraries*/
 #define ZDIRECTION BACKWARD
 
 #define LEFT_EEPROM_ADR     5
-#define RIGHT_EEPROM_ADR   55
-#define Z_EEPROM_ADR      105
+#define RIGHT_EEPROM_ADR  105
+#define Z_EEPROM_ADR      205
 
 #define MILLIMETERS 1
 #define INCHES      25.4
