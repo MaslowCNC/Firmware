@@ -51,8 +51,8 @@ libraries*/
 #define IN2 8
 #define IN3 10
 #define IN4 11
-#define IN5 14
-#define IN6 15
+#define IN5 12
+#define IN6 13
 
 #define ENA 6
 #define ENB 7
@@ -61,7 +61,7 @@ libraries*/
 
 Axis leftAxis (ENB, IN4, IN3, ENCODER2A, ENCODER2B, "Left-axis",   5, DIST_PER_ROTATION);
 Axis rightAxis(ENA, IN2, IN1, ENCODER1A, ENCODER1B, "Right-axis", 10, DIST_PER_ROTATION);
-Axis zAxis    (ENC, IN5, IN6, ENCODER3B, ENCODER3A, "Z-Axis",     15, DIST_PER_ROTATION/19);
+Axis zAxis    (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "Z-Axis",     15, DIST_PER_ROTATION/19);
 
 
 Kinematics kinematics;
