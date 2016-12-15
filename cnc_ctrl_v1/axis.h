@@ -51,7 +51,7 @@
             float      _readFloat(unsigned int addr);
             int        _sign(float val);
             int        _change(float val);
-            
+            void       _writeLinSeg(unsigned int addr, float x);
             GearMotor  _motor;
             int        _direction;
             int        _encoderPin;

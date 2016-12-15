@@ -206,6 +206,10 @@ void   Axis::_writeFloat(unsigned int addr, float x){
     }
 }
 
+void   Axis::_writeLinSeg(unsigned int addr, float x){
+    Serial.println("would write");
+}
+
 int    Axis::_sign(float val){
     if (val < 0) return -1;
     if (val==0) return 0;
