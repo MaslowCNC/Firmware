@@ -52,7 +52,7 @@ _encoder(encoderPin1,encoderPin2)
         set(_readFloat(_eepromAdr + 4));
     }
     
-    if (_axisName == "Left-axis"){
+    /*if (_axisName == "Left-axis"){
         _motor.setSegment(0 ,  0.7,    23.1,  -256,  -115);
         _motor.setSegment(1 ,  1.9,  -137.0,  -114,     0);
         _motor.setSegment(2 , 2.32,   46.68,     0,   162);
@@ -64,7 +64,7 @@ _encoder(encoderPin1,encoderPin2)
         _motor.setSegment(1 ,  2.4,   -39.8,  -175,     0);
         _motor.setSegment(2 ,  1.9,   117.2,     0,   134);
         _motor.setSegment(3 ,  .69,   -44.2,   133,   256);
-    }
+    }*/
     
     _readAllLinSegs(_eepromAdr);
 }
@@ -230,16 +230,9 @@ void   Axis::_writeAllLinSegs(unsigned int addr){
     
     addr = addr + 8;
     
-    Serial.print("write lin segs at");
-    Serial.println(addr);
-    
-    LinSegment linSeg;
-    linSeg.slope = 53.5;
-    linSeg.intercept = 2;
-    linSeg.positiveBound = 3;
-    linSeg.negativeBound = 4;
-    
-    
+    //Serial.print("write lin segs at: ");
+    //Serial.println(addr);
+        
     _writeLinSeg(addr                 , _motor.getSegment(0));
     _writeLinSeg(addr + 1*SIZEOFLINSEG, _motor.getSegment(1));
     _writeLinSeg(addr + 2*SIZEOFLINSEG, _motor.getSegment(2));
@@ -249,8 +242,8 @@ void   Axis::_writeAllLinSegs(unsigned int addr){
     
     linSegTWO = _readLinSeg (addr + 3*SIZEOFLINSEG);
     
-    Serial.print("End to end slope: ");
-    Serial.println(linSegTWO.slope);
+    //Serial.print("End to end slope: ");
+    //Serial.println(linSegTWO.slope);
     
 }
 
@@ -274,7 +267,17 @@ LinSegment   Axis::_readLinSeg(unsigned int addr){
 }
 
 void   Axis::_readAllLinSegs(unsigned int addr){
-    Serial.println("read lin segs");
+   // Serial.println("read lin segs");
+    
+    addr = addr + 8;
+    
+    LinSegment linSeg;
+    
+    for (int i = 0; i < 4; i++){
+        linSeg = _readLinSeg (addr + i*SIZEOFLINSEG);
+        
+        _motor.setSegment(i, linSeg.slope, linSeg.intercept,  linSeg.negativeBound, linSeg.positiveBound);
+    }
 }
 
 int    Axis::_sign(float val){
