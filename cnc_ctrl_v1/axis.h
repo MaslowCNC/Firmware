@@ -52,6 +52,7 @@
             int        _sign(float val);
             int        _change(float val);
             void       _writeLinSeg(unsigned int addr, LinSegment linSeg);
+            void       _writeAllLinSegs(unsigned int addr);
             LinSegment _readLinSeg(unsigned int addr);
             GearMotor  _motor;
             int        _direction;

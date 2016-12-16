@@ -29,7 +29,7 @@ GearMotor::GearMotor(){
   
   _attachedState = 0;
   
-  
+    
 }
 
 int  GearMotor::setupMotor(int pwmPin, int pin1, int pin2){
@@ -138,4 +138,3 @@ void GearMotor::setSegment(int index, float slope, float intercept, int negative
     _linSegments[index].negativeBound  =  negativeBound;
     
 }
-

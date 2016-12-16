@@ -150,19 +150,8 @@ int    Axis::detach(){
         _writeFloat (_eepromAdr+4, read());
         EEPROM.write(_eepromAdr, EEPROMVALIDDATA);
         
-        LinSegment linSeg;
-        linSeg.slope = 53.5;
-        linSeg.intercept = 2;
-        linSeg.positiveBound = 3;
-        linSeg.negativeBound = 4;
-        _writeLinSeg(_eepromAdr + 8, linSeg);
+        _writeAllLinSegs(_eepromAdr + 8);
         
-        LinSegment linSegTWO;
-        
-        linSegTWO = _readLinSeg (_eepromAdr + 8);
-        
-        Serial.print("End to end slope: ");
-        Serial.println(linSegTWO.slope);
     }
     
     _motor.detach();
@@ -225,11 +214,6 @@ void   Axis::_writeFloat(unsigned int addr, float x){
 }
 
 void   Axis::_writeLinSeg(unsigned int addr, LinSegment linSeg){
-    //Serial.print("Write at : ");
-    //Serial.println(addr);
-    //Serial.print("slope: ");
-    //Serial.println(linSeg.slope);
-    
     
     //flag that data is good
     EEPROM.write(addr, EEPROMVALIDDATA);
@@ -241,8 +225,6 @@ void   Axis::_writeLinSeg(unsigned int addr, LinSegment linSeg){
 }
 
 LinSegment   Axis::_readLinSeg(unsigned int addr){
-    //Serial.print("Read at : ");
-    //Serial.println(addr);
     
     LinSegment linSeg;
     
@@ -259,6 +241,32 @@ LinSegment   Axis::_readLinSeg(unsigned int addr){
     }
     
     return linSeg;
+}
+
+void   Axis::_writeAllLinSegs(unsigned int addr){
+    
+    Serial.print("write lin segs at");
+    Serial.println(addr);
+    
+    LinSegment linSeg;
+    linSeg.slope = 53.5;
+    linSeg.intercept = 2;
+    linSeg.positiveBound = 3;
+    linSeg.negativeBound = 4;
+    
+    
+    _writeLinSeg(addr                 , linSeg);
+    _writeLinSeg(addr + 1*SIZEOFLINSEG, linSeg);
+    _writeLinSeg(addr + 2*SIZEOFLINSEG, linSeg);
+    _writeLinSeg(addr + 3*SIZEOFLINSEG, linSeg);
+    
+    LinSegment linSegTWO;
+    
+    linSegTWO = _readLinSeg (addr + 3*SIZEOFLINSEG);
+    
+    Serial.print("End to end slope: ");
+    Serial.println(linSegTWO.slope);
+    
 }
 
 int    Axis::_sign(float val){
