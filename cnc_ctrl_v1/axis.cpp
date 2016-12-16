@@ -23,6 +23,8 @@
 #define BACKWARD -1
 
 #define EEPROMVALIDDATA 56
+#define SIZEOFFLOAT      4
+#define SIZEOFLINSEG    17
 
 #define NUMBER_OF_ENCODER_STEPS 8148.0 
 
@@ -147,10 +149,20 @@ int    Axis::detach(){
     if (_motor.attached()){
         _writeFloat (_eepromAdr+4, read());
         EEPROM.write(_eepromAdr, EEPROMVALIDDATA);
+        
         LinSegment linSeg;
-        linSeg.slope = 56;
+        linSeg.slope = 53.5;
+        linSeg.intercept = 2;
+        linSeg.positiveBound = 3;
+        linSeg.negativeBound = 4;
         _writeLinSeg(_eepromAdr + 8, linSeg);
-        _readLinSeg (_eepromAdr + 8);
+        
+        LinSegment linSegTWO;
+        
+        linSegTWO = _readLinSeg (_eepromAdr + 8);
+        
+        Serial.print("End to end slope: ");
+        Serial.println(linSegTWO.slope);
     }
     
     _motor.detach();
@@ -213,42 +225,40 @@ void   Axis::_writeFloat(unsigned int addr, float x){
 }
 
 void   Axis::_writeLinSeg(unsigned int addr, LinSegment linSeg){
-    Serial.print("Write at : ");
-    Serial.println(addr);
-    Serial.print("slope: ");
-    Serial.println(linSeg.slope);
+    //Serial.print("Write at : ");
+    //Serial.println(addr);
+    //Serial.print("slope: ");
+    //Serial.println(linSeg.slope);
     
     
     //flag that data is good
     EEPROM.write(addr, EEPROMVALIDDATA);
     
-    int sizeOfFloat = 4;
-    
-    _writeFloat(addr + 1                , 56.0);
-    _writeFloat(addr + 1 + 1*sizeOfFloat, 56.2);
-    _writeFloat(addr + 1 + 2*sizeOfFloat, 56.3);
-    _writeFloat(addr + 1 + 3*sizeOfFloat, 56.4);
+    _writeFloat(addr + 1                , linSeg.slope);
+    _writeFloat(addr + 1 + 1*SIZEOFFLOAT, linSeg.intercept);
+    _writeFloat(addr + 1 + 2*SIZEOFFLOAT, linSeg.positiveBound);
+    _writeFloat(addr + 1 + 3*SIZEOFFLOAT, linSeg.negativeBound);
 }
 
 LinSegment   Axis::_readLinSeg(unsigned int addr){
-    Serial.print("Read at : ");
-    Serial.println(addr);
+    //Serial.print("Read at : ");
+    //Serial.println(addr);
     
-    int sizeOfFloat = 4;
+    LinSegment linSeg;
     
     //check that data is good
     if (EEPROM.read(addr) == EEPROMVALIDDATA){
-        Serial.println(_readFloat(addr + 1                ));
-        Serial.println(_readFloat(addr + 1 + 1*sizeOfFloat));
-        Serial.println(_readFloat(addr + 1 + 2*sizeOfFloat));
-        Serial.println(_readFloat(addr + 1 + 3*sizeOfFloat));
+        linSeg.slope         =  _readFloat(addr + 1                );
+        linSeg.intercept     =  _readFloat(addr + 1 + 1*SIZEOFFLOAT);
+        linSeg.positiveBound =  _readFloat(addr + 1 + 2*SIZEOFFLOAT);
+        linSeg.negativeBound =  _readFloat(addr + 1 + 3*SIZEOFFLOAT);
     }
     else {
         Serial.print("Lin seg bad read at: ");
         Serial.println(addr);
     }
     
-    
+    return linSeg;
 }
 
 int    Axis::_sign(float val){
