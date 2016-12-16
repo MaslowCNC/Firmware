@@ -49,22 +49,8 @@ _encoder(encoderPin1,encoderPin2)
     
     //load position
     if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
-        set(_readFloat(_eepromAdr + 4));
+        set(_readFloat(_eepromAdr + SIZEOFFLOAT));
     }
-    
-    /*if (_axisName == "Left-axis"){
-        _motor.setSegment(0 ,  0.7,    23.1,  -256,  -115);
-        _motor.setSegment(1 ,  1.9,  -137.0,  -114,     0);
-        _motor.setSegment(2 , 2.32,   46.68,     0,   162);
-        _motor.setSegment(3 , 0.54,  -113.4,   161,   256);
-    }
-    
-    if (_axisName == "Right-axis"){
-        _motor.setSegment(0 ,  .48,   131.9,  -256,  -174);
-        _motor.setSegment(1 ,  2.4,   -39.8,  -175,     0);
-        _motor.setSegment(2 ,  1.9,   117.2,     0,   134);
-        _motor.setSegment(3 ,  .69,   -44.2,   133,   256);
-    }*/
     
     _readAllLinSegs(_eepromAdr);
 }
@@ -149,7 +135,7 @@ float  Axis::error(){
 int    Axis::detach(){
     
     if (_motor.attached()){
-        _writeFloat (_eepromAdr+4, read());
+        _writeFloat (_eepromAdr+SIZEOFFLOAT, read());
         EEPROM.write(_eepromAdr, EEPROMVALIDDATA);
         
         _writeAllLinSegs(_eepromAdr);
@@ -227,27 +213,24 @@ void   Axis::_writeLinSeg(unsigned int addr, LinSegment linSeg){
 }
 
 void   Axis::_writeAllLinSegs(unsigned int addr){
+    /*
+    Write all of the LinSegment objects which define the motors response into the EEPROM
+    */
     
-    addr = addr + 8;
+    addr = addr + 2*SIZEOFFLOAT;
     
-    //Serial.print("write lin segs at: ");
-    //Serial.println(addr);
-        
+    //Write into memory
     _writeLinSeg(addr                 , _motor.getSegment(0));
     _writeLinSeg(addr + 1*SIZEOFLINSEG, _motor.getSegment(1));
     _writeLinSeg(addr + 2*SIZEOFLINSEG, _motor.getSegment(2));
     _writeLinSeg(addr + 3*SIZEOFLINSEG, _motor.getSegment(3));
     
-    LinSegment linSegTWO;
-    
-    linSegTWO = _readLinSeg (addr + 3*SIZEOFLINSEG);
-    
-    Serial.print("End to end slope: ");
-    Serial.println(linSegTWO.slope);
-    
 }
 
 LinSegment   Axis::_readLinSeg(unsigned int addr){
+    /*
+    Read a LinSegment object from the EEPROM
+    */
     
     LinSegment linSeg;
     
@@ -267,7 +250,9 @@ LinSegment   Axis::_readLinSeg(unsigned int addr){
 }
 
 void   Axis::_readAllLinSegs(unsigned int addr){
-   // Serial.println("read lin segs");
+   /*
+   Read back all the LinSegment objects which define the motors behavior from the EEPROM
+   */
     
     addr = addr + 8;
     
