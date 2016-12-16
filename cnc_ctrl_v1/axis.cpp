@@ -65,6 +65,8 @@ _encoder(encoderPin1,encoderPin2)
         _motor.setSegment(2 ,  1.9,   117.2,     0,   134);
         _motor.setSegment(3 ,  .69,   -44.2,   133,   256);
     }
+    
+    _readAllLinSegs(_eepromAdr);
 }
 
 void   Axis::initializePID(){
@@ -150,7 +152,7 @@ int    Axis::detach(){
         _writeFloat (_eepromAdr+4, read());
         EEPROM.write(_eepromAdr, EEPROMVALIDDATA);
         
-        _writeAllLinSegs(_eepromAdr + 8);
+        _writeAllLinSegs(_eepromAdr);
         
     }
     
@@ -224,26 +226,9 @@ void   Axis::_writeLinSeg(unsigned int addr, LinSegment linSeg){
     _writeFloat(addr + 1 + 3*SIZEOFFLOAT, linSeg.negativeBound);
 }
 
-LinSegment   Axis::_readLinSeg(unsigned int addr){
-    
-    LinSegment linSeg;
-    
-    //check that data is good
-    if (EEPROM.read(addr) == EEPROMVALIDDATA){
-        linSeg.slope         =  _readFloat(addr + 1                );
-        linSeg.intercept     =  _readFloat(addr + 1 + 1*SIZEOFFLOAT);
-        linSeg.positiveBound =  _readFloat(addr + 1 + 2*SIZEOFFLOAT);
-        linSeg.negativeBound =  _readFloat(addr + 1 + 3*SIZEOFFLOAT);
-    }
-    else {
-        Serial.print("Lin seg bad read at: ");
-        Serial.println(addr);
-    }
-    
-    return linSeg;
-}
-
 void   Axis::_writeAllLinSegs(unsigned int addr){
+    
+    addr = addr + 8;
     
     Serial.print("write lin segs at");
     Serial.println(addr);
@@ -267,6 +252,29 @@ void   Axis::_writeAllLinSegs(unsigned int addr){
     Serial.print("End to end slope: ");
     Serial.println(linSegTWO.slope);
     
+}
+
+LinSegment   Axis::_readLinSeg(unsigned int addr){
+    
+    LinSegment linSeg;
+    
+    //check that data is good
+    if (EEPROM.read(addr) == EEPROMVALIDDATA){
+        linSeg.slope         =  _readFloat(addr + 1                );
+        linSeg.intercept     =  _readFloat(addr + 1 + 1*SIZEOFFLOAT);
+        linSeg.positiveBound =  _readFloat(addr + 1 + 2*SIZEOFFLOAT);
+        linSeg.negativeBound =  _readFloat(addr + 1 + 3*SIZEOFFLOAT);
+    }
+    else {
+        Serial.print("Lin seg bad read at: ");
+        Serial.println(addr);
+    }
+    
+    return linSeg;
+}
+
+void   Axis::_readAllLinSegs(unsigned int addr){
+    Serial.println("read lin segs");
 }
 
 int    Axis::_sign(float val){

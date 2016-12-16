@@ -54,6 +54,7 @@
             void       _writeLinSeg(unsigned int addr, LinSegment linSeg);
             void       _writeAllLinSegs(unsigned int addr);
             LinSegment _readLinSeg(unsigned int addr);
+            void       _readAllLinSegs(unsigned int addr);
             GearMotor  _motor;
             int        _direction;
             int        _encoderPin;
