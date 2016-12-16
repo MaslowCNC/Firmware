@@ -62,8 +62,8 @@ _encoder(encoderPin1,encoderPin2)
     if (_axisName == "Right-axis"){
         _motor.setSegment(0 ,  .48,   131.9,  -256,  -174);
         _motor.setSegment(1 ,  2.4,   -39.8,  -175,     0);
-        _motor.setSegment(3 ,  1.9,   117.2,     0,   134);
-        _motor.setSegment(2 ,  .69,   -44.2,   133,   256);
+        _motor.setSegment(2 ,  1.9,   117.2,     0,   134);
+        _motor.setSegment(3 ,  .69,   -44.2,   133,   256);
     }
 }
 
@@ -255,10 +255,10 @@ void   Axis::_writeAllLinSegs(unsigned int addr){
     linSeg.negativeBound = 4;
     
     
-    _writeLinSeg(addr                 , linSeg);
-    _writeLinSeg(addr + 1*SIZEOFLINSEG, linSeg);
-    _writeLinSeg(addr + 2*SIZEOFLINSEG, linSeg);
-    _writeLinSeg(addr + 3*SIZEOFLINSEG, linSeg);
+    _writeLinSeg(addr                 , _motor.getSegment(0));
+    _writeLinSeg(addr + 1*SIZEOFLINSEG, _motor.getSegment(1));
+    _writeLinSeg(addr + 2*SIZEOFLINSEG, _motor.getSegment(2));
+    _writeLinSeg(addr + 3*SIZEOFLINSEG, _motor.getSegment(3));
     
     LinSegment linSegTWO;
     
