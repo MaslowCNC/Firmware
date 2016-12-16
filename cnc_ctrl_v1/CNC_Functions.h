@@ -33,6 +33,9 @@ libraries*/
 #define YDIRECTION BACKWARD
 #define ZDIRECTION BACKWARD
 
+#define LEFT_EEPROM_ADR     5
+#define RIGHT_EEPROM_ADR  105
+#define Z_EEPROM_ADR      205
 
 #define MILLIMETERS 1
 #define INCHES      25.4
@@ -59,9 +62,9 @@ libraries*/
 #define ENC 5
 
 
-Axis leftAxis (ENB, IN4, IN3, ENCODER2A, ENCODER2B, "Left-axis",   5, DIST_PER_ROTATION);
-Axis rightAxis(ENA, IN2, IN1, ENCODER1A, ENCODER1B, "Right-axis", 10, DIST_PER_ROTATION);
-Axis zAxis    (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "Z-Axis",     15, DIST_PER_ROTATION/19);
+Axis leftAxis (ENB, IN4, IN3, ENCODER2A, ENCODER2B, "Left-axis",   LEFT_EEPROM_ADR, DIST_PER_ROTATION);
+Axis rightAxis(ENA, IN2, IN1, ENCODER1A, ENCODER1B, "Right-axis", RIGHT_EEPROM_ADR, DIST_PER_ROTATION);
+Axis zAxis    (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "Z-Axis",         Z_EEPROM_ADR, DIST_PER_ROTATION/19);
 
 
 Kinematics kinematics;

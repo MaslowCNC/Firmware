@@ -41,6 +41,7 @@
             int  attached();
             int  _convolve(int input);
             void setSegment(int index, float slope, float intercept, int negativeBound, int positiveBound);
+            LinSegment getSegment(int index);
         private:
             int _pwmPin;
             int _pin1;

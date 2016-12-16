@@ -23,7 +23,8 @@
 #define BACKWARD -1
 
 #define EEPROMVALIDDATA 56
-#define EEPROMFLAG 18
+#define SIZEOFFLOAT      4
+#define SIZEOFLINSEG    17
 
 #define NUMBER_OF_ENCODER_STEPS 8148.0 
 
@@ -47,23 +48,11 @@ _encoder(encoderPin1,encoderPin2)
     _mmPerRotation= mmPerRotation;
     
     //load position
-    if (EEPROM.read(EEPROMFLAG) == EEPROMVALIDDATA){
-        set(_readFloat(_eepromAdr));
+    if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
+        set(_readFloat(_eepromAdr + SIZEOFFLOAT));
     }
     
-    if (_axisName == "Left-axis"){
-        _motor.setSegment(0 ,  0.7,    23.1,  -256,  -115);
-        _motor.setSegment(1 ,  1.9,  -137.0,  -114,     0);
-        _motor.setSegment(2 , 2.32,   46.68,     0,   162);
-        _motor.setSegment(3 , 0.54,  -113.4,   161,   256);
-    }
-    
-    if (_axisName == "Right-axis"){
-        _motor.setSegment(0 ,  .48,   131.9,  -256,  -174);
-        _motor.setSegment(1 ,  2.4,   -39.8,  -175,     0);
-        _motor.setSegment(3 ,  1.9,   117.2,     0,   134);
-        _motor.setSegment(2 ,  .69,   -44.2,   133,   256);
-    }
+    _readAllLinSegs(_eepromAdr);
 }
 
 void   Axis::initializePID(){
@@ -146,8 +135,11 @@ float  Axis::error(){
 int    Axis::detach(){
     
     if (_motor.attached()){
-        _writeFloat(_eepromAdr, read());
-        EEPROM.write(EEPROMFLAG, EEPROMVALIDDATA);
+        _writeFloat (_eepromAdr+SIZEOFFLOAT, read());
+        EEPROM.write(_eepromAdr, EEPROMVALIDDATA);
+        
+        _writeAllLinSegs(_eepromAdr);
+        
     }
     
     _motor.detach();
@@ -196,6 +188,9 @@ float  Axis::_readFloat(unsigned int addr){
 }
 
 void   Axis::_writeFloat(unsigned int addr, float x){
+    
+    //Writes a floating point number into the eeprom memory by splitting it into four one byte chunks and saving them
+    
     union{
         byte b[4];
         float f;
@@ -203,6 +198,70 @@ void   Axis::_writeFloat(unsigned int addr, float x){
     data.f = x;
     for(int i = 0; i < 4; i++){
         EEPROM.write(addr+i, data.b[i]);
+    }
+}
+
+void   Axis::_writeLinSeg(unsigned int addr, LinSegment linSeg){
+    
+    //flag that data is good
+    EEPROM.write(addr, EEPROMVALIDDATA);
+    
+    _writeFloat(addr + 1                , linSeg.slope);
+    _writeFloat(addr + 1 + 1*SIZEOFFLOAT, linSeg.intercept);
+    _writeFloat(addr + 1 + 2*SIZEOFFLOAT, linSeg.positiveBound);
+    _writeFloat(addr + 1 + 3*SIZEOFFLOAT, linSeg.negativeBound);
+}
+
+void   Axis::_writeAllLinSegs(unsigned int addr){
+    /*
+    Write all of the LinSegment objects which define the motors response into the EEPROM
+    */
+    
+    addr = addr + 2*SIZEOFFLOAT;
+    
+    //Write into memory
+    _writeLinSeg(addr                 , _motor.getSegment(0));
+    _writeLinSeg(addr + 1*SIZEOFLINSEG, _motor.getSegment(1));
+    _writeLinSeg(addr + 2*SIZEOFLINSEG, _motor.getSegment(2));
+    _writeLinSeg(addr + 3*SIZEOFLINSEG, _motor.getSegment(3));
+    
+}
+
+LinSegment   Axis::_readLinSeg(unsigned int addr){
+    /*
+    Read a LinSegment object from the EEPROM
+    */
+    
+    LinSegment linSeg;
+    
+    //check that data is good
+    if (EEPROM.read(addr) == EEPROMVALIDDATA){
+        linSeg.slope         =  _readFloat(addr + 1                );
+        linSeg.intercept     =  _readFloat(addr + 1 + 1*SIZEOFFLOAT);
+        linSeg.positiveBound =  _readFloat(addr + 1 + 2*SIZEOFFLOAT);
+        linSeg.negativeBound =  _readFloat(addr + 1 + 3*SIZEOFFLOAT);
+    }
+    else {
+        Serial.print("Lin seg bad read at: ");
+        Serial.println(addr);
+    }
+    
+    return linSeg;
+}
+
+void   Axis::_readAllLinSegs(unsigned int addr){
+   /*
+   Read back all the LinSegment objects which define the motors behavior from the EEPROM
+   */
+    
+    addr = addr + 8;
+    
+    LinSegment linSeg;
+    
+    for (int i = 0; i < 4; i++){
+        linSeg = _readLinSeg (addr + i*SIZEOFLINSEG);
+        
+        _motor.setSegment(i, linSeg.slope, linSeg.intercept,  linSeg.negativeBound, linSeg.positiveBound);
     }
 }
 
