@@ -242,8 +242,8 @@ void   Axis::_writeAllLinSegs(unsigned int addr){
     
     linSegTWO = _readLinSeg (addr + 3*SIZEOFLINSEG);
     
-    //Serial.print("End to end slope: ");
-    //Serial.println(linSegTWO.slope);
+    Serial.print("End to end slope: ");
+    Serial.println(linSegTWO.slope);
     
 }
 
