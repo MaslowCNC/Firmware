@@ -241,10 +241,10 @@ LinSegment   Axis::_readLinSeg(unsigned int addr){
         linSeg.positiveBound =  _readFloat(addr + 1 + 2*SIZEOFFLOAT);
         linSeg.negativeBound =  _readFloat(addr + 1 + 3*SIZEOFFLOAT);
     }
-    else {
-        Serial.print("Lin seg bad read at: ");
-        Serial.println(addr);
-    }
+    //else {
+    //    Serial.print("Lin seg bad read at: ");
+    //    Serial.println(addr);
+    //}
     
     return linSeg;
 }
