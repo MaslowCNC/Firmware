@@ -73,6 +73,11 @@ float feedrate             =  125;
 float _inchesToMMConversion =  1;
 String prependString;
 
+//These are used in place of a forward kinematic function at the beginning of each move. They should be replaced
+//by a call to the forward kinematic function when it is available.
+float xTarget = 0;
+float yTarget = 0;
+
 void  returnPoz(){
     static unsigned long lastRan = millis();
     int                  timeout = 200;
@@ -156,13 +161,12 @@ the speed moveSpeed. Movements are correlated so that regardless of the distance
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
     
-    float  xStartingLocation;
-    float  yStartingLocation;
-    float  zStartingLocation;
+    float  xStartingLocation = xTarget;
+    float  yStartingLocation = yTarget;
     int    numberOfStepsPerMM         = 100;
     MMPerSecond = .5;
     
-    kinematics.forward(leftAxis.target(), rightAxis.target(), &xStartingLocation, &yStartingLocation);
+    //kinematics.forward(leftAxis.target(), rightAxis.target(), &xStartingLocation, &yStartingLocation);
     
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
@@ -203,6 +207,9 @@ and G01 commands. The units at this point should all be in rotations or rotation
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
     leftAxis.endMove(aChainLength);
     rightAxis.endMove(bChainLength);
+    
+    xTarget = xEnd;
+    yTarget = yEnd;
     
     return(1);
     
@@ -282,9 +289,9 @@ int   G1(String readString){
     
     readString.toUpperCase(); //Make the string all uppercase to remove variability
     
-    float currentXPos;
-    float currentYPos;
-    kinematics.forward(leftAxis.target(), rightAxis.target(), &currentXPos, &currentYPos);
+    float currentXPos = xTarget;
+    float currentYPos = yTarget;
+    //kinematics.forward(leftAxis.target(), rightAxis.target(), &currentXPos, &currentYPos);
     float currentZPos = zAxis.read();
     
     xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
@@ -389,9 +396,9 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
 
 int   G2(String readString){
     
-    float X1;
-    float Y1;
-    kinematics.forward(leftAxis.target(), rightAxis.target(), &X1, &Y1);
+    float X1 = xTarget; //does this work if units are inches?
+    float Y1 = yTarget;
+    //kinematics.forward(leftAxis.target(), rightAxis.target(), &X1, &Y1);
     
     float X2      = _inchesToMMConversion*extractGcodeValue(readString, 'X', 0.0);
     float Y2      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', 0.0);
