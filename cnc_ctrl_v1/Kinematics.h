@@ -27,7 +27,9 @@
             Kinematics();
             void forward   (float chainALength, float chainBLength, float* X, float* Y);
             void inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
+            void newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void test();
+            void speedTest(float input);
         private:
             BigNumber float2BigNum (float value);
     };

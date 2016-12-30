@@ -116,6 +116,30 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     *bChainLength = Lbd - chainLengthAtCenterInMM;
 }
 
+void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    Serial.println("would run new inverse kinematics here");
+}
+
+void  Kinematics::speedTest(float input){
+    Serial.println("Begin Speed Test");
+    
+    float x = 0;
+    float y = .3*1.0;
+    long  startTime = micros();
+    int iterations = 100;
+    
+    for (int i = 0; i < iterations; i++){
+        x = cos(.3 + float(i)/100000.0);
+    }
+    
+    Serial.println(x);
+    
+    Serial.print("Time per call: ");
+    Serial.print((micros() - startTime)/iterations);
+    Serial.println("us");
+    
+}
+
 void Kinematics::test(){
     
     Serial.println("test kinematics begin-------------------------------------------------------");

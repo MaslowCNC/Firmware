@@ -31,6 +31,8 @@ void setup(){
     
     Timer1.initialize(10000);
     Timer1.attachInterrupt(runsOnATimer);
+    
+    kinematics.speedTest(.2);
 }
 
 void runsOnATimer(){
