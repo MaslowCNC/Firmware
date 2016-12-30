@@ -246,6 +246,9 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     rightAxis.endMove(bChainLength);
     zAxis.endMove(zEnd);
     
+    xTarget = xEnd;
+    yTarget = yEnd;
+    
 }
 
 void  holdPosition(){
@@ -420,7 +423,7 @@ int   G2(String readString){
 
 void  G10(String readString){
 
-/*The G10() function handles the G10 gcode which re-zeroes one or all of the machine's axes.*/
+/*The G10() function handles the G10 gcode which re-zeros one or all of the machine's axes.*/
     
     leftAxis.set(0);
     rightAxis.set(0);
