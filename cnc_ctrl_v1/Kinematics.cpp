@@ -28,7 +28,7 @@ in X-Y space.
 #define MACHINEWIDTH     2438.4 //this is the distance between the motors
 #define MOTOROFFSETX     270
 #define MOTOROFFSETY     463
-#define ORIGINCHAINLEN   sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
+#define ORIGINCHAINLEN   1650   //sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
 #define SLEDWIDTH        310
 #define SLEDHEIGHT       139
 
