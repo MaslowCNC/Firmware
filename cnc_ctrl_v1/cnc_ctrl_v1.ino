@@ -53,7 +53,8 @@ void loop(){
         }
     }
     if (readString.length() > 0){
-        interpretCommandString(readString.toUpperCase());
+        readString.toUpperCase();
+        interpretCommandString(readString);
     }
     
     holdPosition();
