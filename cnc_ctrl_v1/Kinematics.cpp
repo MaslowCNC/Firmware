@@ -127,15 +127,18 @@ void  Kinematics::speedTest(float input){
     float y = .3*1.0;
     long  startTime = micros();
     int iterations = 100;
+    String testString = "this is a test";
     
     for (int i = 0; i < iterations; i++){
         x = cos(.3 + float(i)/100000.0);
     }
     
+    long time = (micros() - startTime)/iterations;
+    
     Serial.println(x);
     
     Serial.print("Time per call: ");
-    Serial.print((micros() - startTime)/iterations);
+    Serial.print(time);
     Serial.println("us");
     
     Serial.println(ORIGINCHAINLEN);
