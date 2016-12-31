@@ -53,6 +53,7 @@ void loop(){
         }
     }
     if (readString.length() > 0){
+        readString.toUpperCase();
         interpretCommandString(readString);
     }
     
