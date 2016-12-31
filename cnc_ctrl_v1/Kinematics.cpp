@@ -138,6 +138,8 @@ void  Kinematics::speedTest(float input){
     Serial.print((micros() - startTime)/iterations);
     Serial.println("us");
     
+    Serial.println(ORIGINCHAINLEN);
+    
 }
 
 void Kinematics::test(){
