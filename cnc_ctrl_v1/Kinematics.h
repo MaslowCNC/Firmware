@@ -28,6 +28,7 @@
             void forward   (float chainALength, float chainBLength, float* X, float* Y);
             void inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
+            float momentSproc(float h, float h3, float x, float y, float D, float Theta, float Phi);
             void test();
             void speedTest(float input);
         private:

@@ -31,6 +31,7 @@ in X-Y space.
 #define ORIGINCHAINLEN   sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
 #define SLEDWIDTH        310
 #define SLEDHEIGHT       139
+#define SPROCKETR        15
 
 #define AX               -1*MACHINEWIDTH/2 - MOTOROFFSETX
 #define AY               MACHINEHEIGHT/2 + MOTOROFFSETY
@@ -120,16 +121,35 @@ void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, f
     Serial.println("would run new inverse kinematics here");
 }
 
+float Kinematics::momentSproc(float h, float h3, float x, float y, float D, float Theta, float Phi){
+    //Serial.println("would run sprocket code here");
+    
+    float Psi1 = Theta - Phi;
+    float Psi2 = Theta + Phi;
+    float Offsetx1 = h * cos(Psi1); //these sin and cos operations are duplicated in the MomentSproc calculation
+    float Offsetx2 = h * cos(Psi2);
+    float Offsety1 = h * sin(Psi1);
+    float Offsety2 = h * sin(Psi2);
+    float TanGamma = (y - Offsety1)/(x - SPROCKETR - Offsetx1);
+    float TanLambda = (y - Offsety2)/(D - SPROCKETR -(x + Offsetx2));
+
+    float MomentSproc = h3*sin(Phi)+ (h/(TanLambda+TanGamma))*(sin(Psi2) - sin(Psi1) + TanGamma*cos(Psi1) - TanLambda * cos(Psi2));
+
+    return MomentSproc;
+}
+
 void  Kinematics::speedTest(float input){
     Serial.println("Begin Speed Test");
+    
+    Serial.println(momentSproc(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0));
     
     float x = 0;
     float y = .3*1.0;
     long  startTime = micros();
-    int iterations = 100;
+    int iterations = 1000;
     
     for (int i = 0; i < iterations; i++){
-        x = cos(.3 + float(i)/100000.0);
+        x = momentSproc(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, float(i)/100000.0);
     }
     
     long time = (micros() - startTime)/iterations;
@@ -139,8 +159,6 @@ void  Kinematics::speedTest(float input){
     Serial.print("Time per call: ");
     Serial.print(time);
     Serial.println("us");
-    
-    Serial.println(ORIGINCHAINLEN);
     
 }
 
