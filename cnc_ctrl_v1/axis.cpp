@@ -94,6 +94,9 @@ float  Axis::setpoint(){
 int    Axis::set(float newAxisPosition){
     _axisTarget   =  newAxisPosition/_mmPerRotation;
     _encoder.write((newAxisPosition*NUMBER_OF_ENCODER_STEPS)/_mmPerRotation);
+    
+    Serial.println("set to :");
+    Serial.println(_encoder.read());
 }
 
 void   Axis::computePID(){
@@ -148,7 +151,7 @@ int    Axis::detach(){
 }
 
 int    Axis::attach(){
-     _motor.attach(1);
+     _motor.attach();
      return 1;
 }
 
