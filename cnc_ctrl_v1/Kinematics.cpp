@@ -35,8 +35,8 @@ in X-Y space.
 //Keith's variables
 #define L                SLEDWIDTH
 #define S                SLEDHEIGHT
-#define H                sqrt(sq(L/2) + sq(S))
-#define H3               
+#define H                sqrt(sq(L/2.0) + sq(S))
+#define H3               79.0
 #define SPROCKETR        15
 #define D                 MACHINEWIDTH + 2*MOTOROFFSETX //The width of the wood + 2*lenght of arms
 
@@ -130,7 +130,7 @@ void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, f
     
     //initialization
 
-    float NetMoment = 0.2;                                //primer so stop criteria isn't met before first pass
+    /*float NetMoment = 0.2;                                //primer so stop criteria isn't met before first pass
     float phideg = -0.5;                                  //initial estimate of carver-pen holder tilt in degrees 
     float Gamma = atan(yTarget/xTarget);                  //initial estimate of left chain angle 
     float Lambda = atan(yTarget/(D - xTarget));           //initial estimate of right chain angle
@@ -170,22 +170,21 @@ void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, f
     Offsetx1 = h * cos(Psi1);
     Offsetx2 = h * cos(Psi2);
     Offsety1 = h * sin(Psi1);
-    Offsety2 = h * sin(Psi2);
+    Offsety2 = h * sin(Psi2);*/
 }
 
-float Kinematics::momentSproc(float h, float h3, float x, float y, float D, float Theta, float Phi){
-    //Serial.println("would run sprocket code here");
+float Kinematics::momentSproc(float x, float y, float Theta, float Phi){
     
     float Psi1 = Theta - Phi;
     float Psi2 = Theta + Phi;
-    float Offsetx1 = h * cos(Psi1); //these sin and cos operations are duplicated in the MomentSproc calculation
-    float Offsetx2 = h * cos(Psi2);
-    float Offsety1 = h * sin(Psi1);
-    float Offsety2 = h * sin(Psi2);
+    float Offsetx1 = H * cos(Psi1); //these sin and cos operations are duplicated in the MomentSproc calculation
+    float Offsetx2 = H * cos(Psi2);
+    float Offsety1 = H * sin(Psi1);
+    float Offsety2 = H * sin(Psi2);
     float TanGamma = (y - Offsety1)/(x - SPROCKETR - Offsetx1);
     float TanLambda = (y - Offsety2)/(D - SPROCKETR -(x + Offsetx2));
-
-    float MomentSproc = h3*sin(Phi)+ (h/(TanLambda+TanGamma))*(sin(Psi2) - sin(Psi1) + TanGamma*cos(Psi1) - TanLambda * cos(Psi2));
+    
+    float MomentSproc = H3*sin(Phi)+ (H/(TanLambda+TanGamma))*(sin(Psi2) - sin(Psi1) + TanGamma*cos(Psi1) - TanLambda * cos(Psi2));
 
     return MomentSproc;
 }
@@ -193,7 +192,7 @@ float Kinematics::momentSproc(float h, float h3, float x, float y, float D, floa
 void  Kinematics::speedTest(float input){
     Serial.println("Begin Speed Test");
     
-    Serial.println(momentSproc(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0));
+    Serial.println(momentSproc(1.0, 1.0, 1.0, 1.0));
     
     float x = 0;
     float y = .3*1.0;
@@ -201,7 +200,7 @@ void  Kinematics::speedTest(float input){
     int iterations = 1000;
     
     for (int i = 0; i < iterations; i++){
-        x = momentSproc(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, float(i)/100000.0);
+        x = momentSproc(1.0, 1.0, 1.0, float(i)/100000.0);
     }
     
     long time = (micros() - startTime)/iterations;
