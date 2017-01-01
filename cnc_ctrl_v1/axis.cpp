@@ -92,11 +92,12 @@ float  Axis::setpoint(){
 }
 
 int    Axis::set(float newAxisPosition){
+    
+    //reset everything to the new value
     _axisTarget   =  newAxisPosition/_mmPerRotation;
+    _pidSetpoint  =  newAxisPosition/_mmPerRotation;
     _encoder.write((newAxisPosition*NUMBER_OF_ENCODER_STEPS)/_mmPerRotation);
     
-    Serial.println("set to :");
-    Serial.println(_encoder.read());
 }
 
 void   Axis::computePID(){
