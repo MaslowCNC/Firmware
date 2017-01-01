@@ -236,7 +236,15 @@ void  Kinematics::speedTest(float input){
     
     float chainA;
     float chainB;
+    
+    startTime = micros();
+    
     newInverse(1489.2,1489.2, &chainA, &chainB);
+    
+    time = (micros() - startTime)/iterations;
+    Serial.print("Time to converge: ");
+    Serial.print(time);
+    Serial.println("us");
     
 }
 
