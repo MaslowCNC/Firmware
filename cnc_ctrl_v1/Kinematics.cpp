@@ -24,14 +24,22 @@ in X-Y space.
 #include "Kinematics.h"
 
 
-#define MACHINEHEIGHT    1219.2 //this is the distance from the motors to the center of the work space
-#define MACHINEWIDTH     2438.4 //this is the distance between the motors
+#define MACHINEHEIGHT    1219.2 //this is 4 feet in mm
+#define MACHINEWIDTH     2438.4 //this is 8 feet in mm
 #define MOTOROFFSETX     270
 #define MOTOROFFSETY     463
 #define ORIGINCHAINLEN   sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
 #define SLEDWIDTH        310
 #define SLEDHEIGHT       139
+
+//Keith's variables
+#define L                SLEDWIDTH
+#define S                SLEDHEIGHT
+#define H                sqrt(sq(L/2) + sq(S))
+#define H3               
 #define SPROCKETR        15
+#define D                 MACHINEWIDTH + 2*MOTOROFFSETX //The width of the wood + 2*lenght of arms
+
 
 #define AX               -1*MACHINEWIDTH/2 - MOTOROFFSETX
 #define AY               MACHINEHEIGHT/2 + MOTOROFFSETY
@@ -118,7 +126,51 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 }
 
 void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
-    Serial.println("would run new inverse kinematics here");
+    
+    
+    //initialization
+
+    float NetMoment = 0.2;                                //primer so stop criteria isn't met before first pass
+    float phideg = -0.5;                                  //initial estimate of carver-pen holder tilt in degrees 
+    float Gamma = atan(yTarget/xTarget);                  //initial estimate of left chain angle 
+    float Lambda = atan(yTarget/(D - xTarget));           //initial estimate of right chain angle
+    float Phi = phideg/(360.0/DegPerRad);
+    float Theta = atan(2.0*S/L);                          //angle between line connecting pen holder attach points and line from attach point to pen
+    int   Tries = 0;
+
+    //Solution
+
+    tic                                                   //start the stop watch
+    while abs(NetMoment) > MaxError 
+        if Tries > MaxTries, break, end                   //estimate the tilt angle that results in zero net moment about the pen
+        Tries = Tries + 1;                                //and refine the estimate until the error is acceptable or time runs out
+                                                          //compute the moment given the angle phi
+        NetMoment = MomentSproc(h, h3, SprocketR, x, y, D, Theta, Phi);    
+        XTry(Tries) = Phi;
+        YTry(Tries) = NetMoment;
+        LTry(Tries) = tan(Lambda);
+        GTry(Tries) = tan(Gamma);
+        OldPhi = Phi;
+
+                                                           //compute perturbed moment 
+        Phi = Phi + DeltaPhi;
+        NewNetPhi = MomentSproc(h, h3, SprocketR, x, y, D, Theta, Phi);
+                                                  
+        dPhi = (NewNetPhi - NetMoment)/DeltaPhi; 
+        
+                                                          //compute new estimate of Phi, for zero net moment  
+        Phi = OldPhi - NetMoment/dPhi;
+    end
+
+    Phideg = Phi * DegPerRad                            
+
+    Psi1 = Theta - Phi;
+    Psi2 = Theta + Phi;
+
+    Offsetx1 = h * cos(Psi1);
+    Offsetx2 = h * cos(Psi2);
+    Offsety1 = h * sin(Psi1);
+    Offsety2 = h * sin(Psi2);
 }
 
 float Kinematics::momentSproc(float h, float h3, float x, float y, float D, float Theta, float Phi){
