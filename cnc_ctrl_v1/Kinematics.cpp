@@ -184,7 +184,16 @@ void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, f
     float TanLambda = (yTarget - Offsety2)/(D - SPROCKETR - (xTarget+Offsetx2));                                                         
     float Chain1 = sqrt(sq(xTarget - Offsetx1) + sq(yTarget + SPROCKETR * TanGamma - Offsety1)) - SPROCKETR * TanGamma + SPROCKETR * Gamma;            //left chain length                       
     float Chain2 = sqrt(sq(D - (xTarget + Offsetx2))+sq(yTarget + SPROCKETR * TanLambda - Offsety2)) - SPROCKETR * TanLambda + SPROCKETR * Lambda;     //right chain length
-
+    
+    Serial.println("Chain Lengths: ");
+    Serial.println(Chain1);
+    Serial.println(Chain2);
+    
+    *aChainLength = Chain1;
+    *bChainLength = Chain2;
+    
+    
+    
 }
 
 float Kinematics::momentSproc(float xTarget, float yTarget, float Theta, float Phi){
@@ -224,6 +233,10 @@ void  Kinematics::speedTest(float input){
     Serial.print("Time per call: ");
     Serial.print(time);
     Serial.println("us");
+    
+    float chainA;
+    float chainB;
+    newInverse(1489.2,1489.2, &chainA, &chainB);
     
 }
 
