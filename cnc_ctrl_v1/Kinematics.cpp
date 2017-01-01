@@ -38,7 +38,14 @@ in X-Y space.
 #define H                sqrt(sq(L/2.0) + sq(S))
 #define H3               79.0
 #define SPROCKETR        15
-#define D                 MACHINEWIDTH + 2*MOTOROFFSETX //The width of the wood + 2*lenght of arms
+#define D                MACHINEWIDTH + 2*MOTOROFFSETX //The width of the wood + 2*length of arms
+#define DEGPERRAD        (360.0/(2.0*3.14159))
+
+//newton parameters
+#define MAXERROR         0.00001                           //repeat until the net moment about the pen is less than this
+#define MAXTRIES         300.0
+#define DELTAPHI         0.00000000001                     //perturbation of tilt angle used to compute dmoment/dtilt
+
 
 
 #define AX               -1*MACHINEWIDTH/2 - MOTOROFFSETX
@@ -130,50 +137,57 @@ void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, f
     
     //initialization
 
-    /*float NetMoment = 0.2;                                //primer so stop criteria isn't met before first pass
-    float phideg = -0.5;                                  //initial estimate of carver-pen holder tilt in degrees 
-    float Gamma = atan(yTarget/xTarget);                  //initial estimate of left chain angle 
-    float Lambda = atan(yTarget/(D - xTarget));           //initial estimate of right chain angle
-    float Phi = phideg/(360.0/DegPerRad);
-    float Theta = atan(2.0*S/L);                          //angle between line connecting pen holder attach points and line from attach point to pen
-    int   Tries = 0;
+    float NetMoment = 0.2;                                //primer so stop criteria isn't met before first pass
+    float phideg    = -0.5;                               //initial estimate of carver-pen holder tilt in degrees 
+    float Gamma     = atan(yTarget/xTarget);              //initial estimate of left chain angle 
+    float Lambda    = atan(yTarget/(D - xTarget));        //initial estimate of right chain angle
+    float Phi       = phideg/(360.0/DEGPERRAD);
+    float Theta     = atan(2.0*S/L);                      //angle between line connecting pen holder attach points and line from attach point to pen
+    int   Tries     = 0;
 
     //Solution
 
-    tic                                                   //start the stop watch
-    while abs(NetMoment) > MaxError 
-        if Tries > MaxTries, break, end                   //estimate the tilt angle that results in zero net moment about the pen
+    while (abs(NetMoment) > MAXERROR) {
+        if (Tries > MAXTRIES){ break;}                    //estimate the tilt angle that results in zero net moment about the pen
         Tries = Tries + 1;                                //and refine the estimate until the error is acceptable or time runs out
                                                           //compute the moment given the angle phi
-        NetMoment = MomentSproc(h, h3, SprocketR, x, y, D, Theta, Phi);    
-        XTry(Tries) = Phi;
-        YTry(Tries) = NetMoment;
-        LTry(Tries) = tan(Lambda);
-        GTry(Tries) = tan(Gamma);
-        OldPhi = Phi;
+        //NetMoment = MomentSproc(x, y, Theta, Phi);    
+        //XTry(Tries) = Phi;
+        //YTry(Tries) = NetMoment;
+        //LTry(Tries) = tan(Lambda);
+        //GTry(Tries) = tan(Gamma);
+        float OldPhi = Phi;
 
                                                            //compute perturbed moment 
-        Phi = Phi + DeltaPhi;
-        NewNetPhi = MomentSproc(h, h3, SprocketR, x, y, D, Theta, Phi);
+        Phi = Phi + DELTAPHI;
+        float NewNetPhi = momentSproc(xTarget, yTarget, Theta, Phi);
                                                   
-        dPhi = (NewNetPhi - NetMoment)/DeltaPhi; 
+        float dPhi = (NewNetPhi - NetMoment)/DELTAPHI; 
         
                                                           //compute new estimate of Phi, for zero net moment  
         Phi = OldPhi - NetMoment/dPhi;
-    end
+    }
 
-    Phideg = Phi * DegPerRad                            
+    //Phideg = Phi * DegPerRad                            
 
-    Psi1 = Theta - Phi;
-    Psi2 = Theta + Phi;
+    float Psi1 = Theta - Phi;
+    float Psi2 = Theta + Phi;
 
-    Offsetx1 = h * cos(Psi1);
-    Offsetx2 = h * cos(Psi2);
-    Offsety1 = h * sin(Psi1);
-    Offsety2 = h * sin(Psi2);*/
+    float Offsetx1 = H * cos(Psi1);
+    float Offsetx2 = H * cos(Psi2);
+    float Offsety1 = H * sin(Psi1);
+    float Offsety2 = H * sin(Psi2);
+    
+    //Solution
+    
+    float TanGamma = (yTarget  - Offsety1)/(xTarget - SPROCKETR - Offsetx1);
+    float TanLambda = (yTarget - Offsety2)/(D - SPROCKETR - (xTarget+Offsetx2));                                                         
+    float Chain1 = sqrt(sq(xTarget - Offsetx1) + sq(yTarget + SPROCKETR * TanGamma - Offsety1)) - SPROCKETR * TanGamma + SPROCKETR * Gamma;            //left chain length                       
+    float Chain2 = sqrt(sq(D - (xTarget + Offsetx2))+sq(yTarget + SPROCKETR * TanLambda - Offsety2)) - SPROCKETR * TanLambda + SPROCKETR * Lambda;     //right chain length
+
 }
 
-float Kinematics::momentSproc(float x, float y, float Theta, float Phi){
+float Kinematics::momentSproc(float xTarget, float yTarget, float Theta, float Phi){
     
     float Psi1 = Theta - Phi;
     float Psi2 = Theta + Phi;
@@ -181,8 +195,8 @@ float Kinematics::momentSproc(float x, float y, float Theta, float Phi){
     float Offsetx2 = H * cos(Psi2);
     float Offsety1 = H * sin(Psi1);
     float Offsety2 = H * sin(Psi2);
-    float TanGamma = (y - Offsety1)/(x - SPROCKETR - Offsetx1);
-    float TanLambda = (y - Offsety2)/(D - SPROCKETR -(x + Offsetx2));
+    float TanGamma = (yTarget - Offsety1)/(xTarget - SPROCKETR - Offsetx1);
+    float TanLambda = (yTarget - Offsety2)/(D - SPROCKETR -(xTarget + Offsetx2));
     
     float MomentSproc = H3*sin(Phi)+ (H/(TanLambda+TanGamma))*(sin(Psi2) - sin(Psi1) + TanGamma*cos(Psi1) - TanLambda * cos(Psi2));
 
