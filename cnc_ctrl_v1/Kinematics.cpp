@@ -28,7 +28,7 @@ in X-Y space.
 #define MACHINEWIDTH     2438.4 //this is 8 feet in mm
 #define MOTOROFFSETX     270.0
 #define MOTOROFFSETY     463.0
-#define ORIGINCHAINLEN   sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
+#define ORIGINCHAINLEN   1650   //sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
 #define SLEDWIDTH        310.0
 #define SLEDHEIGHT       139.0
 
@@ -45,7 +45,6 @@ in X-Y space.
 #define MAXERROR         0.00001                           //repeat until the net moment about the pen is less than this
 #define MAXTRIES         300.0
 #define DELTAPHI         0.00000000001                     //perturbation of tilt angle used to compute dmoment/dtilt
-
 
 
 #define AX               -1*MACHINEWIDTH/2 - MOTOROFFSETX

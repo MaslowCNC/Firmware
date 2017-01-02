@@ -425,6 +425,10 @@ void  G10(String readString){
 
 /*The G10() function handles the G10 gcode which re-zeros one or all of the machine's axes.*/
     
+    leftAxis.detach();
+    rightAxis.detach();
+    zAxis.detach();
+    
     leftAxis.set(0);
     rightAxis.set(0);
     zAxis.set(0);
@@ -432,6 +436,8 @@ void  G10(String readString){
     leftAxis.endMove(0);
     rightAxis.endMove(0);
     zAxis.endMove(0);
+    
+    delay(1000); //Let the PID controller settle 
     
     leftAxis.attach();
     rightAxis.attach();
