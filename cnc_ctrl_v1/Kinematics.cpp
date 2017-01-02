@@ -127,9 +127,8 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     float Lbd = sqrt(sq(BX-Dx) + sq(BY-Dy));
     
     
-    float chainLengthAtCenterInMM = 1628.4037;
-    *aChainLength = -1*(Lac - chainLengthAtCenterInMM);
-    *bChainLength = Lbd - chainLengthAtCenterInMM;
+    *aChainLength = Lac;
+    *bChainLength = Lbd;
 }
 
 void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
@@ -227,6 +226,12 @@ void  Kinematics::speedTest(float input){
     startTime = micros();
     
     newInverse(1489.2,1489.2, &chainA, &chainB);
+    
+    inverse(-100, 0, &chainA, &chainB);
+    
+    Serial.println("Chain Lengths at Center");
+    Serial.println(chainA);
+    Serial.println(chainB);
     
     time = (micros() - startTime);
     Serial.print("Time to converge: ");
