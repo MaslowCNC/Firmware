@@ -53,7 +53,7 @@ int  GearMotor::setupMotor(int pwmPin, int pin1, int pin2){
   return 1;
 }
 
-void GearMotor::attach(int pin){
+void GearMotor::attach(){
     _attachedState = 1;
 }
 
