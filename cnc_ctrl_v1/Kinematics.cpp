@@ -32,6 +32,8 @@ in X-Y space.
 #define SLEDWIDTH        310
 #define SLEDHEIGHT       139
 
+#define OLDKINEMATICS
+
 #define AX               -1*MACHINEWIDTH/2 - MOTOROFFSETX
 #define AY               MACHINEHEIGHT/2 + MOTOROFFSETY
 #define BX               MACHINEWIDTH/2 + MOTOROFFSETX
@@ -42,6 +44,39 @@ Kinematics::Kinematics(){
     BigNumber::begin ();
     
 }
+
+#ifdef ZAXIS OLDKINEMATICS //This lets you use the old kinematics which make a triangle where the tool is at the tip.
+
+void  Kinematics::forward(float chainALength, float chainBLength, float* X, float* Y){
+    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
+    
+    //Use the law of cosines to find the angle between the two chains
+    float   a   = chainBLength + chainLengthAtCenterInMM;
+    float   b   = -1*chainALength + chainLengthAtCenterInMM;
+    float   c   = MACHINEWIDTH+2*MOTOROFFSETX;
+    float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
+    
+    *Y   = MOTOROFFSETY + MACHINEHEIGHT/2 - (b*sin(theta));
+    *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
+}
+
+void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    
+    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
+    
+    float X1 = MOTOROFFSETX + MACHINEWIDTH/2.0   + xTarget;
+    float X2 = MOTOROFFSETX + MACHINEWIDTH/2.0   - xTarget;
+    float Y  = MOTOROFFSETY + MACHINEHEIGHT/2.0  - yTarget;
+    
+    float La = sqrt( sq(X1) + sq(Y) );
+    float Lb = sqrt( sq(X2) + sq(Y) );
+    
+    *aChainLength = -1*(La - chainLengthAtCenterInMM);
+    *bChainLength = Lb - chainLengthAtCenterInMM;
+}
+
+
+#else //Use the regular kinematics
 
 void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     //Compute xy postion from chain lengths
@@ -115,6 +150,8 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     *aChainLength = -1*(Lac - chainLengthAtCenterInMM);
     *bChainLength = Lbd - chainLengthAtCenterInMM;
 }
+
+#endif
 
 void Kinematics::test(){
     
