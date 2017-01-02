@@ -26,18 +26,18 @@ in X-Y space.
 
 #define MACHINEHEIGHT    1219.2 //this is 4 feet in mm
 #define MACHINEWIDTH     2438.4 //this is 8 feet in mm
-#define MOTOROFFSETX     270
-#define MOTOROFFSETY     463
+#define MOTOROFFSETX     270.0
+#define MOTOROFFSETY     463.0
 #define ORIGINCHAINLEN   sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
-#define SLEDWIDTH        310
-#define SLEDHEIGHT       139
+#define SLEDWIDTH        310.0
+#define SLEDHEIGHT       139.0
 
 //Keith's variables
 #define L                SLEDWIDTH
 #define S                SLEDHEIGHT
 #define H                sqrt(sq(L/2.0) + sq(S))
 #define H3               79.0
-#define SPROCKETR        15
+#define SPROCKETR        15.0
 #define D                MACHINEWIDTH + 2*MOTOROFFSETX //The width of the wood + 2*length of arms
 #define DEGPERRAD        (360.0/(2.0*3.14159))
 
@@ -180,10 +180,13 @@ void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, f
     
     //Solution
     
-    float TanGamma = (yTarget  - Offsety1)/(xTarget - SPROCKETR - Offsetx1);
-    float TanLambda = (yTarget - Offsety2)/(D - SPROCKETR - (xTarget+Offsetx2));                                                         
-    float Chain1 = sqrt(sq(xTarget - Offsetx1) + sq(yTarget + SPROCKETR * TanGamma - Offsety1)) - SPROCKETR * TanGamma + SPROCKETR * Gamma;            //left chain length                       
-    float Chain2 = sqrt(sq(D - (xTarget + Offsetx2))+sq(yTarget + SPROCKETR * TanLambda - Offsety2)) - SPROCKETR * TanLambda + SPROCKETR * Lambda;     //right chain length
+    //float TanGamma = (yTarget  - Offsety1)/(xTarget - SPROCKETR - Offsetx1);
+    //float TanLambda = (yTarget - Offsety2)/(D - SPROCKETR - (xTarget+Offsetx2));                                                         
+    //float Chain1 = sqrt(sq(xTarget - Offsetx1) + sq(yTarget + SPROCKETR * TanGamma - Offsety1)) - SPROCKETR * TanGamma + SPROCKETR * Gamma;            //left chain length                       
+    //float Chain2 = sqrt(sq(D - (xTarget + Offsetx2))+sq(yTarget + SPROCKETR * TanLambda - Offsety2)) - SPROCKETR * TanLambda + SPROCKETR * Lambda;     //right chain length
+    
+    float Chain1 = sqrt(sq(x-Deltax1)+sq(y-Deltay1))       //left chain length                       
+    float Chain2 = sqrt(sq(D-(x+Deltax2))+sq(y-Deltay2))   //right chain length
     
     Serial.println("Chain Lengths: ");
     Serial.println(Chain1);
@@ -241,10 +244,10 @@ void  Kinematics::speedTest(float input){
     
     newInverse(1489.2,1489.2, &chainA, &chainB);
     
-    time = (micros() - startTime)/iterations;
+    time = (micros() - startTime)/1000;
     Serial.print("Time to converge: ");
     Serial.print(time);
-    Serial.println("us");
+    Serial.println("ms");
     
 }
 
