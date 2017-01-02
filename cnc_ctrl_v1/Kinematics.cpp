@@ -137,56 +137,42 @@ void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, f
     
     //initialization
 
-    float NetMoment = 0.2;                                //primer so stop criteria isn't met before first pass
-    float phideg    = -0.5;                               //initial estimate of carver-pen holder tilt in degrees 
-    float Gamma     = atan(yTarget/xTarget);              //initial estimate of left chain angle 
-    float Lambda    = atan(yTarget/(D - xTarget));        //initial estimate of right chain angle
-    float Phi       = phideg/(360.0/DEGPERRAD);
-    float Theta     = atan(2.0*S/L);                      //angle between line connecting pen holder attach points and line from attach point to pen
-    int   Tries     = 0;
+    float NetMoment = .2;                                  //initial guess-primer
+    float phideg = -0.5;                                   //carver-pen holder tilt in degrees
+    float Phi = phideg/(360/(2*3.14159));
+    float Theta = atan(2*S/L);                             //angle between line connecting pen holder attach points and line from attach point to pen
+    int   Tries = 0;
 
     //Solution
 
-    while (abs(NetMoment) > MAXERROR) {
-        if (Tries > MAXTRIES){ break;}                    //estimate the tilt angle that results in zero net moment about the pen
-        Tries = Tries + 1;                                //and refine the estimate until the error is acceptable or time runs out
-                                                          //compute the moment given the angle phi
-        //NetMoment = MomentSproc(x, y, Theta, Phi);    
+    while (abs(NetMoment) > MAXERROR){
+        if (Tries > MAXTRIES){break;}                      //estimate the tilt angle that results in zero net moment about the pen
+        Tries = Tries + 1;                                 //and refine the estimate until the error is acceptable or time runs out
+        float NetMoment = moment(xTarget, yTarget, Theta, Phi);    //compute the moment given the angle phi 
         //XTry(Tries) = Phi;
         //YTry(Tries) = NetMoment;
-        //LTry(Tries) = tan(Lambda);
-        //GTry(Tries) = tan(Gamma);
-        float OldPhi = Phi;
-
-                                                           //compute perturbed moment 
-        Phi = Phi + DELTAPHI;
-        float NewNetPhi = momentSproc(xTarget, yTarget, Theta, Phi);
-                                                  
-        float dPhi = (NewNetPhi - NetMoment)/DELTAPHI; 
-        
-                                                          //compute new estimate of Phi, for zero net moment  
-        Phi = OldPhi - NetMoment/dPhi;
+        float OldPhi = Phi;       
+        float Phi = Phi + DELTAPHI;
+        float NewNet = moment(xTarget, yTarget, Theta, Phi);       //compute the moment given the perturbed angle phi
+        float Derivative = (NewNet - NetMoment)/DELTAPHI;        //estimate the derivative of the moment function at phi
+        Phi = OldPhi - NetMoment/Derivative;               //estimate the value of Phi for zero net moment  
     }
-
-    //Phideg = Phi * DegPerRad                            
+    //NetMoment                                             %Some diagnostic outputs
+    //Tries                                                 %
+    //Phi                                                   %
+    //Phideg = Phi * (360/(2*pi))                           %
 
     float Psi1 = Theta - Phi;
     float Psi2 = Theta + Phi;
 
-    float Offsetx1 = H * cos(Psi1);
-    float Offsetx2 = H * cos(Psi2);
-    float Offsety1 = H * sin(Psi1);
-    float Offsety2 = H * sin(Psi2);
-    
-    //Solution
-    
-    //float TanGamma = (yTarget  - Offsety1)/(xTarget - SPROCKETR - Offsetx1);
-    //float TanLambda = (yTarget - Offsety2)/(D - SPROCKETR - (xTarget+Offsetx2));                                                         
-    //float Chain1 = sqrt(sq(xTarget - Offsetx1) + sq(yTarget + SPROCKETR * TanGamma - Offsety1)) - SPROCKETR * TanGamma + SPROCKETR * Gamma;            //left chain length                       
-    //float Chain2 = sqrt(sq(D - (xTarget + Offsetx2))+sq(yTarget + SPROCKETR * TanLambda - Offsety2)) - SPROCKETR * TanLambda + SPROCKETR * Lambda;     //right chain length
-    
-    float Chain1 = sqrt(sq(x-Deltax1)+sq(y-Deltay1))       //left chain length                       
-    float Chain2 = sqrt(sq(D-(x+Deltax2))+sq(y-Deltay2))   //right chain length
+    float Deltax1 = H * cos(Psi1);
+    float Deltax2 = H * cos(Psi2);
+    float Deltay1 = H * sin(Psi1);
+    float Deltay2 = H * sin(Psi2); 
+                                                        //Solution
+                                                             
+    float Chain1 = sqrt(sq(xTarget-Deltax1)+sq(yTarget-Deltay1));       //left chain length                       
+    float Chain2 = sqrt(sq(D-(xTarget+Deltax2))+sq(yTarget-Deltay2));   //right chain length
     
     Serial.println("Chain Lengths: ");
     Serial.println(Chain1);
@@ -199,7 +185,7 @@ void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, f
     
 }
 
-float Kinematics::momentSproc(float xTarget, float yTarget, float Theta, float Phi){
+float Kinematics::moment(float xTarget, float yTarget, float Theta, float Phi){
     
     float Psi1 = Theta - Phi;
     float Psi2 = Theta + Phi;
@@ -207,18 +193,16 @@ float Kinematics::momentSproc(float xTarget, float yTarget, float Theta, float P
     float Offsetx2 = H * cos(Psi2);
     float Offsety1 = H * sin(Psi1);
     float Offsety2 = H * sin(Psi2);
-    float TanGamma = (yTarget - Offsety1)/(xTarget - SPROCKETR - Offsetx1);
-    float TanLambda = (yTarget - Offsety2)/(D - SPROCKETR -(xTarget + Offsetx2));
+    float TanGamma = (yTarget - Offsety1)/(xTarget-Offsetx1);
+    float TanLambda = (yTarget - Offsety2)/(D-(xTarget+Offsetx2));
     
-    float MomentSproc = H3*sin(Phi)+ (H/(TanLambda+TanGamma))*(sin(Psi2) - sin(Psi1) + TanGamma*cos(Psi1) - TanLambda * cos(Psi2));
+    float Moment =H3*sin(Phi)+ (H/(TanLambda+TanGamma))*(sin(Psi2) - sin(Psi1) + TanGamma*cos(Psi1) - TanLambda * cos(Psi2));
 
-    return MomentSproc;
+    return Moment;
 }
 
 void  Kinematics::speedTest(float input){
     Serial.println("Begin Speed Test");
-    
-    Serial.println(momentSproc(1.0, 1.0, 1.0, 1.0));
     
     float x = 0;
     float y = .3*1.0;
@@ -226,7 +210,7 @@ void  Kinematics::speedTest(float input){
     int iterations = 1000;
     
     for (int i = 0; i < iterations; i++){
-        x = momentSproc(1.0, 1.0, 1.0, float(i)/100000.0);
+        x = moment(1.0, 1.0, 1.0, float(i)/100000.0);
     }
     
     long time = (micros() - startTime)/iterations;
@@ -244,10 +228,10 @@ void  Kinematics::speedTest(float input){
     
     newInverse(1489.2,1489.2, &chainA, &chainB);
     
-    time = (micros() - startTime)/1000;
+    time = (micros() - startTime);
     Serial.print("Time to converge: ");
     Serial.print(time);
-    Serial.println("ms");
+    Serial.println("us");
     
 }
 
