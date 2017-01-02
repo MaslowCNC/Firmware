@@ -70,10 +70,8 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     BigNumber AXb  = neg1*float2BigNum(AX);
     BigNumber BXb  = float2BigNum(BX);
     
-
-    float chainLengthAtCenterInMM = 1628.4037;
-    BigNumber Lacb = float2BigNum(-1*Lac + chainLengthAtCenterInMM);
-    BigNumber Lbdb = float2BigNum(Lbd + chainLengthAtCenterInMM);
+    BigNumber Lacb = float2BigNum(Lac);
+    BigNumber Lbdb = float2BigNum(Lbd);
     
     //Do pre-calculations
     BigNumber alpha        = Lacb.pow(2) - AYb.pow(2);
