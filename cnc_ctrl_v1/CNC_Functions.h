@@ -87,11 +87,6 @@ void  returnPoz(){
         float X;
         float Y;
         
-        Serial.print("L: ");
-        Serial.println(leftAxis.read());
-        Serial.print("R: ");
-        Serial.println(rightAxis.read());
-        
         kinematics.forward(leftAxis.read(), rightAxis.read(), &X, &Y);
         
         Serial.print("pz(");
@@ -438,9 +433,12 @@ void  G10(String readString){
     rightAxis.set(ORIGINCHAINLEN); //set the chains to the center length
     zAxis.set(0);
     
-    leftAxis.endMove(0);
-    rightAxis.endMove(0);
+    leftAxis.endMove(ORIGINCHAINLEN);
+    rightAxis.endMove(ORIGINCHAINLEN);
     zAxis.endMove(0);
+    
+    xTarget = 0;
+    yTarget = 0;
     
     delay(1000); //Let the PID controller settle 
     
