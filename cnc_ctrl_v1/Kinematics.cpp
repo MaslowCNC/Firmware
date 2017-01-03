@@ -32,7 +32,7 @@ in X-Y space.
 #define SLEDWIDTH        310
 #define SLEDHEIGHT       139
 
-#define OLDKINEMATICS
+//#define OLDKINEMATICS 
 
 #define AX               -1*MACHINEWIDTH/2 - MOTOROFFSETX
 #define AY               MACHINEHEIGHT/2 + MOTOROFFSETY
@@ -45,7 +45,7 @@ Kinematics::Kinematics(){
     
 }
 
-#ifdef ZAXIS OLDKINEMATICS //This lets you use the old kinematics which make a triangle where the tool is at the tip.
+#ifdef OLDKINEMATICS //This lets you use the old kinematics which make a triangle where the tool is at the tip.
 
 void  Kinematics::forward(float chainALength, float chainBLength, float* X, float* Y){
     float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
@@ -144,7 +144,6 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     
     float Lac = sqrt(sq(AX-Cx) + sq(AY-Cy));
     float Lbd = sqrt(sq(BX-Dx) + sq(BY-Dy));
-    
     
     float chainLengthAtCenterInMM = 1628.4037;
     *aChainLength = -1*(Lac - chainLengthAtCenterInMM);
