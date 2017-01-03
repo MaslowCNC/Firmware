@@ -28,7 +28,6 @@ in X-Y space.
 #define MACHINEWIDTH     2438.4 //this is 8 feet in mm
 #define MOTOROFFSETX     270.0
 #define MOTOROFFSETY     463.0
-#define ORIGINCHAINLEN   sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
 #define SLEDWIDTH        310.0
 #define SLEDHEIGHT       139.0
 
@@ -45,7 +44,6 @@ in X-Y space.
 #define MAXERROR         0.00001                           //repeat until the net moment about the pen is less than this
 #define MAXTRIES         300.0
 #define DELTAPHI         0.00000000001                     //perturbation of tilt angle used to compute dmoment/dtilt
-
 
 
 #define AX               -1*MACHINEWIDTH/2 - MOTOROFFSETX
@@ -70,10 +68,8 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     BigNumber AXb  = neg1*float2BigNum(AX);
     BigNumber BXb  = float2BigNum(BX);
     
-
-    float chainLengthAtCenterInMM = 1628.4037;
-    BigNumber Lacb = float2BigNum(-1*Lac + chainLengthAtCenterInMM);
-    BigNumber Lbdb = float2BigNum(Lbd + chainLengthAtCenterInMM);
+    BigNumber Lacb = float2BigNum(Lac);
+    BigNumber Lbdb = float2BigNum(Lbd);
     
     //Do pre-calculations
     BigNumber alpha        = Lacb.pow(2) - AYb.pow(2);
@@ -127,9 +123,8 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     float Lbd = sqrt(sq(BX-Dx) + sq(BY-Dy));
     
     
-    float chainLengthAtCenterInMM = 1628.4037;
-    *aChainLength = -1*(Lac - chainLengthAtCenterInMM);
-    *bChainLength = Lbd - chainLengthAtCenterInMM;
+    *aChainLength = Lac;
+    *bChainLength = Lbd;
 }
 
 void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
@@ -232,6 +227,18 @@ void  Kinematics::speedTest(float input){
     Serial.print("Time to converge: ");
     Serial.print(time);
     Serial.println("us");
+    
+    inverse(0, 0, &chainA, &chainB);
+    
+    Serial.println("Chain Lengths at Center");
+    Serial.println(chainA);
+    Serial.println(chainB);
+    
+    inverse(100, 0, &chainA, &chainB);
+    
+    Serial.println("Chain Lengths at x:+100");
+    Serial.println(chainA);
+    Serial.println(chainB);
     
 }
 

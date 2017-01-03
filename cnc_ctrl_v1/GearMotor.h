@@ -34,7 +34,7 @@
     class GearMotor{
         public:
             GearMotor();
-            void attach(int pin);
+            void attach();
             int  setupMotor(int pwmPin, int pin1, int pin2);
             void detach();
             void write(int speed);

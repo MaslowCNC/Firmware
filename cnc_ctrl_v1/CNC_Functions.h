@@ -52,8 +52,8 @@ libraries*/
 
 #define IN1 9
 #define IN2 8
-#define IN3 10
-#define IN4 11
+#define IN3 11
+#define IN4 10
 #define IN5 12
 #define IN6 13
 
@@ -62,7 +62,7 @@ libraries*/
 #define ENC 5
 
 
-Axis leftAxis (ENB, IN3, IN4, ENCODER2A, ENCODER2B, "Left-axis",   LEFT_EEPROM_ADR, DIST_PER_ROTATION);
+Axis leftAxis (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Left-axis",   LEFT_EEPROM_ADR, DIST_PER_ROTATION);
 Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, "Right-axis", RIGHT_EEPROM_ADR, DIST_PER_ROTATION);
 Axis zAxis    (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "Z-Axis",         Z_EEPROM_ADR, DIST_PER_ROTATION/19);
 
@@ -425,13 +425,22 @@ void  G10(String readString){
 
 /*The G10() function handles the G10 gcode which re-zeros one or all of the machine's axes.*/
     
-    leftAxis.set(0);
-    rightAxis.set(0);
+    leftAxis.detach();
+    rightAxis.detach();
+    zAxis.detach();
+    
+    leftAxis.set(ORIGINCHAINLEN);
+    rightAxis.set(ORIGINCHAINLEN); //set the chains to the center length
     zAxis.set(0);
     
-    leftAxis.endMove(0);
-    rightAxis.endMove(0);
+    leftAxis.endMove(ORIGINCHAINLEN);
+    rightAxis.endMove(ORIGINCHAINLEN);
     zAxis.endMove(0);
+    
+    xTarget = 0;
+    yTarget = 0;
+    
+    delay(1000); //Let the PID controller settle 
     
     leftAxis.attach();
     rightAxis.attach();
