@@ -130,6 +130,11 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     
     
+    //Translation from (0,0) being the left motor to (0,0) being the center of the plywood
+    xTarget = xTarget + MOTOROFFSETX + MACHINEWIDTH/2;
+    yTarget = (yTarget - MACHINEHEIGHT/2) - MOTOROFFSETY;
+    
+    
     //initialization
 
     float NetMoment = .2;                                  //initial guess-primer
@@ -169,9 +174,9 @@ void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, f
     float Chain1 = sqrt(sq(xTarget-Deltax1)+sq(yTarget-Deltay1));       //left chain length                       
     float Chain2 = sqrt(sq(D-(xTarget+Deltax2))+sq(yTarget-Deltay2));   //right chain length
     
-    Serial.println("Chain Lengths: ");
-    Serial.println(Chain1);
-    Serial.println(Chain2);
+    //Serial.println("Chain Lengths: ");
+    //Serial.println(Chain1);
+    //Serial.println(Chain2);
     
     *aChainLength = Chain1;
     *bChainLength = Chain2;
@@ -203,21 +208,22 @@ void  Kinematics::speedTest(float input){
     float y = .3*1.0;
     long  startTime = micros();
     int iterations = 1000;
+    float chainA;
+    float chainB;
     
     for (int i = 0; i < iterations; i++){
-        x = moment(1.0, 1.0, 1.0, float(i)/100000.0);
+        newInverse(100, float(i)/100000.0, &chainA, &chainB);
     }
     
     long time = (micros() - startTime)/iterations;
     
-    Serial.println(x);
     
     Serial.print("Time per call: ");
     Serial.print(time);
     Serial.println("us");
     
-    float chainA;
-    float chainB;
+    
+    
     
     startTime = micros();
     
@@ -230,16 +236,28 @@ void  Kinematics::speedTest(float input){
     
     inverse(0, 0, &chainA, &chainB);
     
-    Serial.println("Chain Lengths at Center");
+    Serial.println("Old K Chain Lengths at Center");
     Serial.println(chainA);
     Serial.println(chainB);
     
     inverse(100, 0, &chainA, &chainB);
     
-    Serial.println("Chain Lengths at x:+100");
+    Serial.println("Old K Chain Lengths at x:+100");
     Serial.println(chainA);
     Serial.println(chainB);
     
+    
+    newInverse(0, 0, &chainA, &chainB);
+    
+    Serial.println("New K Chain Lengths at Center");
+    Serial.println(chainA);
+    Serial.println(chainB);
+    
+    newInverse(100, 0, &chainA, &chainB);
+    
+    Serial.println("New K Chain Lengths at x:+100");
+    Serial.println(chainA);
+    Serial.println(chainB);
 }
 
 void Kinematics::test(){
