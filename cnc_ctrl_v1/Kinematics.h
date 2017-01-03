@@ -17,7 +17,9 @@
     
     #ifndef Kinematics_h
     #define Kinematics_h
-
+    
+    #define ORIGINCHAINLEN   1650
+    
     #include "Arduino.h"
     #include "BigNumber.h"
     #include "FormatDouble.h"

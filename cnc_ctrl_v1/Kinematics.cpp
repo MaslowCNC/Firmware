@@ -28,7 +28,6 @@ in X-Y space.
 #define MACHINEWIDTH     2438.4 //this is 8 feet in mm
 #define MOTOROFFSETX     270.0
 #define MOTOROFFSETY     463.0
-#define ORIGINCHAINLEN   1650   //sqrt(sq(MOTOROFFSETY + MACHINEHEIGHT/2.0)+ sq(MOTOROFFSETX + MACHINEWIDTH/2.0))
 #define SLEDWIDTH        310.0
 #define SLEDHEIGHT       139.0
 
@@ -224,16 +223,22 @@ void  Kinematics::speedTest(float input){
     
     newInverse(1489.2,1489.2, &chainA, &chainB);
     
-    inverse(-100, 0, &chainA, &chainB);
+    time = (micros() - startTime);
+    Serial.print("Time to converge: ");
+    Serial.print(time);
+    Serial.println("us");
+    
+    inverse(0, 0, &chainA, &chainB);
     
     Serial.println("Chain Lengths at Center");
     Serial.println(chainA);
     Serial.println(chainB);
     
-    time = (micros() - startTime);
-    Serial.print("Time to converge: ");
-    Serial.print(time);
-    Serial.println("us");
+    inverse(100, 0, &chainA, &chainB);
+    
+    Serial.println("Chain Lengths at x:+100");
+    Serial.println(chainA);
+    Serial.println(chainB);
     
 }
 

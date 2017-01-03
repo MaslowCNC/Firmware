@@ -52,8 +52,8 @@ libraries*/
 
 #define IN1 9
 #define IN2 8
-#define IN3 10
-#define IN4 11
+#define IN3 11
+#define IN4 10
 #define IN5 12
 #define IN6 13
 
@@ -62,7 +62,7 @@ libraries*/
 #define ENC 5
 
 
-Axis leftAxis (ENB, IN3, IN4, ENCODER2A, ENCODER2B, "Left-axis",   LEFT_EEPROM_ADR, DIST_PER_ROTATION);
+Axis leftAxis (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Left-axis",   LEFT_EEPROM_ADR, DIST_PER_ROTATION);
 Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, "Right-axis", RIGHT_EEPROM_ADR, DIST_PER_ROTATION);
 Axis zAxis    (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "Z-Axis",         Z_EEPROM_ADR, DIST_PER_ROTATION/19);
 
@@ -86,6 +86,11 @@ void  returnPoz(){
         
         float X;
         float Y;
+        
+        Serial.print("L: ");
+        Serial.println(leftAxis.read());
+        Serial.print("R: ");
+        Serial.println(rightAxis.read());
         
         kinematics.forward(leftAxis.read(), rightAxis.read(), &X, &Y);
         
@@ -429,8 +434,8 @@ void  G10(String readString){
     rightAxis.detach();
     zAxis.detach();
     
-    leftAxis.set(0);
-    rightAxis.set(0);
+    leftAxis.set(ORIGINCHAINLEN);
+    rightAxis.set(ORIGINCHAINLEN); //set the chains to the center length
     zAxis.set(0);
     
     leftAxis.endMove(0);
