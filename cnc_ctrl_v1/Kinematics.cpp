@@ -132,7 +132,7 @@ void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, f
     
     //Translation from (0,0) being the left motor to (0,0) being the center of the plywood
     xTarget = xTarget + MOTOROFFSETX + MACHINEWIDTH/2;
-    yTarget = (yTarget - MACHINEHEIGHT/2) - MOTOROFFSETY;
+    yTarget = yTarget - ((MACHINEHEIGHT/2) +  MOTOROFFSETY);
     
     
     //initialization
