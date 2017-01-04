@@ -52,8 +52,8 @@ libraries*/
 
 #define IN1 9
 #define IN2 8
-#define IN3 10
-#define IN4 11
+#define IN3 11
+#define IN4 10
 #define IN5 12
 #define IN6 13
 
@@ -62,7 +62,7 @@ libraries*/
 #define ENC 5
 
 
-Axis leftAxis (ENB, IN3, IN4, ENCODER2A, ENCODER2B, "Left-axis",   LEFT_EEPROM_ADR, DIST_PER_ROTATION);
+Axis leftAxis (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Left-axis",   LEFT_EEPROM_ADR, DIST_PER_ROTATION);
 Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, "Right-axis", RIGHT_EEPROM_ADR, DIST_PER_ROTATION);
 Axis zAxis    (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "Z-Axis",         Z_EEPROM_ADR, DIST_PER_ROTATION/19);
 
@@ -72,6 +72,11 @@ Kinematics kinematics;
 float feedrate             =  125;
 float _inchesToMMConversion =  1;
 String prependString;
+
+//These are used in place of a forward kinematic function at the beginning of each move. They should be replaced
+//by a call to the forward kinematic function when it is available.
+float xTarget = 0;
+float yTarget = 0;
 
 void  returnPoz(){
     static unsigned long lastRan = millis();
@@ -156,13 +161,12 @@ the speed moveSpeed. Movements are correlated so that regardless of the distance
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in rotations or rotations per second*/
     
-    float  xStartingLocation;
-    float  yStartingLocation;
-    float  zStartingLocation;
+    float  xStartingLocation = xTarget;
+    float  yStartingLocation = yTarget;
     int    numberOfStepsPerMM         = 100;
     MMPerSecond = .5;
     
-    kinematics.forward(leftAxis.target(), rightAxis.target(), &xStartingLocation, &yStartingLocation);
+    //kinematics.forward(leftAxis.target(), rightAxis.target(), &xStartingLocation, &yStartingLocation);
     
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
@@ -204,6 +208,9 @@ and G01 commands. The units at this point should all be in rotations or rotation
     leftAxis.endMove(aChainLength);
     rightAxis.endMove(bChainLength);
     
+    xTarget = xEnd;
+    yTarget = yEnd;
+    
     return(1);
     
 }
@@ -238,6 +245,9 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     leftAxis.endMove(aChainLength);
     rightAxis.endMove(bChainLength);
     zAxis.endMove(zEnd);
+    
+    xTarget = xEnd;
+    yTarget = yEnd;
     
 }
 
@@ -282,9 +292,9 @@ int   G1(String readString){
     
     readString.toUpperCase(); //Make the string all uppercase to remove variability
     
-    float currentXPos;
-    float currentYPos;
-    kinematics.forward(leftAxis.target(), rightAxis.target(), &currentXPos, &currentYPos);
+    float currentXPos = xTarget;
+    float currentYPos = yTarget;
+    //kinematics.forward(leftAxis.target(), rightAxis.target(), &currentXPos, &currentYPos);
     float currentZPos = zAxis.read();
     
     xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
@@ -389,9 +399,9 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
 
 int   G2(String readString){
     
-    float X1;
-    float Y1;
-    kinematics.forward(leftAxis.target(), rightAxis.target(), &X1, &Y1);
+    float X1 = xTarget; //does this work if units are inches?
+    float Y1 = yTarget;
+    //kinematics.forward(leftAxis.target(), rightAxis.target(), &X1, &Y1);
     
     float X2      = _inchesToMMConversion*extractGcodeValue(readString, 'X', 0.0);
     float Y2      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', 0.0);
@@ -413,19 +423,22 @@ int   G2(String readString){
 
 void  G10(String readString){
 
-/*The G10() function handles the G10 gcode which re-zeroes one or all of the machine's axes.*/
+/*The G10() function handles the G10 gcode which re-zeros one or all of the machine's axes.*/
     
     leftAxis.detach();
     rightAxis.detach();
     zAxis.detach();
     
-    leftAxis.set(0);
-    rightAxis.set(0);
+    leftAxis.set(ORIGINCHAINLEN);
+    rightAxis.set(ORIGINCHAINLEN); //set the chains to the center length
     zAxis.set(0);
     
-    leftAxis.endMove(0);
-    rightAxis.endMove(0);
+    leftAxis.endMove(ORIGINCHAINLEN);
+    rightAxis.endMove(ORIGINCHAINLEN);
     zAxis.endMove(0);
+    
+    xTarget = 0;
+    yTarget = 0;
     
     delay(1000); //Let the PID controller settle 
     
