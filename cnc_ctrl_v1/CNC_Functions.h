@@ -154,7 +154,13 @@ void  goAroundInCircle(){
     }
 }
 
-int   move(float xEnd, float yEnd, float zEnd, float MMPerSecond){
+float calculateDelay(float feedrateMMPerMin, float stepSizeMM){
+    Serial.println("would compute delay");
+    
+    return 2.0;
+}
+
+int   move(float xEnd, float yEnd, float zEnd, float MMPerMin){
     
 /*The move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
 the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
@@ -164,7 +170,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float  xStartingLocation = xTarget;
     float  yStartingLocation = yTarget;
     int    numberOfStepsPerMM         = 100;
-    MMPerSecond = .5;
+    float  MMPerSecond = .5;
     
     //kinematics.forward(leftAxis.target(), rightAxis.target(), &xStartingLocation, &yStartingLocation);
     
@@ -187,6 +193,9 @@ and G01 commands. The units at this point should all be in rotations or rotation
     float aChainLength;
     float bChainLength;
     
+    Serial.print("Time per step: ");
+    Serial.println(calculateDelay(1.0/stepsPerMM));
+    
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
         float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
@@ -201,7 +210,7 @@ and G01 commands. The units at this point should all be in rotations or rotation
         
         returnPoz();
         
-        delay(timePerStep);
+        delay(timePerStep(xStepSize, );
     }
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
