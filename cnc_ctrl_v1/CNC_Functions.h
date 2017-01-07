@@ -154,8 +154,12 @@ void  goAroundInCircle(){
     }
 }
 
-float calculateDelay(float feedrateMMPerMin, float stepSizeMM){
-    Serial.println("would compute delay");
+float calculateDelay(float stepSizeMM, float feedrateMMPerMin){
+    Serial.print("Step Size: ");
+    Serial.print(1000*stepSizeMM);
+    Serial.println(" thousandths of a mm");
+    Serial.print("Feed rate in mm/min: ");
+    Serial.println(feedrateMMPerMin);
     
     return 2.0;
 }
@@ -165,52 +169,58 @@ int   move(float xEnd, float yEnd, float zEnd, float MMPerMin){
 /*The move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
 the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
 direction, the tool moves to the target in a straight line. This function is used by the G00 
-and G01 commands. The units at this point should all be in rotations or rotations per second*/
+and G01 commands. The units at this point should all be in mm or mm per minute*/
     
     float  xStartingLocation = xTarget;
     float  yStartingLocation = yTarget;
-    int    numberOfStepsPerMM         = 100;
-    float  MMPerSecond = .5;
+    float  stepSizeMM         = .01;
     
     //kinematics.forward(leftAxis.target(), rightAxis.target(), &xStartingLocation, &yStartingLocation);
     
+    //find the total distances to move
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
     float  yDistanceToMoveInMM        = yEnd - yStartingLocation;
-    float  millisecondsForMove        = numberOfStepsPerMM*(distanceToMoveInMM/MMPerSecond);
-    long   finalNumberOfSteps         = abs(distanceToMoveInMM*numberOfStepsPerMM);
-    float  timePerStep                = abs(millisecondsForMove/float(finalNumberOfSteps));
     
-    float  xStepSize                  = (xDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM);
-    float  yStepSize                  = (yDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM);
+    //compute the total  number of steps in the move
+    long   finalNumberOfSteps         = abs(distanceToMoveInMM/stepSizeMM);
+    
+    // (fraction of distance in x direction)* size of step toward target
+    float  xStepSize                  = (xDistanceToMoveInMM/distanceToMoveInMM)*stepSizeMM;
+    float  yStepSize                  = (yDistanceToMoveInMM/distanceToMoveInMM)*stepSizeMM;
     
     
-    long   numberOfStepsTaken         =  0;
+    Serial.print("Time per step: ");
+    Serial.println(calculateDelay(stepSizeMM, MMPerMin));
     
+    //attach the axes
     leftAxis.attach();
     rightAxis.attach();
     
     float aChainLength;
     float bChainLength;
-    
-    Serial.print("Time per step: ");
-    Serial.println(calculateDelay(1.0/stepsPerMM));
-    
+    long   numberOfStepsTaken         =  0;
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
+        //find the target point for this step
         float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
         float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
         
+        //find the chain lengths for this step
         kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
-        
+        //write to each axis
         leftAxis.write(aChainLength);
         rightAxis.write(bChainLength);
+        
+        //increment the number of steps taken
         numberOfStepsTaken++;
         
+        //update position on display
         returnPoz();
         
-        delay(timePerStep(xStepSize, );
+        //pause
+        delay(2.0);
     }
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
