@@ -155,13 +155,18 @@ void  goAroundInCircle(){
 }
 
 float calculateDelay(float stepSizeMM, float feedrateMMPerMin){
-    Serial.print("Step Size: ");
-    Serial.print(1000*stepSizeMM);
-    Serial.println(" thousandths of a mm");
-    Serial.print("Feed rate in mm/min: ");
-    Serial.println(feedrateMMPerMin);
+    //Serial.print("Step Size: ");
+    //Serial.println(stepSizeMM);
+    //Serial.print("Feed rate in mm/min: ");
+    //Serial.println(feedrateMMPerMin);
     
-    return 2.0;
+    #define MINUTEINMS 60000.0
+    
+    // derivation: ms / step = 1 min in ms / dist in one min
+    
+    float msPerStep = (stepSizeMM*MINUTEINMS)/feedrateMMPerMin;
+    
+    return msPerStep;
 }
 
 int   move(float xEnd, float yEnd, float zEnd, float MMPerMin){
@@ -220,7 +225,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
         returnPoz();
         
         //pause
-        delay(2.0);
+        delay(calculateDelay(stepSizeMM, MMPerMin));
     }
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
