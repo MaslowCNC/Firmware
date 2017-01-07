@@ -204,9 +204,11 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 }
 
 void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
+    x = xTarget +  MOTOROFFSETX + MACHINEWIDTH/2;
+    y = yTarget - ((MACHINEHEIGHT/2) + MOTOROFFSETY);
     
-    Time = micros();                            //start the stop watch
-
+    
     Tries = 0;                                  //initialize                   
 
     Psi1 = Theta - Phi;
@@ -374,7 +376,7 @@ void  Kinematics::speedTest(float input){
     float x = 0;
     float y = .3*1.0;
     long  startTime = micros();
-    int iterations = 1000;
+    int iterations = 1;
     float chainA;
     float chainB;
     
