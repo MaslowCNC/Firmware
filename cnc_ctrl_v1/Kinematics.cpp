@@ -187,7 +187,7 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     *Y   = Fy;
 }
 
-void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     //compute chain lengths from an XY position
     
     float Cx = xTarget - SLEDWIDTH/2;
@@ -203,10 +203,10 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     *bChainLength = Lbd;
 }
 
-void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
     x = xTarget +  MOTOROFFSETX + MACHINEWIDTH/2;
-    y = yTarget - ((MACHINEHEIGHT/2) + MOTOROFFSETY);
+    y = (yTarget - ((MACHINEHEIGHT/2) + MOTOROFFSETY)) + 285;
     
     
     Tries = 0;                                  //initialize                   
@@ -409,11 +409,17 @@ void  Kinematics::speedTest(float input){
     Serial.println(chainA);
     Serial.println(chainB);
     
-    inverse(100, 0, &chainA, &chainB);
+    //inverse(100, 0, &chainA, &chainB);
     
-    Serial.println("Old K Chain Lengths at x:+100");
-    Serial.println(chainA);
-    Serial.println(chainB);
+    //Serial.println("Old K Chain Lengths at x:+100");
+    //Serial.println(chainA);
+    //Serial.println(chainB);
+    
+    inverse(0, 100, &chainA, &chainB);
+    
+    //Serial.println("Old K Chain Lengths at y:+100");
+    //Serial.println(chainA);
+    //Serial.println(chainB);
     
     
     newInverse(0, 0, &chainA, &chainB);
@@ -425,6 +431,12 @@ void  Kinematics::speedTest(float input){
     newInverse(100, 0, &chainA, &chainB);
     
     Serial.println("New K Chain Lengths at x:+100");
+    Serial.println(chainA);
+    Serial.println(chainB);
+    
+    newInverse(0, 100, &chainA, &chainB);
+    
+    Serial.println("New K Chain Lengths at y:+100");
     Serial.println(chainA);
     Serial.println(chainB);
 
