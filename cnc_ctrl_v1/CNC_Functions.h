@@ -155,10 +155,9 @@ void  goAroundInCircle(){
 }
 
 float calculateDelay(float stepSizeMM, float feedrateMMPerMin){
-    //Serial.print("Step Size: ");
-    //Serial.println(stepSizeMM);
-    //Serial.print("Feed rate in mm/min: ");
-    //Serial.println(feedrateMMPerMin);
+    /*
+    Calculate the time delay between each step for a given feedrate
+    */
     
     #define MINUTEINMS 60000.0
     
@@ -195,8 +194,8 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     float  yStepSize                  = (yDistanceToMoveInMM/distanceToMoveInMM)*stepSizeMM;
     
     
-    Serial.print("Time per step: ");
-    Serial.println(calculateDelay(stepSizeMM, MMPerMin));
+    //Serial.print("Time per step: ");
+    //Serial.println(calculateDelay(stepSizeMM, MMPerMin));
     
     //attach the axes
     leftAxis.attach();
@@ -367,9 +366,8 @@ int   G1(String readString){
     }
 }
 
-int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float mmPerSecond, int direction){
+int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float MMPerMin, int direction){
     
-    mmPerSecond = .5;
     float pi                     =  3.1415;
     float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
     float distanceBetweenPoints  =  sqrt( sq(  X2 - X1   ) + sq(    Y2  - Y1) );
@@ -379,14 +377,11 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float arcLengthMM            =  circumference * (theta / (2*pi) );
     float startingAngle          =  atan2(Y1 - centerY, X1 - centerX);
     
-    int   numberOfStepsPerMM     =  15;
-    int   finalNumberOfSteps     =  arcLengthMM*numberOfStepsPerMM;
+    int numberOfStepsTaken       =  0;
+    
+    int   stepSizeMM             =  .01;
+    int   finalNumberOfSteps     =  arcLengthMM/stepSizeMM;
     float stepSizeRadians        =  theta/finalNumberOfSteps;
-    
-    float  millisecondsForMove     = numberOfStepsPerMM*(arcLengthMM/mmPerSecond);
-    float stepDelayMs              =  20;
-    
-    int numberOfStepsTaken         =  0;
     
     float angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
     
@@ -409,7 +404,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         leftAxis.write(aChainLength);
         rightAxis.write(bChainLength);
         
-        delay(stepDelayMs);
+        delay(calculateDelay(stepSizeMM, MMPerMin));
         
         returnPoz();
         
