@@ -204,27 +204,32 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     float aChainLength;
     float bChainLength;
     long   numberOfStepsTaken         =  0;
+    long  beginingOfLastStep          = millis();
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
-        //find the target point for this step
-        float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
-        float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
-        
-        //find the chain lengths for this step
-        kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
-        
-        //write to each axis
-        leftAxis.write(aChainLength);
-        rightAxis.write(bChainLength);
-        
-        //increment the number of steps taken
-        numberOfStepsTaken++;
-        
-        //update position on display
-        returnPoz();
-        
-        //pause
-        delay(calculateDelay(stepSizeMM, MMPerMin));
+        //if enough time has passed to take the next step
+        if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
+            
+            //reset the counter 
+            beginingOfLastStep          = millis();
+            
+            //find the target point for this step
+            float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
+            float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
+            
+            //find the chain lengths for this step
+            kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+            
+            //write to each axis
+            leftAxis.write(aChainLength);
+            rightAxis.write(bChainLength);
+            
+            //increment the number of steps taken
+            numberOfStepsTaken++;
+            
+            //update position on display
+            returnPoz();
+        }
     }
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
