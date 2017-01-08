@@ -154,54 +154,77 @@ void  goAroundInCircle(){
     }
 }
 
-int   move(float xEnd, float yEnd, float zEnd, float MMPerSecond){
+float calculateDelay(float stepSizeMM, float feedrateMMPerMin){
+    /*
+    Calculate the time delay between each step for a given feedrate
+    */
+    
+    #define MINUTEINMS 60000.0
+    
+    // derivation: ms / step = 1 min in ms / dist in one min
+    
+    float msPerStep = (stepSizeMM*MINUTEINMS)/feedrateMMPerMin;
+    
+    return msPerStep;
+}
+
+int   move(float xEnd, float yEnd, float zEnd, float MMPerMin){
     
 /*The move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
 the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
 direction, the tool moves to the target in a straight line. This function is used by the G00 
-and G01 commands. The units at this point should all be in rotations or rotations per second*/
+and G01 commands. The units at this point should all be in mm or mm per minute*/
     
     float  xStartingLocation = xTarget;
     float  yStartingLocation = yTarget;
-    int    numberOfStepsPerMM         = 100;
-    MMPerSecond = .5;
+    float  stepSizeMM         = .01;
     
     //kinematics.forward(leftAxis.target(), rightAxis.target(), &xStartingLocation, &yStartingLocation);
     
+    //find the total distances to move
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
     float  yDistanceToMoveInMM        = yEnd - yStartingLocation;
-    float  millisecondsForMove        = numberOfStepsPerMM*(distanceToMoveInMM/MMPerSecond);
-    long   finalNumberOfSteps         = abs(distanceToMoveInMM*numberOfStepsPerMM);
-    float  timePerStep                = abs(millisecondsForMove/float(finalNumberOfSteps));
     
-    float  xStepSize                  = (xDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM);
-    float  yStepSize                  = (yDistanceToMoveInMM/distanceToMoveInMM)/float(numberOfStepsPerMM);
+    //compute the total  number of steps in the move
+    long   finalNumberOfSteps         = abs(distanceToMoveInMM/stepSizeMM);
+    
+    // (fraction of distance in x direction)* size of step toward target
+    float  xStepSize                  = (xDistanceToMoveInMM/distanceToMoveInMM)*stepSizeMM;
+    float  yStepSize                  = (yDistanceToMoveInMM/distanceToMoveInMM)*stepSizeMM;
     
     
-    long   numberOfStepsTaken         =  0;
+    //Serial.print("Time per step: ");
+    //Serial.println(calculateDelay(stepSizeMM, MMPerMin));
     
+    //attach the axes
     leftAxis.attach();
     rightAxis.attach();
     
     float aChainLength;
     float bChainLength;
-    
+    long   numberOfStepsTaken         =  0;
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
+        //find the target point for this step
         float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
         float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
         
+        //find the chain lengths for this step
         kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
         
-        
+        //write to each axis
         leftAxis.write(aChainLength);
         rightAxis.write(bChainLength);
+        
+        //increment the number of steps taken
         numberOfStepsTaken++;
         
+        //update position on display
         returnPoz();
         
-        delay(timePerStep);
+        //pause
+        delay(calculateDelay(stepSizeMM, MMPerMin));
     }
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
@@ -343,9 +366,8 @@ int   G1(String readString){
     }
 }
 
-int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float mmPerSecond, int direction){
+int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float MMPerMin, int direction){
     
-    mmPerSecond = .5;
     float pi                     =  3.1415;
     float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
     float distanceBetweenPoints  =  sqrt( sq(  X2 - X1   ) + sq(    Y2  - Y1) );
@@ -355,14 +377,11 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float arcLengthMM            =  circumference * (theta / (2*pi) );
     float startingAngle          =  atan2(Y1 - centerY, X1 - centerX);
     
-    int   numberOfStepsPerMM     =  15;
-    int   finalNumberOfSteps     =  arcLengthMM*numberOfStepsPerMM;
+    int numberOfStepsTaken       =  0;
+    
+    int   stepSizeMM             =  .01;
+    int   finalNumberOfSteps     =  arcLengthMM/stepSizeMM;
     float stepSizeRadians        =  theta/finalNumberOfSteps;
-    
-    float  millisecondsForMove     = numberOfStepsPerMM*(arcLengthMM/mmPerSecond);
-    float stepDelayMs              =  20;
-    
-    int numberOfStepsTaken         =  0;
     
     float angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
     
@@ -385,7 +404,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         leftAxis.write(aChainLength);
         rightAxis.write(bChainLength);
         
-        delay(stepDelayMs);
+        delay(calculateDelay(stepSizeMM, MMPerMin));
         
         returnPoz();
         
