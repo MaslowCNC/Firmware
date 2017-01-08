@@ -177,7 +177,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     
     float  xStartingLocation = xTarget;
     float  yStartingLocation = yTarget;
-    float  stepSizeMM         = .01;
+    float  stepSizeMM         = .1;
     
     //kinematics.forward(leftAxis.target(), rightAxis.target(), &xStartingLocation, &yStartingLocation);
     
