@@ -211,7 +211,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
         //if enough time has passed to take the next step
         if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
             
-            Serial.println(millis() - beginingOfLastStep);
+            Serial.println(numberOfTimesLooped);
             
             //reset the counter 
             beginingOfLastStep          = millis();
@@ -232,6 +232,8 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
             
             //update position on display
             returnPoz();
+            
+            numberOfTimesLooped = 0;
         }
         numberOfTimesLooped++;
     }
