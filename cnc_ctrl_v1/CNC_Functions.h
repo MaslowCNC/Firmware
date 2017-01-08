@@ -177,7 +177,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     
     float  xStartingLocation = xTarget;
     float  yStartingLocation = yTarget;
-    float  stepSizeMM         = .1;
+    float  stepSizeMM         = .5;
     
     //kinematics.forward(leftAxis.target(), rightAxis.target(), &xStartingLocation, &yStartingLocation);
     
@@ -205,10 +205,13 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     float bChainLength;
     long   numberOfStepsTaken         =  0;
     long  beginingOfLastStep          = millis();
+    int   numberOfTimesLooped           = 0;
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
         //if enough time has passed to take the next step
         if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
+            
+            Serial.println(numberOfTimesLooped);
             
             //reset the counter 
             beginingOfLastStep          = millis();
@@ -230,6 +233,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
             //update position on display
             returnPoz();
         }
+        numberOfTimesLooped++;
     }
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
