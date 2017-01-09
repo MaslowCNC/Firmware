@@ -187,7 +187,7 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     *Y   = Fy;
 }
 
-void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  Kinematics::oldInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     //compute chain lengths from an XY position
     
     float Cx = xTarget - SLEDWIDTH/2;
@@ -381,7 +381,7 @@ void  Kinematics::speedTest(float input){
     float chainB;
     
     for (int i = 0; i < iterations; i++){
-        newInverse(100, float(i)/100000.0, &chainA, &chainB);
+        oldInverse(100, float(i)/100000.0, &chainA, &chainB);
     }
     
     long time = (micros() - startTime)/iterations;
@@ -394,14 +394,14 @@ void  Kinematics::speedTest(float input){
     
     inverse(719, 109, &chainA, &chainB);
     
-    Serial.println("Old K Chain Lengths at point");
+    Serial.println("New K Chain Lengths at point");
     Serial.println(chainB);
     Serial.println(chainA);
     
     
-    newInverse(719, 109, &chainA, &chainB);
+    oldInverse(719, 109, &chainA, &chainB);
     
-    Serial.println("New K Chain Lengths at point");
+    Serial.println("Old K Chain Lengths at point");
     Serial.println(chainB);
     Serial.println(chainA);
     

@@ -204,10 +204,14 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     float aChainLength;
     float bChainLength;
     long   numberOfStepsTaken         =  0;
+    long  beginingOfLastStep          = millis();
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
         //if enough time has passed to take the next step
         if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
+            
+            //reset the counter 
+            beginingOfLastStep          = millis();
             
             //find the target point for this step
             float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
