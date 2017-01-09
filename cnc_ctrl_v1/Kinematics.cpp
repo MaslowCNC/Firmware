@@ -208,10 +208,6 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     x = ( MACHINEWIDTH/2 - xTarget) + MOTOROFFSETX;
     y = (MACHINEHEIGHT/2 - yTarget) + MOTOROFFSETY;
     
-    //Serial.println("intermediate cords");
-    //Serial.println(x);
-    //Serial.println(y);
-    
     
     Tries = 0;                                  //initialize                   
 
