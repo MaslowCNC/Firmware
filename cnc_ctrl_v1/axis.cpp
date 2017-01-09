@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with the Makesmith Control Software.  If not, see <http://www.gnu.org/licenses/>.
     
-    Copyright 2014-2016 Bar Smith*/
+    Copyright 2014-2016 Bar Smith*/ 
 
 
 #include "Arduino.h"
