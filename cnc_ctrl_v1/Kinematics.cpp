@@ -23,6 +23,7 @@ in X-Y space.
 #include "Arduino.h"
 #include "Kinematics.h"
 
+//#define OLDKINEMATICS 
 
 #define MACHINEHEIGHT    1219.2 //this is 4 feet in mm
 #define MACHINEWIDTH     2438.4 //this is 8 feet in mm
@@ -31,27 +32,67 @@ in X-Y space.
 #define SLEDWIDTH        310.0
 #define SLEDHEIGHT       139.0
 
-//Keith's variables
-#define L                SLEDWIDTH
-#define S                SLEDHEIGHT
-#define H                sqrt(sq(L/2.0) + sq(S))
-#define H3               79.0
-#define SPROCKETR        15.0
-#define D                MACHINEWIDTH + 2*MOTOROFFSETX //The width of the wood + 2*length of arms
-#define DEGPERRAD        (360.0/(2.0*3.14159))
-
-//newton parameters
-#define MAXERROR         0.00001                           //repeat until the net moment about the pen is less than this
-#define MAXTRIES         300.0
-#define DELTAPHI         0.00000000001                     //perturbation of tilt angle used to compute dmoment/dtilt
-
-
-//#define OLDKINEMATICS 
-
 #define AX               -1*MACHINEWIDTH/2 - MOTOROFFSETX
 #define AY               MACHINEHEIGHT/2 + MOTOROFFSETY
 #define BX               MACHINEWIDTH/2 + MOTOROFFSETX
 #define BY               MACHINEHEIGHT/2 + MOTOROFFSETY
+
+
+//Keith's variables
+//Coordinates definition:
+//         x -->, y |
+//                  v
+// (0,0) at center of left sprocket
+// upper left corner of plywood (270, 270)
+
+//target router bit coordinates.
+float x = 270;
+float y = 1489.2;
+
+//utility variables
+float DegPerRad = 360/(4 * atan(1));
+unsigned long Time;
+
+//geometry
+float l = 310.0;
+float s = 139.0;
+float h = sqrt((l/2)*(l/2) + s * s);
+float h3 = 79.0;
+float D = 2978.4;
+float R = 10.2;
+
+//Calculation tolerances
+float MaxError = 0.01;
+byte MaxTries = 10;
+float DeltaPhi = 0.001;
+float DeltaY = 0.01;
+
+//Criterion Computation Variables
+float Phi = 0.0;
+float TanGamma = y/x;
+float TanLambda = y/(D-x);
+float Y1Plus = R * sqrt(1 + TanGamma * TanGamma);
+float Y2Plus = R * sqrt(1 + TanLambda * TanLambda);
+float Theta = atan(2*s/l);
+float Psi1 = Theta - Phi;
+float Psi2 = Theta + Phi;
+byte Tries = 0;
+float Jac[9];
+float Solution[3];
+float Crit[3];
+float Offsetx1;
+float Offsetx2;
+float Offsety1;
+float Offsety2;
+
+//intermediate output
+float Lambda;
+float Gamma;
+
+// output = chain lengths measured from 12 o'clock
+
+float Chain1; //left chain length 
+float Chain2; //right chain length
 
 Kinematics::Kinematics(){
    
@@ -146,7 +187,7 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     *Y   = Fy;
 }
 
-void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  Kinematics::oldInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     //compute chain lengths from an XY position
     
     float Cx = xTarget - SLEDWIDTH/2;
@@ -162,78 +203,171 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     *bChainLength = Lbd;
 }
 
-void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
+    x = ( MACHINEWIDTH/2 - xTarget) + MOTOROFFSETX;
+    y = (MACHINEHEIGHT/2 - yTarget) + MOTOROFFSETY;
     
     
-    //Translation from (0,0) being the left motor to (0,0) being the center of the plywood
-    xTarget = xTarget + MOTOROFFSETX + MACHINEWIDTH/2;
-    yTarget = yTarget - ((MACHINEHEIGHT/2) +  MOTOROFFSETY);
-    
-    
-    //initialization
+    Tries = 0;                                  //initialize                   
 
-    float NetMoment = .2;                                  //initial guess-primer
-    float phideg = -0.5;                                   //carver-pen holder tilt in degrees
-    float Phi = phideg/(360/(2*3.14159));
-    float Theta = atan(2*S/L);                             //angle between line connecting pen holder attach points and line from attach point to pen
-    int   Tries = 0;
+    Psi1 = Theta - Phi;
+    Psi2 = Theta + Phi;
+                                             //These criteria will be zero when the correct values are reached 
+                                             //They are negated here as a numerical efficiency expedient
+    Crit[0]=  - moment(Y1Plus, Y2Plus, Phi);    
+    Crit[1] = - YOffsetEqn(Y1Plus, x - h * cos(Psi1), Psi1);
+    Crit[2] = - YOffsetEqn(Y2Plus, D - (x + h * cos(Psi2)), Psi2);
 
-    //Solution
+    while (Tries <= MaxTries) {
+    if (abs(Crit[0]) < MaxError) {
+      if (abs(Crit[1]) < MaxError) {
+        if (abs(Crit[2]) < MaxError){
+          break;
+        }
+      }
+    }                   
+                   //estimate the tilt angle that results in zero net moment about the pen
+                   //and refine the estimate until the error is acceptable or time runs out
 
-    while (abs(NetMoment) > MAXERROR){
-        if (Tries > MAXTRIES){break;}                      //estimate the tilt angle that results in zero net moment about the pen
-        Tries = Tries + 1;                                 //and refine the estimate until the error is acceptable or time runs out
-        float NetMoment = moment(xTarget, yTarget, Theta, Phi);    //compute the moment given the angle phi 
-        //XTry(Tries) = Phi;
-        //YTry(Tries) = NetMoment;
-        float OldPhi = Phi;       
-        float Phi = Phi + DELTAPHI;
-        float NewNet = moment(xTarget, yTarget, Theta, Phi);       //compute the moment given the perturbed angle phi
-        float Derivative = (NewNet - NetMoment)/DELTAPHI;        //estimate the derivative of the moment function at phi
-        Phi = OldPhi - NetMoment/Derivative;               //estimate the value of Phi for zero net moment  
+                          //Estimate the Jacobian components 
+                                                       
+    Jac[0] = (moment( Y1Plus, Y2Plus,Phi + DeltaPhi) + Crit[0])/DeltaPhi;
+    Jac[1] = (moment( Y1Plus + DeltaY, Y2Plus, Phi) + Crit[0])/DeltaY;  
+    Jac[2] = (moment(Y1Plus, Y2Plus + DeltaY,  Phi) + Crit[0])/DeltaY;
+    Jac[3] = (YOffsetEqn(Y1Plus, x - h * cos(Psi1 - DeltaPhi), Psi1 - DeltaPhi) + Crit[1])/DeltaPhi;
+    Jac[4] = (YOffsetEqn(Y1Plus + DeltaY, x - h * cos(Psi1),Psi1) + Crit[1])/DeltaY;
+    Jac[5] = 0.0;
+    Jac[6] = (YOffsetEqn(Y2Plus, D - (x + h * cos(Psi2+DeltaPhi)), Psi2 + DeltaPhi) + Crit[2])/DeltaPhi;
+    Jac[7] = 0.0;
+    Jac[8] = (YOffsetEqn(Y2Plus + DeltaY, D - (x + h * cos(Psi2)), Psi2) + Crit[2])/DeltaY;
+
+    //solve for the next guess
+    MatSolv();     // solves the matrix equation Jx=-Criterion                                                     
+                   
+    // update the variables with the new estimate
+
+    Phi = Phi + Solution[0];
+    Y1Plus = Y1Plus + Solution[1];                         //don't allow the anchor points to be inside a sprocket
+    if (Y1Plus < R){
+        Y1Plus = R;                               
     }
-    //NetMoment                                             %Some diagnostic outputs
-    //Tries                                                 %
-    //Phi                                                   %
-    //Phideg = Phi * (360/(2*pi))                           %
+    Y2Plus = Y2Plus + Solution[2];                         //don't allow the anchor points to be inside a sprocket
+    if (Y2Plus < R){
+        Y2Plus = R;
+    }
 
-    float Psi1 = Theta - Phi;
-    float Psi2 = Theta + Phi;
+    Psi1 = Theta - Phi;
+    Psi2 = Theta + Phi;   
+                                                             //evaluate the
+                                                             //three criterion equations
 
-    float Deltax1 = H * cos(Psi1);
-    float Deltax2 = H * cos(Psi2);
-    float Deltay1 = H * sin(Psi1);
-    float Deltay2 = H * sin(Psi2); 
-                                                        //Solution
-                                                             
-    float Chain1 = sqrt(sq(xTarget-Deltax1)+sq(yTarget-Deltay1));       //left chain length                       
-    float Chain2 = sqrt(sq(D-(xTarget+Deltax2))+sq(yTarget-Deltay2));   //right chain length
+    Crit[0] = - moment(Y1Plus, Y2Plus, Phi);
+    Crit[1] = - YOffsetEqn(Y1Plus, x - h * cos(Psi1), Psi1);
+    Crit[2] = - YOffsetEqn(Y2Plus, D - (x + h * cos(Psi2)), Psi2);
+    Tries = Tries + 1;                                       // increment iteration count
+    }                                       
+
+    //Variables are within accuracy limits
+    //  perform output computation
+    Offsetx1 = h * cos(Psi1);
+    Offsetx2 = h * cos(Psi2);
+    Offsety1 = h * sin(Psi1);
+    Offsety2 = h * sin(Psi2);
+    TanGamma = (y - Offsety1 + Y1Plus)/(x - Offsetx1);
+    TanLambda = (y - Offsety2 + Y2Plus)/(D -(x + Offsetx2));
+    Gamma = atan(TanGamma);
+    Lambda =atan(TanLambda);
+    Gamma = Gamma;
+    Lambda = Lambda;
+
+    //compute the chain lengths
+
+    Chain1 = sqrt((x - Offsetx1)*(x - Offsetx1) + (y + Y1Plus - Offsety1)*(y + Y1Plus - Offsety1)) - R * TanGamma + R * Gamma;   //left chain length                       
+    Chain2 = sqrt((D - (x + Offsetx2))*(D - (x + Offsetx2))+(y + Y2Plus - Offsety2)*(y + Y2Plus - Offsety2)) - R * TanLambda + R * Lambda;   //right chain length
     
-    //Serial.println("Chain Lengths: ");
-    //Serial.println(Chain1);
-    //Serial.println(Chain2);
-    
-    *aChainLength = Chain1;
-    *bChainLength = Chain2;
-    
-    
-    
+    *aChainLength = Chain2;
+    *bChainLength = Chain1;
+
 }
 
-float Kinematics::moment(float xTarget, float yTarget, float Theta, float Phi){
-    
-    float Psi1 = Theta - Phi;
-    float Psi2 = Theta + Phi;
-    float Offsetx1 = H * cos(Psi1); //these sin and cos operations are duplicated in the MomentSproc calculation
-    float Offsetx2 = H * cos(Psi2);
-    float Offsety1 = H * sin(Psi1);
-    float Offsety2 = H * sin(Psi2);
-    float TanGamma = (yTarget - Offsety1)/(xTarget-Offsetx1);
-    float TanLambda = (yTarget - Offsety2)/(D-(xTarget+Offsetx2));
-    
-    float Moment =H3*sin(Phi)+ (H/(TanLambda+TanGamma))*(sin(Psi2) - sin(Psi1) + TanGamma*cos(Psi1) - TanLambda * cos(Psi2));
+void  Kinematics::MatSolv(){
+  float Sum;
+  int NN;
+  int i;
+  int ii;
+  int J;
+  int JJ;
+  int K;
+  int KK;
+  int L;
+  int M;
+  int N;
 
-    return Moment;
+  float fact;
+
+  // gaus elimination, no pivot
+
+  N = 3;
+  NN = N-1;
+  for (i=1;i<=NN;i++){
+    J = (N+1-i);
+    JJ = (J-1) * N-1;
+    L = J-1;
+    KK = -1;
+    for (K=0;K<L;K++){
+      fact = Jac[KK+J]/Jac[JJ+J];
+       for (M=1;M<=J;M++){
+        Jac[KK + M]= Jac[KK + M] -fact * Jac[JJ+M];
+      }
+      KK = KK + N;      
+      Crit[K] = Crit[K] - fact * Crit[J-1];
+   }
+  }
+
+//Lower triangular matrix solver
+
+  Solution[0] =  Crit[0]/Jac[0];
+  ii = N-1;
+  for (i=2;i<=N;i++){
+    M = i -1;
+    Sum = Crit[i-1];
+    for (J=1;J<=M;J++){
+      Sum = Sum-Jac[ii+J]*Solution[J-1]; 
+    }
+    Solution[i-1] = Sum/Jac[ii+i];
+    ii = ii + N;
+  }
+}
+
+float Kinematics::moment(float Y1Plus,float Y2Plus, float Phi){   //computes net moment about center of mass
+    float Temp;
+    float Offsetx1;
+    float Offsetx2;
+    float Offsety1;
+    float Offsety2;
+    float Psi1;
+    float Psi2;
+    float TanGamma;
+    float TanLambda;
+
+    Psi1 = Theta - Phi;
+    Psi2 = Theta + Phi;
+    
+    Offsetx1 = h * cos(Psi1);
+    Offsetx2 = h * cos(Psi2);
+    Offsety1 = h * sin(Psi1);
+    Offsety2 = h * sin(Psi2);
+    TanGamma = (y - Offsety1 + Y1Plus)/(x - Offsetx1);
+    TanLambda = (y - Offsety2 + Y2Plus)/(D -(x + Offsetx2));
+    
+    return h3*sin(Phi) + (h/(TanLambda+TanGamma))*(sin(Psi2) - sin(Psi1) + (TanGamma*cos(Psi1) - TanLambda * cos(Psi2)));   
+}
+
+float Kinematics::YOffsetEqn(float YPlus, float Denominator, float Psi){
+float Temp;
+  Temp = ((sqrt(YPlus * YPlus - R * R)/R) - (y + YPlus - h * sin(Psi))/Denominator);
+  return Temp;
 }
 
 void  Kinematics::speedTest(float input){
@@ -242,12 +376,12 @@ void  Kinematics::speedTest(float input){
     float x = 0;
     float y = .3*1.0;
     long  startTime = micros();
-    int iterations = 1000;
+    int iterations = 1;
     float chainA;
     float chainB;
     
     for (int i = 0; i < iterations; i++){
-        newInverse(100, float(i)/100000.0, &chainA, &chainB);
+        oldInverse(100, float(i)/100000.0, &chainA, &chainB);
     }
     
     long time = (micros() - startTime)/iterations;
@@ -258,41 +392,19 @@ void  Kinematics::speedTest(float input){
     Serial.println("us");
     
     
+    inverse(719, 109, &chainA, &chainB);
     
-    
-    startTime = micros();
-    
-    newInverse(1489.2,1489.2, &chainA, &chainB);
-    
-    time = (micros() - startTime);
-    Serial.print("Time to converge: ");
-    Serial.print(time);
-    Serial.println("us");
-    
-    inverse(0, 0, &chainA, &chainB);
-    
-    Serial.println("Old K Chain Lengths at Center");
-    Serial.println(chainA);
+    Serial.println("New K Chain Lengths at point");
     Serial.println(chainB);
-    
-    inverse(100, 0, &chainA, &chainB);
-    
-    Serial.println("Old K Chain Lengths at x:+100");
     Serial.println(chainA);
+    
+    
+    oldInverse(719, 109, &chainA, &chainB);
+    
+    Serial.println("Old K Chain Lengths at point");
     Serial.println(chainB);
-    
-    
-    newInverse(0, 0, &chainA, &chainB);
-    
-    Serial.println("New K Chain Lengths at Center");
     Serial.println(chainA);
-    Serial.println(chainB);
     
-    newInverse(100, 0, &chainA, &chainB);
-    
-    Serial.println("New K Chain Lengths at x:+100");
-    Serial.println(chainA);
-    Serial.println(chainB);
 
 }
 

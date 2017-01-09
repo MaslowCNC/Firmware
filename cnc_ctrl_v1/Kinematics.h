@@ -29,8 +29,10 @@
             Kinematics();
             void  forward   (float chainALength, float chainBLength, float* X, float* Y);
             void  inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
-            void  newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
-            float moment(float x, float y, float Theta, float Phi);
+            void  oldInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
+            float moment(float Y1Plus,float Y2Plus, float Phi);
+            float YOffsetEqn(float YPlus, float Denominator, float Psi);
+            void  MatSolv();
             void  test();
             void  speedTest(float input);
         private:
