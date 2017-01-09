@@ -187,7 +187,7 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     *Y   = Fy;
 }
 
-void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     //compute chain lengths from an XY position
     
     float Cx = xTarget - SLEDWIDTH/2;
@@ -203,7 +203,7 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     *bChainLength = Lbd;
 }
 
-void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
     x = ( MACHINEWIDTH/2 - xTarget) + MOTOROFFSETX;
     y = (MACHINEHEIGHT/2 - yTarget) + MOTOROFFSETY;
