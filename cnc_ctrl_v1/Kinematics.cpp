@@ -187,7 +187,7 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     *Y   = Fy;
 }
 
-void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     //compute chain lengths from an XY position
     
     float Cx = xTarget - SLEDWIDTH/2;
@@ -203,10 +203,14 @@ void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, f
     *bChainLength = Lbd;
 }
 
-void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  Kinematics::newInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
-    x = xTarget +  MOTOROFFSETX + MACHINEWIDTH/2;
-    y = (yTarget - ((MACHINEHEIGHT/2) + MOTOROFFSETY)) + 285;
+    x = ( MACHINEWIDTH/2 - xTarget) + MOTOROFFSETX;
+    y = (MACHINEHEIGHT/2 - yTarget) + MOTOROFFSETY;
+    
+    //Serial.println("intermediate cords");
+    //Serial.println(x);
+    //Serial.println(y);
     
     
     Tries = 0;                                  //initialize                   
@@ -286,8 +290,8 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     Chain1 = sqrt((x - Offsetx1)*(x - Offsetx1) + (y + Y1Plus - Offsety1)*(y + Y1Plus - Offsety1)) - R * TanGamma + R * Gamma;   //left chain length                       
     Chain2 = sqrt((D - (x + Offsetx2))*(D - (x + Offsetx2))+(y + Y2Plus - Offsety2)*(y + Y2Plus - Offsety2)) - R * TanLambda + R * Lambda;   //right chain length
     
-    *aChainLength = Chain1;
-    *bChainLength = Chain2;
+    *aChainLength = Chain2;
+    *bChainLength = Chain1;
 
 }
 
@@ -392,53 +396,19 @@ void  Kinematics::speedTest(float input){
     Serial.println("us");
     
     
+    inverse(719, 109, &chainA, &chainB);
     
-    
-    startTime = micros();
-    
-    newInverse(1489.2,1489.2, &chainA, &chainB);
-    
-    time = (micros() - startTime);
-    Serial.print("Time to converge: ");
-    Serial.print(time);
-    Serial.println("us");
-    
-    inverse(0, 0, &chainA, &chainB);
-    
-    Serial.println("Old K Chain Lengths at Center");
-    Serial.println(chainA);
+    Serial.println("Old K Chain Lengths at point");
     Serial.println(chainB);
-    
-    //inverse(100, 0, &chainA, &chainB);
-    
-    //Serial.println("Old K Chain Lengths at x:+100");
-    //Serial.println(chainA);
-    //Serial.println(chainB);
-    
-    inverse(0, 100, &chainA, &chainB);
-    
-    //Serial.println("Old K Chain Lengths at y:+100");
-    //Serial.println(chainA);
-    //Serial.println(chainB);
-    
-    
-    newInverse(0, 0, &chainA, &chainB);
-    
-    Serial.println("New K Chain Lengths at Center");
     Serial.println(chainA);
+    
+    
+    newInverse(719, 109, &chainA, &chainB);
+    
+    Serial.println("New K Chain Lengths at point");
     Serial.println(chainB);
-    
-    newInverse(100, 0, &chainA, &chainB);
-    
-    Serial.println("New K Chain Lengths at x:+100");
     Serial.println(chainA);
-    Serial.println(chainB);
     
-    newInverse(0, 100, &chainA, &chainB);
-    
-    Serial.println("New K Chain Lengths at y:+100");
-    Serial.println(chainA);
-    Serial.println(chainB);
 
 }
 
