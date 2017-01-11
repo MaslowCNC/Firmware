@@ -20,6 +20,8 @@ libraries*/
 #include "Axis.h"
 #include "Kinematics.h"
 
+#VERSIONNUMBER 0.60
+
 #define ZAXIS
 
 #define FORWARD           1
@@ -574,7 +576,8 @@ void  interpretCommandString(String readString){
     }
     
     if(readString.substring(0, 3) == "B05"){
-        Serial.println("Firmware Version .59");
+        Serial.print("Firmware Version ");
+        Serial.println(VERSIONNUMBER);
         readString = "";
         Serial.println("gready");
     }
