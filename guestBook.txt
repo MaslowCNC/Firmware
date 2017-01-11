@@ -6,3 +6,5 @@ The guest book is a way to say hello, practice contributing to the project, and 
 in the project! Write your name! Put a message to prove you were here!
 
 Bar was here - 1/1/17
+
+Bar was back for the weekly Wednesday update!
