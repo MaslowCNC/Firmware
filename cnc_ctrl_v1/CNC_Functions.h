@@ -207,10 +207,14 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     float bChainLength;
     long   numberOfStepsTaken         =  0;
     long  beginingOfLastStep          = millis();
+    int numberOfCycles = 0;
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
         //if enough time has passed to take the next step
         if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
+            
+            Serial.println(numberOfCycles);
+            numberOfCycles = 0;
             
             //reset the counter 
             beginingOfLastStep          = millis();
@@ -233,6 +237,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
             returnPoz();
             
         }
+        numberOfCycles++;
     }
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
