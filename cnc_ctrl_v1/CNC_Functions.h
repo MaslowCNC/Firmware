@@ -20,7 +20,7 @@ libraries*/
 #include "Axis.h"
 #include "Kinematics.h"
 
-#VERSIONNUMBER 0.60
+#define VERSIONNUMBER 0.60
 
 #define ZAXIS
 
