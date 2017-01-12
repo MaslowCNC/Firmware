@@ -396,7 +396,7 @@ float Kinematics::moment(float Y1Plus, float Y2Plus, float Phi, float MSinPhi, f
     return h3*MSinPhi + (h/(TanLambda+TanGamma))*(MSinPsi2 - MSinPsi1 + (TanGamma*MCosPsi1 - TanLambda * MCosPsi2));   
 }
 
-void MyTrig(){
+void Kinematics::MyTrig(){
     float Phisq = Phi * Phi;
     float Phicu = Phi * Phisq;
     float Phidel = Phi + DeltaPhi;
