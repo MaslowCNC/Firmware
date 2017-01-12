@@ -30,9 +30,10 @@
             void  forward   (float chainALength, float chainBLength, float* X, float* Y);
             void  inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  oldInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
-            float moment(float Y1Plus,float Y2Plus, float Phi);
+            float moment(float Y1Plus, float Y2Plus, float Phi, float MSinPhi, float MSinPsi1, float MCosPsi1, float MSinPsi2, float MCosPsi2);
             float YOffsetEqn(float YPlus, float Denominator, float Psi);
             void  MatSolv();
+            void  MyTrig();
             void  test();
             void  speedTest(float input);
         private:
