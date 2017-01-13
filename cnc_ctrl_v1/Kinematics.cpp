@@ -153,17 +153,17 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     BigNumber neg1 = ("-1");
     
     //store variables in BigNumber form
-    BigNumber AYb  = float2BigNum(AY);
-    BigNumber AXb  = neg1*float2BigNum(AX);
-    BigNumber BXb  = float2BigNum(BX);
+    BigNumber AYb  = _float2BigNum(AY);
+    BigNumber AXb  = neg1*_float2BigNum(AX);
+    BigNumber BXb  = _float2BigNum(BX);
     
-    BigNumber Lacb = float2BigNum(Lac);
-    BigNumber Lbdb = float2BigNum(Lbd);
+    BigNumber Lacb = _float2BigNum(Lac);
+    BigNumber Lbdb = _float2BigNum(Lbd);
     
     //Do pre-calculations
     BigNumber alpha        = Lacb.pow(2) - AYb.pow(2);
     BigNumber beta         = Lbdb.pow(2) - AYb.pow(2);
-    BigNumber widthb       = float2BigNum(SLEDWIDTH);
+    BigNumber widthb       = _float2BigNum(SLEDWIDTH);
     BigNumber gamma        = BXb - AXb - widthb;//widthb - AXb + BXb;
     BigNumber b64          = 64.0;
     BigNumber b16          = 16.0;
@@ -233,15 +233,15 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     Y1Plus = R * sqrt(1 + TanGamma * TanGamma);
     Y2Plus = R * sqrt(1 + TanLambda * TanLambda);
   
-    MyTrig();
+    _MyTrig();
     Psi1 = Theta - Phi;
     Psi2 = Theta + Phi;
                                              //These criteria will be zero when the correct values are reached 
                                              //They are negated here as a numerical efficiency expedient
                                              
-    Crit[0]=  - moment(Y1Plus, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
-    Crit[1] = - YOffsetEqn(Y1Plus, x - h * CosPsi1, SinPsi1);
-    Crit[2] = - YOffsetEqn(Y2Plus, D - (x + h * CosPsi2), SinPsi2);
+    Crit[0]=  - _moment(Y1Plus, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
+    Crit[1] = - _YOffsetEqn(Y1Plus, x - h * CosPsi1, SinPsi1);
+    Crit[2] = - _YOffsetEqn(Y2Plus, D - (x + h * CosPsi2), SinPsi2);
 
   
     while (Tries <= MaxTries) {
@@ -253,24 +253,24 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
             }
         } 
                   
-                   //estimate the tilt angle that results in zero net moment about the pen
+                   //estimate the tilt angle that results in zero net _moment about the pen
                    //and refine the estimate until the error is acceptable or time runs out
     
                           //Estimate the Jacobian components 
                                                        
-        Jac[0] = (moment( Y1Plus, Y2Plus,Phi + DeltaPhi, MySinPhiDelta, SinPsi1D, CosPsi1D, SinPsi2D, CosPsi2D) + Crit[0])/DeltaPhi;
-        Jac[1] = (moment( Y1Plus + DeltaY, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DeltaY;  
-        Jac[2] = (moment(Y1Plus, Y2Plus + DeltaY,  Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DeltaY;
-        Jac[3] = (YOffsetEqn(Y1Plus, x - h * CosPsi1D, SinPsi1D) + Crit[1])/DeltaPhi;
-        Jac[4] = (YOffsetEqn(Y1Plus + DeltaY, x - h * CosPsi1,SinPsi1) + Crit[1])/DeltaY;
+        Jac[0] = (_moment( Y1Plus, Y2Plus,Phi + DeltaPhi, MySinPhiDelta, SinPsi1D, CosPsi1D, SinPsi2D, CosPsi2D) + Crit[0])/DeltaPhi;
+        Jac[1] = (_moment( Y1Plus + DeltaY, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DeltaY;  
+        Jac[2] = (_moment(Y1Plus, Y2Plus + DeltaY,  Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DeltaY;
+        Jac[3] = (_YOffsetEqn(Y1Plus, x - h * CosPsi1D, SinPsi1D) + Crit[1])/DeltaPhi;
+        Jac[4] = (_YOffsetEqn(Y1Plus + DeltaY, x - h * CosPsi1,SinPsi1) + Crit[1])/DeltaY;
         Jac[5] = 0.0;
-        Jac[6] = (YOffsetEqn(Y2Plus, D - (x + h * CosPsi2D), SinPsi2D) + Crit[2])/DeltaPhi;
+        Jac[6] = (_YOffsetEqn(Y2Plus, D - (x + h * CosPsi2D), SinPsi2D) + Crit[2])/DeltaPhi;
         Jac[7] = 0.0;
-        Jac[8] = (YOffsetEqn(Y2Plus + DeltaY, D - (x + h * CosPsi2D), SinPsi2) + Crit[2])/DeltaY;
+        Jac[8] = (_YOffsetEqn(Y2Plus + DeltaY, D - (x + h * CosPsi2D), SinPsi2) + Crit[2])/DeltaY;
 
 
         //solve for the next guess
-        MatSolv();     // solves the matrix equation Jx=-Criterion                                                     
+        _MatSolv();     // solves the matrix equation Jx=-Criterion                                                     
                    
         // update the variables with the new estimate
 
@@ -288,11 +288,11 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
         Psi2 = Theta + Phi;   
                                                              //evaluate the
                                                              //three criterion equations
-    MyTrig();
+    _MyTrig();
     
-    Crit[0] = - moment(Y1Plus, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
-    Crit[1] = - YOffsetEqn(Y1Plus, x - h * CosPsi1, SinPsi1);
-    Crit[2] = - YOffsetEqn(Y2Plus, D - (x + h * CosPsi2), SinPsi2);
+    Crit[0] = - _moment(Y1Plus, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
+    Crit[1] = - _YOffsetEqn(Y1Plus, x - h * CosPsi1, SinPsi1);
+    Crit[2] = - _YOffsetEqn(Y2Plus, D - (x + h * CosPsi2), SinPsi2);
     Tries = Tries + 1;                                       // increment itteration count
 
     }                                       
@@ -324,7 +324,7 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 
 }
 
-void  Kinematics::MatSolv(){
+void  Kinematics::_MatSolv(){
     float Sum;
     int NN;
     int i;
@@ -373,7 +373,7 @@ void  Kinematics::MatSolv(){
     }
 }
 
-float Kinematics::moment(float Y1Plus, float Y2Plus, float Phi, float MSinPhi, float MSinPsi1, float MCosPsi1, float MSinPsi2, float MCosPsi2){   //computes net moment about center of mass
+float Kinematics::_moment(float Y1Plus, float Y2Plus, float Phi, float MSinPhi, float MSinPsi1, float MCosPsi1, float MSinPsi2, float MCosPsi2){   //computes net moment about center of mass
     float Temp;
     float Offsetx1;
     float Offsetx2;
@@ -397,7 +397,7 @@ float Kinematics::moment(float Y1Plus, float Y2Plus, float Phi, float MSinPhi, f
     return h3*MSinPhi + (h/(TanLambda+TanGamma))*(MSinPsi2 - MSinPsi1 + (TanGamma*MCosPsi1 - TanLambda * MCosPsi2));   
 }
 
-void Kinematics::MyTrig(){
+void Kinematics::_MyTrig(){
     float Phisq = Phi * Phi;
     float Phicu = Phi * Phisq;
     float Phidel = Phi + DeltaPhi;
@@ -440,7 +440,7 @@ void Kinematics::MyTrig(){
 }
 
 
-float Kinematics::YOffsetEqn(float YPlus, float Denominator, float Psi){
+float Kinematics::_YOffsetEqn(float YPlus, float Denominator, float Psi){
     float Temp;
     Temp = ((sqrt(YPlus * YPlus - R * R)/R) - (y + YPlus - h * sin(Psi))/Denominator);
     return Temp;
@@ -518,7 +518,7 @@ void Kinematics::test(){
     
 }
 
-BigNumber Kinematics::float2BigNum (float value){
+BigNumber Kinematics::_float2BigNum (float value){
     char buf [20];
     fmtDouble (value, 6, buf, sizeof buf);
     BigNumber bigVal = BigNumber (buf);
