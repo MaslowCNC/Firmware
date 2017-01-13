@@ -223,68 +223,69 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     
     
     Tries = 0;                                  //initialize                   
-  if(x > D/2.0){                              //the right half of the board mirrors the left half so all computations are done  using left half coordinates.
-    x = D-x;                                  //Chain lengths are swapped at exit if the x,y is on the right half
-    Mirror = true;
-  }
-  TanGamma = y/x;
-  TanLambda = y/(D-x);
-  Y1Plus = R * sqrt(1 + TanGamma * TanGamma);
-  Y2Plus = R * sqrt(1 + TanLambda * TanLambda);
+    if(x > D/2.0){                              //the right half of the board mirrors the left half so all computations are done  using left half coordinates.
+      x = D-x;                                  //Chain lengths are swapped at exit if the x,y is on the right half
+      Mirror = true;
+    }
+    
+    TanGamma = y/x;
+    TanLambda = y/(D-x);
+    Y1Plus = R * sqrt(1 + TanGamma * TanGamma);
+    Y2Plus = R * sqrt(1 + TanLambda * TanLambda);
   
-  MyTrig();
-  Psi1 = Theta - Phi;
-  Psi2 = Theta + Phi;
+    MyTrig();
+    Psi1 = Theta - Phi;
+    Psi2 = Theta + Phi;
                                              //These criteria will be zero when the correct values are reached 
                                              //They are negated here as a numerical efficiency expedient
                                              
-  Crit[0]=  - moment(Y1Plus, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
-  Crit[1] = - YOffsetEqn(Y1Plus, x - h * CosPsi1, SinPsi1);
-  Crit[2] = - YOffsetEqn(Y2Plus, D - (x + h * CosPsi2), SinPsi2);
+    Crit[0]=  - moment(Y1Plus, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
+    Crit[1] = - YOffsetEqn(Y1Plus, x - h * CosPsi1, SinPsi1);
+    Crit[2] = - YOffsetEqn(Y2Plus, D - (x + h * CosPsi2), SinPsi2);
 
   
-  while (Tries <= MaxTries) {
-    if (abs(Crit[0]) < MaxError) {
-      if (abs(Crit[1]) < MaxError) {
-        if (abs(Crit[2]) < MaxError){
-          break;
-        }
-      }
-    } 
+    while (Tries <= MaxTries) {
+        if (abs(Crit[0]) < MaxError) {
+            if (abs(Crit[1]) < MaxError) {
+                if (abs(Crit[2]) < MaxError){
+                    break;
+                }
+            }
+        } 
                   
                    //estimate the tilt angle that results in zero net moment about the pen
                    //and refine the estimate until the error is acceptable or time runs out
     
                           //Estimate the Jacobian components 
                                                        
-    Jac[0] = (moment( Y1Plus, Y2Plus,Phi + DeltaPhi, MySinPhiDelta, SinPsi1D, CosPsi1D, SinPsi2D, CosPsi2D) + Crit[0])/DeltaPhi;
-    Jac[1] = (moment( Y1Plus + DeltaY, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DeltaY;  
-    Jac[2] = (moment(Y1Plus, Y2Plus + DeltaY,  Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DeltaY;
-    Jac[3] = (YOffsetEqn(Y1Plus, x - h * CosPsi1D, SinPsi1D) + Crit[1])/DeltaPhi;
-    Jac[4] = (YOffsetEqn(Y1Plus + DeltaY, x - h * CosPsi1,SinPsi1) + Crit[1])/DeltaY;
-    Jac[5] = 0.0;
-    Jac[6] = (YOffsetEqn(Y2Plus, D - (x + h * CosPsi2D), SinPsi2D) + Crit[2])/DeltaPhi;
-    Jac[7] = 0.0;
-    Jac[8] = (YOffsetEqn(Y2Plus + DeltaY, D - (x + h * CosPsi2D), SinPsi2) + Crit[2])/DeltaY;
+        Jac[0] = (moment( Y1Plus, Y2Plus,Phi + DeltaPhi, MySinPhiDelta, SinPsi1D, CosPsi1D, SinPsi2D, CosPsi2D) + Crit[0])/DeltaPhi;
+        Jac[1] = (moment( Y1Plus + DeltaY, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DeltaY;  
+        Jac[2] = (moment(Y1Plus, Y2Plus + DeltaY,  Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DeltaY;
+        Jac[3] = (YOffsetEqn(Y1Plus, x - h * CosPsi1D, SinPsi1D) + Crit[1])/DeltaPhi;
+        Jac[4] = (YOffsetEqn(Y1Plus + DeltaY, x - h * CosPsi1,SinPsi1) + Crit[1])/DeltaY;
+        Jac[5] = 0.0;
+        Jac[6] = (YOffsetEqn(Y2Plus, D - (x + h * CosPsi2D), SinPsi2D) + Crit[2])/DeltaPhi;
+        Jac[7] = 0.0;
+        Jac[8] = (YOffsetEqn(Y2Plus + DeltaY, D - (x + h * CosPsi2D), SinPsi2) + Crit[2])/DeltaY;
 
 
-//solve for the next guess
-    MatSolv();     // solves the matrix equation Jx=-Criterion                                                     
+        //solve for the next guess
+        MatSolv();     // solves the matrix equation Jx=-Criterion                                                     
                    
-// update the variables with the new estimate
+        // update the variables with the new estimate
 
-    Phi = Phi + Solution[0];
-    Y1Plus = Y1Plus + Solution[1];                         //don't allow the anchor points to be inside a sprocket
-    if (Y1Plus < R){
-        Y1Plus = R;                               
-    }
-    Y2Plus = Y2Plus + Solution[2];                         //don't allow the anchor points to be inside a sprocke
-    if (Y2Plus < R){
-        Y2Plus = R;
-    }
+        Phi = Phi + Solution[0];
+        Y1Plus = Y1Plus + Solution[1];                         //don't allow the anchor points to be inside a sprocket
+        if (Y1Plus < R){
+            Y1Plus = R;                               
+        }
+        Y2Plus = Y2Plus + Solution[2];                         //don't allow the anchor points to be inside a sprocke
+        if (Y2Plus < R){
+            Y2Plus = R;
+        }
 
-    Psi1 = Theta - Phi;
-    Psi2 = Theta + Phi;   
+        Psi1 = Theta - Phi;
+        Psi2 = Theta + Phi;   
                                                              //evaluate the
                                                              //three criterion equations
     MyTrig();
@@ -294,29 +295,29 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     Crit[2] = - YOffsetEqn(Y2Plus, D - (x + h * CosPsi2), SinPsi2);
     Tries = Tries + 1;                                       // increment itteration count
 
-  }                                       
+    }                                       
   
-//Variables are within accuracy limits
-//  perform output computation
+    //Variables are within accuracy limits
+    //  perform output computation
 
-  Offsetx1 = h * CosPsi1;
-  Offsetx2 = h * CosPsi2;
-  Offsety1 = h *  SinPsi1;
-  Offsety2 = h * SinPsi2;
-  TanGamma = (y - Offsety1 + Y1Plus)/(x - Offsetx1);
-  TanLambda = (y - Offsety2 + Y2Plus)/(D -(x + Offsetx2));
-  Gamma = atan(TanGamma);
-  Lambda =atan(TanLambda);
+    Offsetx1 = h * CosPsi1;
+    Offsetx2 = h * CosPsi2;
+    Offsety1 = h *  SinPsi1;
+    Offsety2 = h * SinPsi2;
+    TanGamma = (y - Offsety1 + Y1Plus)/(x - Offsetx1);
+    TanLambda = (y - Offsety2 + Y2Plus)/(D -(x + Offsetx2));
+    Gamma = atan(TanGamma);
+    Lambda =atan(TanLambda);
 
-  //compute the chain lengths
+    //compute the chain lengths
 
-  if(Mirror){
-    Chain2 = sqrt((x - Offsetx1)*(x - Offsetx1) + (y + Y1Plus - Offsety1)*(y + Y1Plus - Offsety1)) - R * TanGamma + R * Gamma;   //right chain length                       
-    Chain1 = sqrt((D - (x + Offsetx2))*(D - (x + Offsetx2))+(y + Y2Plus - Offsety2)*(y + Y2Plus - Offsety2)) - R * TanLambda + R * Lambda;}   //left chain length
-  else{
-    Chain1 = sqrt((x - Offsetx1)*(x - Offsetx1) + (y + Y1Plus - Offsety1)*(y + Y1Plus - Offsety1)) - R * TanGamma + R * Gamma;   //left chain length                       
-    Chain2 = sqrt((D - (x + Offsetx2))*(D - (x + Offsetx2))+(y + Y2Plus - Offsety2)*(y + Y2Plus - Offsety2)) - R * TanLambda + R * Lambda;   //right chain length
-  }
+    if(Mirror){
+        Chain2 = sqrt((x - Offsetx1)*(x - Offsetx1) + (y + Y1Plus - Offsety1)*(y + Y1Plus - Offsety1)) - R * TanGamma + R * Gamma;   //right chain length                       
+        Chain1 = sqrt((D - (x + Offsetx2))*(D - (x + Offsetx2))+(y + Y2Plus - Offsety2)*(y + Y2Plus - Offsety2)) - R * TanLambda + R * Lambda;}   //left chain length
+    else{
+        Chain1 = sqrt((x - Offsetx1)*(x - Offsetx1) + (y + Y1Plus - Offsety1)*(y + Y1Plus - Offsety1)) - R * TanGamma + R * Gamma;   //left chain length                       
+        Chain2 = sqrt((D - (x + Offsetx2))*(D - (x + Offsetx2))+(y + Y2Plus - Offsety2)*(y + Y2Plus - Offsety2)) - R * TanLambda + R * Lambda;   //right chain length
+    }
      
     *aChainLength = Chain2;
     *bChainLength = Chain1;
@@ -324,52 +325,52 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 }
 
 void  Kinematics::MatSolv(){
-  float Sum;
-  int NN;
-  int i;
-  int ii;
-  int J;
-  int JJ;
-  int K;
-  int KK;
-  int L;
-  int M;
-  int N;
+    float Sum;
+    int NN;
+    int i;
+    int ii;
+    int J;
+    int JJ;
+    int K;
+    int KK;
+    int L;
+    int M;
+    int N;
 
-  float fact;
+    float fact;
 
-  // gaus elimination, no pivot
+    // gaus elimination, no pivot
 
-  N = 3;
-  NN = N-1;
-  for (i=1;i<=NN;i++){
-    J = (N+1-i);
-    JJ = (J-1) * N-1;
-    L = J-1;
-    KK = -1;
-    for (K=0;K<L;K++){
-      fact = Jac[KK+J]/Jac[JJ+J];
-       for (M=1;M<=J;M++){
-        Jac[KK + M]= Jac[KK + M] -fact * Jac[JJ+M];
-      }
-      KK = KK + N;      
-      Crit[K] = Crit[K] - fact * Crit[J-1];
-   }
-  }
+    N = 3;
+    NN = N-1;
+    for (i=1;i<=NN;i++){
+        J = (N+1-i);
+        JJ = (J-1) * N-1;
+        L = J-1;
+        KK = -1;
+        for (K=0;K<L;K++){
+            fact = Jac[KK+J]/Jac[JJ+J];
+            for (M=1;M<=J;M++){
+                Jac[KK + M]= Jac[KK + M] -fact * Jac[JJ+M];
+            }
+        KK = KK + N;      
+        Crit[K] = Crit[K] - fact * Crit[J-1];
+        }
+    }
 
 //Lower triangular matrix solver
 
-  Solution[0] =  Crit[0]/Jac[0];
-  ii = N-1;
-  for (i=2;i<=N;i++){
-    M = i -1;
-    Sum = Crit[i-1];
-    for (J=1;J<=M;J++){
-      Sum = Sum-Jac[ii+J]*Solution[J-1]; 
-    }
+    Solution[0] =  Crit[0]/Jac[0];
+    ii = N-1;
+    for (i=2;i<=N;i++){
+        M = i -1;
+        Sum = Crit[i-1];
+        for (J=1;J<=M;J++){
+            Sum = Sum-Jac[ii+J]*Solution[J-1]; 
+        }
     Solution[i-1] = Sum/Jac[ii+i];
     ii = ii + N;
-  }
+    }
 }
 
 float Kinematics::moment(float Y1Plus, float Y2Plus, float Phi, float MSinPhi, float MSinPsi1, float MCosPsi1, float MSinPsi2, float MCosPsi2){   //computes net moment about center of mass
@@ -440,9 +441,9 @@ void Kinematics::MyTrig(){
 
 
 float Kinematics::YOffsetEqn(float YPlus, float Denominator, float Psi){
-float Temp;
-  Temp = ((sqrt(YPlus * YPlus - R * R)/R) - (y + YPlus - h * sin(Psi))/Denominator);
-  return Temp;
+    float Temp;
+    Temp = ((sqrt(YPlus * YPlus - R * R)/R) - (y + YPlus - h * sin(Psi))/Denominator);
+    return Temp;
 }
 
 void  Kinematics::speedTest(float input){
