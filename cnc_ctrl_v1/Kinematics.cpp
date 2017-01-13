@@ -38,75 +38,6 @@ in X-Y space.
 #define BY               MACHINEHEIGHT/2 + MOTOROFFSETY
 
 
-//Keith's variables
-//Coordinates definition:
-//         x -->, y |
-//                  v
-// (0,0) at center of left sprocket
-// upper left corner of plywood (270, 270)
-
-//target router bit coordinates.
-float x = 2708.4;
-float y = 270;
-
-//utility variables
-float DegPerRad = 360/(4 * atan(1));
-unsigned long Time;
-boolean Mirror;
-
-//geometry
-float l = 310.0;                               //distance between sled attach points
-float s = 139.0;                               //vertical distance between sled attach points and bit
-float h = sqrt((l/2)*(l/2) + s * s);           //distance between sled attach point and bit
-float h3 = 79.0;                               //distance from bit to sled center of mass
-float D = 2978.4;                             //distance between sprocket centers
-float R = 10.2;                                //sprocket radius
-
-//Calculation tolerances
-float MaxError = 0.001;
-byte MaxTries = 10;
-float DeltaPhi = 0.001;
-float DeltaY = 0.01;
-
-//Criterion Computation Variables
-float Phi = -0.2;
-float TanGamma; 
-float TanLambda;
-float Y1Plus ;
-float Y2Plus;
-float Theta = atan(2*s/l);
-float Psi1 = Theta - Phi;
-float Psi2 = Theta + Phi;
-byte Tries = 0;
-float Jac[9];
-float Solution[3];
-float Crit[3];
-float Offsetx1;
-float Offsetx2;
-float Offsety1;
-float Offsety2;
-float SinPsi1;
-float CosPsi1;
-float SinPsi2;
-float CosPsi2;
-float SinPsi1D;
-float CosPsi1D;
-float SinPsi2D;
-float CosPsi2D;
-float MySinPhi;
-float MySinPhiDelta;
-
-//intermediate output
-float Lambda;
-float Gamma;
-
-// output = chain lengths measured from 12 o'clock
-
-float Chain1; //left chain length 
-float Chain2; //right chain length
-
-int i;
-
 Kinematics::Kinematics(){
    
     BigNumber::begin ();
@@ -221,6 +152,11 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     x = ( MACHINEWIDTH/2 - xTarget) + MOTOROFFSETX;
     y = (MACHINEHEIGHT/2 - yTarget) + MOTOROFFSETY;
     
+    //Coordinates definition:
+    //         x -->, y |
+    //                  v
+    // (0,0) at center of left sprocket
+    // upper left corner of plywood (270, 270)
     
     Tries = 0;                                  //initialize                   
     if(x > D/2.0){                              //the right half of the board mirrors the left half so all computations are done  using left half coordinates.
@@ -438,7 +374,6 @@ void Kinematics::_MyTrig(){
     CosPsi2D = 0.0792*Psi2delcu - 0.5559*Psi2delsq + 0.0171*Psi2del +0.9981;//cosPsi2
 
 }
-
 
 float Kinematics::_YOffsetEqn(float YPlus, float Denominator, float Psi){
     float Temp;
