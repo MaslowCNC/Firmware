@@ -409,7 +409,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         leftAxis.write(aChainLength);
         rightAxis.write(bChainLength);
         
-        delay(20);//calculateDelay(stepSizeMM, MMPerMin));
+        delay(calculateDelay(stepSizeMM, MMPerMin));
         
         returnPoz();
         
