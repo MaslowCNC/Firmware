@@ -396,9 +396,6 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float aChainLength;
     float bChainLength;
     
-    Serial.print("Number of steps: ");
-    Serial.println(finalNumberOfSteps);
-    
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
         angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
@@ -422,13 +419,15 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     kinematics.inverse(X2,Y2,&aChainLength,&bChainLength);
     leftAxis.endMove(aChainLength);
     rightAxis.endMove(bChainLength);
+    
+    xTarget = X2;
+    yTarget = Y2;
 }
 
 int   G2(String readString){
     
-    float X1 = xTarget; //does this work if units are inches?
+    float X1 = xTarget; //does this work if units are inches? (It seems to)
     float Y1 = yTarget;
-    //kinematics.forward(leftAxis.target(), rightAxis.target(), &X1, &Y1);
     
     float X2      = _inchesToMMConversion*extractGcodeValue(readString, 'X', 0.0);
     float Y2      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', 0.0);
