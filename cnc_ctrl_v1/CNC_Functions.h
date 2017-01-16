@@ -384,7 +384,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     
     int numberOfStepsTaken       =  0;
     
-    float stepSizeMM             =  .1;
+    float stepSizeMM             =  .2;
     int   finalNumberOfSteps     =  arcLengthMM/stepSizeMM;
     float stepSizeRadians        =  theta/finalNumberOfSteps;
     
