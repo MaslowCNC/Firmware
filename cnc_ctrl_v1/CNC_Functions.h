@@ -384,7 +384,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     
     int numberOfStepsTaken       =  0;
     
-    int   stepSizeMM             =  .01;
+    float stepSizeMM             =  .1;
     int   finalNumberOfSteps     =  arcLengthMM/stepSizeMM;
     float stepSizeRadians        =  theta/finalNumberOfSteps;
     
@@ -395,6 +395,9 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     
     float aChainLength;
     float bChainLength;
+    
+    Serial.print("Number of steps: ");
+    Serial.println(finalNumberOfSteps);
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
@@ -409,7 +412,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         leftAxis.write(aChainLength);
         rightAxis.write(bChainLength);
         
-        delay(calculateDelay(stepSizeMM, MMPerMin));
+        delay(20);//calculateDelay(stepSizeMM, MMPerMin));
         
         returnPoz();
         
