@@ -253,6 +253,7 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
     rightAxis.attach();
     zAxis.attach();
     
+    float acceptableError = 1.0;
     
     while(true){
         
@@ -264,7 +265,7 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
         
         delay(20);
 
-        if (leftAxis.error() < 1 && rightAxis.error() < 1 && zAxis.error() < 1){
+        if (leftAxis.error() < acceptableError && rightAxis.error() < acceptableError && zAxis.error() < acceptableError){
             break;
         }
     }
