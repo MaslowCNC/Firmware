@@ -582,11 +582,9 @@ void  interpretCommandString(String readString){
     }
     
     if((readString[0] == 'T' || readString[0] == 't') && readString[1] != 'e'){
-        if(readString[1] != '1'){
-            Serial.print("Please insert tool ");
-            Serial.println(readString);
-            Serial.println("gready");
-        }
+        Serial.print("Please insert tool ");
+        Serial.println(readString);
+        Serial.println("gready");
         readString = "";
     }
     
