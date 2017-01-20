@@ -163,6 +163,9 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
       x = D-x;                                  //Chain lengths are swapped at exit if the x,y is on the right half
       Mirror = true;
     }
+    else{
+        Mirror = false;
+    }
     
     TanGamma = y/x;
     TanLambda = y/(D-x);
@@ -250,7 +253,8 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 
     if(Mirror){
         Chain2 = sqrt((x - Offsetx1)*(x - Offsetx1) + (y + Y1Plus - Offsety1)*(y + Y1Plus - Offsety1)) - R * TanGamma + R * Gamma;   //right chain length                       
-        Chain1 = sqrt((D - (x + Offsetx2))*(D - (x + Offsetx2))+(y + Y2Plus - Offsety2)*(y + Y2Plus - Offsety2)) - R * TanLambda + R * Lambda;}   //left chain length
+        Chain1 = sqrt((D - (x + Offsetx2))*(D - (x + Offsetx2))+(y + Y2Plus - Offsety2)*(y + Y2Plus - Offsety2)) - R * TanLambda + R * Lambda;   //left chain length
+    }
     else{
         Chain1 = sqrt((x - Offsetx1)*(x - Offsetx1) + (y + Y1Plus - Offsety1)*(y + Y1Plus - Offsety1)) - R * TanGamma + R * Gamma;   //left chain length                       
         Chain2 = sqrt((D - (x + Offsetx2))*(D - (x + Offsetx2))+(y + Y2Plus - Offsety2)*(y + Y2Plus - Offsety2)) - R * TanLambda + R * Lambda;   //right chain length
