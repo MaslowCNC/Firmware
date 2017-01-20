@@ -356,7 +356,6 @@ int   G1(String readString){
     }
     #endif
     
-    
     if (isNotRapid){
         move(xgoto, ygoto, zgoto, feedrate); //The XY move is performed
         #ifdef ZAXIS
