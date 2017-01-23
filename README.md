@@ -69,3 +69,12 @@ TODO: Not ready for consumption yet, creating a new sketch creates a default ino
    * Select "Next" button
    * Select the "Browse" button to select the source location (location of the cloned repository cnc_ctrl_v1 directory)
    * Select "Finish" button
+   
+### Using NotePad++ in Conjunction with the Arduino IDE
+1. Download NotePad++ (Windows only) [link](https://notepad-plus-plus.org/)
+2. Download the Arduino IDE          [link](https://www.arduino.cc/en/main/software)
+3. Set that you would like use an external editor from within the Arduino IDE by clicking File -> Preferences -> Use External Editor
+   *The Arduino editor will no longer allow you to edit the files, but instead will only work to compile and upload your code. 
+   *The code can be edited from within NotePad++
+   *This method can be used on other platforms with editing programs other than NP++
+
