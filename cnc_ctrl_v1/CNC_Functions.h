@@ -449,6 +449,19 @@ int   G2(String readString){
 void  G10(String readString){
     /*The G10() function handles the G10 gcode which re-zeros one or all of the machine's axes.*/
     Serial.println("Would run G10 here");
+    
+    float currentXPos = xTarget;
+    float currentYPos = yTarget;
+    float currentZPos = zAxis.read();
+    
+    float xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
+    float ygoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
+    float zgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Z', currentZPos/_inchesToMMConversion);
+    
+    zAxis.set(zgoto);
+    zAxis.endMove(zgoto);
+    zAxis.attach();
+    leftAxis.detach();
 }
 
 void calibrateChainLengths(){
