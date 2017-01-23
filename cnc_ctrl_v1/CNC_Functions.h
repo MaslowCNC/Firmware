@@ -447,8 +447,15 @@ int   G2(String readString){
 }
 
 void  G10(String readString){
+    /*The G10() function handles the G10 gcode which re-zeros one or all of the machine's axes.*/
+    Serial.println("Would run G10 here");
+}
 
-/*The G10() function handles the G10 gcode which re-zeros one or all of the machine's axes.*/
+void calibrateChainLengths(){
+    /*
+    The calibrateChainLengths function lets the machine know that the chains are set to a given length where each chain is ORIGINCHAINLEN
+    in length
+    */
     
     leftAxis.detach();
     rightAxis.detach();
@@ -465,7 +472,7 @@ void  G10(String readString){
     xTarget = 0;
     yTarget = 0;
     
-    delay(1000); //Let the PID controller settle 
+    delay(900); //Let the PID controller settle 
     
     leftAxis.attach();
     rightAxis.attach();
@@ -569,6 +576,12 @@ void  interpretCommandString(String readString){
             Serial.println(leftAxis.measureMotorSpeed(i));
         }*/
         
+        readString = "";
+        Serial.println("gready");
+    }
+    
+    if(readString.substring(0, 3) == "B02"){
+        calibrateChainLengths();
         readString = "";
         Serial.println("gready");
     }
