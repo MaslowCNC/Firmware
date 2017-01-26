@@ -484,7 +484,11 @@ void calibrateChainLengths(){
     xTarget = 0;
     yTarget = 0;
     
-    delay(900); //Let the PID controller settle 
+    Serial.println("pt(0, 0, 0)mm");
+    delay(500); //Let the PID controller settle 
+    Serial.println("pt(0, 0, 0)mm");
+    delay(500); //Let the PID controller settle 
+    Serial.println("pt(0, 0, 0)mm");
     
     leftAxis.attach();
     rightAxis.attach();
