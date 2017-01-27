@@ -331,7 +331,6 @@ int   G1(String readString){
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     isNotRapid = extractGcodeValue(readString, 'G', 1);
     
-    
     #ifndef ZAXIS
     if (zgoto != 0){
         Serial.print("Message: Please adjust Z-Axis to a depth of ");
