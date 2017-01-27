@@ -33,8 +33,6 @@ void setup(){
     Timer1.attachInterrupt(runsOnATimer);
     
     kinematics.forward(leftAxis.setpoint(), rightAxis.setpoint(), &xTarget, &yTarget); //setup the targets to be correct
-    Serial.print("xTarget at the start: ");
-    Serial.println(xTarget);
     
 }
 
