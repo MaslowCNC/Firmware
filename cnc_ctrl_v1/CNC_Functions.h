@@ -325,18 +325,11 @@ int   G1(String readString){
     //kinematics.forward(leftAxis.target(), rightAxis.target(), &currentXPos, &currentYPos);
     float currentZPos = zAxis.read();
     
-    Serial.print("currentXPos is: ");
-    Serial.println(currentXPos);
-    
     xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
     ygoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
     zgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Z', currentZPos/_inchesToMMConversion);
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     isNotRapid = extractGcodeValue(readString, 'G', 1);
-    
-    
-    Serial.print("xgoto is: ");
-    Serial.println(xgoto);
     
     #ifndef ZAXIS
     if (zgoto != 0){
