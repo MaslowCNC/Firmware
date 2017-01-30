@@ -495,7 +495,7 @@ float  Axis::measureMotorSpeed(int speed){
         
         //print to prevent connection timeout
         if (i % 1000 == 0){
-             Serial.println("pt(0, 0, 0)mm");
+            Serial.println("\npt(0, 0, 0)mm");
         }
         i++;
     }
@@ -516,7 +516,7 @@ float  Axis::measureMotorSpeed(int speed){
         delay(10);
         //print to prevent connection timeout
         if (i % 50 == 0){
-             Serial.println("pt(0, 0, 0)mm");
+            Serial.println("\npt(0, 0, 0)mm");
         }
         i++;
     }
