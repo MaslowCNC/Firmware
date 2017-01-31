@@ -21,7 +21,6 @@
     #define ORIGINCHAINLEN   1650
     
     #include "Arduino.h"
-    #include "BigNumber.h"
     #include "FormatDouble.h"
 
     class Kinematics{
@@ -31,9 +30,8 @@
             void  inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  oldInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  test();
-            void  speedTest(float input);
+            void  speedTest();
         private:
-            BigNumber _float2BigNum (float value);
             float _moment(float Y1Plus, float Y2Plus, float Phi, float MSinPhi, float MSinPsi1, float MCosPsi1, float MSinPsi2, float MCosPsi2);
             float _YOffsetEqn(float YPlus, float Denominator, float Psi);
             void  _MatSolv();

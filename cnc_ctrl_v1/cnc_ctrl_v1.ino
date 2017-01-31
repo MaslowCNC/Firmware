@@ -20,7 +20,7 @@
 String readString;
 
 void setup(){
-    Serial.begin(19200);
+    Serial.begin(115200);
     
     Serial.println("ready");
     Serial.println("gready");
