@@ -470,6 +470,7 @@ float  Axis::measureMotorSpeed(int speed){
     //So continuously monitoring would help quite a bit with catching that.
     long originalEncoderPos  = _encoder.read();
     long startTime = millis();
+    long i;
     while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
         _motor.write(speed);
         
@@ -491,6 +492,12 @@ float  Axis::measureMotorSpeed(int speed){
             Serial.print("^");
             break;
         }
+        
+        //print to prevent connection timeout
+        if (i % 1000 == 0){
+            Serial.println("\npt(0, 0, 0)mm");
+        }
+        i++;
     }
     int posTime = millis() - startTime;
     
@@ -503,9 +510,15 @@ float  Axis::measureMotorSpeed(int speed){
     //reset to start point
     _disableAxisForTesting = false;
     _timeLastMoved = millis();
+    i = 0;
     for (long startTime = millis(); millis() - startTime < 2000; millis()){
         hold();
         delay(10);
+        //print to prevent connection timeout
+        if (i % 50 == 0){
+            Serial.println("\npt(0, 0, 0)mm");
+        }
+        i++;
     }
     
     return RPM;
