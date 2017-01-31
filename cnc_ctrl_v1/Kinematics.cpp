@@ -84,7 +84,7 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     float   b   = Lac;// + SLEDDIAGONAL;
     float   c   = MACHINEWIDTH+2*MOTOROFFSETX;
     
-    //which angle is theta?
+    //Theta is the angle made by the chain and the top left motor
     float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
     
     *Y   = (MACHINEHEIGHT/2 + MOTOROFFSETY) - (b*sin(theta) + 394); //394 is a made up number to make things look good because this is fake math
