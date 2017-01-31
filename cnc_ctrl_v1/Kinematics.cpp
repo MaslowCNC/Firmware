@@ -92,14 +92,28 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
 }
 
 void Kinematics::_verifyValidTarget(float* xTarget,float* yTarget){
-    Serial.println("this ran");
+    //If the target point is beyond one of the edges of the board, the machine stops at the edge
+    
+    if (*xTarget < -MACHINEWIDTH/2){
+        *xTarget = -MACHINEWIDTH/2;
+    }
+    else if (*xTarget >  MACHINEWIDTH/2){
+        *xTarget =  MACHINEWIDTH/2;
+    }
+    else if (*yTarget >  MACHINEHEIGHT/2){
+        *yTarget =  MACHINEHEIGHT/2;
+    }
+    else if (*yTarget <  -MACHINEHEIGHT/2){
+        *yTarget =  -MACHINEHEIGHT/2;
+    }
+    
 }
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     
     
     //Confirm that the coordinates are on the wood
-    verifyValidTarget(&xTarget, &yTarget);
+    _verifyValidTarget(&xTarget, &yTarget);
     
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
     x = ( MACHINEWIDTH/2 - xTarget) + MOTOROFFSETX;
