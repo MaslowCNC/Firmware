@@ -91,7 +91,16 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
 }
 
+void Kinematics::_verifyValidTarget(float* xTarget,float* yTarget){
+    Serial.println("this ran");
+}
+
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    
+    
+    //Confirm that the coordinates are on the wood
+    verifyValidTarget(&xTarget, &yTarget);
+    
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
     x = ( MACHINEWIDTH/2 - xTarget) + MOTOROFFSETX;
     y = (MACHINEHEIGHT/2 - yTarget) + MOTOROFFSETY;

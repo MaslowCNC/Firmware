@@ -36,6 +36,7 @@
             float _YOffsetEqn(float YPlus, float Denominator, float Psi);
             void  _MatSolv();
             void  _MyTrig();
+            void _verifyValidTarget(float* xTarget,float* yTarget);
             //target router bit coordinates.
             float x = 2708.4;
             float y = 270;
