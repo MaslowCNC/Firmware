@@ -91,7 +91,30 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
 }
 
+void Kinematics::_verifyValidTarget(float* xTarget,float* yTarget){
+    //If the target point is beyond one of the edges of the board, the machine stops at the edge
+    
+    if (*xTarget < -MACHINEWIDTH/2){
+        *xTarget = -MACHINEWIDTH/2;
+    }
+    else if (*xTarget >  MACHINEWIDTH/2){
+        *xTarget =  MACHINEWIDTH/2;
+    }
+    else if (*yTarget >  MACHINEHEIGHT/2){
+        *yTarget =  MACHINEHEIGHT/2;
+    }
+    else if (*yTarget <  -MACHINEHEIGHT/2){
+        *yTarget =  -MACHINEHEIGHT/2;
+    }
+    
+}
+
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    
+    
+    //Confirm that the coordinates are on the wood
+    _verifyValidTarget(&xTarget, &yTarget);
+    
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
     x = ( MACHINEWIDTH/2 - xTarget) + MOTOROFFSETX;
     y = (MACHINEHEIGHT/2 - yTarget) + MOTOROFFSETY;
