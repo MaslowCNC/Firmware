@@ -80,39 +80,19 @@ String prependString;
 float xTarget = 0;
 float yTarget = 0;
 
-void  returnPoz(){
+void  returnPoz(float x, float y, float z){
     static unsigned long lastRan = millis();
     int                  timeout = 200;
     
     if (millis() - lastRan > timeout){
         
-        float X;
-        float Y;
-        
-        kinematics.forward(leftAxis.read(), rightAxis.read(), &X, &Y);
-        
         Serial.print("pz(");
-        Serial.print(X/_inchesToMMConversion);
+        Serial.print(x/_inchesToMMConversion);
         Serial.print(", ");
-        Serial.print(Y/_inchesToMMConversion);
+        Serial.print(y/_inchesToMMConversion);
         Serial.print(", ");
-        Serial.print(zAxis.read()/_inchesToMMConversion);
+        Serial.print(z/_inchesToMMConversion);
         Serial.print(")");
-        
-        if (_inchesToMMConversion == INCHES){
-            Serial.println("in");
-        }
-        else{
-            Serial.println("mm");
-        }
-        
-        kinematics.forward(leftAxis.setpoint(), rightAxis.setpoint(), &X, &Y);
-        
-        Serial.print("pt(");
-        Serial.print(X/_inchesToMMConversion);
-        Serial.print(", ");
-        Serial.print(Y/_inchesToMMConversion);
-        Serial.print(", 0.0)");
         
         if (_inchesToMMConversion == INCHES){
             Serial.println("in");
@@ -124,36 +104,6 @@ void  returnPoz(){
         lastRan = millis();
     }
     
-}
-
-void  goAroundInCircle(){
-    
-    float aChainLength;
-    float bChainLength;
-    
-    float pi = 3.14159;
-    float i = 0;
-    while(true){
-        
-        float whereXShouldBeAtThisStep = 100 * cos(i*pi);
-        float whereYShouldBeAtThisStep = 100 * sin(i*pi);
-        
-        kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
-        
-        
-        leftAxis.write(aChainLength);
-        rightAxis.write(bChainLength);
-        
-        delay(15);
-        
-        returnPoz();
-        
-        i = i +.0001;
-        
-        if (i > 2){
-            i = 0;
-        }
-    }
 }
 
 float calculateDelay(float stepSizeMM, float feedrateMMPerMin){
@@ -226,7 +176,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
             numberOfStepsTaken++;
             
             //update position on display
-            returnPoz();
+            returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
             
         }
     }
@@ -261,7 +211,7 @@ int   rapidMove(float xEnd, float yEnd, float zEnd){
         rightAxis.write(bChainLength);
         zAxis.write(zEnd);
         
-        returnPoz();
+        returnPoz(xEnd, yEnd, zAxis.read());
         
         delay(20);
 
@@ -409,7 +359,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         
         delay(calculateDelay(stepSizeMM, MMPerMin));
         
-        returnPoz();
+        returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
         
         numberOfStepsTaken = numberOfStepsTaken + 1;
     }
