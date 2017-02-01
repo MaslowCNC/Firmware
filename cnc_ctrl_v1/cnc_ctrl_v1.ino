@@ -62,5 +62,5 @@ void loop(){
     
     holdPosition();
     
-    returnPoz();
+    returnPoz(xTarget, yTarget, zAxis.read());
 }
