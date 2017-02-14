@@ -72,6 +72,7 @@
             float      _oldSetpoint;
             float      _oldVal;
             bool       _disableAxisForTesting = false;
+            float      _speedSinceLastCall();
     };
 
     #endif

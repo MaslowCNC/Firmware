@@ -446,6 +446,15 @@ void   Axis::computeMotorResponse(){
     
 }
 
+float  Axis::_speedSinceLastCall(){
+    static long time = millis();
+    static long encoderValue = _encoder.read();
+    
+    Serial.println("measure speed");
+    
+    return 1.0;
+}
+
 float  Axis::measureMotorSpeed(int speed){
     /*
     Returns the motors speed in RPM at a given input value
@@ -496,6 +505,7 @@ float  Axis::measureMotorSpeed(int speed){
         //print to prevent connection timeout
         if (i % 1000 == 0){
             Serial.println("\npt(0, 0, 0)mm");
+            _speedSinceLastCall();
         }
         i++;
     }
