@@ -461,7 +461,8 @@ float  Axis::_speedSinceLastCall(){
     time = millis();
     prevEncoderValue = _encoder.read();
     
-    return speed;
+    //return the absolute value because speed is not a vector
+    return abs(speed);
 }
 
 float  Axis::measureMotorSpeed(int speed){
@@ -486,12 +487,14 @@ float  Axis::measureMotorSpeed(int speed){
     //So continuously monitoring would help quite a bit with catching that.
     long originalEncoderPos  = _encoder.read();
     long startTime = millis();
+    
+    //until the motor has moved the target distance
     while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
         //command motor to spin at speed
         _motor.write(speed);
         
         //wait
-        delay(100);
+        delay(200);
         
         //print to prevent connection timeout
         Serial.println("pt(0, 0, 0)mm");
