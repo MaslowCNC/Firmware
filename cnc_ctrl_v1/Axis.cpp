@@ -313,7 +313,6 @@ void   Axis::computeMotorResponse(){
     
     //Increments of 10
     while (i < 255){
-        Serial.print(".");
         motorSpeed = measureMotorSpeed(i);
         if (motorSpeed > 0){break;}
         i = i + 10;
@@ -322,7 +321,6 @@ void   Axis::computeMotorResponse(){
     
     //Increments of 5
     while (i < 255){
-        Serial.print("~");
         motorSpeed = measureMotorSpeed(i);
         if (motorSpeed > 0){break;}
         i = i + 5;
@@ -331,7 +329,6 @@ void   Axis::computeMotorResponse(){
     
     //Find exact value
     while (i < 255){
-        Serial.print("*");
         motorSpeed = measureMotorSpeed(i);
         if (motorSpeed > 0){break;}
         i = i + 1;
@@ -366,7 +363,6 @@ void   Axis::computeMotorResponse(){
     //Increments of 10
     i = 0;                                                                                                                                  
     while (i > -255){
-        Serial.print(".");
         motorSpeed = measureMotorSpeed(i);
         if (motorSpeed < 0){break;}
         i = i - 10;
@@ -374,7 +370,6 @@ void   Axis::computeMotorResponse(){
     i = i + 10;
     //Increments of 5
     while (i > -255){
-        Serial.print("~");
         motorSpeed = measureMotorSpeed(i);
         if (motorSpeed < 0){break;}
         i = i - 5;
@@ -382,13 +377,11 @@ void   Axis::computeMotorResponse(){
     i = i + 5;
     //Find exact value
     while (i > -255){
-        Serial.print("*");
         motorSpeed = measureMotorSpeed(i);
         if (motorSpeed < 0){break;}
         i = i - 1;
     }
     
-    Serial.println("-");
     
     X1 = i;
     Y1 = scale*motorSpeed;
@@ -457,12 +450,12 @@ float  Axis::_speedSinceLastCall(){
     float speed = float(distMoved)/float(elapsedTime);
     
     //debug prints
-    //Serial.print("Time: ");
-    //Serial.println(elapsedTime);
-    //Serial.print("Dist: ");
-    //Serial.println(distMoved);
-    //Serial.print("Speed: ");
-    //Serial.println(speed);
+    Serial.print("Time: ");
+    Serial.println(elapsedTime);
+    Serial.print("Dist: ");
+    Serial.println(distMoved);
+    Serial.print("Speed: ");
+    Serial.println(speed);
     
     //set values for next call
     time = millis();
@@ -483,8 +476,6 @@ float  Axis::measureMotorSpeed(int speed){
     
     int numberOfStepsToTest = 2000;
     int timeOutMS           = 30*1000; //30 seconds
-    int quickTimeOut        = 1000;
-    int quickTimeOutDist    = 50;
     bool timeout            = false;
     
     //run the motor for numberOfStepsToTest steps positive and record the time taken
@@ -495,22 +486,23 @@ float  Axis::measureMotorSpeed(int speed){
     //So continuously monitoring would help quite a bit with catching that.
     long originalEncoderPos  = _encoder.read();
     long startTime = millis();
-    long i;
     while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
+        //command motor to spin at speed
         _motor.write(speed);
         
+        //wait
+        delay(100);
         
         //print to prevent connection timeout
-        if (i % 1000 == 0){
-            Serial.println("\npt(0, 0, 0)mm");
-            if (_speedSinceLastCall() < .1){
-                Serial.print("Break at ");
-                Serial.println(speed);
-                timeout = true;
-                break;
-            }
+        Serial.println("pt(0, 0, 0)mm");
+        
+        //check to see if motor is moving
+        if (_speedSinceLastCall() < .1){
+            Serial.print("Break at ");
+            Serial.println(speed);
+            timeout = true;
+            break;
         }
-        i++;
     }
     int posTime = millis() - startTime;
     
@@ -520,18 +512,14 @@ float  Axis::measureMotorSpeed(int speed){
         RPM = 0;
     }
     
-    //reset to start point
+    //move back to start point
     _disableAxisForTesting = false;
     _timeLastMoved = millis();
-    i = 0;
     for (long startTime = millis(); millis() - startTime < 2000; millis()){
         hold();
-        delay(10);
+        delay(50);
         //print to prevent connection timeout
-        if (i % 50 == 0){
-            Serial.println("\npt(0, 0, 0)mm");
-        }
-        i++;
+        Serial.println("\npt(0, 0, 0)mm");
     }
     
     return RPM;
