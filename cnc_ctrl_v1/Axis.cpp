@@ -447,12 +447,28 @@ void   Axis::computeMotorResponse(){
 }
 
 float  Axis::_speedSinceLastCall(){
+    //static variables to persist between calls
     static long time = millis();
-    static long encoderValue = _encoder.read();
+    static long prevEncoderValue = _encoder.read();
     
-    Serial.println("measure speed");
+    //compute dist moved
+    int elapsedTime = millis() - time;
+    int distMoved   = _encoder.read() - prevEncoderValue;
+    float speed = float(distMoved)/float(elapsedTime);
     
-    return 1.0;
+    //debug prints
+    //Serial.print("Time: ");
+    //Serial.println(elapsedTime);
+    //Serial.print("Dist: ");
+    //Serial.println(distMoved);
+    //Serial.print("Speed: ");
+    //Serial.println(speed);
+    
+    //set values for next call
+    time = millis();
+    prevEncoderValue = _encoder.read();
+    
+    return speed;
 }
 
 float  Axis::measureMotorSpeed(int speed){
@@ -483,29 +499,16 @@ float  Axis::measureMotorSpeed(int speed){
     while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
         _motor.write(speed);
         
-        //long timeout
-        if (millis() - startTime > timeOutMS ){
-            timeout = true;
-            break;
-        } 
-        
-        //very quick timeout if it doesn't move at all
-        if (millis() - startTime > quickTimeOut && abs(originalEncoderPos - _encoder.read()) < quickTimeOutDist){
-            timeout = true;
-            break;
-        }
-        
-        //medium timeout if it starts to move, then conks out.
-        if (millis() - startTime > quickTimeOut/3 && abs(originalEncoderPos - _encoder.read()) < quickTimeOutDist/4){
-            timeout = true;
-            Serial.print("^");
-            break;
-        }
         
         //print to prevent connection timeout
         if (i % 1000 == 0){
             Serial.println("\npt(0, 0, 0)mm");
-            _speedSinceLastCall();
+            if (_speedSinceLastCall() < .1){
+                Serial.print("Break at ");
+                Serial.println(speed);
+                timeout = true;
+                break;
+            }
         }
         i++;
     }
