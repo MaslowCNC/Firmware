@@ -355,34 +355,37 @@ void   Axis::computeMotorResponse(){
     _motor.setSegment(2 , M1, I1,    0,   Y2);
     _motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
     
-    Serial.println("+");
+    
     //In the negative direction
     //-----------------------------------------------------------------------------
     
     scale = -255/measureMotorSpeed(-255); //Y3*scale = 255 -> scale = 255/Y3
     
-    //Increments of 10
-    i = 0;                                                                                                                                  
-    while (i > -255){
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed < 0){break;}
-        i = i - 10;
-    }
-    i = i + 10;
-    //Increments of 5
-    while (i > -255){
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed < 0){break;}
-        i = i - 5;
-    }
-    i = i + 5;
-    //Find exact value
-    while (i > -255){
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed < 0){break;}
-        i = i - 1;
+    upperBound =      0; //the whole range is valid
+    lowerBound =   -255;
+    
+    while (true){ //until a value is found
+        motorSpeed = measureMotorSpeed((upperBound + lowerBound)/2);
+        if (motorSpeed == 0){                               //if the motor stalled
+            upperBound = (upperBound + lowerBound)/2;           //shift lower bound to be the guess
+            Serial.print("Stall at: ");
+            Serial.println(upperBound);
+        }
+        else{                                               //if the motor didn't stall
+            lowerBound = (upperBound + lowerBound)/2;           //shift upper bound to be the guess
+            Serial.print("Worked at: ");
+            Serial.println(lowerBound);
+        }
+        
+        if (upperBound - lowerBound <= 1){                  //when we've converged on the first point which doesn't stall
+            break;                                              //exit loop
+        }
     }
     
+    i = lowerBound;
+    
+    Serial.print("decided on a final value of: ");
+    Serial.println(i);
     
     //At this point motorSpeed is the speed in RPM at the value i which is just above the stall speed
     
@@ -401,44 +404,8 @@ void   Axis::computeMotorResponse(){
     I1 = -1*(Y1 - (M1*X1));
     I2 = -1*(Y2 - (M2*X2));
     
-    
-    //_motor.setSegment(0 ,  1.9,  -137.0,  -114,     0);
-    //_motor.setSegment(1 ,  0.7,    23.1,  -256,  -115);
     _motor.setSegment(0 , M1, I1,   Y2,    0);
     _motor.setSegment(1 , M2, I2, Y3-1, Y2+1);
-    
-    /*Serial.print("First point: (");
-    Serial.print(X1);
-    Serial.print(", ");
-    Serial.print(Y1);
-    Serial.println(")");
-    
-    Serial.print("Second point: (");
-    Serial.print(X2);
-    Serial.print(", ");
-    Serial.print(Y2);
-    Serial.println(")");
-    
-    Serial.print("Third point: (");
-    Serial.print(X3);
-    Serial.print(", ");
-    Serial.print(Y3);
-    Serial.println(")");
-    
-    Serial.print("Slope 1: ");
-    Serial.println(M1);
-    
-    Serial.print("Slope 2: ");
-    Serial.println(M2);
-    
-    Serial.print("Intercept 1: ");
-    Serial.println(I1);
-    
-    Serial.print("Intercept 2: ");
-    Serial.println(I2);
-    
-    Serial.print("Scale: ");
-    Serial.println(scale);*/
     
 }
 
