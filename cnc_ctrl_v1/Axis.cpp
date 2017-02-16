@@ -311,35 +311,28 @@ void   Axis::computeMotorResponse(){
     int i = 0;
     float motorSpeed;
     
-    //Increments of 10
-    while (i < 255){
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed > 0){break;}
-        i = i + 10;
+    int upperBound = 255; //the whole range is valid
+    int lowerBound =   0;
+    
+    while (true){ //until a value is found
+        motorSpeed = measureMotorSpeed((upperBound + lowerBound)/2);
+        if (motorSpeed == 0){                               //if the motor stalled
+            lowerBound = (upperBound + lowerBound)/2;           //shift lower bound to be the guess
+            Serial.print("Stall at: ");
+            Serial.println(lowerBound);
+        }
+        else{                                               //if the motor didn't stall
+            upperBound = (upperBound + lowerBound)/2;           //shift upper bound to be the guess
+            Serial.print("Worked at: ");
+            Serial.println(upperBound);
+        }
+        
+        if (upperBound - lowerBound <= 1){                  //when we've converged on the first point which doesn't stall
+            break;                                              //exit loop
+        }
     }
     
-    Serial.print(i);
-    Serial.println(" looks good");
-    
-    i = i - 10;
-    
-    //Increments of 5
-    while (i < 255){
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed > 0){break;}
-        i = i + 5;
-    }
-    
-    Serial.print(i);
-    Serial.println(" looks good");
-    i = i - 5;
-    
-    //Find exact value
-    while (i < 255){
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed > 0){break;}
-        i = i + 1;
-    }
+    i = upperBound;
     
     Serial.print("decided on final value of: ");
     Serial.println(i);
@@ -390,6 +383,8 @@ void   Axis::computeMotorResponse(){
         i = i - 1;
     }
     
+    
+    //At this point motorSpeed is the speed in RPM at the value i which is just above the stall speed
     
     X1 = i;
     Y1 = scale*motorSpeed;
@@ -517,9 +512,6 @@ float  Axis::measureMotorSpeed(int speed){
         
         //check to see if motor is moving
         if (_speedSinceLastCall() < .01){
-            Serial.print("Stall at ");
-            Serial.println(speed);
-            Serial.println("*");
             stall = true;
             break;
         }
