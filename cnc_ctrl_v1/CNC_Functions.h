@@ -192,15 +192,16 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     
 }
 
-void  singleAxisMove(Axis axis, float endPos, float feedrate){
+void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
     Serial.println("Single axis move called");
     Serial.println(axis.target());
     Serial.println(endPos);
-    Serial.println(feedrate);
+    Serial.println(MMPerMin);
     
-    float moveDist             = axis.target() - endPos; //total distance to move
-    float stepSize             = 0.1;                    //step size in mm
-    long finalNumberOfSteps    = moveDist/stepSize;      //number of steps taken in move
+    float startingPos          = axis.target();
+    float moveDist             = startingPos - endPos; //total distance to move
+    float stepSizeMM           = 0.1;                    //step size in mm
+    long finalNumberOfSteps    = moveDist/MMPerMin;      //number of steps taken in move
     
     long numberOfStepsTaken    = 0;
     long  beginingOfLastStep   = millis();
@@ -208,7 +209,25 @@ void  singleAxisMove(Axis axis, float endPos, float feedrate){
     axis.attach();
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
-        
+        //if enough time has passed to take the next step
+        if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
+            
+            //reset the counter 
+            beginingOfLastStep          = millis();
+            
+            //find the target point for this step
+            float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM;
+            
+            //write to each axis
+            axis.write(whereAxisShouldBeAtThisStep);
+            
+            //increment the number of steps taken
+            numberOfStepsTaken++;
+            
+            //update position on display
+            returnPoz(0, 0, zAxis.read());
+            
+        }
     }
     
 }
