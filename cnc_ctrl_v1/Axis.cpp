@@ -308,7 +308,7 @@ void   Axis::computeMotorResponse(){
     
     float scale = 255/measureMotorSpeed(255); //Y3*scale = 255 -> scale = 255/Y3
     
-    int i = 0;
+    int stallPoint;
     float motorSpeed;
     
     int upperBound = 255; //the whole range is valid
@@ -334,12 +334,14 @@ void   Axis::computeMotorResponse(){
         }
     }
     
-    i = upperBound;
+    stallPoint = upperBound;
     
     Serial.print("decided on final value of: ");
-    Serial.println(i);
+    Serial.println(stallPoint);
     
-    float X1 = i;
+    
+    //compute a model of the motor from the given data points
+    float X1 = stallPoint;
     float Y1 = scale*motorSpeed;
     
     float X2 = (255 - X1)/2;
@@ -354,6 +356,8 @@ void   Axis::computeMotorResponse(){
     float I1 = -1*(Y1 - (M1*X1));
     float I2 = -1*(Y2 - (M2*X2));
     
+    
+    //Apply the model to the motor
     _motor.setSegment(2 , M1, I1,    0,   Y2);
     _motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
     
@@ -386,14 +390,16 @@ void   Axis::computeMotorResponse(){
         }
     }
     
-    i = lowerBound;
+    stallPoint = lowerBound;
     
     Serial.print("decided on a final value of: ");
-    Serial.println(i);
+    Serial.println(stallPoint);
     
     //At this point motorSpeed is the speed in RPM at the value i which is just above the stall speed
     
-    X1 = i;
+    
+    //Compute a model for the motor's behavior using the given data-points
+    X1 = stallPoint;
     Y1 = scale*motorSpeed;
     
     X2 = (-255 - X1)/3 + X1;
@@ -408,8 +414,12 @@ void   Axis::computeMotorResponse(){
     I1 = -1*(Y1 - (M1*X1));
     I2 = -1*(Y2 - (M2*X2));
     
+    
+    //Apply the model to the motor
     _motor.setSegment(0 , M1, I1,   Y2,    0);
     _motor.setSegment(1 , M2, I2, Y3-1, Y2+1);
+    
+    Serial.println("Calibration complete.");
     
 }
 
