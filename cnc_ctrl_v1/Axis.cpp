@@ -308,38 +308,40 @@ void   Axis::computeMotorResponse(){
     
     float scale = 255/measureMotorSpeed(255); //Y3*scale = 255 -> scale = 255/Y3
     
-    int i = 0;
+    int stallPoint;
     float motorSpeed;
     
-    //Increments of 10
-    while (i < 255){
-        Serial.print(".");
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed > 0){break;}
-        i = i + 10;
-    }
-    i = i - 10;
+    int upperBound = 255; //the whole range is valid
+    int lowerBound =   0;
     
-    //Increments of 5
-    while (i < 255){
-        Serial.print("~");
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed > 0){break;}
-        i = i + 5;
-    }
-    i = i - 5;
-    
-    //Find exact value
-    while (i < 255){
-        Serial.print("*");
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed > 0){break;}
-        i = i + 1;
+    while (true){ //until a value is found
+        Serial.print("Testing: ");
+        Serial.println((upperBound + lowerBound)/2);
+        
+        motorSpeed = measureMotorSpeed((upperBound + lowerBound)/2);
+        
+        if (motorSpeed == 0){                               //if the motor stalled
+            lowerBound = (upperBound + lowerBound)/2;           //shift lower bound to be the guess
+            Serial.println("- stall");
+        }
+        else{                                               //if the motor didn't stall
+            upperBound = (upperBound + lowerBound)/2;           //shift upper bound to be the guess
+            Serial.println("- good");
+        }
+        
+        if (upperBound - lowerBound <= 1){                  //when we've converged on the first point which doesn't stall
+            break;                                              //exit loop
+        }
     }
     
+    stallPoint = upperBound;
+    
+    Serial.print("decided on final value of: ");
+    Serial.println(stallPoint);
     
     
-    float X1 = i;
+    //compute a model of the motor from the given data points
+    float X1 = stallPoint;
     float Y1 = scale*motorSpeed;
     
     float X2 = (255 - X1)/2;
@@ -354,43 +356,50 @@ void   Axis::computeMotorResponse(){
     float I1 = -1*(Y1 - (M1*X1));
     float I2 = -1*(Y2 - (M2*X2));
     
+    
+    //Apply the model to the motor
     _motor.setSegment(2 , M1, I1,    0,   Y2);
     _motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
     
-    Serial.println("+");
+    
     //In the negative direction
     //-----------------------------------------------------------------------------
     
     scale = -255/measureMotorSpeed(-255); //Y3*scale = 255 -> scale = 255/Y3
     
-    //Increments of 10
-    i = 0;                                                                                                                                  
-    while (i > -255){
-        Serial.print(".");
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed < 0){break;}
-        i = i - 10;
-    }
-    i = i + 10;
-    //Increments of 5
-    while (i > -255){
-        Serial.print("~");
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed < 0){break;}
-        i = i - 5;
-    }
-    i = i + 5;
-    //Find exact value
-    while (i > -255){
-        Serial.print("*");
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed < 0){break;}
-        i = i - 1;
+    upperBound =      0; //the whole range is valid
+    lowerBound =   -255;
+    
+    while (true){ //until a value is found
+        
+        Serial.print("Testing: ");
+        Serial.println((upperBound + lowerBound)/2);
+        
+        motorSpeed = measureMotorSpeed((upperBound + lowerBound)/2);
+        if (motorSpeed == 0){                               //if the motor stalled
+            upperBound = (upperBound + lowerBound)/2;           //shift lower bound to be the guess
+            Serial.println("-stall");
+        }
+        else{                                               //if the motor didn't stall
+            lowerBound = (upperBound + lowerBound)/2;           //shift upper bound to be the guess
+            Serial.println("-good");
+        }
+        
+        if (upperBound - lowerBound <= 1){                  //when we've converged on the first point which doesn't stall
+            break;                                              //exit loop
+        }
     }
     
-    Serial.println("-");
+    stallPoint = lowerBound;
     
-    X1 = i;
+    Serial.print("decided on a final value of: ");
+    Serial.println(stallPoint);
+    
+    //At this point motorSpeed is the speed in RPM at the value i which is just above the stall speed
+    
+    
+    //Compute a model for the motor's behavior using the given data-points
+    X1 = stallPoint;
     Y1 = scale*motorSpeed;
     
     X2 = (-255 - X1)/3 + X1;
@@ -406,44 +415,35 @@ void   Axis::computeMotorResponse(){
     I2 = -1*(Y2 - (M2*X2));
     
     
-    //_motor.setSegment(0 ,  1.9,  -137.0,  -114,     0);
-    //_motor.setSegment(1 ,  0.7,    23.1,  -256,  -115);
+    //Apply the model to the motor
     _motor.setSegment(0 , M1, I1,   Y2,    0);
     _motor.setSegment(1 , M2, I2, Y3-1, Y2+1);
     
-    /*Serial.print("First point: (");
-    Serial.print(X1);
-    Serial.print(", ");
-    Serial.print(Y1);
-    Serial.println(")");
+    Serial.println("Calibration complete.");
     
-    Serial.print("Second point: (");
-    Serial.print(X2);
-    Serial.print(", ");
-    Serial.print(Y2);
-    Serial.println(")");
+}
+
+float  Axis::_speedSinceLastCall(){
+    //static variables to persist between calls
+    static long time = millis();
+    static long prevEncoderValue = _encoder.read();
     
-    Serial.print("Third point: (");
-    Serial.print(X3);
-    Serial.print(", ");
-    Serial.print(Y3);
-    Serial.println(")");
+    //compute dist moved
+    int elapsedTime = millis() - time;
+    int distMoved   = _encoder.read() - prevEncoderValue;
+    float speed = float(distMoved)/float(elapsedTime);
     
-    Serial.print("Slope 1: ");
-    Serial.println(M1);
+    //catch if time is zero
+    if (elapsedTime < 10){
+        speed = 0;
+    }
     
-    Serial.print("Slope 2: ");
-    Serial.println(M2);
+    //set values for next call
+    time = millis();
+    prevEncoderValue = _encoder.read();
     
-    Serial.print("Intercept 1: ");
-    Serial.println(I1);
-    
-    Serial.print("Intercept 2: ");
-    Serial.println(I2);
-    
-    Serial.print("Scale: ");
-    Serial.println(scale);*/
-    
+    //return the absolute value because speed is not a vector
+    return abs(speed);
 }
 
 float  Axis::measureMotorSpeed(int speed){
@@ -458,9 +458,7 @@ float  Axis::measureMotorSpeed(int speed){
     
     int numberOfStepsToTest = 2000;
     int timeOutMS           = 30*1000; //30 seconds
-    int quickTimeOut        = 1000;
-    int quickTimeOutDist    = 50;
-    bool timeout            = false;
+    bool stall              = false;
     
     //run the motor for numberOfStepsToTest steps positive and record the time taken
     
@@ -470,55 +468,43 @@ float  Axis::measureMotorSpeed(int speed){
     //So continuously monitoring would help quite a bit with catching that.
     long originalEncoderPos  = _encoder.read();
     long startTime = millis();
-    long i;
+    
+    //until the motor has moved the target distance
     while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
+        //establish baseline for speed measurement
+        _speedSinceLastCall();
+        
+        //command motor to spin at speed
         _motor.write(speed);
         
-        //long timeout
-        if (millis() - startTime > timeOutMS ){
-            timeout = true;
-            break;
-        } 
-        
-        //very quick timeout if it doesn't move at all
-        if (millis() - startTime > quickTimeOut && abs(originalEncoderPos - _encoder.read()) < quickTimeOutDist){
-            timeout = true;
-            break;
-        }
-        
-        //medium timeout if it starts to move, then conks out.
-        if (millis() - startTime > quickTimeOut/3 && abs(originalEncoderPos - _encoder.read()) < quickTimeOutDist/4){
-            timeout = true;
-            Serial.print("^");
-            break;
-        }
+        //wait
+        delay(200);
         
         //print to prevent connection timeout
-        if (i % 1000 == 0){
-            Serial.println("\npt(0, 0, 0)mm");
+        Serial.println("pt(0, 0, 0)mm");
+        
+        //check to see if motor is moving
+        if (_speedSinceLastCall() < .01){
+            stall = true;
+            break;
         }
-        i++;
     }
     int posTime = millis() - startTime;
     
     float RPM = float(sign)*60.0*1000.0 * 1.0/(4.0*float(posTime));
     
-    if (timeout){
+    if (stall){
         RPM = 0;
     }
     
-    //reset to start point
+    //move back to start point
     _disableAxisForTesting = false;
     _timeLastMoved = millis();
-    i = 0;
     for (long startTime = millis(); millis() - startTime < 2000; millis()){
         hold();
-        delay(10);
+        delay(50);
         //print to prevent connection timeout
-        if (i % 50 == 0){
-            Serial.println("\npt(0, 0, 0)mm");
-        }
-        i++;
+        Serial.println("pt(0, 0, 0)mm");
     }
     
     return RPM;
