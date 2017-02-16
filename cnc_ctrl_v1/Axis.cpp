@@ -317,6 +317,10 @@ void   Axis::computeMotorResponse(){
         if (motorSpeed > 0){break;}
         i = i + 10;
     }
+    
+    Serial.print(i);
+    Serial.println(" looks good");
+    
     i = i - 10;
     
     //Increments of 5
@@ -325,6 +329,9 @@ void   Axis::computeMotorResponse(){
         if (motorSpeed > 0){break;}
         i = i + 5;
     }
+    
+    Serial.print(i);
+    Serial.println(" looks good");
     i = i - 5;
     
     //Find exact value
@@ -334,7 +341,8 @@ void   Axis::computeMotorResponse(){
         i = i + 1;
     }
     
-    
+    Serial.print("decided on final value of: ");
+    Serial.println(i);
     
     float X1 = i;
     float Y1 = scale*motorSpeed;
@@ -449,13 +457,18 @@ float  Axis::_speedSinceLastCall(){
     int distMoved   = _encoder.read() - prevEncoderValue;
     float speed = float(distMoved)/float(elapsedTime);
     
+    //catch if time is zero
+    if (elapsedTime < 10){
+        speed = 0;
+    }
+    
     //debug prints
-    Serial.print("Time: ");
-    Serial.println(elapsedTime);
-    Serial.print("Dist: ");
-    Serial.println(distMoved);
-    Serial.print("Speed: ");
-    Serial.println(speed);
+    //Serial.print("Time: ");
+    //Serial.println(elapsedTime);
+    //Serial.print("Dist: ");
+    //Serial.println(distMoved);
+    //Serial.print("Speed: ");
+    //Serial.println(speed);
     
     //set values for next call
     time = millis();
@@ -477,7 +490,7 @@ float  Axis::measureMotorSpeed(int speed){
     
     int numberOfStepsToTest = 2000;
     int timeOutMS           = 30*1000; //30 seconds
-    bool timeout            = false;
+    bool stall              = false;
     
     //run the motor for numberOfStepsToTest steps positive and record the time taken
     
@@ -490,6 +503,9 @@ float  Axis::measureMotorSpeed(int speed){
     
     //until the motor has moved the target distance
     while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
+        //establish baseline for speed measurement
+        _speedSinceLastCall();
+        
         //command motor to spin at speed
         _motor.write(speed);
         
@@ -500,10 +516,11 @@ float  Axis::measureMotorSpeed(int speed){
         Serial.println("pt(0, 0, 0)mm");
         
         //check to see if motor is moving
-        if (_speedSinceLastCall() < .1){
-            Serial.print("Break at ");
+        if (_speedSinceLastCall() < .01){
+            Serial.print("Stall at ");
             Serial.println(speed);
-            timeout = true;
+            Serial.println("*");
+            stall = true;
             break;
         }
     }
@@ -511,7 +528,7 @@ float  Axis::measureMotorSpeed(int speed){
     
     float RPM = float(sign)*60.0*1000.0 * 1.0/(4.0*float(posTime));
     
-    if (timeout){
+    if (stall){
         RPM = 0;
     }
     
@@ -522,7 +539,7 @@ float  Axis::measureMotorSpeed(int speed){
         hold();
         delay(50);
         //print to prevent connection timeout
-        Serial.println("\npt(0, 0, 0)mm");
+        Serial.println("pt(0, 0, 0)mm");
     }
     
     return RPM;
