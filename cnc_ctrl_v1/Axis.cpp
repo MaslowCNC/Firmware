@@ -438,14 +438,6 @@ float  Axis::_speedSinceLastCall(){
         speed = 0;
     }
     
-    //debug prints
-    //Serial.print("Time: ");
-    //Serial.println(elapsedTime);
-    //Serial.print("Dist: ");
-    //Serial.println(distMoved);
-    //Serial.print("Speed: ");
-    //Serial.println(speed);
-    
     //set values for next call
     time = millis();
     prevEncoderValue = _encoder.read();
