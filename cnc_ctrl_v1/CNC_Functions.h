@@ -120,9 +120,9 @@ float calculateDelay(float stepSizeMM, float feedrateMMPerMin){
     return msPerStep;
 }
 
-int   move(float xEnd, float yEnd, float zEnd, float MMPerMin){
+int   cordinatedMove(float xEnd, float yEnd, float MMPerMin){
     
-/*The move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
+/*The move() function moves the tool in a straight line to the position (xEnd, yEnd) at 
 the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in mm or mm per minute*/
@@ -192,40 +192,24 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     
 }
 
-int   rapidMove(float xEnd, float yEnd, float zEnd){
+void  singleAxisMove(Axis axis, float endPos, float feedrate){
+    Serial.println("Single axis move called");
+    Serial.println(axis.target());
+    Serial.println(endPos);
+    Serial.println(feedrate);
     
-    float aChainLength;
-    float bChainLength;
+    float moveDist             = axis.target() - endPos; //total distance to move
+    float stepSize             = 0.1;                    //step size in mm
+    long finalNumberOfSteps    = moveDist/stepSize;      //number of steps taken in move
     
-    kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
+    long numberOfStepsTaken    = 0;
+    long  beginingOfLastStep   = millis();
     
-    leftAxis.attach();
-    rightAxis.attach();
-    zAxis.attach();
+    axis.attach();
     
-    float acceptableError = 1.0;
-    
-    while(true){
+    while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
-        leftAxis.write(aChainLength);
-        rightAxis.write(bChainLength);
-        zAxis.write(zEnd);
-        
-        returnPoz(xEnd, yEnd, zAxis.read());
-        
-        delay(20);
-
-        if (leftAxis.error() < acceptableError && rightAxis.error() < acceptableError && zAxis.error() < acceptableError){
-            break;
-        }
     }
-    
-    leftAxis.endMove(aChainLength);
-    rightAxis.endMove(bChainLength);
-    zAxis.endMove(zEnd);
-    
-    xTarget = xEnd;
-    yTarget = yEnd;
     
 }
 
@@ -273,7 +257,7 @@ int   G1(String readString){
     float currentXPos = xTarget;
     float currentYPos = yTarget;
     //kinematics.forward(leftAxis.target(), rightAxis.target(), &currentXPos, &currentYPos);
-    float currentZPos = zAxis.read();
+    float currentZPos = zAxis.target();
     
     xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
     ygoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
@@ -305,17 +289,19 @@ int   G1(String readString){
     }
     #endif
     
+    #ifdef ZAXIS
+    if (zgoto != currentZPos/_inchesToMMConversion){
+        singleAxisMove(zAxis, zgoto, feedrate);
+    }
+    #endif
+    
     if (isNotRapid){
-        move(xgoto, ygoto, zgoto, feedrate); //The XY move is performed
-        #ifdef ZAXIS
-        if (zgoto != currentZPos/_inchesToMMConversion){
-            rapidMove(xgoto, ygoto, zgoto);  //The Z move is performed 
-        }
-        #endif
+        //if this is a regular move
+        cordinatedMove(xgoto, ygoto, feedrate); //The XY move is performed
     }
     else{
         //if this is a rapid move
-        rapidMove(xgoto, ygoto, zgoto);
+        cordinatedMove(xgoto, ygoto, 1200); //move the same as a regular move, but go fast
     }
 }
 

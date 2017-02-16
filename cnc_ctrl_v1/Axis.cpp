@@ -74,16 +74,12 @@ int    Axis::write(float targetPosition){
 }
 
 float  Axis::read(){
-    
-    if (_motor.attached()){
-        return (_encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
-    }
-    else{
-        return (_encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
-    }
+    //returns the true axis position
+    return (_encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
 }
 
 float  Axis::target(){
+    //returns the axis target
     return _axisTarget*_mmPerRotation;
 }
 
