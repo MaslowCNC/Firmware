@@ -315,16 +315,18 @@ void   Axis::computeMotorResponse(){
     int lowerBound =   0;
     
     while (true){ //until a value is found
+        Serial.print("Testing: ");
+        Serial.println((upperBound + lowerBound)/2);
+        
         motorSpeed = measureMotorSpeed((upperBound + lowerBound)/2);
+        
         if (motorSpeed == 0){                               //if the motor stalled
             lowerBound = (upperBound + lowerBound)/2;           //shift lower bound to be the guess
-            Serial.print("Stall at: ");
-            Serial.println(lowerBound);
+            Serial.println("- stall");
         }
         else{                                               //if the motor didn't stall
             upperBound = (upperBound + lowerBound)/2;           //shift upper bound to be the guess
-            Serial.print("Worked at: ");
-            Serial.println(upperBound);
+            Serial.println("- good");
         }
         
         if (upperBound - lowerBound <= 1){                  //when we've converged on the first point which doesn't stall
@@ -365,16 +367,18 @@ void   Axis::computeMotorResponse(){
     lowerBound =   -255;
     
     while (true){ //until a value is found
+        
+        Serial.print("Testing: ");
+        Serial.println((upperBound + lowerBound)/2);
+        
         motorSpeed = measureMotorSpeed((upperBound + lowerBound)/2);
         if (motorSpeed == 0){                               //if the motor stalled
             upperBound = (upperBound + lowerBound)/2;           //shift lower bound to be the guess
-            Serial.print("Stall at: ");
-            Serial.println(upperBound);
+            Serial.println("-stall");
         }
         else{                                               //if the motor didn't stall
             lowerBound = (upperBound + lowerBound)/2;           //shift upper bound to be the guess
-            Serial.print("Worked at: ");
-            Serial.println(lowerBound);
+            Serial.println("-good");
         }
         
         if (upperBound - lowerBound <= 1){                  //when we've converged on the first point which doesn't stall
