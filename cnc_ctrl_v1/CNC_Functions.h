@@ -200,13 +200,18 @@ void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
     
     float startingPos          = axis.target();
     float moveDist             = startingPos - endPos; //total distance to move
-    float stepSizeMM           = 0.1;                    //step size in mm
-    long finalNumberOfSteps    = moveDist/MMPerMin;      //number of steps taken in move
+    float stepSizeMM           = 0.5;                    //step size in mm
+    long finalNumberOfSteps    = moveDist/stepSizeMM;      //number of steps taken in move
     
     long numberOfStepsTaken    = 0;
     long  beginingOfLastStep   = millis();
     
     axis.attach();
+    
+    Serial.print("number of steps taken: ");
+    Serial.println(numberOfStepsTaken);
+    Serial.print("final number of steps: ");
+    Serial.println(finalNumberOfSteps);
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         //if enough time has passed to take the next step
@@ -229,7 +234,7 @@ void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
             
         }
     }
-    
+    axis.endMove(endPos);
 }
 
 void  holdPosition(){
