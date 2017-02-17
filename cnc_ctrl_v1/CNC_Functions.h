@@ -217,10 +217,10 @@ void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
          zAxis.write(whereAxisShouldBeAtThisStep);
         
         //update position on display
-        returnPoz(0, 0, zAxis.read());
+        returnPoz(xTarget, yTarget, zAxis.read());
         
-        delay(calculateDelay(stepSizeMM, MMPerMin)); 
-        Serial.println(calculateDelay(stepSizeMM, MMPerMin));
+        //calculate the correct delay between steps to set feedrate
+        delay(calculateDelay(stepSizeMM, MMPerMin));
         
         //increment the number of steps taken
         numberOfStepsTaken++;
@@ -308,7 +308,7 @@ int   G1(String readString){
     
     #ifdef ZAXIS
     if (zgoto != currentZPos/_inchesToMMConversion){
-        singleAxisMove(zAxis, zgoto,30);
+        singleAxisMove(zAxis, zgoto,40);
     }
     #endif
     
