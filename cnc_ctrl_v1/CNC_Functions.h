@@ -206,12 +206,12 @@ void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
     long numberOfStepsTaken    = 0;
     long  beginingOfLastStep   = millis();
     
-    axis.attach();
-    
     Serial.print("number of steps taken: ");
     Serial.println(numberOfStepsTaken);
     Serial.print("final number of steps: ");
     Serial.println(finalNumberOfSteps);
+    
+    axis.attach();
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         //if enough time has passed to take the next step

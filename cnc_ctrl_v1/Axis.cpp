@@ -63,9 +63,6 @@ void   Axis::initializePID(){
 int    Axis::write(float targetPosition){
     
     _pidSetpoint   =  targetPosition/_mmPerRotation;
-    
-    Serial.println(_axisName);
-    
     return 1;
 }
 
