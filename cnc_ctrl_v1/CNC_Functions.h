@@ -195,6 +195,9 @@ void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
     float startingPos          = zAxis.target();
     float moveDist             = startingPos - endPos; //total distance to move
     
+    float direction            = -1* moveDist/abs(moveDist);
+    Serial.println(direction);
+    
     float stepSizeMM           = 0.01;                    //step size in mm
     long finalNumberOfSteps    = moveDist/stepSizeMM;      //number of steps taken in move
     
@@ -209,7 +212,7 @@ void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
         beginingOfLastStep          = millis();
         
         //find the target point for this step
-        float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM;
+        float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM*direction;
         
         //write to each axis
          zAxis.write(whereAxisShouldBeAtThisStep);
@@ -217,11 +220,17 @@ void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
         //update position on display
         returnPoz(0, 0, zAxis.read());
         
-        delay(calculateDelay(stepSizeMM, MMPerMin));
+        delay(20);//calculateDelay(stepSizeMM, MMPerMin));
         
         //increment the number of steps taken
         numberOfStepsTaken++;
     }
+    
+    Serial.println("at end");
+    Serial.print("Target: ");
+    Serial.println(endPos);
+    Serial.print("Pos: ");
+    Serial.println(axis.read());
     
     zAxis.endMove(endPos);
     
@@ -305,7 +314,7 @@ int   G1(String readString){
     
     #ifdef ZAXIS
     if (zgoto != currentZPos/_inchesToMMConversion){
-        singleAxisMove(zAxis, zgoto, feedrate);
+        singleAxisMove(zAxis, zgoto, 15);
     }
     #endif
     
