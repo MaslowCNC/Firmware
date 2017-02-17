@@ -64,13 +64,9 @@ int    Axis::write(float targetPosition){
     
     _pidSetpoint   =  targetPosition/_mmPerRotation;
     
-    int acceptableError = 20;
-    if (abs( ((_encoder.read()/NUMBER_OF_ENCODER_STEPS) - _pidSetpoint)*1000 ) < acceptableError){
-        return 1;
-    }
-    else{
-        return 0;
-    }
+    Serial.println(_axisName);
+    
+    return 1;
 }
 
 float  Axis::read(){
