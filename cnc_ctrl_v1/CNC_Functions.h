@@ -192,47 +192,48 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
 
 void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
     Serial.println("Single axis move called");
-    Serial.println(axis.target());
+    Serial.println(zAxis.target());
     Serial.println(endPos);
     Serial.println(MMPerMin);
     
-    float startingPos          = axis.target();
+    float startingPos          = zAxis.target();
     float moveDist             = startingPos - endPos; //total distance to move
-    float stepSizeMM           = 0.5;                    //step size in mm
+    
+    Serial.print("MoveDist ");
+    Serial.println(moveDist);
+    
+    float stepSizeMM           = 0.01;                    //step size in mm
     long finalNumberOfSteps    = moveDist/stepSizeMM;      //number of steps taken in move
     
     long numberOfStepsTaken    = 0;
     long  beginingOfLastStep   = millis();
     
-    Serial.print("number of steps taken: ");
-    Serial.println(numberOfStepsTaken);
-    Serial.print("final number of steps: ");
-    Serial.println(finalNumberOfSteps);
+    zAxis.attach();
     
-    axis.attach();
+    float acceptableError = 1.0;
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
-        //if enough time has passed to take the next step
-        if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
-            
-            //reset the counter 
-            beginingOfLastStep          = millis();
-            
-            //find the target point for this step
-            float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM;
-            
-            //write to each axis
-            axis.write(whereAxisShouldBeAtThisStep);
-            
-            //increment the number of steps taken
-            numberOfStepsTaken++;
-            
-            //update position on display
-            returnPoz(0, 0, zAxis.read());
-            
-        }
+        
+        //reset the counter 
+        beginingOfLastStep          = millis();
+        
+        //find the target point for this step
+        float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM;
+        
+        //write to each axis
+         zAxis.write(whereAxisShouldBeAtThisStep);
+        
+        //update position on display
+        returnPoz(0, 0, zAxis.read());
+        
+        delay(calculateDelay(stepSizeMM, MMPerMin));
+        
+        //increment the number of steps taken
+        numberOfStepsTaken++;
     }
-    axis.endMove(endPos);
+    
+    zAxis.endMove(endPos);
+    
 }
 
 void  holdPosition(){
