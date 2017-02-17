@@ -191,16 +191,9 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
 }
 
 void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
-    Serial.println("Single axis move called");
-    Serial.println(zAxis.target());
-    Serial.println(endPos);
-    Serial.println(MMPerMin);
     
     float startingPos          = zAxis.target();
     float moveDist             = startingPos - endPos; //total distance to move
-    
-    Serial.print("MoveDist ");
-    Serial.println(moveDist);
     
     float stepSizeMM           = 0.01;                    //step size in mm
     long finalNumberOfSteps    = moveDist/stepSizeMM;      //number of steps taken in move
@@ -209,8 +202,6 @@ void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
     long  beginingOfLastStep   = millis();
     
     zAxis.attach();
-    
-    float acceptableError = 1.0;
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
