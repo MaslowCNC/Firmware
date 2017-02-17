@@ -120,9 +120,9 @@ float calculateDelay(float stepSizeMM, float feedrateMMPerMin){
     return msPerStep;
 }
 
-int   move(float xEnd, float yEnd, float zEnd, float MMPerMin){
+int   cordinatedMove(float xEnd, float yEnd, float MMPerMin){
     
-/*The move() function moves the tool in a straight line to the position (xEnd, yEnd, zEnd) at 
+/*The move() function moves the tool in a straight line to the position (xEnd, yEnd) at 
 the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
 direction, the tool moves to the target in a straight line. This function is used by the G00 
 and G01 commands. The units at this point should all be in mm or mm per minute*/
@@ -130,8 +130,6 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     float  xStartingLocation = xTarget;
     float  yStartingLocation = yTarget;
     float  stepSizeMM         = .5;
-    
-    //kinematics.forward(leftAxis.target(), rightAxis.target(), &xStartingLocation, &yStartingLocation);
     
     //find the total distances to move
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
@@ -192,40 +190,40 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     
 }
 
-int   rapidMove(float xEnd, float yEnd, float zEnd){
+void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
     
-    float aChainLength;
-    float bChainLength;
+    float startingPos          = zAxis.target();
+    float moveDist             = startingPos - endPos; //total distance to move
     
-    kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
+    float stepSizeMM           = 0.01;                    //step size in mm
+    long finalNumberOfSteps    = moveDist/stepSizeMM;      //number of steps taken in move
     
-    leftAxis.attach();
-    rightAxis.attach();
+    long numberOfStepsTaken    = 0;
+    long  beginingOfLastStep   = millis();
+    
     zAxis.attach();
     
-    float acceptableError = 1.0;
-    
-    while(true){
+    while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
-        leftAxis.write(aChainLength);
-        rightAxis.write(bChainLength);
-        zAxis.write(zEnd);
+        //reset the counter 
+        beginingOfLastStep          = millis();
         
-        returnPoz(xEnd, yEnd, zAxis.read());
+        //find the target point for this step
+        float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM;
         
-        delay(20);
-
-        if (leftAxis.error() < acceptableError && rightAxis.error() < acceptableError && zAxis.error() < acceptableError){
-            break;
-        }
+        //write to each axis
+         zAxis.write(whereAxisShouldBeAtThisStep);
+        
+        //update position on display
+        returnPoz(0, 0, zAxis.read());
+        
+        delay(calculateDelay(stepSizeMM, MMPerMin));
+        
+        //increment the number of steps taken
+        numberOfStepsTaken++;
     }
     
-    leftAxis.endMove(aChainLength);
-    rightAxis.endMove(bChainLength);
-    zAxis.endMove(zEnd);
-    
-    xTarget = xEnd;
-    yTarget = yEnd;
+    zAxis.endMove(endPos);
     
 }
 
@@ -273,7 +271,7 @@ int   G1(String readString){
     float currentXPos = xTarget;
     float currentYPos = yTarget;
     //kinematics.forward(leftAxis.target(), rightAxis.target(), &currentXPos, &currentYPos);
-    float currentZPos = zAxis.read();
+    float currentZPos = zAxis.target();
     
     xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
     ygoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
@@ -305,17 +303,19 @@ int   G1(String readString){
     }
     #endif
     
+    #ifdef ZAXIS
+    if (zgoto != currentZPos/_inchesToMMConversion){
+        singleAxisMove(zAxis, zgoto, feedrate);
+    }
+    #endif
+    
     if (isNotRapid){
-        move(xgoto, ygoto, zgoto, feedrate); //The XY move is performed
-        #ifdef ZAXIS
-        if (zgoto != currentZPos/_inchesToMMConversion){
-            rapidMove(xgoto, ygoto, zgoto);  //The Z move is performed 
-        }
-        #endif
+        //if this is a regular move
+        cordinatedMove(xgoto, ygoto, feedrate); //The XY move is performed
     }
     else{
         //if this is a rapid move
-        rapidMove(xgoto, ygoto, zgoto);
+        cordinatedMove(xgoto, ygoto, 1200); //move the same as a regular move, but go fast
     }
 }
 

@@ -63,27 +63,16 @@ void   Axis::initializePID(){
 int    Axis::write(float targetPosition){
     
     _pidSetpoint   =  targetPosition/_mmPerRotation;
-    
-    int acceptableError = 20;
-    if (abs( ((_encoder.read()/NUMBER_OF_ENCODER_STEPS) - _pidSetpoint)*1000 ) < acceptableError){
-        return 1;
-    }
-    else{
-        return 0;
-    }
+    return 1;
 }
 
 float  Axis::read(){
-    
-    if (_motor.attached()){
-        return (_encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
-    }
-    else{
-        return (_encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
-    }
+    //returns the true axis position
+    return (_encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
 }
 
 float  Axis::target(){
+    //returns the axis target
     return _axisTarget*_mmPerRotation;
 }
 
