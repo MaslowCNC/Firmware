@@ -422,34 +422,10 @@ void calibrateChainLengths(){
     in length
     */
     
-    leftAxis.detach();
-    rightAxis.detach();
-    zAxis.detach();
+    Serial.println("calibrate chain lengths ran");
+    singleAxisMove(&leftAxis, 100, feedrate);
     
-    leftAxis.set(ORIGINCHAINLEN);
-    rightAxis.set(ORIGINCHAINLEN); //set the chains to the center length
-    zAxis.set(0);
     
-    leftAxis.endMove(ORIGINCHAINLEN);
-    rightAxis.endMove(ORIGINCHAINLEN);
-    zAxis.endMove(0);
-    
-    xTarget = 0;
-    yTarget = 0;
-    
-    Serial.println("pt(0, 0, 0)mm");
-    delay(500); //Let the PID controller settle 
-    Serial.println("pt(0, 0, 0)mm");
-    delay(500); //Let the PID controller settle 
-    Serial.println("pt(0, 0, 0)mm");
-    
-    leftAxis.attach();
-    rightAxis.attach();
-    zAxis.attach();
-    
-    leftAxis.detach();
-    rightAxis.detach();
-    zAxis.detach();
     
 }
 
