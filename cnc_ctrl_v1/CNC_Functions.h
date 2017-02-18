@@ -311,7 +311,7 @@ int   G1(String readString){
     
     #ifdef ZAXIS
     if (zgoto != currentZPos/_inchesToMMConversion){
-        singleAxisMove(zAxis, zgoto,40);
+        singleAxisMove(&zAxis, zgoto,40);
     }
     #endif
     
@@ -425,7 +425,8 @@ void calibrateChainLengths(){
     */
     
     Serial.println("calibrate chain lengths ran");
-    singleAxisMove(&leftAxis, 100, feedrate);
+    leftAxis.set(0);
+    singleAxisMove(&leftAxis, 3000, feedrate);
     
     
     
