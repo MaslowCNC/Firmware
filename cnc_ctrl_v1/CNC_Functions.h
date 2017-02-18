@@ -198,6 +198,8 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     float startingPos          = axis->target();
     float moveDist             = startingPos - endPos; //total distance to move
     
+    float direction            = -1* moveDist/abs(moveDist); //determine the direction of the move
+    
     float stepSizeMM           = 0.01;                    //step size in mm
     long finalNumberOfSteps    = moveDist/stepSizeMM;      //number of steps taken in move
     
@@ -212,15 +214,15 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
         beginingOfLastStep          = millis();
         
         //find the target point for this step
-        float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM;
+        float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM*direction;
         
         //write to each axis
         axis->write(whereAxisShouldBeAtThisStep);
         
         //update position on display
-        returnPoz(0, 0, axis->read());
+        returnPoz(xTarget, yTarget, zAxis.read());
         
-        //pause to set federate
+        //calculate the correct delay between steps to set feedrate
         delay(calculateDelay(stepSizeMM, MMPerMin));
         
         //increment the number of steps taken
@@ -309,7 +311,7 @@ int   G1(String readString){
     
     #ifdef ZAXIS
     if (zgoto != currentZPos/_inchesToMMConversion){
-        singleAxisMove(&zAxis, zgoto, feedrate);
+        singleAxisMove(zAxis, zgoto,40);
     }
     #endif
     
