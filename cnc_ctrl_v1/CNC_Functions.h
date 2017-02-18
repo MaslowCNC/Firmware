@@ -190,9 +190,12 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     
 }
 
-void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
+void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
+    /*
+    Takes a pointer to an axis object and moves that axis to endPos at speed MMPerMin
+    */
     
-    float startingPos          = zAxis.target();
+    float startingPos          = axis->target();
     float moveDist             = startingPos - endPos; //total distance to move
     
     float stepSizeMM           = 0.01;                    //step size in mm
@@ -201,7 +204,7 @@ void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
     long numberOfStepsTaken    = 0;
     long  beginingOfLastStep   = millis();
     
-    zAxis.attach();
+    axis->attach();
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
@@ -212,18 +215,19 @@ void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
         float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM;
         
         //write to each axis
-         zAxis.write(whereAxisShouldBeAtThisStep);
+        axis->write(whereAxisShouldBeAtThisStep);
         
         //update position on display
-        returnPoz(0, 0, zAxis.read());
+        returnPoz(0, 0, axis->read());
         
+        //pause to set federate
         delay(calculateDelay(stepSizeMM, MMPerMin));
         
         //increment the number of steps taken
         numberOfStepsTaken++;
     }
     
-    zAxis.endMove(endPos);
+    axis->endMove(endPos);
     
 }
 
@@ -305,7 +309,7 @@ int   G1(String readString){
     
     #ifdef ZAXIS
     if (zgoto != currentZPos/_inchesToMMConversion){
-        singleAxisMove(zAxis, zgoto, feedrate);
+        singleAxisMove(&zAxis, zgoto, feedrate);
     }
     #endif
     
