@@ -300,6 +300,17 @@ void   Axis::computeMotorResponse(){
     int stallPoint;
     float motorSpeed;
     
+    Serial.println("this bit ran");
+    int i = 0;
+    while( i < 256){
+        Serial.print(i);
+        Serial.println("->");
+        Serial.println(measureMotorSpeed(i));
+        i++;
+        i++;
+    }
+    
+    
     int upperBound = 255; //the whole range is valid
     int lowerBound =   0;
     
@@ -451,10 +462,7 @@ float  Axis::measureMotorSpeed(int speed){
     
     //run the motor for numberOfStepsToTest steps positive and record the time taken
     
-    //Future options to improve the speed of this section. 1) Use a newton-raphson type search where it tries over, 
-    //under...over..under until it converges on a value. 2) Compute the speed with every cycle of the while loop and
-    //kick out if the total speed ever drops below a threshold. The motor tends to go a little bit at first and then stall
-    //So continuously monitoring would help quite a bit with catching that.
+    
     long originalEncoderPos  = _encoder.read();
     long startTime = millis();
     
