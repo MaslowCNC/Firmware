@@ -300,17 +300,6 @@ void   Axis::computeMotorResponse(){
     int stallPoint;
     float motorSpeed;
     
-    Serial.println("this bit ran");
-    int i = 0;
-    while( i < 256){
-        Serial.print(i);
-        Serial.println("->");
-        Serial.println(measureMotorSpeed(i));
-        i++;
-        i++;
-    }
-    
-    
     int upperBound = 255; //the whole range is valid
     int lowerBound =   0;
     
@@ -492,11 +481,6 @@ float  Axis::measureMotorSpeed(int speed){
     float rotations = (originalEncoderPos - _encoder.read())/NUMBER_OF_ENCODER_STEPS;
     //minutes = time elapsed in ms * 1000ms/s *60 seconds per minute
     float minutes   = posTime/(1000.0*60.0);
-    
-    //Serial.print("Num: ");
-    //Serial.println(rotations);
-    //Serial.print("Denom: ");
-    //Serial.println(minutes);
     
     //RPM is rotations per minute.
     float RPM = rotations/minutes;
