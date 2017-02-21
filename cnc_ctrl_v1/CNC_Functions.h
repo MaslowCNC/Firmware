@@ -190,9 +190,12 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     
 }
 
-void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
+void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
+    /*
+    Takes a pointer to an axis object and moves that axis to endPos at speed MMPerMin
+    */
     
-    float startingPos          = zAxis.target();
+    float startingPos          = axis->target();
     float moveDist             = startingPos - endPos; //total distance to move
     
     float direction            = -1* moveDist/abs(moveDist); //determine the direction of the move
@@ -203,7 +206,7 @@ void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
     long numberOfStepsTaken    = 0;
     long  beginingOfLastStep   = millis();
     
-    zAxis.attach();
+    axis->attach();
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
@@ -214,7 +217,7 @@ void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
         float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM*direction;
         
         //write to each axis
-         zAxis.write(whereAxisShouldBeAtThisStep);
+        axis->write(whereAxisShouldBeAtThisStep);
         
         //update position on display
         returnPoz(xTarget, yTarget, zAxis.read());
@@ -226,7 +229,7 @@ void  singleAxisMove(Axis axis, float endPos, float MMPerMin){
         numberOfStepsTaken++;
     }
     
-    zAxis.endMove(endPos);
+    axis->endMove(endPos);
     
 }
 
@@ -308,7 +311,7 @@ int   G1(String readString){
     
     #ifdef ZAXIS
     if (zgoto != currentZPos/_inchesToMMConversion){
-        singleAxisMove(zAxis, zgoto,40);
+        singleAxisMove(&zAxis, zgoto,40);
     }
     #endif
     
@@ -421,34 +424,17 @@ void calibrateChainLengths(){
     in length
     */
     
+    
+    leftAxis.set(0);
+    singleAxisMove(&leftAxis, ORIGINCHAINLEN, 500);
     leftAxis.detach();
+    
+    rightAxis.set(0);
+    singleAxisMove(&rightAxis, ORIGINCHAINLEN, 500);
     rightAxis.detach();
-    zAxis.detach();
-    
-    leftAxis.set(ORIGINCHAINLEN);
-    rightAxis.set(ORIGINCHAINLEN); //set the chains to the center length
-    zAxis.set(0);
-    
-    leftAxis.endMove(ORIGINCHAINLEN);
-    rightAxis.endMove(ORIGINCHAINLEN);
-    zAxis.endMove(0);
     
     xTarget = 0;
     yTarget = 0;
-    
-    Serial.println("pt(0, 0, 0)mm");
-    delay(500); //Let the PID controller settle 
-    Serial.println("pt(0, 0, 0)mm");
-    delay(500); //Let the PID controller settle 
-    Serial.println("pt(0, 0, 0)mm");
-    
-    leftAxis.attach();
-    rightAxis.attach();
-    zAxis.attach();
-    
-    leftAxis.detach();
-    rightAxis.detach();
-    zAxis.detach();
     
 }
 
