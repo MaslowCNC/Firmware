@@ -488,7 +488,18 @@ float  Axis::measureMotorSpeed(int speed){
     }
     int posTime = millis() - startTime;
     
-    float RPM = float(sign)*60.0*1000.0 * 1.0/(4.0*float(posTime));
+    //rotations = number of steps taken / steps per rotation
+    float rotations = (originalEncoderPos - _encoder.read())/NUMBER_OF_ENCODER_STEPS;
+    //minutes = time elapsed in ms * 1000ms/s *60 seconds per minute
+    float minutes   = posTime/(1000.0*60.0);
+    
+    //Serial.print("Num: ");
+    //Serial.println(rotations);
+    //Serial.print("Denom: ");
+    //Serial.println(minutes);
+    
+    //RPM is rotations per minute.
+    float RPM = rotations/minutes;
     
     if (stall){
         RPM = 0;
