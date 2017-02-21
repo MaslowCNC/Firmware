@@ -424,7 +424,7 @@ void calibrateChainLengths(){
     in length
     */
     
-    Serial.println("calibrate chain lengths ran");
+    
     leftAxis.set(0);
     singleAxisMove(&leftAxis, ORIGINCHAINLEN, 500);
     leftAxis.detach();
