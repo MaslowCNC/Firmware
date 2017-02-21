@@ -451,10 +451,7 @@ float  Axis::measureMotorSpeed(int speed){
     
     //run the motor for numberOfStepsToTest steps positive and record the time taken
     
-    //Future options to improve the speed of this section. 1) Use a newton-raphson type search where it tries over, 
-    //under...over..under until it converges on a value. 2) Compute the speed with every cycle of the while loop and
-    //kick out if the total speed ever drops below a threshold. The motor tends to go a little bit at first and then stall
-    //So continuously monitoring would help quite a bit with catching that.
+    
     long originalEncoderPos  = _encoder.read();
     long startTime = millis();
     
@@ -480,7 +477,13 @@ float  Axis::measureMotorSpeed(int speed){
     }
     int posTime = millis() - startTime;
     
-    float RPM = float(sign)*60.0*1000.0 * 1.0/(4.0*float(posTime));
+    //rotations = number of steps taken / steps per rotation
+    float rotations = (originalEncoderPos - _encoder.read())/NUMBER_OF_ENCODER_STEPS;
+    //minutes = time elapsed in ms * 1000ms/s *60 seconds per minute
+    float minutes   = posTime/(1000.0*60.0);
+    
+    //RPM is rotations per minute.
+    float RPM = rotations/minutes;
     
     if (stall){
         RPM = 0;
