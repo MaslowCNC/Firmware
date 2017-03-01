@@ -271,19 +271,6 @@ int    Axis::_change(float val){
     }
 }
 
-void   Axis::printBoost(){
-    
-    _disableAxisForTesting = true;
-    
-    for(int i = -255; i < 255; i = i+10){
-        Serial.print(i);
-        Serial.print(" -> ");
-        Serial.println(_motor._convolve(i));
-    }
-     
-    _disableAxisForTesting = false;
-}
-
 void   Axis::computeMotorResponse(){
     
     //remove whatever transform is applied

@@ -41,7 +41,6 @@
             float  error();
             float  setpoint();
             void   computePID();
-            void   printBoost();
             float  measureMotorSpeed(int speed);
             void   computeMotorResponse();
             
