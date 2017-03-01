@@ -40,6 +40,7 @@
             float  error();
             float  setpoint();
             void   computePID();
+            void computeMotorResponse();
             
         private:
             int        _PWMread(int pin);

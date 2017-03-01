@@ -22,10 +22,9 @@ to be a drop in replacement for a continuous rotation servo.
 */
 
 #include "Arduino.h"
-#include "GearMotor.h"
+#include "Motor.h"
 
 Motor::Motor(){
-  //Serial.println("created gear motor");
   
   _attachedState = 0;
   

@@ -187,3 +187,7 @@ int    Axis::_change(float val){
         return false;
     }
 }
+
+void   Axis::computeMotorResponse(){
+    _motorModule.computeMotorResponse();
+}

@@ -37,6 +37,8 @@ _encoder(encoderPin1,encoderPin2)
     _readAllLinSegs(_eepromAdr);
 }
 
+//           Encoder Functions
+
 long         GearboxMotorEncoder::readEncoder(){
     return _encoder.read();
 }
@@ -44,6 +46,9 @@ long         GearboxMotorEncoder::readEncoder(){
 void         GearboxMotorEncoder::writeEncoder(long newEncoderValue){
     _encoder.write(newEncoderValue);
 }
+
+
+//            Address motor module functions
 
 void         GearboxMotorEncoder::write(int speed){
     _motor.write(speed);
@@ -55,8 +60,8 @@ void         GearboxMotorEncoder::attach(){
 
 void         GearboxMotorEncoder::detach(){
     if (_motor.attached()){
-        _writeFloat (_eepromAdr+SIZEOFFLOAT, read());
-        EEPROM.write(_eepromAdr, EEPROMVALIDDATA);
+        EEPROM.write(_eepromAdr, EEPROMVALIDDATA);      //Mark that there is data to be written
+        //_writeFloat (_eepromAdr+SIZEOFFLOAT, read());   //Write the axis position (this should happen at the axis level)
         
         _writeAllLinSegs(_eepromAdr);
         
@@ -64,6 +69,9 @@ void         GearboxMotorEncoder::detach(){
     
     _motor.detach();
 }
+
+
+//           Reading and Writing EEPROM
 
 float        GearboxMotorEncoder::_readFloat(unsigned int addr){
 
@@ -154,6 +162,9 @@ void         GearboxMotorEncoder::_readAllLinSegs(unsigned int addr){
         _motor.setSegment(i, linSeg.slope, linSeg.intercept,  linSeg.negativeBound, linSeg.positiveBound);
     }
 }
+
+
+//           Calibration functions
 
 void         GearboxMotorEncoder::computeMotorResponse(){
     
@@ -362,7 +373,6 @@ float        GearboxMotorEncoder::measureMotorSpeed(int speed){
     
     //move back to start point
     _disableAxisForTesting = false;
-    _timeLastMoved = millis();
     for (long startTime = millis(); millis() - startTime < 2000; millis()){
         //hold();
         Serial.println("no hold function now");
