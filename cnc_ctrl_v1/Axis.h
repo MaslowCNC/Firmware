@@ -22,7 +22,6 @@
     #include "GearMotor.h"
     #include "PID_v1.h"
     #include <EEPROM.h>
-    #include "Encoder.h"
     #include "GearboxMotorEncoder.h"
     
 
@@ -68,8 +67,7 @@
             PID        _pidController;
             int        _eepromAdr;
             float      _mmPerRotation;
-            Encoder    _encoder;
-            GearboxMotorEncoder   _gearboxMotorEncoder;
+            GearboxMotorEncoder   _motorModule;
             float      _oldSetpoint;
             float      _oldVal;
             bool       _disableAxisForTesting = false;

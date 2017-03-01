@@ -35,3 +35,10 @@ _encoder(encoderPin1,encoderPin2)
     
     //_readAllLinSegs(_eepromAdr);
 }
+
+long GearboxMotorEncoder::readEncoder(){
+    return _encoder.read();
+}
+void GearboxMotorEncoder::writeEncoder(long newEncoderValue){
+    _encoder.write(newEncoderValue);
+}
