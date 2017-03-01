@@ -19,7 +19,7 @@
 #include "Arduino.h"
 #include "GearboxMotorEncoder.h"
 
-GearboxMotorEncoder::GearboxMotorEncoder()
+GearboxMotorEncoder::GearboxMotorEncoder(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation)
 :
 _encoder(encoderPin1,encoderPin2)
 {
@@ -31,7 +31,5 @@ _encoder(encoderPin1,encoderPin2)
     //initialize variables
     _eepromAdr    = eepromAdr;
     
-    //load position
-    
-    _readAllLinSegs(_eepromAdr);
+    //_readAllLinSegs(_eepromAdr);
 }

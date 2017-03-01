@@ -25,11 +25,14 @@
     #include "Encoder.h"
     
 
-    class Axis{
+    class GearboxMotorEncoder{
         public:
-            GearboxMotorEncoder();
+            GearboxMotorEncoder(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation);
             
         private:
+            Encoder    _encoder;
+            GearMotor  _motor;
+            int        _eepromAdr;
             
     };
 
