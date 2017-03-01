@@ -27,7 +27,7 @@
 
     class GearboxMotorEncoder{
         public:
-            GearboxMotorEncoder(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation);
+            GearboxMotorEncoder(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, int eepromAdr);
             
         private:
             Encoder    _encoder;

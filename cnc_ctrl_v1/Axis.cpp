@@ -32,7 +32,8 @@
 
 Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation)
 :
-_encoder(encoderPin1,encoderPin2)
+_encoder(encoderPin1,encoderPin2),
+_gearboxMotorEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2, eepromAdr)
 {
     
     //initialize motor
