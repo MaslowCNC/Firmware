@@ -31,9 +31,9 @@
     
     
     
-    class GearMotor{
+    class Motor{
         public:
-            GearMotor();
+            Motor();
             void attach();
             int  setupMotor(int pwmPin, int pin1, int pin2);
             void detach();

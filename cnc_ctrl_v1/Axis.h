@@ -40,8 +40,6 @@
             float  error();
             float  setpoint();
             void   computePID();
-            float  measureMotorSpeed(int speed);
-            void   computeMotorResponse();
             
         private:
             int        _PWMread(int pin);
@@ -49,10 +47,6 @@
             float      _readFloat(unsigned int addr);
             int        _sign(float val);
             int        _change(float val);
-            void       _writeLinSeg(unsigned int addr, LinSegment linSeg);
-            void       _writeAllLinSegs(unsigned int addr);
-            LinSegment _readLinSeg(unsigned int addr);
-            void       _readAllLinSegs(unsigned int addr);
             int        _direction;
             int        _encoderPin;
             String     _axisName;
@@ -68,8 +62,6 @@
             GearboxMotorEncoder   _motorModule;
             float      _oldSetpoint;
             float      _oldVal;
-            bool       _disableAxisForTesting = false;
-            float      _speedSinceLastCall();
     };
 
     #endif

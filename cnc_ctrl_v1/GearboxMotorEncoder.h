@@ -19,24 +19,41 @@
     #define GearboxMotorEncoder_h
 
     #include "Arduino.h"
-    #include "GearMotor.h"
+    #include "Motor.h"
     #include "PID_v1.h"
     #include <EEPROM.h>
     #include "Encoder.h"
+    
+    #define EEPROMVALIDDATA 56
+    #define SIZEOFFLOAT      4
+    #define SIZEOFLINSEG    17
+    
+    
+    #define NUMBER_OF_ENCODER_STEPS 8148.0 
     
 
     class GearboxMotorEncoder{
         public:
             GearboxMotorEncoder(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, int eepromAdr);
-            long readEncoder();
-            void writeEncoder(long newEncoderValue);
-            void write(int speed);
-            void attach();
-            void detach();
+            long  readEncoder();
+            void  writeEncoder(long newEncoderValue);
+            void  write(int speed);
+            void  attach();
+            void  detach();
+            float measureMotorSpeed(int speed);
+            void  computeMotorResponse();
         private:
             Encoder    _encoder;
-            GearMotor  _motor;
+            Motor      _motor;
             int        _eepromAdr;
+            void       _writeLinSeg(unsigned int addr, LinSegment linSeg);
+            void       _writeAllLinSegs(unsigned int addr);
+            LinSegment _readLinSeg(unsigned int addr);
+            void       _readAllLinSegs(unsigned int addr);
+            float      _speedSinceLastCall();
+            void       _writeFloat(unsigned int addr, float x);
+            float      _readFloat(unsigned int addr);
+            bool       _disableAxisForTesting = false;
             
     };
 
