@@ -117,7 +117,7 @@ void   Axis::computePID(){
     _pidInput      =  _motorModule.readEncoder()/NUMBER_OF_ENCODER_STEPS;
     _pidController.Compute();
     
-    _motor.write(_pidOutput);
+    _motorModule.write(_pidOutput);
     
 }
 
@@ -127,21 +127,13 @@ float  Axis::error(){
 
 int    Axis::detach(){
     
-    if (_motor.attached()){
-        _writeFloat (_eepromAdr+SIZEOFFLOAT, read());
-        EEPROM.write(_eepromAdr, EEPROMVALIDDATA);
-        
-        _writeAllLinSegs(_eepromAdr);
-        
-    }
-    
-    _motor.detach();
+    _motorModule.detach();
     
     return 1;
 }
 
 int    Axis::attach(){
-     _motor.attach();
+     _motorModule.attach();
      return 1;
 }
 

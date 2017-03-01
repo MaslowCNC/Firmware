@@ -30,6 +30,9 @@
             GearboxMotorEncoder(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, int eepromAdr);
             long readEncoder();
             void writeEncoder(long newEncoderValue);
+            void write(int speed);
+            void attach();
+            void detach();
         private:
             Encoder    _encoder;
             GearMotor  _motor;

@@ -39,6 +39,27 @@ _encoder(encoderPin1,encoderPin2)
 long GearboxMotorEncoder::readEncoder(){
     return _encoder.read();
 }
+
 void GearboxMotorEncoder::writeEncoder(long newEncoderValue){
     _encoder.write(newEncoderValue);
+}
+
+void GearboxMotorEncoder::write(int speed){
+    _motor.write(speed);
+}
+
+void GearboxMotorEncoder::attach(){
+    _motor.attach();
+}
+
+void GearboxMotorEncoder::detach(){
+    if (_motor.attached()){
+        _writeFloat (_eepromAdr+SIZEOFFLOAT, read());
+        EEPROM.write(_eepromAdr, EEPROMVALIDDATA);
+        
+        _writeAllLinSegs(_eepromAdr);
+        
+    }
+    
+    _motor.detach();
 }
