@@ -37,8 +37,8 @@ _motorModule(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2, eep
     _eepromAdr    = eepromAdr;
     _mmPerRotation= mmPerRotation;
     
-    //load position
-    if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
+    //load position from EEPROM
+    if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){  //check to see that a valid position is available to read from memory
         set(_readFloat(_eepromAdr + SIZEOFFLOAT));
     }
     
@@ -125,13 +125,12 @@ int    Axis::attach(){
 void   Axis::hold(){
     int timeout   = 2000;
     
-    if (millis() - _timeLastMoved < timeout){
-        write(_axisTarget*_mmPerRotation);
+    if (millis() - _timeLastMoved < timeout){   //If timeout hasn't happened
+        write(_axisTarget*_mmPerRotation);          //Keep trying to go to the position
     }
     else{
         detach();
     }
-    
 }
 
 void   Axis::endMove(float finalTarget){

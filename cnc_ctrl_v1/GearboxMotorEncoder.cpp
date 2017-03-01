@@ -24,8 +24,6 @@ GearboxMotorEncoder::GearboxMotorEncoder(int pwmPin, int directionPin1, int dire
 _encoder(encoderPin1,encoderPin2)
 {
     
-    Serial.println("begin gearbox motor setup");
-    
     //initialize motor
     _motor.setupMotor(pwmPin, directionPin1, directionPin2);
     
