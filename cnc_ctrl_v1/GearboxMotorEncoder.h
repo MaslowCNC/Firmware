@@ -43,6 +43,7 @@
             float measureMotorSpeed(int speed);
             void  computeMotorResponse();
             void  testPID(int speed);
+            void  computePID();
         private:
             Encoder    _encoder;
             Motor      _motor;
@@ -55,6 +56,8 @@
             void       _writeFloat(unsigned int addr, float x);
             float      _readFloat(unsigned int addr);
             bool       _disableAxisForTesting = false;
+            float      _speedSetpoint = 0;
+            int        _kP = 200;
             
     };
 

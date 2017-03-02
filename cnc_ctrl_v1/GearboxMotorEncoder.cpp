@@ -68,6 +68,16 @@ void         GearboxMotorEncoder::detach(){
     _motor.detach();
 }
 
+void         GearboxMotorEncoder::computePID(){
+                
+                
+                float tempSpeed = _speedSinceLastCall();
+                
+                float errorTerm = tempSpeed - _speedSetpoint;
+                long pwmCmd = _kP*errorTerm;//should be in the range 0-255
+                Serial.print(tempSpeed);
+                Serial.print(" ");
+}
 
 //           Reading and Writing EEPROM
 
@@ -387,11 +397,20 @@ float        GearboxMotorEncoder::measureMotorSpeed(int speed){
 }
 
 void         GearboxMotorEncoder::testPID(int speed){
+                delay(500);
                 Serial.println("Test PID");
                 _motor.attach();
+                _speedSetpoint = 8.0;
+                int i = 0;
                 while(true){
-                    _motor.write(200);
-                    Serial.println(_speedSinceLastCall());
+                    
+                    computePID();
                     delay(10);
+                    if(i > 1000){
+                        _speedSetpoint = 14;
+                    }
+                        i = 0;
+                    }
+                    i++;
                 }
 }
