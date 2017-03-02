@@ -167,7 +167,7 @@ void         GearboxMotorEncoder::_readAllLinSegs(unsigned int addr){
 void         GearboxMotorEncoder::computeMotorResponse(){
     
     //remove whatever transform is applied
-    _motor.setSegment(0 , 1, 0, 0, 0);
+    _motor.setSegment(0 , 1, 0, -255, 255);
     _motor.setSegment(1 , 1, 0, 0, 0);
     _motor.setSegment(2 , 1, 0, 0, 0);
     _motor.setSegment(3 , 1, 0, 0, 0);
@@ -372,7 +372,7 @@ float        GearboxMotorEncoder::measureMotorSpeed(int speed){
     //move back to start point
     _disableAxisForTesting = false;
     for (long startTime = millis(); millis() - startTime < 2000; millis()){
-        //_motor.write(originalEncoderPos - _encoder.read());
+        _motor.write(_encoder.read() - originalEncoderPos);
         delay(50);
         //print to prevent connection timeout
         Serial.println("pt(0, 0, 0)mm");
