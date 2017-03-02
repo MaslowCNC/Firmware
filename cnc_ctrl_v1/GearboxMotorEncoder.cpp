@@ -75,8 +75,12 @@ void         GearboxMotorEncoder::computePID(){
                 
                 float errorTerm = tempSpeed - _speedSetpoint;
                 long pwmCmd = _kP*errorTerm;//should be in the range 0-255
-                Serial.print(tempSpeed);
-                Serial.print(" ");
+                _motor.write(-200);
+                Serial.println(tempSpeed);
+                //Serial.print(" ");
+                //Serial.println(_speedSetpoint);
+                //Serial.print(" ");
+                //Serial.println(pwmCmd);
 }
 
 //           Reading and Writing EEPROM
@@ -403,12 +407,12 @@ void         GearboxMotorEncoder::testPID(int speed){
                 _speedSetpoint = 8.0;
                 int i = 0;
                 while(true){
-                    
-                    computePID();
                     delay(10);
                     if(i > 1000){
                         _speedSetpoint = 14;
                     }
+                    if(i > 2000){
+                        _speedSetpoint = -8;
                         i = 0;
                     }
                     i++;

@@ -103,6 +103,9 @@ void   Axis::computePID(){
     _pidController.Compute();
     
     _motorModule.write(_pidOutput);
+    if(_axisName == "Right-axis"){
+        _motorModule.computePID();
+    }
     
 }
 
