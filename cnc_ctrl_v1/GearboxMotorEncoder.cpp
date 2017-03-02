@@ -49,7 +49,7 @@ void         GearboxMotorEncoder::writeEncoder(long newEncoderValue){
 //            Address motor module functions
 
 void         GearboxMotorEncoder::write(int speed){
-    _motor.write(speed);
+    //_motor.write(speed);
 }
 
 void         GearboxMotorEncoder::attach(){
@@ -293,26 +293,31 @@ void         GearboxMotorEncoder::computeMotorResponse(){
 }
 
 float        GearboxMotorEncoder::_speedSinceLastCall(){
+    /*
+    Return the average motor speed since the last time the function was called in units of RPM
+    */
+    
     //static variables to persist between calls
-    static long time = millis();
+    static long time = micros();
     static long prevEncoderValue = _encoder.read();
     
     //compute dist moved
-    int elapsedTime = millis() - time;
-    int distMoved   = _encoder.read() - prevEncoderValue;
-    float speed = float(distMoved)/float(elapsedTime);
+    long elapsedTime = micros() - time;                     //units of microseconds 1/60,000,000 of a minute
+    int distMoved   = _encoder.read() - prevEncoderValue;   //units of steps moved of which there are NUMBER_OF_ENCODER_STEPS per rotation
+    int conversionFactor = 7364;//60 million / number of steps per rotation
+    float RPM = ((float)conversionFactor*(float)distMoved)/(float)elapsedTime;
     
     //catch if time is zero
-    if (elapsedTime < 10){
-        speed = 0;
+    if (elapsedTime < 1000){
+        RPM = 0;
     }
     
     //set values for next call
-    time = millis();
+    time = micros();
     prevEncoderValue = _encoder.read();
     
-    //return the absolute value because speed is not a vector
-    return abs(speed);
+    //return the speed in RPM
+    return RPM;
 }
 
 float        GearboxMotorEncoder::measureMotorSpeed(int speed){
@@ -382,5 +387,11 @@ float        GearboxMotorEncoder::measureMotorSpeed(int speed){
 }
 
 void         GearboxMotorEncoder::testPID(int speed){
-                Serial.println("would test PID");
+                Serial.println("Test PID");
+                _motor.attach();
+                while(true){
+                    _motor.write(200);
+                    Serial.println(_speedSinceLastCall());
+                    delay(10);
+                }
 }

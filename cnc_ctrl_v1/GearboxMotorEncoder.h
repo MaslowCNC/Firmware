@@ -29,7 +29,7 @@
     #define SIZEOFLINSEG    17
     
     
-    #define NUMBER_OF_ENCODER_STEPS 8148.0 
+    #define NUMBER_OF_ENCODER_STEPS 8148.0   //The number of steps in one complete rotation
     
 
     class GearboxMotorEncoder{

@@ -32,6 +32,8 @@ void setup(){
     Timer1.initialize(10000);
     Timer1.attachInterrupt(runsOnATimer);
     
+    rightAxis.computeMotorResponse();
+    
 }
 
 void runsOnATimer(){
