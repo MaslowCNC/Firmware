@@ -372,8 +372,7 @@ float        GearboxMotorEncoder::measureMotorSpeed(int speed){
     //move back to start point
     _disableAxisForTesting = false;
     for (long startTime = millis(); millis() - startTime < 2000; millis()){
-        //hold();
-        Serial.println("no hold function now");
+        //_motor.write(originalEncoderPos - _encoder.read());
         delay(50);
         //print to prevent connection timeout
         Serial.println("pt(0, 0, 0)mm");

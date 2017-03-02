@@ -69,6 +69,7 @@ void Motor::write(int speed){
     /*
     Sets motor speed from input. Speed = 0 is stopped, -255 is full reverse, 255 is full ahead.
     */
+    
     if (_attachedState == 1){
         
         //linearize the motor
