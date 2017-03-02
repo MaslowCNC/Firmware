@@ -57,7 +57,7 @@
             float      _readFloat(unsigned int addr);
             bool       _disableAxisForTesting = false;
             float      _speedSetpoint = 0;
-            int        _kP = 200;
+            int        _kP = 25;
             
     };
 

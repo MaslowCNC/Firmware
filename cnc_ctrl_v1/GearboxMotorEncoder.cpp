@@ -69,18 +69,33 @@ void         GearboxMotorEncoder::detach(){
 }
 
 void         GearboxMotorEncoder::computePID(){
-                
+                static float avg1; //this is a gross way to do this and should be changed
+                static float avg2;
+                static float avg3;
+                static float avg4;
+                static float avg5;
+                static float avg6;
+                static float avg7;
                 
                 float tempSpeed = _speedSinceLastCall();
+                float avgSpeed  = (avg1 + avg2 + avg3 + avg4 + avg5 + avg6 + avg7 + tempSpeed)/8; //the speed since last call function is somewhat noisy because calculating the motor speed 100x/second is pushing the limits on the encoder resolution
                 
-                float errorTerm = tempSpeed - _speedSetpoint;
-                long pwmCmd = _kP*errorTerm;//should be in the range 0-255
-                _motor.write(-200);
-                Serial.println(tempSpeed);
+                float errorTerm = avgSpeed - _speedSetpoint;
+                int pwmCmd = _kP*errorTerm;//should be in the range 0-255
+                _motor.write(pwmCmd);
+                Serial.println(avgSpeed);
                 //Serial.print(" ");
                 //Serial.println(_speedSetpoint);
                 //Serial.print(" ");
                 //Serial.println(pwmCmd);
+                
+                avg1 = avg2;
+                avg2 = avg3;
+                avg3 = avg4;
+                avg4 = avg5;
+                avg5 = avg6;
+                avg6 = avg7;
+                avg7 = tempSpeed;
 }
 
 //           Reading and Writing EEPROM
@@ -320,11 +335,6 @@ float        GearboxMotorEncoder::_speedSinceLastCall(){
     int distMoved   = _encoder.read() - prevEncoderValue;   //units of steps moved of which there are NUMBER_OF_ENCODER_STEPS per rotation
     int conversionFactor = 7364;//60 million / number of steps per rotation
     float RPM = ((float)conversionFactor*(float)distMoved)/(float)elapsedTime;
-    
-    //catch if time is zero
-    if (elapsedTime < 1000){
-        RPM = 0;
-    }
     
     //set values for next call
     time = micros();
