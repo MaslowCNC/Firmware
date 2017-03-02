@@ -221,7 +221,7 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
         //update position on display
         returnPoz(xTarget, yTarget, zAxis.read());
         
-        //calculate the correct delay between steps to set feedrate
+        //calculate the correct delay between steps to set feed-rate
         delay(calculateDelay(stepSizeMM, MMPerMin));
         
         //increment the number of steps taken
