@@ -42,6 +42,7 @@
             void  detach();
             float measureMotorSpeed(int speed);
             void  computeMotorResponse();
+            void  testPID(int speed);
         private:
             Encoder    _encoder;
             Motor      _motor;

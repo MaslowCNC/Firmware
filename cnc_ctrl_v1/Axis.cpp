@@ -188,5 +188,6 @@ int    Axis::_change(float val){
 }
 
 void   Axis::computeMotorResponse(){
-    _motorModule.computeMotorResponse();
+    //_motorModule.computeMotorResponse();
+    _motorModule.testPID(100);
 }

@@ -380,3 +380,7 @@ float        GearboxMotorEncoder::measureMotorSpeed(int speed){
     
     return RPM;
 }
+
+void         GearboxMotorEncoder::testPID(int speed){
+                Serial.println("would test PID");
+}
