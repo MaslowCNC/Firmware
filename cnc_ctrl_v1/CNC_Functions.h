@@ -93,7 +93,7 @@ void  returnPoz(float x, float y, float z){
         Serial.print(y/_inchesToMMConversion);
         Serial.print(", ");
         Serial.print(z/_inchesToMMConversion);
-        Serial.print(" ");
+        Serial.print(", ");
         Serial.print(errorTerm);
         Serial.print(")");
         
