@@ -85,7 +85,7 @@ void  returnPoz(float x, float y, float z){
     int                  timeout = 200;
     
     if (millis() - lastRan > timeout){
-        float errorTerm = leftAxis.error();
+        float errorTerm = (leftAxis.error() + rightAxis.error() )/2;
         
         Serial.print("pz(");
         Serial.print(x/_inchesToMMConversion);
