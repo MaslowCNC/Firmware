@@ -51,7 +51,7 @@
             float s = 139.0;                               //vertical distance between sled attach points and bit
             float h = sqrt((l/2)*(l/2) + s * s);           //distance between sled attach point and bit
             float h3 = 79.0;                               //distance from bit to sled center of mass
-            float D = 2978.4;                             //distance between sprocket centers
+            float D = 2978.4;                              //distance between sprocket centers
             float R = 10.2;                                //sprocket radius
 
             //Calculation tolerances
