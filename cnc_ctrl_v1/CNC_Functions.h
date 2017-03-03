@@ -418,7 +418,7 @@ void  G10(String readString){
     leftAxis.detach();
 }
 
-void calibrateChainLengths(){
+void  calibrateChainLengths(){
     /*
     The calibrateChainLengths function lets the machine know that the chains are set to a given length where each chain is ORIGINCHAINLEN
     in length
@@ -440,6 +440,19 @@ void calibrateChainLengths(){
 
 void  setInchesToMillimetersConversion(float newConversionFactor){
     _inchesToMMConversion = newConversionFactor;
+}
+
+void  updateSettings(String readString){
+    Serial.println("got to function ");
+    float bedWidth      = extractGcodeValue(readString, 'A', 0);
+    float bedHeight     = extractGcodeValue(readString, 'B', 0);
+    float motorOffsetX  = extractGcodeValue(readString, 'C', 0);
+    float motorOffsetY  = extractGcodeValue(readString, 'D', 0);
+    float sledWidth     = extractGcodeValue(readString, 'E', 0);
+    float sledHeight    = extractGcodeValue(readString, 'F', 0);
+    float sledCG        = extractGcodeValue(readString, 'G', 0);
+    Serial.print("Bed width: ");
+    Serial.println(bedWidth);
 }
 
 void  interpretCommandString(String readString){
@@ -536,6 +549,13 @@ void  interpretCommandString(String readString){
     
     if(readString.substring(0, 3) == "B02"){
         calibrateChainLengths();
+        readString = "";
+        Serial.println("gready");
+    }
+    
+    if(readString.substring(0, 3) == "B03"){
+        Serial.println("recognized B03");
+        updateSettings(readString);
         readString = "";
         Serial.println("gready");
     }
