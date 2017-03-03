@@ -453,6 +453,11 @@ void  updateSettings(String readString){
     float sledCG        = extractGcodeValue(readString, 'G', 0);
     Serial.print("Bed width: ");
     Serial.println(bedWidth);
+    
+    kinematics.l  = sledWidth;
+    kinematics.s  = sledHeight;
+    kinematics.h3 = sledCG;
+    kinematics.D  = bedWidth+2*motorOffsetX;
 }
 
 void  interpretCommandString(String readString){
