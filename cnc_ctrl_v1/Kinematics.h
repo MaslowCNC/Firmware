@@ -31,6 +31,14 @@
             void  oldInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  test();
             void  speedTest();
+            //geometry
+            float l = 310.0;                               //distance between sled attach points
+            float s = 139.0;                               //vertical distance between sled attach points and bit
+            float h = sqrt((l/2)*(l/2) + s * s);           //distance between sled attach point and bit
+            float h3 = 79.0;                               //distance from bit to sled center of mass
+            float D = 2978.4;                              //distance between sprocket centers
+            float R = 10.2;                                //sprocket radius
+            
         private:
             float _moment(float Y1Plus, float Y2Plus, float Phi, float MSinPhi, float MSinPsi1, float MCosPsi1, float MSinPsi2, float MCosPsi2);
             float _YOffsetEqn(float YPlus, float Denominator, float Psi);
@@ -45,14 +53,6 @@
             float DegPerRad = 360/(4 * atan(1));
             unsigned long Time;
             boolean Mirror;
-
-            //geometry
-            float l = 310.0;                               //distance between sled attach points
-            float s = 139.0;                               //vertical distance between sled attach points and bit
-            float h = sqrt((l/2)*(l/2) + s * s);           //distance between sled attach point and bit
-            float h3 = 79.0;                               //distance from bit to sled center of mass
-            float D = 2978.4;                             //distance between sprocket centers
-            float R = 10.2;                                //sprocket radius
 
             //Calculation tolerances
             float MaxError = 0.001;
