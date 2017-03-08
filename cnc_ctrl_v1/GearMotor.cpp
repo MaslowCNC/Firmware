@@ -121,8 +121,6 @@ int  GearMotor::_convolve(int input){
     for (int i = 0; i <= arrayLen - 1; i++){
         if (input > _linSegments[i].negativeBound and input < _linSegments[i].positiveBound){
             output = (input + _linSegments[i].intercept)/_linSegments[i].slope;
-            Serial.println("linseg applied");
-            Serial.println(i);
             break;
         }
     }

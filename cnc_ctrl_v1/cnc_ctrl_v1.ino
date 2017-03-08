@@ -32,6 +32,8 @@ void setup(){
     Timer1.initialize(10000);
     Timer1.attachInterrupt(runsOnATimer);
     
+    kinematics.forward(leftAxis.setpoint(), rightAxis.setpoint(), &xTarget, &yTarget); //setup the targets to be correct
+    
 }
 
 void runsOnATimer(){
