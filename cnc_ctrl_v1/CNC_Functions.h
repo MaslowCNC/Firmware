@@ -115,12 +115,12 @@ void emergencyStop(){
     /*
     Runs when the emergency stop is triggered
     */
-    Serial.println("estop ran");
+    Serial.println("E-Stop Triggered. Machine locked.");
     while(true){
-        Serial.println("estop");
         leftAxis.detach();
         rightAxis.detach();
         zAxis.detach();
+        returnPoz(xTarget, yTarget, zAxis.read());
     }
 }
 
@@ -138,6 +138,8 @@ void readSerialCommands(){
             readString += c; //makes the string readString
             if(readString.endsWith("STOP")){
                 emergencyStop();
+                readString = "";
+                readyCommandString = "";
             }
         }
     }
