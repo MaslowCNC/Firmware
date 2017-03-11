@@ -23,8 +23,6 @@ in X-Y space.
 #include "Arduino.h"
 #include "Kinematics.h"
 
-//#define OLDKINEMATICS 
-
 #define MACHINEHEIGHT    1219.2 //this is 4 feet in mm
 #define MACHINEWIDTH     2438.4 //this is 8 feet in mm
 #define MOTOROFFSETX     270.0
@@ -41,39 +39,6 @@ in X-Y space.
 Kinematics::Kinematics(){
     
 }
-
-#ifdef OLDKINEMATICS //This lets you use the old kinematics which make a triangle where the tool is at the tip.
-
-void  Kinematics::forward(float chainALength, float chainBLength, float* X, float* Y){
-    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
-    
-    //Use the law of cosines to find the angle between the two chains
-    float   a   = chainBLength + chainLengthAtCenterInMM;
-    float   b   = -1*chainALength + chainLengthAtCenterInMM;
-    float   c   = MACHINEWIDTH+2*MOTOROFFSETX;
-    float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
-    
-    *Y   = MOTOROFFSETY + MACHINEHEIGHT/2 - (b*sin(theta));
-    *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
-}
-
-void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
-    
-    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
-    
-    float X1 = MOTOROFFSETX + MACHINEWIDTH/2.0   + xTarget;
-    float X2 = MOTOROFFSETX + MACHINEWIDTH/2.0   - xTarget;
-    float Y  = MOTOROFFSETY + MACHINEHEIGHT/2.0  - yTarget;
-    
-    float La = sqrt( sq(X1) + sq(Y) );
-    float Lb = sqrt( sq(X2) + sq(Y) );
-    
-    *aChainLength = -1*(La - chainLengthAtCenterInMM);
-    *bChainLength = Lb - chainLengthAtCenterInMM;
-}
-
-
-#else //Use the regular kinematics
 
 void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
     //Compute xy position from chain lengths
@@ -353,32 +318,6 @@ float Kinematics::_YOffsetEqn(float YPlus, float Denominator, float Psi){
     return Temp;
 }
 
-void  Kinematics::speedTest(){
-    Serial.println("Begin Speed Test");
-    
-    float x = 0;
-    float y = .3*1.0;
-    long  startTime = micros();
-    int iterations = 100;
-    float chainA;
-    float chainB;
-    
-    for (int i = 0; i < iterations; i++){
-        forward(1432.01, 1766.6 + float(i)/100000.0, &chainA, &chainB);
-    }
-    
-    long time = (micros() - startTime)/iterations;
-    
-    
-    Serial.print("Time per call: ");
-    Serial.print(time);
-    Serial.println("us");
-    
-}
-
-#endif
-
-void Kinematics::test(){
     
     Serial.println("test kinematics begin-------------------------------------------------------");
     

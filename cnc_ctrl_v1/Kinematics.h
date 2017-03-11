@@ -28,9 +28,6 @@
             Kinematics();
             void  forward   (float chainALength, float chainBLength, float* X, float* Y);
             void  inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
-            void  oldInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
-            void  test();
-            void  speedTest();
             //geometry
             float l = 310.0;                               //distance between sled attach points
             float s = 139.0;                               //vertical distance between sled attach points and bit
