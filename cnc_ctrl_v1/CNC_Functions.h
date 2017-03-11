@@ -76,6 +76,7 @@ float _inchesToMMConversion =  1;
 String prependString;       //prefix ('G01' for ex) from the previous command
 String readString;          //command being built one character at a time
 String readyCommandString;  //next command queued up and ready to send
+bool   interuptMove        = false;
 
 //These are used in place of a forward kinematic function at the beginning of each move. They should be replaced
 //by a call to the forward kinematic function when it is available.
@@ -111,19 +112,6 @@ void  returnPoz(float x, float y, float z){
     
 }
 
-void emergencyStop(){
-    /*
-    Runs when the emergency stop is triggered
-    */
-    Serial.println("E-Stop Triggered. Machine locked.");
-    while(true){
-        leftAxis.detach();
-        rightAxis.detach();
-        zAxis.detach();
-        returnPoz(xTarget, yTarget, zAxis.read());
-    }
-}
-
 void readSerialCommands(){
     /*
     Check to see if a new character is available from the serial connection, read it if one is.
@@ -136,13 +124,19 @@ void readSerialCommands(){
         }
         else{
             readString += c; //makes the string readString
-            if(readString.endsWith("STOP")){
-                emergencyStop();
-                readString = "";
-                readyCommandString = "";
-            }
         }
     }
+}
+
+bool checkForStopCommand(){
+    if(readString.endsWith("STOP")){
+        //emergencyStop();
+        readString = "";
+        readyCommandString = "";
+        Serial.println("returning 1 seen stop");
+        return 1;
+    }
+    return 0;
 }
 
 float calculateDelay(float stepSizeMM, float feedrateMMPerMin){
@@ -218,6 +212,24 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
             //check for new serial commands
             readSerialCommands();
             
+            //check for a STOP command
+            if(checkForStopCommand()){
+                
+                //set the axis positions to save
+                kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+                leftAxis.endMove(aChainLength);
+                rightAxis.endMove(bChainLength);
+                
+                //make sure the positions are displayed correctly after stop
+                xTarget = whereXShouldBeAtThisStep;
+                yTarget = whereYShouldBeAtThisStep;
+                
+                Serial.println("this bit ran");
+                Serial.println(xTarget);
+                
+                return 1;
+            }
+            
         }
     }
     
@@ -228,7 +240,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     xTarget = xEnd;
     yTarget = yEnd;
     
-    return(1);
+    return 1;
     
 }
 
@@ -272,6 +284,9 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
         
         //check for new serial commands
         readSerialCommands();
+        
+        //check for a STOP command
+            checkForStopCommand();
     }
     
     axis->endMove(endPos);
@@ -416,6 +431,9 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         
         //check for new serial commands
         readSerialCommands();
+        
+        //check for a STOP command
+        checkForStopCommand();
     }
     
     kinematics.inverse(X2,Y2,&aChainLength,&bChainLength);
