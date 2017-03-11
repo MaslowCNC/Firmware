@@ -133,7 +133,6 @@ bool checkForStopCommand(){
         //emergencyStop();
         readString = "";
         readyCommandString = "";
-        Serial.println("returning 1 seen stop");
         return 1;
     }
     return 0;
@@ -223,9 +222,6 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
                 //make sure the positions are displayed correctly after stop
                 xTarget = whereXShouldBeAtThisStep;
                 yTarget = whereYShouldBeAtThisStep;
-                
-                Serial.println("this bit ran");
-                Serial.println(xTarget);
                 
                 return 1;
             }
