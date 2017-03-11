@@ -111,6 +111,22 @@ void  returnPoz(float x, float y, float z){
     
 }
 
+void readSerialCommands(){
+    /*
+    Check to see if a new character is available from the serial connection, read it if one is.
+    */
+    if (Serial.available() > 0) {
+        char c = Serial.read();  //gets one byte from serial buffer
+        if (c == '\n'){
+            readyCommandString = readString;
+            readString = "";
+        }
+        else{
+            readString += c; //makes the string readString
+        }
+    }
+}
+
 float calculateDelay(float stepSizeMM, float feedrateMMPerMin){
     /*
     Calculate the time delay between each step for a given feedrate
@@ -181,6 +197,9 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
             //update position on display
             returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
             
+            //check for new serial commands
+            readSerialCommands();
+            
         }
     }
     
@@ -232,6 +251,9 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
         
         //increment the number of steps taken
         numberOfStepsTaken++;
+        
+        //check for new serial commands
+        readSerialCommands();
     }
     
     axis->endMove(endPos);
@@ -373,6 +395,9 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
         
         numberOfStepsTaken = numberOfStepsTaken + 1;
+        
+        //check for new serial commands
+        readSerialCommands();
     }
     
     kinematics.inverse(X2,Y2,&aChainLength,&bChainLength);
@@ -441,20 +466,6 @@ void  calibrateChainLengths(){
     xTarget = 0;
     yTarget = 0;
     
-}
-
-void readSerialCommands(){
-    if (Serial.available() > 0) {
-        char c = Serial.read();  //gets one byte from serial buffer
-        if (c == '\n'){
-            Serial.println(readString);
-            readyCommandString = readString;
-            readString = "";
-        }
-        else{
-            readString += c; //makes the string readString
-        }
-    }
 }
 
 void  setInchesToMillimetersConversion(float newConversionFactor){
