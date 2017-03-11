@@ -17,8 +17,6 @@
 #include "TimerOne.h"
 
 
-String readString;
-
 void setup(){
     Serial.begin(19200);
     
@@ -43,24 +41,16 @@ void runsOnATimer(){
 }
 
 void loop(){
-    readString = "";
-    if (Serial.available()){
-        while (true) {
-            if (Serial.available() > 0) {
-                char c = Serial.read();  //gets one byte from serial buffer
-                if (c == '\n'){
-                    break;
-                }
-                readString += c; //makes the string readString
-            } 
-        }
-    }
-    if (readString.length() > 0){
-        readString.toUpperCase();
-        interpretCommandString(readString);
+    
+    if (readyCommandString.length() > 0){
+        readyCommandString.toUpperCase();
+        interpretCommandString(readyCommandString);
+        readyCommandString = "";
     }
     
     holdPosition();
+    
+    readSerialCommands();
     
     returnPoz(xTarget, yTarget, zAxis.read());
 }

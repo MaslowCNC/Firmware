@@ -73,7 +73,9 @@ Kinematics kinematics;
 
 float feedrate             =  125;
 float _inchesToMMConversion =  1;
-String prependString;
+String prependString;       //prefix ('G01' for ex) from the previous command
+String readString;          //command being built one character at a time
+String readyCommandString;  //next command queued up and ready to send
 
 //These are used in place of a forward kinematic function at the beginning of each move. They should be replaced
 //by a call to the forward kinematic function when it is available.
@@ -439,6 +441,20 @@ void  calibrateChainLengths(){
     xTarget = 0;
     yTarget = 0;
     
+}
+
+void readSerialCommands(){
+    if (Serial.available() > 0) {
+        char c = Serial.read();  //gets one byte from serial buffer
+        if (c == '\n'){
+            Serial.println(readString);
+            readyCommandString = readString;
+            readString = "";
+        }
+        else{
+            readString += c; //makes the string readString
+        }
+    }
 }
 
 void  setInchesToMillimetersConversion(float newConversionFactor){
