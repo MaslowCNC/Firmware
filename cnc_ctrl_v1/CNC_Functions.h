@@ -111,6 +111,19 @@ void  returnPoz(float x, float y, float z){
     
 }
 
+void emergencyStop(){
+    /*
+    Runs when the emergency stop is triggered
+    */
+    Serial.println("estop ran");
+    while(true){
+        Serial.println("estop");
+        leftAxis.detach();
+        rightAxis.detach();
+        zAxis.detach();
+    }
+}
+
 void readSerialCommands(){
     /*
     Check to see if a new character is available from the serial connection, read it if one is.
@@ -123,6 +136,9 @@ void readSerialCommands(){
         }
         else{
             readString += c; //makes the string readString
+            if(readString.endsWith("STOP")){
+                emergencyStop();
+            }
         }
     }
 }
