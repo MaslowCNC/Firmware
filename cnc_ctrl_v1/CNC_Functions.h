@@ -73,7 +73,9 @@ Kinematics kinematics;
 
 float feedrate             =  125;
 float _inchesToMMConversion =  1;
-String prependString;
+String prependString;       //prefix ('G01' for ex) from the previous command
+String readString;          //command being built one character at a time
+String readyCommandString;  //next command queued up and ready to send
 
 //These are used in place of a forward kinematic function at the beginning of each move. They should be replaced
 //by a call to the forward kinematic function when it is available.
@@ -107,6 +109,34 @@ void  returnPoz(float x, float y, float z){
         lastRan = millis();
     }
     
+}
+
+void readSerialCommands(){
+    /*
+    Check to see if a new character is available from the serial connection, read it if one is.
+    */
+    if (Serial.available() > 0) {
+        char c = Serial.read();  //gets one byte from serial buffer
+        if (c == '\n'){
+            readyCommandString = readString;
+            readString = "";
+        }
+        else{
+            readString += c; //makes the string readString
+        }
+    }
+}
+
+bool checkForStopCommand(){
+    /*
+    Check to see if the STOP command has been sent to the machine.
+    */
+    if(readString.endsWith("STOP")){
+        readString = "";
+        readyCommandString = "";
+        return 1;
+    }
+    return 0;
 }
 
 float calculateDelay(float stepSizeMM, float feedrateMMPerMin){
@@ -179,6 +209,24 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
             //update position on display
             returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
             
+            //check for new serial commands
+            readSerialCommands();
+            
+            //check for a STOP command
+            if(checkForStopCommand()){
+                
+                //set the axis positions to save
+                kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+                leftAxis.endMove(aChainLength);
+                rightAxis.endMove(bChainLength);
+                
+                //make sure the positions are displayed correctly after stop
+                xTarget = whereXShouldBeAtThisStep;
+                yTarget = whereYShouldBeAtThisStep;
+                
+                return 1;
+            }
+            
         }
     }
     
@@ -189,7 +237,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     xTarget = xEnd;
     yTarget = yEnd;
     
-    return(1);
+    return 1;
     
 }
 
@@ -230,6 +278,15 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
         
         //increment the number of steps taken
         numberOfStepsTaken++;
+        
+        //check for new serial commands
+        readSerialCommands();
+        
+        //check for a STOP command
+        if(checkForStopCommand()){
+            axis->endMove(whereAxisShouldBeAtThisStep);
+            return;
+        }
     }
     
     axis->endMove(endPos);
@@ -371,6 +428,23 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
         returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
         
         numberOfStepsTaken = numberOfStepsTaken + 1;
+        
+        //check for new serial commands
+        readSerialCommands();
+        
+        //check for a STOP command
+        if(checkForStopCommand()){
+            //set the axis positions to save
+            kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+            leftAxis.endMove(aChainLength);
+            rightAxis.endMove(bChainLength);
+            
+            //make sure the positions are displayed correctly after stop
+            xTarget = whereXShouldBeAtThisStep;
+            yTarget = whereYShouldBeAtThisStep;
+            
+            return 1;
+        }
     }
     
     kinematics.inverse(X2,Y2,&aChainLength,&bChainLength);
@@ -379,6 +453,8 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     
     xTarget = X2;
     yTarget = Y2;
+    
+    return 1;
 }
 
 int   G2(String readString){
