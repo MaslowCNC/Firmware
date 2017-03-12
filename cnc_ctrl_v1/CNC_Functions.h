@@ -537,7 +537,6 @@ void  updateSettings(String readString){
     kinematics.D  = bedWidth+2*motorOffsetX;
     
     Serial.println("Machine Settings Updated");
-    Serial.println(kinematics.D);
 }
 
 void  interpretCommandString(String readString){
