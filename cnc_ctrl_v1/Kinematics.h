@@ -90,7 +90,6 @@
             float Gamma;
 
             // output = chain lengths measured from 12 o'clock
-
             float Chain1; //left chain length 
             float Chain2; //right chain length
 

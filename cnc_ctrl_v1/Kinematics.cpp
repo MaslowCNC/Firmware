@@ -317,34 +317,3 @@ float Kinematics::_YOffsetEqn(float YPlus, float Denominator, float Psi){
     Temp = ((sqrt(YPlus * YPlus - R * R)/R) - (y + YPlus - h * sin(Psi))/Denominator);
     return Temp;
 }
-
-    
-    Serial.println("test kinematics begin-------------------------------------------------------");
-    
-    
-    float chainA;
-    float chainB;
-    float X = -500.0;
-    float Y = 500.0; 
-    
-    Serial.print("X: ");
-    Serial.println(X);
-    Serial.print("Y: ");
-    Serial.println(Y);
-    
-    inverse(X,Y, &chainA, &chainB);
-    
-    Serial.println("New: ");
-    Serial.print("La: ");
-    Serial.println(chainA);
-    Serial.print("Lb: ");
-    Serial.println(chainB);
-    
-    forward(chainA, chainB, &X, &Y);
-    
-    Serial.print("X: ");
-    Serial.println(X);
-    Serial.print("Y: ");
-    Serial.println(Y);
-    
-}
