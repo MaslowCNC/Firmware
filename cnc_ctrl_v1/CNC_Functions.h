@@ -522,7 +522,11 @@ void  setInchesToMillimetersConversion(float newConversionFactor){
 }
 
 void  updateSettings(String readString){
+    /*
+    Updates the machine dimensions from the Ground Control settings
+    */
     
+    //Extract the settings values
     float bedWidth      = extractGcodeValue(readString, 'A', 0);
     float bedHeight     = extractGcodeValue(readString, 'B', 0);
     float motorOffsetX  = extractGcodeValue(readString, 'C', 0);
@@ -531,10 +535,16 @@ void  updateSettings(String readString){
     float sledHeight    = extractGcodeValue(readString, 'F', 0);
     float sledCG        = extractGcodeValue(readString, 'G', 0);
     
-    kinematics.l  = sledWidth;
-    kinematics.s  = sledHeight;
-    kinematics.h3 = sledCG;
-    kinematics.D  = bedWidth+2*motorOffsetX;
+    
+    //Change the machine dimensions in the kinematics 
+    kinematics.l            = sledWidth;
+    kinematics.s            = sledHeight;
+    kinematics.h3           = sledCG;
+    kinematics.D            = bedWidth+2*motorOffsetX;
+    kinematics.motorOffsetX = motorOffsetX;
+    kinematics.motorOffsetY = motorOffsetY;
+    kinematics.machineWidth = bedWidth;
+    kinematics.machineHeight= bedHeight;
     
     Serial.println("Machine Settings Updated");
 }
