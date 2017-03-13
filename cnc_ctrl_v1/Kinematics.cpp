@@ -90,11 +90,6 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     x = ( machineWidth/2 - xTarget) + motorOffsetX;
     y = (machineHeight/2 - yTarget) + motorOffsetY;
     
-    Serial.println("@#$");
-    Serial.println(y);
-    Serial.println(machineHeight);
-    Serial.println(motorOffsetY);
-    
     //Coordinates definition:
     //         x -->, y |
     //                  v
