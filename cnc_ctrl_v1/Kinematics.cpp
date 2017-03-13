@@ -69,6 +69,17 @@ void Kinematics::_verifyValidTarget(float* xTarget,float* yTarget){
     
 }
 
+void Kinematics::recomputeGeometry(){
+    /*
+    Some variables are computed on class creation for the geometry of the machine to reduce overhead,
+    calling this function regenerates those values.
+    */
+    h = sqrt((l/2)*(l/2) + s * s);
+    Theta = atan(2*s/l);
+    Psi1 = Theta - Phi;
+    Psi2 = Theta + Phi;
+}
+
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     
     

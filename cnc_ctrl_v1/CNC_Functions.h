@@ -545,6 +545,7 @@ void  updateSettings(String readString){
     kinematics.motorOffsetY = motorOffsetY;
     kinematics.machineWidth = bedWidth;
     kinematics.machineHeight= bedHeight;
+    kinematics.recomputeGeometry();
     
     Serial.println("Machine Settings Updated");
 }
