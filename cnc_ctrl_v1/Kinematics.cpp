@@ -55,6 +55,9 @@ void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
 void Kinematics::_verifyValidTarget(float* xTarget,float* yTarget){
     //If the target point is beyond one of the edges of the board, the machine stops at the edge
     
+    //Serial.println("**");
+    //Serial.println(*xTarget);
+    
     if (*xTarget < -machineWidth/2){
         *xTarget = -machineWidth/2;
     }
@@ -67,6 +70,8 @@ void Kinematics::_verifyValidTarget(float* xTarget,float* yTarget){
     else if (*yTarget <  -machineHeight/2){
         *yTarget =  -machineHeight/2;
     }
+    
+    //Serial.println(*xTarget);
     
 }
 
