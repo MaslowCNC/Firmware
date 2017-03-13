@@ -528,12 +528,12 @@ void  updateSettings(String readString){
     
     //Extract the settings values
     float bedWidth      = extractGcodeValue(readString, 'A', 0);
-    float bedHeight     = extractGcodeValue(readString, 'B', 0);
-    float motorOffsetX  = extractGcodeValue(readString, 'C', 0);
-    float motorOffsetY  = extractGcodeValue(readString, 'D', 0);
-    float sledWidth     = extractGcodeValue(readString, 'E', 0);
-    float sledHeight    = extractGcodeValue(readString, 'F', 0);
-    float sledCG        = extractGcodeValue(readString, 'G', 0);
+    float bedHeight     = extractGcodeValue(readString, 'C', 0);
+    float motorOffsetX  = extractGcodeValue(readString, 'D', 0);
+    float motorOffsetY  = extractGcodeValue(readString, 'E', 0);
+    float sledWidth     = extractGcodeValue(readString, 'F', 0);
+    float sledHeight    = extractGcodeValue(readString, 'G', 0);
+    float sledCG        = extractGcodeValue(readString, 'H', 0);
     
     
     //Change the machine dimensions in the kinematics 

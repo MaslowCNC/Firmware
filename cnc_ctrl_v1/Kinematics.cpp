@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
     
-    Copyright 2014-2016 Bar Smith*/
+    Copyright 2014-2017 Bar Smith*/
 
 /*
 The Kinematics module relates the lengths of the chains to the position of the cutting head
@@ -25,12 +25,6 @@ in X-Y space.
 
 #define SLEDWIDTH        310.0
 #define SLEDHEIGHT       139.0
-
-#define AX               -1*machineWidth/2 - motorOffsetX
-#define AY               machineHeight/2 + motorOffsetY
-#define BX               machineWidth/2 + motorOffsetX
-#define BY               machineHeight/2 + motorOffsetY
-
 
 Kinematics::Kinematics(){
     
@@ -84,6 +78,11 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
     x = ( machineWidth/2 - xTarget) + motorOffsetX;
     y = (machineHeight/2 - yTarget) + motorOffsetY;
+    
+    Serial.println("@#$");
+    Serial.println(y);
+    Serial.println(machineHeight);
+    Serial.println(motorOffsetY);
     
     //Coordinates definition:
     //         x -->, y |
