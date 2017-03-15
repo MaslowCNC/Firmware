@@ -10,7 +10,7 @@
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
     
-    Copyright 2014 Bar Smith*/
+    Copyright 2014-2017 Bar Smith*/
     
     
 #include "CNC_Functions.h"
