@@ -22,7 +22,7 @@ libraries*/
 
 #define VERSIONNUMBER 0.60
 
-#define ZAXIS
+//#define ZAXIS
 
 #define FORWARD           1
 #define BACKWARD         -1
