@@ -346,7 +346,8 @@ int   G1(String readString){
     isNotRapid = extractGcodeValue(readString, 'G', 1);
     
     #ifndef ZAXIS
-    if (zgoto != 0){
+    float threshold = .1; //units of mm
+    if (abs(currentZPos - zgoto) > threshold){
         Serial.print("Message: Please adjust Z-Axis to a depth of ");
         if (zgoto > 0){
             Serial.print("+");
@@ -358,6 +359,8 @@ int   G1(String readString){
         else{
             Serial.println(" mm");
         }
+        
+        zAxis.set(zgoto);
         
         int    waitTimeMs = 1000;
         double startTime  = millis();
