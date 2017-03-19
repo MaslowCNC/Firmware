@@ -661,6 +661,19 @@ void  interpretCommandString(String readString){
         Serial.println("gready");
     }
     
+    if(readString.substring(0, 3) == "B04"){
+        //Test each of the axies
+        delay(500);
+        leftAxis.test();
+        delay(500);
+        rightAxis.test();
+        delay(500);
+        zAxis.test();
+        Serial.println("Tests complete.");
+        readString = "";
+        Serial.println("gready");
+    }
+    
     if(readString.substring(0, 3) == "B05"){
         Serial.print("Firmware Version ");
         Serial.println(VERSIONNUMBER);
