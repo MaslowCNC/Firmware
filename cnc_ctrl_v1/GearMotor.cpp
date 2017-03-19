@@ -104,6 +104,26 @@ void GearMotor::write(int speed){
     }
 }
 
+void GearMotor::directWrite(int voltage){
+    /*
+    Write directly to the motor, ignoring if the axis is attached or any applied calibration.
+    */
+    
+    if (voltage > 0){
+        digitalWrite(_pin1 , HIGH);
+        digitalWrite(_pin2 , LOW );
+    }
+    else if (voltage == 0){
+        voltage = voltage;
+    }
+    else{
+        digitalWrite(_pin1 , LOW);
+        digitalWrite(_pin2 , HIGH );
+    }
+    
+    analogWrite(_pwmPin, voltage);
+}
+
 int  GearMotor::attached(){
     
     return _attachedState;

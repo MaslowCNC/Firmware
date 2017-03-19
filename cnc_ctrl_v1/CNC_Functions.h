@@ -658,7 +658,10 @@ void  interpretCommandString(String readString){
     }
     
     if(readString.substring(0, 3) == "B04"){
-        Serial.println("would test axies here");
+        //Test each of the axies
+        leftAxis.test();
+        rightAxis.test();
+        zAxis.test();
         readString = "";
         Serial.println("gready");
     }

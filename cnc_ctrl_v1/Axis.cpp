@@ -289,7 +289,19 @@ void   Axis::test(){
     Test the axis by directly commanding the motor and observing if the encoder moves
     */
     
-    Serial.println("in axis move");
+    Serial.print("Testing ");
+    Serial.println(_axisName);
+    int i = 0;
+    while (i < 10000){
+        _motor.directWrite(255);
+        i++;
+    }
+    i = 0;
+    while (i < 10000){
+        _motor.directWrite(255);
+        i++;
+    }
+    _motor.directWrite(0);
 }
 
 void   Axis::computeMotorResponse(){
