@@ -44,6 +44,7 @@
             void   printBoost();
             float  measureMotorSpeed(int speed);
             void   computeMotorResponse();
+            void   test();
             
         private:
             int        _PWMread(int pin);
