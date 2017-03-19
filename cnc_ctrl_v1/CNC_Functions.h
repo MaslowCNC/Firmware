@@ -413,6 +413,10 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float aChainLength;
     float bChainLength;
     
+    //attach the axes
+    leftAxis.attach();
+    rightAxis.attach();
+    
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
         angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
