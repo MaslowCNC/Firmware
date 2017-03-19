@@ -659,8 +659,11 @@ void  interpretCommandString(String readString){
     
     if(readString.substring(0, 3) == "B04"){
         //Test each of the axies
+        delay(500);
         leftAxis.test();
+        delay(500);
         rightAxis.test();
+        delay(500);
         zAxis.test();
         readString = "";
         Serial.println("gready");

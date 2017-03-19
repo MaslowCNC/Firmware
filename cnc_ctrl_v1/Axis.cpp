@@ -290,18 +290,28 @@ void   Axis::test(){
     */
     
     Serial.print("Testing ");
-    Serial.println(_axisName);
+    Serial.print(_axisName);
+    Serial.println(" motor:");
+    
+    
+    Serial.println("pt(0,0,0)");
     int i = 0;
-    while (i < 10000){
+    double encoderPos = _encoder.read();
+    while (i < 1000){
         _motor.directWrite(255);
         i++;
+        delay(1);
     }
+    Serial.println(encoderPos - _encoder.read());
+    Serial.println("pt(0,0,0)");
     i = 0;
-    while (i < 10000){
-        _motor.directWrite(255);
+    while (i < 1000){
+        _motor.directWrite(-255);
         i++;
+        delay(1);
     }
     _motor.directWrite(0);
+    Serial.println("pt(0,0,0)");
 }
 
 void   Axis::computeMotorResponse(){

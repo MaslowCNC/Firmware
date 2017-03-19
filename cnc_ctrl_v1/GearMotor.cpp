@@ -121,7 +121,7 @@ void GearMotor::directWrite(int voltage){
         digitalWrite(_pin2 , HIGH );
     }
     
-    analogWrite(_pwmPin, voltage);
+    analogWrite(_pwmPin, abs(voltage));
 }
 
 int  GearMotor::attached(){
