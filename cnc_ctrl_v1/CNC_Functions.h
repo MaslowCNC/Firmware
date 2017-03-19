@@ -413,6 +413,10 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float aChainLength;
     float bChainLength;
     
+    //attach the axes
+    leftAxis.attach();
+    rightAxis.attach();
+    
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
         angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
@@ -589,8 +593,8 @@ void  interpretCommandString(String readString){
     }
     
     if(readString.substring(0, 3) == "G03" || readString.substring(0, 3) == "G3 "){
-        Serial.println("gready");
         G2(readString);
+        Serial.println("gready");
         Serial.println("ready");
         readString = "";
     }
