@@ -518,7 +518,7 @@ void  calibrateChainLengths(){
     leftAxis.detach();
     
     //measure out the right chain
-    Serial.println("Measuring out right chain")
+    Serial.println("Measuring out right chain");
     rightAxis.set(0);
     singleAxisMove(&rightAxis, ORIGINCHAINLEN, 500);
     rightAxis.detach();
