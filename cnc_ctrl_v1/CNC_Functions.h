@@ -589,8 +589,8 @@ void  interpretCommandString(String readString){
     }
     
     if(readString.substring(0, 3) == "G03" || readString.substring(0, 3) == "G3 "){
-        Serial.println("gready");
         G2(readString);
+        Serial.println("gready");
         Serial.println("ready");
         readString = "";
     }
