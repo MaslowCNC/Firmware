@@ -284,6 +284,14 @@ void   Axis::printBoost(){
     _disableAxisForTesting = false;
 }
 
+void   Axis::test(){
+    /*
+    Test the axis by directly commanding the motor and observing if the encoder moves
+    */
+    
+    Serial.println("in axis move");
+}
+
 void   Axis::computeMotorResponse(){
     
     //remove whatever transform is applied

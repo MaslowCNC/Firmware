@@ -657,6 +657,12 @@ void  interpretCommandString(String readString){
         Serial.println("gready");
     }
     
+    if(readString.substring(0, 3) == "B04"){
+        Serial.println("would test axies here");
+        readString = "";
+        Serial.println("gready");
+    }
+    
     if(readString.substring(0, 3) == "B05"){
         Serial.print("Firmware Version ");
         Serial.println(VERSIONNUMBER);
