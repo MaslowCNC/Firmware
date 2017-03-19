@@ -296,20 +296,44 @@ void   Axis::test(){
     
     Serial.println("pt(0,0,0)");
     int i = 0;
-    double encoderPos = _encoder.read();
+    double encoderPos = _encoder.read(); //record the position now
+    
+    //move the motor
     while (i < 1000){
         _motor.directWrite(255);
         i++;
         delay(1);
     }
-    Serial.println(encoderPos - _encoder.read());
+    
+    //check to see if it moved
+    if(encoderPos - _encoder.read() > 500){
+        Serial.println("Direction 1 - Pass");
+    }
+    else{
+        Serial.println("Direction 1 - Fail");
+    }
+    
+    //record the position again
+    encoderPos = _encoder.read();
     Serial.println("pt(0,0,0)");
+    
+    //move the motor in the other direction
     i = 0;
     while (i < 1000){
         _motor.directWrite(-255);
         i++;
         delay(1);
     }
+    
+    //check to see if it moved
+    if(encoderPos - _encoder.read() < -500){
+        Serial.println("Direction 2 - Pass");
+    }
+    else{
+        Serial.println("Direction 2 - Fail");
+    }
+    
+    //stop the motor
     _motor.directWrite(0);
     Serial.println("pt(0,0,0)");
 }

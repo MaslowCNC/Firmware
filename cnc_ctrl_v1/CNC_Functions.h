@@ -665,6 +665,7 @@ void  interpretCommandString(String readString){
         rightAxis.test();
         delay(500);
         zAxis.test();
+        Serial.println("Tests complete.");
         readString = "";
         Serial.println("gready");
     }
