@@ -83,6 +83,11 @@ float xTarget = 0;
 float yTarget = 0;
 
 void  returnPoz(float x, float y, float z){
+    /*
+    Causes the machine's position (x,y) to be sent over the serial connection updated on the UI
+    in Ground Control. Only executes if hasn't been called in at least timeout ms.
+    */
+    
     static unsigned long lastRan = millis();
     int                  timeout = 200;
     
@@ -666,7 +671,7 @@ void  interpretCommandString(String readString){
     }
     
     if(readString.substring(0, 3) == "B04"){
-        //Test each of the axies
+        //Test each of the axis
         delay(500);
         leftAxis.test();
         delay(500);
