@@ -23,27 +23,9 @@ in X-Y space.
 #include "Arduino.h"
 #include "Kinematics.h"
 
-#define SLEDWIDTH        310.0
-#define SLEDHEIGHT       139.0
 
 Kinematics::Kinematics(){
     
-}
-
-void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
-    //Compute xy position from chain lengths
-    #define SLEDDIAGONAL  sqrt(sq(SLEDHEIGHT) + sq(SLEDWIDTH/2))
-    
-    //Use the law of cosines to find the angle between the two chains
-    float   a   = Lbd;// + SLEDDIAGONAL;
-    float   b   = Lac;// + SLEDDIAGONAL;
-    float   c   = machineWidth+2*motorOffsetX;
-    
-    //Theta is the angle made by the chain and the top left motor
-    float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
-    
-    *Y   = (machineHeight/2 + motorOffsetY) - (b*sin(theta) + 394); //394 is a made up number to make things look good because this is fake math
-    *X   = (b*cos(theta)) - (machineWidth/2.0 + motorOffsetX);
 }
 
 void Kinematics::_verifyValidTarget(float* xTarget,float* yTarget){
