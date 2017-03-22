@@ -611,33 +611,39 @@ void  interpretCommandString(String readString){
     if(readString.substring(0, 3) == "G10"){
         G10(readString);
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G17"){ //XY plane is the default so no action is taken
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G20"){
         setInchesToMillimetersConversion(INCHES);
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G21"){
         setInchesToMillimetersConversion(MILLIMETERS);
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G90"){ //G90 is the default so no action is taken
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "M06"){ //Tool change are default so no action is taken
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
@@ -646,28 +652,23 @@ void  interpretCommandString(String readString){
         leftAxis.computeMotorResponse();
         rightAxis.computeMotorResponse();
         
-        //Serial.println("Begin motion testing: ");
-        
-        /*for(int i = 0; i > -256; i = i - 10){
-            Serial.print(i);
-            Serial.print("->");
-            Serial.println(leftAxis.measureMotorSpeed(i));
-        }*/
-        
         readString = "";
         Serial.println("gready");
+        Serial.println("ready");
     }
     
     if(readString.substring(0, 3) == "B02"){
         calibrateChainLengths();
         readString = "";
         Serial.println("gready");
+        Serial.println("ready");
     }
     
     if(readString.substring(0, 3) == "B03"){
         updateSettings(readString);
         readString = "";
         Serial.println("gready");
+        Serial.println("ready");
     }
     
     if(readString.substring(0, 3) == "B04"){
@@ -681,6 +682,7 @@ void  interpretCommandString(String readString){
         Serial.println("Tests complete.");
         readString = "";
         Serial.println("gready");
+        Serial.println("ready");
     }
     
     if(readString.substring(0, 3) == "B05"){
@@ -688,12 +690,14 @@ void  interpretCommandString(String readString){
         Serial.println(VERSIONNUMBER);
         readString = "";
         Serial.println("gready");
+        Serial.println("ready");
     }
     
     if((readString[0] == 'T' || readString[0] == 't') && readString[1] != 'e'){
         Serial.print("Please insert tool ");
         Serial.println(readString);
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
@@ -701,5 +705,6 @@ void  interpretCommandString(String readString){
         Serial.println(readString);
         readString = "";
         Serial.println("gready");
+        Serial.println("ready");
     }
 } 
