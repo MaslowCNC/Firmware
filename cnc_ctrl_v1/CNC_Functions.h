@@ -622,12 +622,14 @@ void  interpretCommandString(String readString){
     if(readString.substring(0, 3) == "G20"){
         setInchesToMillimetersConversion(INCHES);
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G21"){
         setInchesToMillimetersConversion(MILLIMETERS);
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
