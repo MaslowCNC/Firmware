@@ -352,6 +352,11 @@ int   G1(String readString){
     
     //if the zaxis is attached
     if(zAxisAttached){
+        if (zgoto != currentZPos/_inchesToMMConversion){
+            singleAxisMove(&zAxis, zgoto,40);
+        }
+    }
+    else{
         float threshold = .1; //units of mm
         if (abs(currentZPos - zgoto) > threshold){
             Serial.print("Message: Please adjust Z-Axis to a depth of ");
@@ -377,11 +382,7 @@ int   G1(String readString){
             } 
         }
     }
-    else{
-        if (zgoto != currentZPos/_inchesToMMConversion){
-            singleAxisMove(&zAxis, zgoto,40);
-        }
-    }
+    
     
     if (isNotRapid){
         //if this is a regular move
@@ -550,6 +551,7 @@ void  updateSettings(String readString){
     float sledWidth     = extractGcodeValue(readString, 'F', 0);
     float sledHeight    = extractGcodeValue(readString, 'G', 0);
     float sledCG        = extractGcodeValue(readString, 'H', 0);
+    zAxisAttached       = extractGcodeValue(readString, 'I', 0);
     
     
     //Change the machine dimensions in the kinematics 
