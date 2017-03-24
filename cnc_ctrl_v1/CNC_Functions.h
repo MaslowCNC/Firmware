@@ -22,7 +22,7 @@ libraries*/
 
 #define VERSIONNUMBER 0.60
 
-//#define ZAXIS
+bool zAxisAttached = false;
 
 #define FORWARD           1
 #define BACKWARD         -1
@@ -350,38 +350,39 @@ int   G1(String readString){
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     isNotRapid = extractGcodeValue(readString, 'G', 1);
     
-    #ifndef ZAXIS
-    float threshold = .1; //units of mm
-    if (abs(currentZPos - zgoto) > threshold){
-        Serial.print("Message: Please adjust Z-Axis to a depth of ");
-        if (zgoto > 0){
-            Serial.print("+");
+    //if the zaxis is attached
+    if(zAxisAttached){
+        if (zgoto != currentZPos/_inchesToMMConversion){
+            singleAxisMove(&zAxis, zgoto,40);
         }
-        Serial.print(zgoto/_inchesToMMConversion);
-        if (_inchesToMMConversion == INCHES){
-            Serial.println(" in");
-        }
-        else{
-            Serial.println(" mm");
-        }
-        
-        zAxis.set(zgoto);
-        
-        int    waitTimeMs = 1000;
-        double startTime  = millis();
-        
-        while (millis() - startTime < waitTimeMs){
-            delay(1);
-            holdPosition();
-        } 
     }
-    #endif
+    else{
+        float threshold = .1; //units of mm
+        if (abs(currentZPos - zgoto) > threshold){
+            Serial.print("Message: Please adjust Z-Axis to a depth of ");
+            if (zgoto > 0){
+                Serial.print("+");
+            }
+            Serial.print(zgoto/_inchesToMMConversion);
+            if (_inchesToMMConversion == INCHES){
+                Serial.println(" in");
+            }
+            else{
+                Serial.println(" mm");
+            }
+            
+            zAxis.set(zgoto);
+            
+            int    waitTimeMs = 1000;
+            double startTime  = millis();
+            
+            while (millis() - startTime < waitTimeMs){
+                delay(1);
+                holdPosition();
+            } 
+        }
+    }
     
-    #ifdef ZAXIS
-    if (zgoto != currentZPos/_inchesToMMConversion){
-        singleAxisMove(&zAxis, zgoto,40);
-    }
-    #endif
     
     if (isNotRapid){
         //if this is a regular move
@@ -550,6 +551,7 @@ void  updateSettings(String readString){
     float sledWidth     = extractGcodeValue(readString, 'F', 0);
     float sledHeight    = extractGcodeValue(readString, 'G', 0);
     float sledCG        = extractGcodeValue(readString, 'H', 0);
+    zAxisAttached       = extractGcodeValue(readString, 'I', 0);
     
     
     //Change the machine dimensions in the kinematics 
