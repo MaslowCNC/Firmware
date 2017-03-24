@@ -561,21 +561,13 @@ void  updateSettings(String readString){
     
     
     //Change the machine dimensions in the kinematics 
-    printBeforeAndAfter(kinematics.l, sledWidth);
     kinematics.l            = sledWidth;
-    printBeforeAndAfter(kinematics.s, sledHeight);
     kinematics.s            = sledHeight;
-    printBeforeAndAfter(kinematics.h3, sledCG);
     kinematics.h3           = sledCG;
-    printBeforeAndAfter(kinematics.D, distBetweenMotors);
     kinematics.D            = distBetweenMotors;
-    printBeforeAndAfter(kinematics.motorOffsetX, motorOffsetX);
     kinematics.motorOffsetX = motorOffsetX;
-    printBeforeAndAfter(kinematics.motorOffsetY, motorOffsetY);
     kinematics.motorOffsetY = motorOffsetY;
-    printBeforeAndAfter(kinematics.machineWidth, bedWidth);
     kinematics.machineWidth = bedWidth;
-    printBeforeAndAfter(kinematics.machineHeight, bedHeight);
     kinematics.machineHeight= bedHeight;
     kinematics.recomputeGeometry();
     
