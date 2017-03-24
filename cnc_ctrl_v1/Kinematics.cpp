@@ -175,8 +175,8 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
         Chain2 = sqrt((D - (x + Offsetx2))*(D - (x + Offsetx2))+(y + Y2Plus - Offsety2)*(y + Y2Plus - Offsety2)) - R * TanLambda + R * Lambda;   //right chain length
     }
      
-    *aChainLength = Chain2;
-    *bChainLength = Chain1;
+    *aChainLength = Chain1;
+    *bChainLength = Chain2;
 
 }
 
