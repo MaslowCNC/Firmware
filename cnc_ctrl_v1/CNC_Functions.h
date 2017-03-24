@@ -550,13 +550,14 @@ void  updateSettings(String readString){
     */
     
     //Extract the settings values
-    float bedWidth      = extractGcodeValue(readString, 'A', 0);
-    float bedHeight     = extractGcodeValue(readString, 'C', 0);
-    float motorOffsetX  = extractGcodeValue(readString, 'D', 0);
-    float motorOffsetY  = extractGcodeValue(readString, 'E', 0);
-    float sledWidth     = extractGcodeValue(readString, 'F', 0);
-    float sledHeight    = extractGcodeValue(readString, 'G', 0);
-    float sledCG        = extractGcodeValue(readString, 'H', 0);
+    float bedWidth           = extractGcodeValue(readString, 'A', 0);
+    float bedHeight          = extractGcodeValue(readString, 'C', 0);
+    float distBetweenMotors  = extractGcodeValue(readString, 'D', 0);
+    float motorOffsetX       = (distBetweenMotors - bedWidth)/2;
+    float motorOffsetY       = extractGcodeValue(readString, 'E', 0);
+    float sledWidth          = extractGcodeValue(readString, 'F', 0);
+    float sledHeight         = extractGcodeValue(readString, 'G', 0);
+    float sledCG             = extractGcodeValue(readString, 'H', 0);
     
     
     //Change the machine dimensions in the kinematics 
@@ -566,8 +567,8 @@ void  updateSettings(String readString){
     kinematics.s            = sledHeight;
     printBeforeAndAfter(kinematics.h3, sledCG);
     kinematics.h3           = sledCG;
-    printBeforeAndAfter(kinematics.D, bedWidth+2*motorOffsetX);
-    kinematics.D            = bedWidth+2*motorOffsetX;
+    printBeforeAndAfter(kinematics.D, distBetweenMotors);
+    kinematics.D            = distBetweenMotors;
     printBeforeAndAfter(kinematics.motorOffsetX, motorOffsetX);
     kinematics.motorOffsetX = motorOffsetX;
     printBeforeAndAfter(kinematics.motorOffsetY, motorOffsetY);
