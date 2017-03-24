@@ -64,8 +64,8 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     _verifyValidTarget(&xTarget, &yTarget);
     
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
-    x = ( machineWidth/2 - xTarget) + motorOffsetX;
-    y = (machineHeight/2 - yTarget) + motorOffsetY;
+    x = machineWidth/2 + motorOffsetX + xTarget;
+    y = machineHeight/2 + motorOffsetY  - yTarget;
     
     //Coordinates definition:
     //         x -->, y |
