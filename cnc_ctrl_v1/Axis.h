@@ -27,7 +27,7 @@
 
     class Axis{
         public:
-            Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation);
+            Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation, float encoderSteps);
             int    write(float targetPosition);
             float  read();
             int    set(float newAxisPosition);
@@ -69,6 +69,7 @@
             PID        _pidController;
             int        _eepromAdr;
             float      _mmPerRotation;
+            float      _encoderSteps;
             Encoder    _encoder;
             float      _oldSetpoint;
             float      _oldVal;
