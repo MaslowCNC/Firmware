@@ -551,16 +551,19 @@ void  updateSettings(String readString){
     */
     
     //Extract the settings values
-    
     float bedWidth           = extractGcodeValue(readString, 'A', 0);
     float bedHeight          = extractGcodeValue(readString, 'C', 0);
-    float distBetweenMotors  = extractGcodeValue(readString, 'D', 0);
-    float motorOffsetX       = (distBetweenMotors - bedWidth)/2;
+    float distBetweenMotors  = extractGcodeValue(readString, 'Q', 0);
+    float motorOffsetX       = extractGcodeValue(readString, 'D', (distBetweenMotors - bedWidth)/2); //read the motor offset X IF it is sent, if it's not sent, compute it from the spacing between the motors
     float motorOffsetY       = extractGcodeValue(readString, 'E', 0);
     float sledWidth          = extractGcodeValue(readString, 'F', 0);
     float sledHeight         = extractGcodeValue(readString, 'G', 0);
     float sledCG             = extractGcodeValue(readString, 'H', 0);
-    zAxisAttached       = extractGcodeValue(readString, 'I', 0);
+    zAxisAttached            = extractGcodeValue(readString, 'I', 0);
+    
+    if (distBetweenMotors == 0){
+        distBetweenMotors = bedWidth + 2*motorOffsetX;
+    }
     
     //Change the machine dimensions in the kinematics 
     kinematics.l            = sledWidth;
