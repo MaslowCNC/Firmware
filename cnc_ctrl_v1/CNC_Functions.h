@@ -128,7 +128,6 @@ void  _watchDog(){
     
     if (millis() - lastRan > timeout){
         Serial.println("gready");
-        Serial.println("watchdog ran");
         
         lastRan = millis();
     }
