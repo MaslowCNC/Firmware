@@ -116,6 +116,24 @@ void  returnPoz(float x, float y, float z){
     
 }
 
+void  _watchDog(){
+    /*
+    Watchdog tells ground control that the machine is ready every second. _watchDog() should only be called when 
+    the machine is actually ready.
+    
+    This fixes the issue where the machine is ready, but Ground Control doesn't know the machine is ready and the system locks up.
+    */
+    static unsigned long lastRan = millis();
+    int                  timeout = 1000;
+    
+    if (millis() - lastRan > timeout){
+        Serial.println("gready");
+        Serial.println("watchdog ran");
+        
+        lastRan = millis();
+    }
+}
+
 void readSerialCommands(){
     /*
     Check to see if a new character is available from the serial connection, read it if one is.
