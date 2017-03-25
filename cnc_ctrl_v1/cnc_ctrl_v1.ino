@@ -51,4 +51,6 @@ void loop(){
     readSerialCommands();
     
     returnPoz(xTarget, yTarget, zAxis.read());
+    
+    _watchDog();
 }
