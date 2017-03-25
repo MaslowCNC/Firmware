@@ -22,7 +22,7 @@ libraries*/
 
 #define VERSIONNUMBER 0.60
 
-//#define ZAXIS
+bool zAxisAttached = false;
 
 #define FORWARD           1
 #define BACKWARD         -1
@@ -350,38 +350,39 @@ int   G1(String readString){
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     isNotRapid = extractGcodeValue(readString, 'G', 1);
     
-    #ifndef ZAXIS
-    float threshold = .1; //units of mm
-    if (abs(currentZPos - zgoto) > threshold){
-        Serial.print("Message: Please adjust Z-Axis to a depth of ");
-        if (zgoto > 0){
-            Serial.print("+");
+    //if the zaxis is attached
+    if(zAxisAttached){
+        if (zgoto != currentZPos/_inchesToMMConversion){
+            singleAxisMove(&zAxis, zgoto,40);
         }
-        Serial.print(zgoto/_inchesToMMConversion);
-        if (_inchesToMMConversion == INCHES){
-            Serial.println(" in");
-        }
-        else{
-            Serial.println(" mm");
-        }
-        
-        zAxis.set(zgoto);
-        
-        int    waitTimeMs = 1000;
-        double startTime  = millis();
-        
-        while (millis() - startTime < waitTimeMs){
-            delay(1);
-            holdPosition();
-        } 
     }
-    #endif
+    else{
+        float threshold = .1; //units of mm
+        if (abs(currentZPos - zgoto) > threshold){
+            Serial.print("Message: Please adjust Z-Axis to a depth of ");
+            if (zgoto > 0){
+                Serial.print("+");
+            }
+            Serial.print(zgoto/_inchesToMMConversion);
+            if (_inchesToMMConversion == INCHES){
+                Serial.println(" in");
+            }
+            else{
+                Serial.println(" mm");
+            }
+            
+            zAxis.set(zgoto);
+            
+            int    waitTimeMs = 1000;
+            double startTime  = millis();
+            
+            while (millis() - startTime < waitTimeMs){
+                delay(1);
+                holdPosition();
+            } 
+        }
+    }
     
-    #ifdef ZAXIS
-    if (zgoto != currentZPos/_inchesToMMConversion){
-        singleAxisMove(&zAxis, zgoto,40);
-    }
-    #endif
     
     if (isNotRapid){
         //if this is a regular move
@@ -550,6 +551,7 @@ void  updateSettings(String readString){
     */
     
     //Extract the settings values
+
     float bedWidth           = extractGcodeValue(readString, 'A', 0);
     float bedHeight          = extractGcodeValue(readString, 'C', 0);
     float distBetweenMotors  = extractGcodeValue(readString, 'D', 0);
@@ -558,7 +560,7 @@ void  updateSettings(String readString){
     float sledWidth          = extractGcodeValue(readString, 'F', 0);
     float sledHeight         = extractGcodeValue(readString, 'G', 0);
     float sledCG             = extractGcodeValue(readString, 'H', 0);
-    
+    zAxisAttached            = extractGcodeValue(readString, 'I', 0);    
     
     //Change the machine dimensions in the kinematics 
     kinematics.l            = sledWidth;
@@ -619,33 +621,39 @@ void  interpretCommandString(String readString){
     if(readString.substring(0, 3) == "G10"){
         G10(readString);
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G17"){ //XY plane is the default so no action is taken
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G20"){
         setInchesToMillimetersConversion(INCHES);
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G21"){
         setInchesToMillimetersConversion(MILLIMETERS);
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G90"){ //G90 is the default so no action is taken
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "M06"){ //Tool change are default so no action is taken
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
@@ -654,28 +662,23 @@ void  interpretCommandString(String readString){
         leftAxis.computeMotorResponse();
         rightAxis.computeMotorResponse();
         
-        //Serial.println("Begin motion testing: ");
-        
-        /*for(int i = 0; i > -256; i = i - 10){
-            Serial.print(i);
-            Serial.print("->");
-            Serial.println(leftAxis.measureMotorSpeed(i));
-        }*/
-        
         readString = "";
         Serial.println("gready");
+        Serial.println("ready");
     }
     
     if(readString.substring(0, 3) == "B02"){
         calibrateChainLengths();
         readString = "";
         Serial.println("gready");
+        Serial.println("ready");
     }
     
     if(readString.substring(0, 3) == "B03"){
         updateSettings(readString);
         readString = "";
         Serial.println("gready");
+        Serial.println("ready");
     }
     
     if(readString.substring(0, 3) == "B04"){
@@ -689,6 +692,7 @@ void  interpretCommandString(String readString){
         Serial.println("Tests complete.");
         readString = "";
         Serial.println("gready");
+        Serial.println("ready");
     }
     
     if(readString.substring(0, 3) == "B05"){
@@ -696,12 +700,14 @@ void  interpretCommandString(String readString){
         Serial.println(VERSIONNUMBER);
         readString = "";
         Serial.println("gready");
+        Serial.println("ready");
     }
     
     if((readString[0] == 'T' || readString[0] == 't') && readString[1] != 'e'){
         Serial.print("Please insert tool ");
         Serial.println(readString);
         Serial.println("gready");
+        Serial.println("ready");
         readString = "";
     }
     
@@ -709,5 +715,6 @@ void  interpretCommandString(String readString){
         Serial.println(readString);
         readString = "";
         Serial.println("gready");
+        Serial.println("ready");
     }
 } 
