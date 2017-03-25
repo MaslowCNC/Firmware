@@ -580,6 +580,7 @@ void  updateSettings(String readString){
     
     if (distBetweenMotors == 0){
         distBetweenMotors = bedWidth + 2*motorOffsetX;
+        Serial.println("Using Old Measuring Method - Consider Updating Ground Control");
     }
     
     //Change the machine dimensions in the kinematics 
