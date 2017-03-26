@@ -127,7 +127,7 @@ void  _watchDog(){
     int                  timeout = 1000;
     
     if (millis() - lastRan > timeout){
-        Serial.println("gready");
+        //Serial.println("gready");
         
         lastRan = millis();
     }
