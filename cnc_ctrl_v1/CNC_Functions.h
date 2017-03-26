@@ -117,6 +117,23 @@ void  returnPoz(float x, float y, float z){
     
 }
 
+void  _watchDog(){
+    /*
+    Watchdog tells ground control that the machine is ready every second. _watchDog() should only be called when 
+    the machine is actually ready.
+    
+    This fixes the issue where the machine is ready, but Ground Control doesn't know the machine is ready and the system locks up.
+    */
+    static unsigned long lastRan = millis();
+    int                  timeout = 1000;
+    
+    if (millis() - lastRan > timeout){
+        Serial.println("gready");
+        
+        lastRan = millis();
+    }
+}
+
 void readSerialCommands(){
     /*
     Check to see if a new character is available from the serial connection, read it if one is.
@@ -539,20 +556,29 @@ void  setInchesToMillimetersConversion(float newConversionFactor){
     _inchesToMMConversion = newConversionFactor;
 }
 
+void  printBeforeAndAfter(float before, float after){
+    Serial.print("Before: ");
+    Serial.print(before);
+    Serial.print(" After: ");
+    Serial.println(after);
+}
+
 void  updateSettings(String readString){
     /*
     Updates the machine dimensions from the Ground Control settings
     */
     
     //Extract the settings values
-    float bedWidth      = extractGcodeValue(readString, 'A', 0);
-    float bedHeight     = extractGcodeValue(readString, 'C', 0);
-    float motorOffsetX  = extractGcodeValue(readString, 'D', 0);
-    float motorOffsetY  = extractGcodeValue(readString, 'E', 0);
-    float sledWidth     = extractGcodeValue(readString, 'F', 0);
-    float sledHeight    = extractGcodeValue(readString, 'G', 0);
-    float sledCG        = extractGcodeValue(readString, 'H', 0);
-    zAxisAttached       = extractGcodeValue(readString, 'I', 0);
+
+    float bedWidth           = extractGcodeValue(readString, 'A', 0);
+    float bedHeight          = extractGcodeValue(readString, 'C', 0);
+    float distBetweenMotors  = extractGcodeValue(readString, 'Q', 0);
+    float motorOffsetX       = extractGcodeValue(readString, 'D', (distBetweenMotors - bedWidth)/2); //read the motor offset X IF it is sent, if it's not sent, compute it from the spacing between the motors
+    float motorOffsetY       = extractGcodeValue(readString, 'E', 0);
+    float sledWidth          = extractGcodeValue(readString, 'F', 0);
+    float sledHeight         = extractGcodeValue(readString, 'G', 0);
+    float sledCG             = extractGcodeValue(readString, 'H', 0);
+    zAxisAttached            = extractGcodeValue(readString, 'I', 0);
     encoderSteps        = extractGcodeValue(readString, 'J', 0);
     float gearTeeth     = extractGcodeValue(readString, 'K', 0);
     float chainPitch    = extractGcodeValue(readString, 'M', 0);
@@ -562,12 +588,17 @@ void  updateSettings(String readString){
     //Change the machine dimentions in cnc_funtions
     distPerRot = gearTeeth*chainPitch;  
     
+    if (distBetweenMotors == 0){
+        distBetweenMotors = bedWidth + 2*motorOffsetX;
+        Serial.println("Using Old Measuring Method - Consider Updating Ground Control");
+    }
+    
     //Change the machine dimensions in the kinematics 
     kinematics.l            = sledWidth;
     kinematics.s            = sledHeight;
     kinematics.h3           = sledCG;
-    kinematics.D            = bedWidth+2*motorOffsetX;
     kinematics.R            = distPerRot/(2*3.14159);
+    kinematics.D            = distBetweenMotors;
     kinematics.motorOffsetX = motorOffsetX;
     kinematics.motorOffsetY = motorOffsetY;
     kinematics.machineWidth = bedWidth;
