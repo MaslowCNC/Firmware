@@ -20,7 +20,7 @@ libraries*/
 #include "Axis.h"
 #include "Kinematics.h"
 
-#define VERSIONNUMBER 0.60
+#define VERSIONNUMBER 0.61
 
 bool zAxisAttached = false;
 
