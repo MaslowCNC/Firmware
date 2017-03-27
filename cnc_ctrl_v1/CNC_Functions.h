@@ -724,6 +724,21 @@ void  interpretCommandString(String readString){
         Serial.println("ready");
     }
     
+    if(readString.substring(0, 3) == "B06"){
+        Serial.println("Manually Setting Chain Lengths To: ");
+        float newL = extractGcodeValue(readString, 'L', 0);
+        float newR = extractGcodeValue(readString, 'R', 0);
+        Serial.print("Left: ");
+        Serial.print(newL);
+        Serial.println("mm");
+        Serial.print("Right: ");
+        Serial.print(newR);
+        Serial.println("mm");
+        
+        leftAxis.set(newL);
+        rightAxis.set(newR);
+    }
+    
     if((readString[0] == 'T' || readString[0] == 't') && readString[1] != 'e'){
         Serial.print("Please insert tool ");
         Serial.println(readString);
