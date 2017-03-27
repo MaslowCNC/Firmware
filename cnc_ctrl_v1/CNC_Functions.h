@@ -42,9 +42,6 @@ bool zAxisAttached = false;
 #define MILLIMETERS 1
 #define INCHES      25.4
 
-#define DIST_PER_ROTATION 10*6.35//#teeth*pitch of chain
-#define Z_DIST_PER_ROTATION 635 //1/8inch in mm
-
 #define ENCODER1A 18
 #define ENCODER1B 19
 #define ENCODER2A 2
@@ -63,10 +60,14 @@ bool zAxisAttached = false;
 #define ENB 7
 #define ENC 5
 
+float distPerRot = 10*6.35;//#teeth*pitch of chain
+float zDistPerRot = 635;//1/8inch in mm
+float encoderSteps = 8148.0;
+float zEncoderSteps = 8148.0;
 
-Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "Left-axis",   LEFT_EEPROM_ADR, DIST_PER_ROTATION);
-Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, "Right-axis", RIGHT_EEPROM_ADR, DIST_PER_ROTATION);
-Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Z-Axis",         Z_EEPROM_ADR, DIST_PER_ROTATION/19);
+Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "Left-axis",   LEFT_EEPROM_ADR, distPerRot, encoderSteps);
+Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, "Right-axis", RIGHT_EEPROM_ADR, distPerRot, encoderSteps);
+Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Z-Axis",         Z_EEPROM_ADR, zDistPerRot, zEncoderSteps);
 
 
 Kinematics kinematics;
@@ -568,6 +569,7 @@ void  updateSettings(String readString){
     */
     
     //Extract the settings values
+
     float bedWidth           = extractGcodeValue(readString, 'A', 0);
     float bedHeight          = extractGcodeValue(readString, 'C', 0);
     float distBetweenMotors  = extractGcodeValue(readString, 'Q', 0);
@@ -577,6 +579,14 @@ void  updateSettings(String readString){
     float sledHeight         = extractGcodeValue(readString, 'G', 0);
     float sledCG             = extractGcodeValue(readString, 'H', 0);
     zAxisAttached            = extractGcodeValue(readString, 'I', 0);
+    encoderSteps        = extractGcodeValue(readString, 'J', 0);
+    float gearTeeth     = extractGcodeValue(readString, 'K', 0);
+    float chainPitch    = extractGcodeValue(readString, 'M', 0);
+    zDistPerRot         = extractGcodeValue(readString, 'N', 0);
+    zEncoderSteps       = extractGcodeValue(readString, 'P', 0);
+
+    //Change the machine dimentions in cnc_funtions
+    distPerRot = gearTeeth*chainPitch;  
     
     if (distBetweenMotors == 0){
         distBetweenMotors = bedWidth + 2*motorOffsetX;
@@ -587,12 +597,15 @@ void  updateSettings(String readString){
     kinematics.l            = sledWidth;
     kinematics.s            = sledHeight;
     kinematics.h3           = sledCG;
+    kinematics.R            = distPerRot/(2*3.14159);
     kinematics.D            = distBetweenMotors;
     kinematics.motorOffsetX = motorOffsetX;
     kinematics.motorOffsetY = motorOffsetY;
     kinematics.machineWidth = bedWidth;
     kinematics.machineHeight= bedHeight;
     kinematics.recomputeGeometry();
+
+
     
     Serial.println("Machine Settings Updated");
 }

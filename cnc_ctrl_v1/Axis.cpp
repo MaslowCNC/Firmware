@@ -26,11 +26,7 @@
 #define SIZEOFFLOAT      4
 #define SIZEOFLINSEG    17
 
-#define NUMBER_OF_ENCODER_STEPS 8148.0 
-
-
-
-Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation)
+Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation, float encoderSteps)
 :
 _encoder(encoderPin1,encoderPin2)
 {
@@ -46,6 +42,7 @@ _encoder(encoderPin1,encoderPin2)
     _axisTarget   = 0.0;
     _eepromAdr    = eepromAdr;
     _mmPerRotation= mmPerRotation;
+    _encoderSteps = encoderSteps;
     
     //load position
     if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
@@ -68,7 +65,7 @@ int    Axis::write(float targetPosition){
 
 float  Axis::read(){
     //returns the true axis position
-    return (_encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
+    return (_encoder.read()/_encoderSteps)*_mmPerRotation;
 }
 
 float  Axis::target(){
@@ -85,7 +82,7 @@ int    Axis::set(float newAxisPosition){
     //reset everything to the new value
     _axisTarget   =  newAxisPosition/_mmPerRotation;
     _pidSetpoint  =  newAxisPosition/_mmPerRotation;
-    _encoder.write((newAxisPosition*NUMBER_OF_ENCODER_STEPS)/_mmPerRotation);
+    _encoder.write((newAxisPosition*_encoderSteps)/_mmPerRotation);
     
 }
 
@@ -114,7 +111,7 @@ void   Axis::computePID(){
         }
     }
     
-    _pidInput      =  _encoder.read()/NUMBER_OF_ENCODER_STEPS;
+    _pidInput      =  _encoder.read()/_encoderSteps;
     _pidController.Compute();
     
     _motor.write(_pidOutput);
@@ -122,7 +119,7 @@ void   Axis::computePID(){
 }
 
 float  Axis::error(){
-    return abs((_encoder.read()/NUMBER_OF_ENCODER_STEPS) - _pidSetpoint)*_mmPerRotation;
+    return abs((_encoder.read()/_encoderSteps) - _pidSetpoint)*_mmPerRotation;
 }
 
 int    Axis::detach(){
@@ -532,7 +529,7 @@ float  Axis::measureMotorSpeed(int speed){
     int posTime = millis() - startTime;
     
     //rotations = number of steps taken / steps per rotation
-    float rotations = (originalEncoderPos - _encoder.read())/NUMBER_OF_ENCODER_STEPS;
+    float rotations = (originalEncoderPos - _encoder.read())/_encoderSteps;
     //minutes = time elapsed in ms * 1000ms/s *60 seconds per minute
     float minutes   = posTime/(1000.0*60.0);
     
