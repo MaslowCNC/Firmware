@@ -23,3 +23,5 @@ jbnimble - January 14, 2017
 
 jbarchuk March 3 2017 New to git at this level. The more I see it the more I like.
 
+jwolter0 (Ohio, USA) - March 25, 2017 - Figuring out how to use git on my Linux machine.  There's no GitHub Desktop for Linux, so I'm learning how to do it from the command line like the cavemen used to.
+
