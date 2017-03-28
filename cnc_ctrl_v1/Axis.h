@@ -45,6 +45,8 @@
             float  measureMotorSpeed(int speed);
             void   computeMotorResponse();
             void   test();
+            void   changePitch(float newPitch);
+            void   changeEncoderResolution(int newResolution);
             
         private:
             int        _PWMread(int pin);
