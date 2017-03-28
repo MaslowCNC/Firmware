@@ -414,15 +414,21 @@ int   G1(String readString){
 
 int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float MMPerMin, int direction){
     
+    //compute geometry 
     float pi                     =  3.1415;
     float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
     float distanceBetweenPoints  =  sqrt( sq(  X2 - X1   ) + sq(    Y2  - Y1) );
     float circumference          =  2.0*pi*radius;
-    float theta                  =  acos(  (sq(radius)+sq(radius)-sq(distanceBetweenPoints)) / (2*radius*radius)  ) ;
+    
+    //compute angle between lines
+    float cosTheta = (sq(radius)+sq(radius)-sq(distanceBetweenPoints)) / (2*radius*radius);
+    cosTheta       = constrain(cosTheta, -1.0, 1.0); //when the angle is exactly 180 degrees, rounding errors can push the argument of acos() outside its +-1 range
+    float theta                  =  acos(cosTheta);
     
     float arcLengthMM            =  circumference * (theta / (2*pi) );
     float startingAngle          =  atan2(Y1 - centerY, X1 - centerX);
     
+    //set up variables for movement
     int numberOfStepsTaken       =  0;
     
     float stepSizeMM             =  .2;
@@ -493,8 +499,8 @@ int   G2(String readString){
     float X1 = xTarget; //does this work if units are inches? (It seems to)
     float Y1 = yTarget;
     
-    float X2      = _inchesToMMConversion*extractGcodeValue(readString, 'X', 0.0);
-    float Y2      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', 0.0);
+    float X2      = _inchesToMMConversion*extractGcodeValue(readString, 'X', X1/_inchesToMMConversion);
+    float Y2      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', Y1/_inchesToMMConversion);
     float I       = _inchesToMMConversion*extractGcodeValue(readString, 'I', 0.0);
     float J       = _inchesToMMConversion*extractGcodeValue(readString, 'J', 0.0);
     float feed    = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
