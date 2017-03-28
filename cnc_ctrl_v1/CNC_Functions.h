@@ -60,10 +60,10 @@ bool zAxisAttached = false;
 #define ENB 7
 #define ENC 5
 
-float distPerRot = 10*6.35;//#teeth*pitch of chain
-float zDistPerRot = 3.17;//1/8inch in mm
-float encoderSteps = 8148.0;
-float zEncoderSteps = 8148.0;
+float distPerRot     = 10*6.35;//#teeth*pitch of chain
+float zDistPerRot    = 3.17;//1/8inch in mm
+float encoderSteps   = 8148.0;
+float zEncoderSteps  = 8148.0;
 
 Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "Left-axis",   LEFT_EEPROM_ADR, distPerRot, encoderSteps);
 Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, "Right-axis", RIGHT_EEPROM_ADR, distPerRot, encoderSteps);
@@ -576,22 +576,25 @@ void  updateSettings(String readString){
     
     //Extract the settings values
 
-    float bedWidth           = extractGcodeValue(readString, 'A', 0);
-    float bedHeight          = extractGcodeValue(readString, 'C', 0);
-    float distBetweenMotors  = extractGcodeValue(readString, 'Q', 0);
+    float bedWidth           = extractGcodeValue(readString, 'A', kinematics.machineWidth);
+    float bedHeight          = extractGcodeValue(readString, 'C', kinematics.machineHeight);
+    float distBetweenMotors  = extractGcodeValue(readString, 'Q', kinematics.D);
     float motorOffsetX       = extractGcodeValue(readString, 'D', (distBetweenMotors - bedWidth)/2); //read the motor offset X IF it is sent, if it's not sent, compute it from the spacing between the motors
-    float motorOffsetY       = extractGcodeValue(readString, 'E', 0);
-    float sledWidth          = extractGcodeValue(readString, 'F', 0);
-    float sledHeight         = extractGcodeValue(readString, 'G', 0);
-    float sledCG             = extractGcodeValue(readString, 'H', 0);
-    zAxisAttached            = extractGcodeValue(readString, 'I', 0);
-    encoderSteps        = extractGcodeValue(readString, 'J', 0);
-    float gearTeeth     = extractGcodeValue(readString, 'K', 0);
-    float chainPitch    = extractGcodeValue(readString, 'M', 0);
-    zDistPerRot         = extractGcodeValue(readString, 'N', 0);
-    zEncoderSteps       = extractGcodeValue(readString, 'P', 0);
+    float motorOffsetY       = extractGcodeValue(readString, 'E', motorOffsetY);
+    float sledWidth          = extractGcodeValue(readString, 'F', kinematics.l);
+    float sledHeight         = extractGcodeValue(readString, 'G', kinematics.s);
+    float sledCG             = extractGcodeValue(readString, 'H', kinematics.h3);
+    zAxisAttached            = extractGcodeValue(readString, 'I', zAxisAttached);
+    encoderSteps             = extractGcodeValue(readString, 'J', encoderSteps);
+    float gearTeeth          = extractGcodeValue(readString, 'K', 10);
+    float chainPitch         = extractGcodeValue(readString, 'M', 6.35);
+    zDistPerRot              = extractGcodeValue(readString, 'N', zDistPerRot);
+    zEncoderSteps            = extractGcodeValue(readString, 'P', zEncoderSteps);
 
-    //Change the machine dimentions in cnc_funtions
+    Serial.print("Z-dist per rot set to: ");
+    Serial.println(zDistPerRot);
+    
+    //Change the machine dimensions in cnc_funtions
     distPerRot = gearTeeth*chainPitch;  
     
     if (distBetweenMotors == 0){
