@@ -61,7 +61,7 @@ bool zAxisAttached = false;
 #define ENC 5
 
 float distPerRot = 10*6.35;//#teeth*pitch of chain
-float zDistPerRot = 635;//1/8inch in mm
+float zDistPerRot = 3.17;//1/8inch in mm
 float encoderSteps = 8148.0;
 float zEncoderSteps = 8148.0;
 
@@ -371,7 +371,7 @@ int   G1(String readString){
     //if the zaxis is attached
     if(zAxisAttached){
         if (zgoto != currentZPos/_inchesToMMConversion){
-            singleAxisMove(&zAxis, zgoto,40);
+            singleAxisMove(&zAxis, zgoto,45);
         }
     }
     else{
