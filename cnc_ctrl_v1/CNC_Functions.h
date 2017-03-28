@@ -591,11 +591,15 @@ void  updateSettings(String readString){
     float zDistPerRot        = extractGcodeValue(readString, 'N', ZDISTPERROT);
     int zEncoderSteps        = extractGcodeValue(readString, 'P', ZENCODERSTEPS);
     
-    //Change the machine dimensions in cnc_funtions
+    //Change the motor properties in cnc_funtions
     float distPerRot = gearTeeth*chainPitch; 
     leftAxis.changePitch(distPerRot);
     rightAxis.changePitch(distPerRot);
     zAxis.changePitch(zDistPerRot);
+    
+    leftAxis.changeEncoderResolution(encoderSteps);
+    rightAxis.changeEncoderResolution(encoderSteps);
+    zAxis.changeEncoderResolution(zEncoderSteps);
     
     if (distBetweenMotors == 0){
         distBetweenMotors = bedWidth + 2*motorOffsetX;
