@@ -60,14 +60,14 @@ bool zAxisAttached = false;
 #define ENB 7
 #define ENC 5
 
-float distPerRot = 10*6.35;//#teeth*pitch of chain
-float zDistPerRot = 3.17;//1/8inch in mm
-float encoderSteps = 8148.0;
-float zEncoderSteps = 8148.0;
+#define DISTPERROT     10*6.35//#teeth*pitch of chain
+#define ZDISTPERROT    3.17//1/8inch in mm
+#define ENCODERSTEPS   8148.0
+#define ZENCODERSTEPS  7500.0
 
-Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "Left-axis",   LEFT_EEPROM_ADR, distPerRot, encoderSteps);
-Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, "Right-axis", RIGHT_EEPROM_ADR, distPerRot, encoderSteps);
-Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Z-Axis",         Z_EEPROM_ADR, zDistPerRot, zEncoderSteps);
+Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "Left-axis",   LEFT_EEPROM_ADR, DISTPERROT, ENCODERSTEPS);
+Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, "Right-axis", RIGHT_EEPROM_ADR, DISTPERROT, ENCODERSTEPS);
+Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Z-Axis",         Z_EEPROM_ADR, ZDISTPERROT, ZENCODERSTEPS);
 
 
 Kinematics kinematics;
@@ -576,23 +576,30 @@ void  updateSettings(String readString){
     
     //Extract the settings values
 
-    float bedWidth           = extractGcodeValue(readString, 'A', 0);
-    float bedHeight          = extractGcodeValue(readString, 'C', 0);
-    float distBetweenMotors  = extractGcodeValue(readString, 'Q', 0);
+    float bedWidth           = extractGcodeValue(readString, 'A', kinematics.machineWidth);
+    float bedHeight          = extractGcodeValue(readString, 'C', kinematics.machineHeight);
+    float distBetweenMotors  = extractGcodeValue(readString, 'Q', kinematics.D);
     float motorOffsetX       = extractGcodeValue(readString, 'D', (distBetweenMotors - bedWidth)/2); //read the motor offset X IF it is sent, if it's not sent, compute it from the spacing between the motors
-    float motorOffsetY       = extractGcodeValue(readString, 'E', 0);
-    float sledWidth          = extractGcodeValue(readString, 'F', 0);
-    float sledHeight         = extractGcodeValue(readString, 'G', 0);
-    float sledCG             = extractGcodeValue(readString, 'H', 0);
-    zAxisAttached            = extractGcodeValue(readString, 'I', 0);
-    encoderSteps        = extractGcodeValue(readString, 'J', 0);
-    float gearTeeth     = extractGcodeValue(readString, 'K', 0);
-    float chainPitch    = extractGcodeValue(readString, 'M', 0);
-    zDistPerRot         = extractGcodeValue(readString, 'N', 0);
-    zEncoderSteps       = extractGcodeValue(readString, 'P', 0);
-
-    //Change the machine dimentions in cnc_funtions
-    distPerRot = gearTeeth*chainPitch;  
+    float motorOffsetY       = extractGcodeValue(readString, 'E', motorOffsetY);
+    float sledWidth          = extractGcodeValue(readString, 'F', kinematics.l);
+    float sledHeight         = extractGcodeValue(readString, 'G', kinematics.s);
+    float sledCG             = extractGcodeValue(readString, 'H', kinematics.h3);
+    zAxisAttached            = extractGcodeValue(readString, 'I', zAxisAttached);
+    int encoderSteps         = extractGcodeValue(readString, 'J', ENCODERSTEPS);
+    float gearTeeth          = extractGcodeValue(readString, 'K', 10);
+    float chainPitch         = extractGcodeValue(readString, 'M', 6.35);
+    float zDistPerRot        = extractGcodeValue(readString, 'N', ZDISTPERROT);
+    int zEncoderSteps        = extractGcodeValue(readString, 'P', ZENCODERSTEPS);
+    
+    //Change the motor properties in cnc_funtions
+    float distPerRot = gearTeeth*chainPitch; 
+    leftAxis.changePitch(distPerRot);
+    rightAxis.changePitch(distPerRot);
+    zAxis.changePitch(zDistPerRot);
+    
+    leftAxis.changeEncoderResolution(encoderSteps);
+    rightAxis.changeEncoderResolution(encoderSteps);
+    zAxis.changeEncoderResolution(zEncoderSteps);
     
     if (distBetweenMotors == 0){
         distBetweenMotors = bedWidth + 2*motorOffsetX;
@@ -603,7 +610,7 @@ void  updateSettings(String readString){
     kinematics.l            = sledWidth;
     kinematics.s            = sledHeight;
     kinematics.h3           = sledCG;
-    kinematics.R            = distPerRot/(2*3.14159);
+    kinematics.R            = distPerRot / (2.0*3.14159);
     kinematics.D            = distBetweenMotors;
     kinematics.motorOffsetX = motorOffsetX;
     kinematics.motorOffsetY = motorOffsetY;

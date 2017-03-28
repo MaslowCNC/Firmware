@@ -122,6 +122,21 @@ float  Axis::error(){
     return abs((_encoder.read()/_encoderSteps) - _pidSetpoint)*_mmPerRotation;
 }
 
+void   Axis::changePitch(float newPitch){
+    /*
+    Reassign the distance moved per-rotation for the axis.
+    */
+    _mmPerRotation = newPitch;
+}
+
+void   Axis::changeEncoderResolution(int newResolution){
+    /*
+    Reassign the encoder resolution for the axis.
+    */
+    _encoderSteps = newResolution;
+    
+}
+
 int    Axis::detach(){
     
     if (_motor.attached()){
