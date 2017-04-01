@@ -46,8 +46,8 @@ bool zAxisAttached = false;
 #define ENCODER1B 19
 #define ENCODER2A 20
 #define ENCODER2B 21
-#define ENCODER3A 3
-#define ENCODER3B 2
+#define ENCODER3A 2
+#define ENCODER3B 3
 
 #define IN1 6
 #define IN2 4
