@@ -44,21 +44,21 @@ bool zAxisAttached = false;
 
 #define ENCODER1A 18
 #define ENCODER1B 19
-#define ENCODER2A 2
-#define ENCODER2B 3
-#define ENCODER3A 21
-#define ENCODER3B 20
+#define ENCODER2A 20
+#define ENCODER2B 21
+#define ENCODER3A 3
+#define ENCODER3B 2
 
-#define IN1 9
-#define IN2 8
-#define IN3 11
-#define IN4 10
-#define IN5 12
-#define IN6 13
+#define IN1 6
+#define IN2 4
+#define IN3 9
+#define IN4 7
+#define IN5 10
+#define IN6 11
 
-#define ENA 6
-#define ENB 7
-#define ENC 5
+#define ENA 5
+#define ENB 8
+#define ENC 12
 
 #define DISTPERROT     10*6.35//#teeth*pitch of chain
 #define ZDISTPERROT    3.17//1/8inch in mm
