@@ -95,22 +95,25 @@ void  returnPoz(float x, float y, float z){
     if (millis() - lastRan > timeout){
         float errorTerm = (leftAxis.error() + rightAxis.error() )/2;
         
-        Serial.print("pz(");
-        Serial.print(x/_inchesToMMConversion);
-        Serial.print(", ");
-        Serial.print(y/_inchesToMMConversion);
-        Serial.print(", ");
-        Serial.print(z/_inchesToMMConversion);
-        Serial.print(", ");
-        Serial.print(errorTerm);
-        Serial.print(")");
         
-        if (_inchesToMMConversion == INCHES){
+        //Serial.println("<Idle,MPos:1.000,2.000,0.000,WPos:0.000,0.000,0.000>");
+        Serial.print("<Idle,MPos:");
+        Serial.print(x/_inchesToMMConversion);
+        Serial.print(",");
+        Serial.print(y/_inchesToMMConversion);
+        Serial.print(",");
+        Serial.print(z/_inchesToMMConversion);
+        //Serial.print(",");
+        //Serial.print(errorTerm);
+        Serial.println(",WPos:0.000,0.000,0.000>");
+        
+        
+        /*if (_inchesToMMConversion == INCHES){
             Serial.println("in");
         }
         else{
             Serial.println("mm");
-        }
+        }*/
         
         lastRan = millis();
     }
@@ -128,7 +131,7 @@ void  _watchDog(){
     int                  timeout = 1000;
     
     if (millis() - lastRan > timeout){
-        //Serial.println("gready");
+        //Serial.println("ok");
         
         lastRan = millis();
     }
@@ -646,7 +649,7 @@ void  interpretCommandString(String readString){
     if(readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G0 " || readString.substring(0, 3) == "G1 "){
         
         G1(readString);
-        Serial.println("gready");
+        Serial.println("ok");
         Serial.println("ready");
         readString = "";
     }
@@ -654,52 +657,52 @@ void  interpretCommandString(String readString){
     if(readString.substring(0, 3) == "G02" || readString.substring(0, 3) == "G2 "){
         G2(readString);
         Serial.println("ready");
-        Serial.println("gready");
+        Serial.println("ok");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G03" || readString.substring(0, 3) == "G3 "){
         G2(readString);
-        Serial.println("gready");
+        Serial.println("ok");
         Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G10"){
         G10(readString);
-        Serial.println("gready");
+        Serial.println("ok");
         Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G17"){ //XY plane is the default so no action is taken
-        Serial.println("gready");
+        Serial.println("ok");
         Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G20"){
         setInchesToMillimetersConversion(INCHES);
-        Serial.println("gready");
+        Serial.println("ok");
         Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G21"){
         setInchesToMillimetersConversion(MILLIMETERS);
-        Serial.println("gready");
+        Serial.println("ok");
         Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "G90"){ //G90 is the default so no action is taken
-        Serial.println("gready");
+        Serial.println("ok");
         Serial.println("ready");
         readString = "";
     }
     
     if(readString.substring(0, 3) == "M06"){ //Tool change are default so no action is taken
-        Serial.println("gready");
+        Serial.println("ok");
         Serial.println("ready");
         readString = "";
     }
@@ -710,21 +713,21 @@ void  interpretCommandString(String readString){
         rightAxis.computeMotorResponse();
         
         readString = "";
-        Serial.println("gready");
+        Serial.println("ok");
         Serial.println("ready");
     }
     
     if(readString.substring(0, 3) == "B02"){
         calibrateChainLengths();
         readString = "";
-        Serial.println("gready");
+        Serial.println("ok");
         Serial.println("ready");
     }
     
     if(readString.substring(0, 3) == "B03"){
         updateSettings(readString);
         readString = "";
-        Serial.println("gready");
+        Serial.println("ok");
         Serial.println("ready");
     }
     
@@ -738,7 +741,7 @@ void  interpretCommandString(String readString){
         zAxis.test();
         Serial.println("Tests complete.");
         readString = "";
-        Serial.println("gready");
+        Serial.println("ok");
         Serial.println("ready");
     }
     
@@ -746,7 +749,7 @@ void  interpretCommandString(String readString){
         Serial.print("Firmware Version ");
         Serial.println(VERSIONNUMBER);
         readString = "";
-        Serial.println("gready");
+        Serial.println("ok");
         Serial.println("ready");
     }
     
@@ -768,7 +771,7 @@ void  interpretCommandString(String readString){
     if((readString[0] == 'T' || readString[0] == 't') && readString[1] != 'e'){
         Serial.print("Please insert tool ");
         Serial.println(readString);
-        Serial.println("gready");
+        Serial.println("ok");
         Serial.println("ready");
         readString = "";
     }
@@ -776,7 +779,7 @@ void  interpretCommandString(String readString){
     if (readString.length() > 0){
         Serial.println(readString);
         readString = "";
-        Serial.println("gready");
+        Serial.println("ok");
         Serial.println("ready");
     }
 } 
