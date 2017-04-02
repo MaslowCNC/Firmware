@@ -626,16 +626,14 @@ void  updateSettings(String readString){
     Serial.println("Machine Settings Updated");
 }
 
-void  interpretCommandString(String readString){
-    int i = 0;
-    char sect[22];
+void executeGcodeLine(String gcodeLine){
+    /*
     
-    while (i < 23){
-        sect[i] = ' ';
-        i++;
-    }
+    Executes a single line of gcode
     
-    Serial.println(readString);
+    */
+    
+    Serial.println(gcodeLine);
     
     if(readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G02" || readString.substring(0, 3) == "G03" || readString.substring(0, 2) == "G0" || readString.substring(0, 2) == "G1" || readString.substring(0, 2) == "G2" || readString.substring(0, 2) == "G3"){
         prependString = readString.substring(0, 3);
@@ -783,3 +781,30 @@ void  interpretCommandString(String readString){
         Serial.println("ready");
     }
 } 
+
+void  interpretCommandString(String readString){
+    /*
+    
+    Splits a string into lines of gcode which begin with 'G'
+    
+    */
+    Serial.println("debug: ");
+    Serial.println(readString);
+    
+    int firstG;
+    int secondG;
+    
+    while (firstG >= 0){
+        //extract one command from the line
+        firstG  = readString.indexOf('G', firstG);
+        secondG = readString.indexOf('G', firstG + 1);
+    
+        String gcodeLine = readString.substring(firstG, secondG);
+    
+        //execute the line
+        executeGcodeLine(gcodeLine);
+        
+        firstG = secondG;
+    }
+    
+}
