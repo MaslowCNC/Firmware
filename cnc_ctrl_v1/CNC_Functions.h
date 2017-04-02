@@ -635,6 +635,8 @@ void executeGcodeLine(String gcodeLine){
     
     Serial.println(gcodeLine);
     
+    Serial.println("then this ran");
+    
     if(readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G02" || readString.substring(0, 3) == "G03" || readString.substring(0, 2) == "G0" || readString.substring(0, 2) == "G1" || readString.substring(0, 2) == "G2" || readString.substring(0, 2) == "G3"){
         prependString = readString.substring(0, 3);
         prependString = prependString + " ";
@@ -794,17 +796,25 @@ void  interpretCommandString(String readString){
     int firstG;
     int secondG;
     
-    while (firstG >= 0){
-        //extract one command from the line
-        firstG  = readString.indexOf('G', firstG);
-        secondG = readString.indexOf('G', firstG + 1);
-    
-        String gcodeLine = readString.substring(firstG, secondG);
-    
-        //execute the line
-        executeGcodeLine(gcodeLine);
+    if (readString.indexOf('G') != -1){
+        //if the line contains a 'G'
+        while (firstG >= 0){
+            //extract one command from the line
+            firstG  = readString.indexOf('G', firstG);
+            secondG = readString.indexOf('G', firstG + 1);
         
-        firstG = secondG;
+            String gcodeLine = readString.substring(firstG, secondG);
+        
+            //execute the line
+            executeGcodeLine(gcodeLine);
+            
+            firstG = secondG;
+        }
+    }
+    else{
+        //try to execute the line anyway, it might be a B code or something else
+        Serial.println("this ran");
+        executeGcodeLine(readString);
     }
     
 }
