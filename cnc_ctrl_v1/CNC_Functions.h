@@ -368,6 +368,11 @@ int   G1(String readString){
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     isNotRapid = extractGcodeValue(readString, 'G', 1);
     
+    feedrate   = constrain(feedrate, 1, 25*_inchesToMMConversion);                                              //constrain the maximum feedrate
+    if (feedrate == 25*_inchesToMMConversion){
+        Serial.println("Feedrate limited to preserve accuracy");
+    }
+    
     //if the zaxis is attached
     if(zAxisAttached){
         if (zgoto != currentZPos/_inchesToMMConversion){
