@@ -96,7 +96,7 @@ void  returnPoz(float x, float y, float z){
         float errorTerm = (leftAxis.error() + rightAxis.error() )/2;
         
         
-        //Serial.println("<Idle,MPos:1.000,2.000,0.000,WPos:0.000,0.000,0.000>");
+        /*//Serial.println("<Idle,MPos:1.000,2.000,0.000,WPos:0.000,0.000,0.000>");
         Serial.print("<Idle,MPos:");
         Serial.print(x/_inchesToMMConversion);
         Serial.print(",");
@@ -105,7 +105,7 @@ void  returnPoz(float x, float y, float z){
         Serial.print(z/_inchesToMMConversion);
         //Serial.print(",");
         //Serial.print(errorTerm);
-        Serial.println(",WPos:0.000,0.000,0.000>");
+        Serial.println(",WPos:0.000,0.000,0.000>");*/
         
         
         /*if (_inchesToMMConversion == INCHES){
@@ -626,14 +626,14 @@ void  updateSettings(String readString){
     Serial.println("Machine Settings Updated");
 }
 
-void executeGcodeLine(String gcodeLine){
+void  executeGcodeLine(String gcodeLine){
     /*
     
     Executes a single line of gcode
     
     */
     
-    Serial.println(gcodeLine);
+    //Serial.println(gcodeLine);
     
     if(gcodeLine.substring(0, 3) == "G00" || gcodeLine.substring(0, 3) == "G01" || gcodeLine.substring(0, 3) == "G02" || gcodeLine.substring(0, 3) == "G03" || gcodeLine.substring(0, 2) == "G0" || gcodeLine.substring(0, 2) == "G1" || gcodeLine.substring(0, 2) == "G2" || gcodeLine.substring(0, 2) == "G3"){
         prependString = gcodeLine.substring(0, 3);
@@ -647,61 +647,43 @@ void executeGcodeLine(String gcodeLine){
     if(gcodeLine.substring(0, 3) == "G01" || gcodeLine.substring(0, 3) == "G00" || gcodeLine.substring(0, 3) == "G0 " || gcodeLine.substring(0, 3) == "G1 "){
         
         G1(gcodeLine);
-        Serial.println("ok");
-        Serial.println("ready");
         gcodeLine = "";
     }
     
     if(gcodeLine.substring(0, 3) == "G02" || gcodeLine.substring(0, 3) == "G2 "){
         G2(gcodeLine);
-        Serial.println("ready");
-        Serial.println("ok");
         gcodeLine = "";
     }
     
     if(gcodeLine.substring(0, 3) == "G03" || gcodeLine.substring(0, 3) == "G3 "){
         G2(gcodeLine);
-        Serial.println("ok");
-        Serial.println("ready");
         gcodeLine = "";
     }
     
     if(gcodeLine.substring(0, 3) == "G10"){
         G10(gcodeLine);
-        Serial.println("ok");
-        Serial.println("ready");
         gcodeLine = "";
     }
     
     if(gcodeLine.substring(0, 3) == "G17"){ //XY plane is the default so no action is taken
-        Serial.println("ok");
-        Serial.println("ready");
         gcodeLine = "";
     }
     
     if(gcodeLine.substring(0, 3) == "G20"){
         setInchesToMillimetersConversion(INCHES);
-        Serial.println("ok");
-        Serial.println("ready");
         gcodeLine = "";
     }
     
     if(gcodeLine.substring(0, 3) == "G21"){
         setInchesToMillimetersConversion(MILLIMETERS);
-        Serial.println("ok");
-        Serial.println("ready");
         gcodeLine = "";
     }
     
     if(gcodeLine.substring(0, 3) == "G90"){ //G90 is the default so no action is taken
-        Serial.println("ok");
-        Serial.println("ready");
         gcodeLine = "";
     }
     
     if(gcodeLine.substring(0, 3) == "M06"){ //Tool change are default so no action is taken
-        Serial.println("ok");
-        Serial.println("ready");
         gcodeLine = "";
     }
     
@@ -769,52 +751,51 @@ void executeGcodeLine(String gcodeLine){
     if((gcodeLine[0] == 'T' || gcodeLine[0] == 't') && gcodeLine[1] != 'e'){
         Serial.print("Please insert tool ");
         Serial.println(gcodeLine);
-        Serial.println("ok");
-        Serial.println("ready");
         gcodeLine = "";
     }
     
-    if (gcodeLine.length() > 0){
-        Serial.println(gcodeLine);
-        gcodeLine = "";
-        Serial.println("ok");
-        Serial.println("ready");
-    }
 } 
 
-void  interpretCommandString(String readString){
+int  findNextG(String readString, int startingPoint){
+    int nextGIndex = readString.indexOf('G', startingPoint);
+    if(nextGIndex == -1){
+        nextGIndex = readString.length();
+    }
+    
+    return nextGIndex;
+}
+
+void  interpretCommandString(String cmdString){
     /*
     
     Splits a string into lines of gcode which begin with 'G'
     
     */
     
-    int firstG;
+    cmdString = "?G91 G20 G0 X10";
+    
+    Serial.println("before");
+    
+    Serial.println(cmdString);
+    
+    int firstG;  
     int secondG;
     
-    if (readString.indexOf('G') != -1){
-        //if the line contains a 'G'
-        while (readString.length() > 0){
-            //extract one command from the line
-            firstG  = readString.indexOf('G', firstG);
-            secondG = readString.indexOf('G', firstG + 1);
-            if (secondG == -1){                                 //no second line detected
-                secondG = readString.length();
-            }
-            
-            String gcodeLine = readString.substring(firstG, secondG);
+    while(cmdString.length() > 0){
+        firstG  = findNextG(cmdString, 0);
+        secondG = findNextG(cmdString, firstG + 1);
         
-            //execute the line
-            executeGcodeLine(gcodeLine);
-            
-            readString = readString.substring(secondG, readString.length());
-            
-        }
+        String gcodeLine = cmdString.substring(firstG, secondG);
+        
+        Serial.println(gcodeLine);
+        
+        cmdString = cmdString.substring(secondG, cmdString.length());
+        
+        Serial.println(cmdString);
     }
-    else{
-        //try to execute the line anyway, it might be a B code or something else
-        Serial.println("Line does not seem to contain a G");
-        executeGcodeLine(readString);
-    }
+    
+    Serial.println("after");
+    
+    Serial.println("ok");
     
 }
