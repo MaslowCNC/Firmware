@@ -72,11 +72,12 @@ Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Z-Axis",         Z_EEPROM_A
 
 Kinematics kinematics;
 
-float feedrate             =  125;
+float feedrate              =  125;
 float _inchesToMMConversion =  1;
-String prependString;       //prefix ('G01' for ex) from the previous command
-String readString;          //command being built one character at a time
-String readyCommandString;  //next command queued up and ready to send
+bool  useRelativeUnits      =  false;
+String prependString;                     //prefix ('G01' for ex) from the previous command
+String readString;                        //command being built one character at a time
+String readyCommandString;                //next command queued up and ready to send
 
 //These are used in place of a forward kinematic function at the beginning of each move. They should be replaced
 //by a call to the forward kinematic function when it is available.
@@ -96,7 +97,7 @@ void  returnPoz(float x, float y, float z){
         float errorTerm = (leftAxis.error() + rightAxis.error() )/2;
         
         
-        /*//Serial.println("<Idle,MPos:1.000,2.000,0.000,WPos:0.000,0.000,0.000>");
+        //Serial.println("<Idle,MPos:1.000,2.000,0.000,WPos:0.000,0.000,0.000>");
         Serial.print("<Idle,MPos:");
         Serial.print(x/_inchesToMMConversion);
         Serial.print(",");
@@ -105,7 +106,7 @@ void  returnPoz(float x, float y, float z){
         Serial.print(z/_inchesToMMConversion);
         //Serial.print(",");
         //Serial.print(errorTerm);
-        Serial.println(",WPos:0.000,0.000,0.000>");*/
+        Serial.println(",WPos:0.000,0.000,0.000>");
         
         
         /*if (_inchesToMMConversion == INCHES){
@@ -370,6 +371,15 @@ int   G1(String readString){
     zgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Z', currentZPos/_inchesToMMConversion);
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     isNotRapid = extractGcodeValue(readString, 'G', 1);
+    
+    if (useRelativeUnits){ //if we are using a relative coordinate system 
+        if(readString.indexOf('X') >= 0){ //if there is an X command
+            xgoto = currentXPos/_inchesToMMConversion + xgoto;
+        }
+        if(readString.indexOf('Y') >= 0){ //if y has moved
+            ygoto = currentYPos/_inchesToMMConversion + ygoto;
+        }
+    }
     
     //if the zaxis is attached
     if(zAxisAttached){
@@ -679,7 +689,13 @@ void  executeGcodeLine(String gcodeLine){
         gcodeLine = "";
     }
     
-    if(gcodeLine.substring(0, 3) == "G90"){ //G90 is the default so no action is taken
+    if(gcodeLine.substring(0, 3) == "G90"){ //Switch to absolute units
+        useRelativeUnits = false;
+        gcodeLine = "";
+    }
+    
+    if(gcodeLine.substring(0, 3) == "G91"){ //Switch to relative units
+        useRelativeUnits = true;
         gcodeLine = "";
     }
     
@@ -756,7 +772,7 @@ void  executeGcodeLine(String gcodeLine){
     
 } 
 
-int  findNextG(String readString, int startingPoint){
+int   findNextG(String readString, int startingPoint){
     int nextGIndex = readString.indexOf('G', startingPoint);
     if(nextGIndex == -1){
         nextGIndex = readString.length();
@@ -774,9 +790,9 @@ void  interpretCommandString(String cmdString){
     
     //cmdString = "?G91 G20 G0 X10";
     
-    Serial.println("before");
+    //Serial.println("before");
     
-    Serial.println(cmdString);
+    //Serial.println(cmdString);
     
     int firstG;  
     int secondG;
@@ -792,10 +808,10 @@ void  interpretCommandString(String cmdString){
         
         cmdString = cmdString.substring(secondG, cmdString.length());
         
-        Serial.println(cmdString);
+        //Serial.println(cmdString);
     }
     
-    Serial.println("after");
+    //Serial.println("after");
     
     Serial.println("ok");
     
