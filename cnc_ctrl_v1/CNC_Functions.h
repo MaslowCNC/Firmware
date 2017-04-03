@@ -635,103 +635,101 @@ void executeGcodeLine(String gcodeLine){
     
     Serial.println(gcodeLine);
     
-    Serial.println("then this ran");
-    
-    if(readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G02" || readString.substring(0, 3) == "G03" || readString.substring(0, 2) == "G0" || readString.substring(0, 2) == "G1" || readString.substring(0, 2) == "G2" || readString.substring(0, 2) == "G3"){
-        prependString = readString.substring(0, 3);
+    if(gcodeLine.substring(0, 3) == "G00" || gcodeLine.substring(0, 3) == "G01" || gcodeLine.substring(0, 3) == "G02" || gcodeLine.substring(0, 3) == "G03" || gcodeLine.substring(0, 2) == "G0" || gcodeLine.substring(0, 2) == "G1" || gcodeLine.substring(0, 2) == "G2" || gcodeLine.substring(0, 2) == "G3"){
+        prependString = gcodeLine.substring(0, 3);
         prependString = prependString + " ";
     }
     
-    if(readString[0] == 'X' || readString[0] == 'Y' || readString[0] == 'Z'){
-        readString = prependString + readString;
+    if(gcodeLine[0] == 'X' || gcodeLine[0] == 'Y' || gcodeLine[0] == 'Z'){
+        gcodeLine = prependString + gcodeLine;
     }
     
-    if(readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G0 " || readString.substring(0, 3) == "G1 "){
+    if(gcodeLine.substring(0, 3) == "G01" || gcodeLine.substring(0, 3) == "G00" || gcodeLine.substring(0, 3) == "G0 " || gcodeLine.substring(0, 3) == "G1 "){
         
-        G1(readString);
+        G1(gcodeLine);
         Serial.println("ok");
         Serial.println("ready");
-        readString = "";
+        gcodeLine = "";
     }
     
-    if(readString.substring(0, 3) == "G02" || readString.substring(0, 3) == "G2 "){
-        G2(readString);
+    if(gcodeLine.substring(0, 3) == "G02" || gcodeLine.substring(0, 3) == "G2 "){
+        G2(gcodeLine);
         Serial.println("ready");
         Serial.println("ok");
-        readString = "";
+        gcodeLine = "";
     }
     
-    if(readString.substring(0, 3) == "G03" || readString.substring(0, 3) == "G3 "){
-        G2(readString);
+    if(gcodeLine.substring(0, 3) == "G03" || gcodeLine.substring(0, 3) == "G3 "){
+        G2(gcodeLine);
         Serial.println("ok");
         Serial.println("ready");
-        readString = "";
+        gcodeLine = "";
     }
     
-    if(readString.substring(0, 3) == "G10"){
-        G10(readString);
+    if(gcodeLine.substring(0, 3) == "G10"){
+        G10(gcodeLine);
         Serial.println("ok");
         Serial.println("ready");
-        readString = "";
+        gcodeLine = "";
     }
     
-    if(readString.substring(0, 3) == "G17"){ //XY plane is the default so no action is taken
+    if(gcodeLine.substring(0, 3) == "G17"){ //XY plane is the default so no action is taken
         Serial.println("ok");
         Serial.println("ready");
-        readString = "";
+        gcodeLine = "";
     }
     
-    if(readString.substring(0, 3) == "G20"){
+    if(gcodeLine.substring(0, 3) == "G20"){
         setInchesToMillimetersConversion(INCHES);
         Serial.println("ok");
         Serial.println("ready");
-        readString = "";
+        gcodeLine = "";
     }
     
-    if(readString.substring(0, 3) == "G21"){
+    if(gcodeLine.substring(0, 3) == "G21"){
         setInchesToMillimetersConversion(MILLIMETERS);
         Serial.println("ok");
         Serial.println("ready");
-        readString = "";
+        gcodeLine = "";
     }
     
-    if(readString.substring(0, 3) == "G90"){ //G90 is the default so no action is taken
+    if(gcodeLine.substring(0, 3) == "G90"){ //G90 is the default so no action is taken
         Serial.println("ok");
         Serial.println("ready");
-        readString = "";
+        gcodeLine = "";
     }
     
-    if(readString.substring(0, 3) == "M06"){ //Tool change are default so no action is taken
+    if(gcodeLine.substring(0, 3) == "M06"){ //Tool change are default so no action is taken
         Serial.println("ok");
         Serial.println("ready");
-        readString = "";
+        gcodeLine = "";
     }
     
-    if(readString.substring(0, 3) == "B01"){
+    if(gcodeLine.substring(0, 3) == "B01"){
         
         leftAxis.computeMotorResponse();
         rightAxis.computeMotorResponse();
         
-        readString = "";
+        gcodeLine = "";
         Serial.println("ok");
         Serial.println("ready");
     }
     
-    if(readString.substring(0, 3) == "B02"){
+    if(gcodeLine.substring(0, 3) == "B02"){
         calibrateChainLengths();
-        readString = "";
+        gcodeLine = "";
         Serial.println("ok");
         Serial.println("ready");
     }
     
-    if(readString.substring(0, 3) == "B03"){
-        updateSettings(readString);
-        readString = "";
+    if(gcodeLine.substring(0, 3) == "B03"){
+        updateSettings(gcodeLine);
+        gcodeLine = "";
         Serial.println("ok");
         Serial.println("ready");
     }
     
-    if(readString.substring(0, 3) == "B04"){
+    if(gcodeLine.substring(0, 3) == "B04"){
         //Test each of the axis
         delay(500);
         leftAxis.test();
@@ -740,23 +738,23 @@ void executeGcodeLine(String gcodeLine){
         delay(500);
         zAxis.test();
         Serial.println("Tests complete.");
-        readString = "";
+        gcodeLine = "";
         Serial.println("ok");
         Serial.println("ready");
     }
     
-    if(readString.substring(0, 3) == "B05"){
+    if(gcodeLine.substring(0, 3) == "B05"){
         Serial.print("Firmware Version ");
         Serial.println(VERSIONNUMBER);
-        readString = "";
+        gcodeLine = "";
         Serial.println("ok");
         Serial.println("ready");
     }
     
-    if(readString.substring(0, 3) == "B06"){
+    if(gcodeLine.substring(0, 3) == "B06"){
         Serial.println("Manually Setting Chain Lengths To: ");
-        float newL = extractGcodeValue(readString, 'L', 0);
-        float newR = extractGcodeValue(readString, 'R', 0);
+        float newL = extractGcodeValue(gcodeLine, 'L', 0);
+        float newR = extractGcodeValue(gcodeLine, 'R', 0);
         Serial.print("Left: ");
         Serial.print(newL);
         Serial.println("mm");
@@ -768,17 +766,17 @@ void executeGcodeLine(String gcodeLine){
         rightAxis.set(newR);
     }
     
-    if((readString[0] == 'T' || readString[0] == 't') && readString[1] != 'e'){
+    if((gcodeLine[0] == 'T' || gcodeLine[0] == 't') && gcodeLine[1] != 'e'){
         Serial.print("Please insert tool ");
-        Serial.println(readString);
+        Serial.println(gcodeLine);
         Serial.println("ok");
         Serial.println("ready");
-        readString = "";
+        gcodeLine = "";
     }
     
-    if (readString.length() > 0){
-        Serial.println(readString);
-        readString = "";
+    if (gcodeLine.length() > 0){
+        Serial.println(gcodeLine);
+        gcodeLine = "";
         Serial.println("ok");
         Serial.println("ready");
     }
@@ -790,30 +788,32 @@ void  interpretCommandString(String readString){
     Splits a string into lines of gcode which begin with 'G'
     
     */
-    Serial.println("debug: ");
-    Serial.println(readString);
     
     int firstG;
     int secondG;
     
     if (readString.indexOf('G') != -1){
         //if the line contains a 'G'
-        while (firstG >= 0){
+        while (readString.length() > 0){
             //extract one command from the line
             firstG  = readString.indexOf('G', firstG);
             secondG = readString.indexOf('G', firstG + 1);
-        
+            if (secondG == -1){                                 //no second line detected
+                secondG = readString.length();
+            }
+            
             String gcodeLine = readString.substring(firstG, secondG);
         
             //execute the line
             executeGcodeLine(gcodeLine);
             
-            firstG = secondG;
+            readString = readString.substring(secondG, readString.length());
+            
         }
     }
     else{
         //try to execute the line anyway, it might be a B code or something else
-        Serial.println("this ran");
+        Serial.println("Line does not seem to contain a G");
         executeGcodeLine(readString);
     }
     
