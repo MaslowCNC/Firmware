@@ -772,7 +772,7 @@ void  interpretCommandString(String cmdString){
     
     */
     
-    cmdString = "?G91 G20 G0 X10";
+    //cmdString = "?G91 G20 G0 X10";
     
     Serial.println("before");
     
@@ -788,6 +788,7 @@ void  interpretCommandString(String cmdString){
         String gcodeLine = cmdString.substring(firstG, secondG);
         
         Serial.println(gcodeLine);
+        executeGcodeLine(gcodeLine);
         
         cmdString = cmdString.substring(secondG, cmdString.length());
         
