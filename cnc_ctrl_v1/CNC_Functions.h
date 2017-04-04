@@ -326,6 +326,22 @@ void  holdPosition(){
     zAxis.hold();
 }
     
+int   findEndOfNumber(String textString, int index){
+    //Return the index of the last digit of the number beginning at the index passed in
+    int i = index;
+    
+    while (i < textString.length()){
+        
+        if(isDigit(textString[i]) or isPunct(textString[i])){ //If we're still looking at a number, keep goin
+            i++;
+        }
+        else{
+            return i;                                         //If we've reached the end of the number, return the last index
+        }
+    }
+    return i;                                                 //If we've reached the end of the string, return the last number
+}
+    
 float extractGcodeValue(String readString, char target,float defaultReturn){
 
 /*Reads a string and returns the value of number following the target character.
@@ -337,8 +353,12 @@ If no number is found, defaultReturn is returned*/
     float numberAsFloat;
     
     begin           =  readString.indexOf(target);
-    end             =  readString.indexOf(' ', begin);
+    end             =  findEndOfNumber(readString,begin+1);
     numberAsString  =  readString.substring(begin+1,end);
+    
+    //Serial.print("Number as a string: ");
+    //Serial.println(numberAsString);
+    
     numberAsFloat   =  numberAsString.toFloat();
     
     if (begin == -1){ //if the character was not found, return error
