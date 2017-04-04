@@ -432,6 +432,7 @@ int   G1(String readString){
                 holdPosition();
             } 
         }
+        Serial.println("ok");
     }
     
     
@@ -664,8 +665,6 @@ void  executeGcodeLine(String gcodeLine){
     */
     
     int gNumber = extractGcodeValue(gcodeLine,'G', -1);
-    Serial.print("G-number: ");
-    Serial.println(gNumber);
     
     if(gcodeLine.substring(0, 3) == "G00" || gcodeLine.substring(0, 3) == "G01" || gcodeLine.substring(0, 3) == "G02" || gcodeLine.substring(0, 3) == "G03" || gcodeLine.substring(0, 2) == "G0" || gcodeLine.substring(0, 2) == "G1" || gcodeLine.substring(0, 2) == "G2" || gcodeLine.substring(0, 2) == "G3"){
         prependString = gcodeLine.substring(0, 3);
