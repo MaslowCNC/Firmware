@@ -104,17 +104,11 @@ void  returnPoz(float x, float y, float z){
         Serial.print(y/_inchesToMMConversion);
         Serial.print(",");
         Serial.print(z/_inchesToMMConversion);
-        //Serial.print(",");
-        //Serial.print(errorTerm);
         Serial.println(",WPos:0.000,0.000,0.000>");
         
-        
-        /*if (_inchesToMMConversion == INCHES){
-            Serial.println("in");
-        }
-        else{
-            Serial.println("mm");
-        }*/
+        Serial.print("[PosError:");
+        Serial.print(errorTerm);
+        Serial.println("]");
         
         lastRan = millis();
     }

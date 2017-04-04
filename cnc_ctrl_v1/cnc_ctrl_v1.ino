@@ -21,7 +21,7 @@ void setup(){
     Serial.begin(19200);
     
     Serial.println("ready");
-    Serial.println("gready");
+    Serial.println("ok");
     
     leftAxis.initializePID();
     rightAxis.initializePID();
