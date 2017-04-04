@@ -564,7 +564,6 @@ void  G10(String readString){
     zAxis.set(zgoto);
     zAxis.endMove(zgoto);
     zAxis.attach();
-    leftAxis.detach();
 }
 
 void  calibrateChainLengths(){
@@ -659,11 +658,14 @@ void  updateSettings(String readString){
 void  executeGcodeLine(String gcodeLine){
     /*
     
-    Executes a single line of gcode
+    Executes a single line of gcode beginning with the character 'G' or 'B'. If neither code is
+    included on the front of the line, the code from the prevous line will be added.
     
     */
     
-    //Serial.println(gcodeLine);
+    int gNumber = extractGcodeValue(gcodeLine,'G', -1);
+    Serial.print("G-number: ");
+    Serial.println(gNumber);
     
     if(gcodeLine.substring(0, 3) == "G00" || gcodeLine.substring(0, 3) == "G01" || gcodeLine.substring(0, 3) == "G02" || gcodeLine.substring(0, 3) == "G03" || gcodeLine.substring(0, 2) == "G0" || gcodeLine.substring(0, 2) == "G1" || gcodeLine.substring(0, 2) == "G2" || gcodeLine.substring(0, 2) == "G3"){
         prependString = gcodeLine.substring(0, 3);
@@ -674,49 +676,34 @@ void  executeGcodeLine(String gcodeLine){
         gcodeLine = prependString + gcodeLine;
     }
     
-    if(gcodeLine.substring(0, 3) == "G01" || gcodeLine.substring(0, 3) == "G00" || gcodeLine.substring(0, 3) == "G0 " || gcodeLine.substring(0, 3) == "G1 "){
-        
-        G1(gcodeLine);
-        gcodeLine = "";
-    }
-    
-    if(gcodeLine.substring(0, 3) == "G02" || gcodeLine.substring(0, 3) == "G2 "){
-        G2(gcodeLine);
-        gcodeLine = "";
-    }
-    
-    if(gcodeLine.substring(0, 3) == "G03" || gcodeLine.substring(0, 3) == "G3 "){
-        G2(gcodeLine);
-        gcodeLine = "";
-    }
-    
-    if(gcodeLine.substring(0, 3) == "G10"){
-        G10(gcodeLine);
-        gcodeLine = "";
-    }
-    
-    if(gcodeLine.substring(0, 3) == "G17"){ //XY plane is the default so no action is taken
-        gcodeLine = "";
-    }
-    
-    if(gcodeLine.substring(0, 3) == "G20"){
-        setInchesToMillimetersConversion(INCHES);
-        gcodeLine = "";
-    }
-    
-    if(gcodeLine.substring(0, 3) == "G21"){
-        setInchesToMillimetersConversion(MILLIMETERS);
-        gcodeLine = "";
-    }
-    
-    if(gcodeLine.substring(0, 3) == "G90"){ //Switch to absolute units
-        useRelativeUnits = false;
-        gcodeLine = "";
-    }
-    
-    if(gcodeLine.substring(0, 3) == "G91"){ //Switch to relative units
-        useRelativeUnits = true;
-        gcodeLine = "";
+    switch(gNumber){
+        case 0:
+            G1(gcodeLine);
+            break;
+        case 1:
+            G1(gcodeLine);
+            break;
+        case 2:
+            G2(gcodeLine);
+            break;
+        case 3:
+            G2(gcodeLine);
+            break;
+        case 10:
+            G10(gcodeLine);
+            break;
+        case 20:
+            setInchesToMillimetersConversion(INCHES);
+            break;
+        case 21:
+            setInchesToMillimetersConversion(MILLIMETERS);
+            break;
+        case 90:
+            useRelativeUnits = false;
+            break;
+        case 91:
+            useRelativeUnits = true;
+            break;
     }
     
     if(gcodeLine.substring(0, 3) == "M06"){ //Tool change are default so no action is taken
