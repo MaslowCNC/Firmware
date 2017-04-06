@@ -20,7 +20,7 @@ libraries*/
 #include "Axis.h"
 #include "Kinematics.h"
 
-#define VERSIONNUMBER 0.62
+#define VERSIONNUMBER 0.63
 
 bool zAxisAttached = false;
 
@@ -386,6 +386,7 @@ int   G1(String readString){
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     isNotRapid = extractGcodeValue(readString, 'G', 1);
     
+
     if (useRelativeUnits){ //if we are using a relative coordinate system 
         if(readString.indexOf('X') >= 0){ //if there is an X command
             xgoto = currentXPos/_inchesToMMConversion + xgoto;
@@ -393,6 +394,11 @@ int   G1(String readString){
         if(readString.indexOf('Y') >= 0){ //if y has moved
             ygoto = currentYPos/_inchesToMMConversion + ygoto;
         }
+    }
+    
+    feedrate   = constrain(feedrate, 1, 25*_inchesToMMConversion);                                              //constrain the maximum feedrate
+    if (feedrate == 25*_inchesToMMConversion){
+        Serial.println("Feedrate limited to preserve accuracy");
     }
     
     //if the zaxis is attached
