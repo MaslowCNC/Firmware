@@ -42,6 +42,8 @@ void runsOnATimer(){
 
 void loop(){
     
+    readyCommandString = ringBuffer.readLine();
+    
     if (readyCommandString.length() > 0){
         readyCommandString.toUpperCase();
         interpretCommandString(readyCommandString);

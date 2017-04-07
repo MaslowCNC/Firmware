@@ -88,12 +88,12 @@ void  returnPoz(float x, float y, float z){
     */
     
     static unsigned long lastRan = millis();
-    int                  timeout = 9000;
+    int                  timeout = 200;
     
     if (millis() - lastRan > timeout){
         float errorTerm = (leftAxis.error() + rightAxis.error() )/2;
         
-        /*
+        
         //Serial.println("<Idle,MPos:1.000,2.000,0.000,WPos:0.000,0.000,0.000>");
         Serial.print("<Idle,MPos:");
         Serial.print(x/_inchesToMMConversion);
@@ -103,12 +103,11 @@ void  returnPoz(float x, float y, float z){
         Serial.print(z/_inchesToMMConversion);
         Serial.println(",WPos:0.000,0.000,0.000>");
         
-        Serial.print("[PosError:");
-        Serial.print(errorTerm);
-        Serial.println("]");
-        */
+        //Serial.print("[PosError:");
+        //Serial.print(errorTerm);
+        //Serial.println("]");
         
-        ringBuffer.print();
+        //ringBuffer.print();
         lastRan = millis();
     }
     
@@ -136,16 +135,9 @@ void readSerialCommands(){
     Check to see if a new character is available from the serial connection, read it if one is.
     */
     if (Serial.available() > 0) {
-        char c = Serial.read();  //gets one byte from serial buffer
-        ringBuffer.write(c);
         
-        /*if (c == '\n'){
-            readyCommandString = readString;
-            readString = "";
-        }
-        else{
-            readString += c; //makes the string readString
-        }*/
+        ringBuffer.write(Serial.read()); //gets one byte from serial buffer, writes it to the internal ring buffer
+        
     }
 }
 
@@ -398,20 +390,14 @@ int   G1(String readString){
     }
     
     feedrate   = constrain(feedrate, 1, 25*_inchesToMMConversion);                                              //constrain the maximum feedrate
-    if (feedrate == 25*_inchesToMMConversion){
-        Serial.println("Feedrate limited to preserve accuracy");
-    }
     
     //if the zaxis is attached
     if(zAxisAttached){
-        Serial.println("before z move");
         if (zgoto != currentZPos/_inchesToMMConversion){
             singleAxisMove(&zAxis, zgoto,45);
         }
-        Serial.println("after zmove");
     }
     else{
-        Serial.println("manual z move");
         float threshold = .1; //units of mm
         if (abs(currentZPos - zgoto) > threshold){
             Serial.print("Message: Please adjust Z-Axis to a depth of ");

@@ -39,9 +39,10 @@ void RingBuffer::write(char letter){
     Write one character into the ring buffer.
     
     */
-    
-    buffer[endOfString] = letter;
-    _incrementEnd();
+    if (letter != '?'){                    //ignore question marks because grbl sends them all the time
+        buffer[endOfString] = letter;
+        _incrementEnd();
+    }
 }
 
 char RingBuffer::read(){
@@ -114,9 +115,6 @@ void RingBuffer::print(){
     }
     
     Serial.println(" ");
-    
-    Serial.print("Read: ");
-    Serial.println(readLine());
     
 }
 
