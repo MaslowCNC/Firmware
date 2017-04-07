@@ -23,9 +23,11 @@ serial data.
 #include "Arduino.h"
 #include "RingBuffer.h"
 
-char buffer[128];
+#define BUFFERSIZE 128
+
+char buffer[BUFFERSIZE];
 int beginningOfString = 0;             //points to the first valid character which can be read
-int endOfString = 0;                   //points to the first open space which can be written
+int endOfString       = 0;             //points to the first open space which can be written
 
 RingBuffer::RingBuffer(){
     
@@ -54,32 +56,67 @@ char RingBuffer::read(){
         letter = '\0';                          //if the buffer is empty return null
     }
     else{
-        letter = buffer[beginningOfString];     //else return first charicter
+        letter = buffer[beginningOfString];     //else return first character
+        buffer[beginningOfString] = '\0';       //set the read character to null so it cannot be read again
     }
     _incrementBeginning();
     
     return letter;
 }
 
+String RingBuffer::readLine(){
+    /*
+   
+    Return one line (terminated with \n) from the buffer
+   
+    */
+    
+    String lineToReturn;
+    
+    bool lineDetected = false;
+    
+    int  i = 0;
+    while (i < BUFFERSIZE){                     //This will always run 128 times even if the buffer isn't full which is a waste
+        if(buffer[i] == '\n'){                  //Check to see if the buffer contains a complete line terminated with \n
+            lineDetected = true;
+        }
+        i++;
+    }
+    
+    //Serial.print("Line detected?:");
+    //Serial.println(lineDetected);
+    
+    if(lineDetected){
+        char lastReadValue;
+        while(lastReadValue != '\n'){                   //read until the end of the line is found, building the string
+            lastReadValue = read();
+            lineToReturn += lastReadValue;
+        }
+    }
+    
+    return lineToReturn;
+    
+}
+
 void RingBuffer::print(){
     Serial.print("Buffer size: ");
-    Serial.println(endOfString - beginningOfString);
+    Serial.println(_bufferSize());
     Serial.print("Begin: ");
     Serial.println(beginningOfString);
     Serial.print("End: ");
     Serial.println(endOfString);
-    Serial.println("Buffer Contents: ");
     
-    int i = beginningOfString;
-    while (i < endOfString){
+    Serial.println("Buffer Contents: ");
+    int i = 0;
+    while(i < BUFFERSIZE){
         Serial.print(buffer[i]);
         i++;
     }
     
-    char temp = read();
+    Serial.println(" ");
     
     Serial.print("Read: ");
-    Serial.println(temp);
+    Serial.println(readLine());
     
 }
 
@@ -107,10 +144,32 @@ void RingBuffer::_incrementEnd(){
     Increment the pointer to the end of the ring buffer by one.
     
     */
-    if (endOfString < 127){
+    if (endOfString + 1 == beginningOfString){
+        Serial.println("buffer overflow");
+        return;
+    }
+    else if (endOfString < 127){
         endOfString++;
     }
     else{
         endOfString = 0;
+    }
+}
+
+int  RingBuffer::_bufferSize(){
+    /*
+    
+    Returns the number of charicters held in the buffer
+    
+    */
+    
+    if(endOfString > beginningOfString){                //if the buffer is linear
+        return endOfString - beginningOfString;
+    }
+    else if (endOfString == beginningOfString){
+        return 0;                                       //if the buffer is empty
+    }
+    else{                                               //if the buffer has wrapped
+        return (BUFFERSIZE - beginningOfString) + endOfString;
     }
 }

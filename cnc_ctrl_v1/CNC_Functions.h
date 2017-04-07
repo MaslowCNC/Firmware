@@ -88,7 +88,7 @@ void  returnPoz(float x, float y, float z){
     */
     
     static unsigned long lastRan = millis();
-    int                  timeout = 2000;
+    int                  timeout = 9000;
     
     if (millis() - lastRan > timeout){
         float errorTerm = (leftAxis.error() + rightAxis.error() )/2;

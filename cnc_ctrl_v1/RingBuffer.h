@@ -26,11 +26,12 @@
             void  write(char letter);
             void  print();
             char  read();
-            char* readLine();
+            String readLine();
             
         private:
             void _incrementBeginning();
             void _incrementEnd();
+            int  _bufferSize();
     };
 
     #endif
