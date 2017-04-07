@@ -19,6 +19,7 @@ libraries*/
 #include "GearMotor.h"
 #include "Axis.h"
 #include "Kinematics.h"
+#include "RingBuffer.h"
 
 #define VERSIONNUMBER 0.63
 
@@ -29,11 +30,6 @@ bool zAxisAttached = false;
 
 #define CLOCKWISE        -1
 #define COUNTERCLOCKWISE  1
-
-
-#define XDIRECTION BACKWARD
-#define YDIRECTION BACKWARD
-#define ZDIRECTION BACKWARD
 
 #define LEFT_EEPROM_ADR     5
 #define RIGHT_EEPROM_ADR  105
@@ -71,6 +67,7 @@ Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Z-Axis",         Z_EEPROM_A
 
 
 Kinematics kinematics;
+RingBuffer ringBuffer;
 
 float feedrate              =  125;
 float _inchesToMMConversion =  1;
@@ -91,12 +88,12 @@ void  returnPoz(float x, float y, float z){
     */
     
     static unsigned long lastRan = millis();
-    int                  timeout = 200;
+    int                  timeout = 2000;
     
     if (millis() - lastRan > timeout){
         float errorTerm = (leftAxis.error() + rightAxis.error() )/2;
         
-        
+        /*
         //Serial.println("<Idle,MPos:1.000,2.000,0.000,WPos:0.000,0.000,0.000>");
         Serial.print("<Idle,MPos:");
         Serial.print(x/_inchesToMMConversion);
@@ -109,7 +106,10 @@ void  returnPoz(float x, float y, float z){
         Serial.print("[PosError:");
         Serial.print(errorTerm);
         Serial.println("]");
+        */
         
+        Serial.println("The buffer is:");
+        ringBuffer.print();
         lastRan = millis();
     }
     
@@ -138,13 +138,15 @@ void readSerialCommands(){
     */
     if (Serial.available() > 0) {
         char c = Serial.read();  //gets one byte from serial buffer
-        if (c == '\n'){
+        ringBuffer.write(c);
+        
+        /*if (c == '\n'){
             readyCommandString = readString;
             readString = "";
         }
         else{
             readString += c; //makes the string readString
-        }
+        }*/
     }
 }
 
@@ -403,11 +405,14 @@ int   G1(String readString){
     
     //if the zaxis is attached
     if(zAxisAttached){
+        Serial.println("before z move");
         if (zgoto != currentZPos/_inchesToMMConversion){
             singleAxisMove(&zAxis, zgoto,45);
         }
+        Serial.println("after zmove");
     }
     else{
+        Serial.println("manual z move");
         float threshold = .1; //units of mm
         if (abs(currentZPos - zgoto) > threshold){
             Serial.print("Message: Please adjust Z-Axis to a depth of ");
@@ -432,7 +437,7 @@ int   G1(String readString){
                 holdPosition();
             } 
         }
-        Serial.println("ok");
+        //Serial.println("ok");
     }
     
     
@@ -794,12 +799,6 @@ void  interpretCommandString(String cmdString){
     
     */
     
-    //cmdString = "?G91 G20 G0 X10";
-    
-    //Serial.println("before");
-    
-    //Serial.println(cmdString);
-    
     int firstG;  
     int secondG;
     
@@ -814,10 +813,8 @@ void  interpretCommandString(String cmdString){
         
         cmdString = cmdString.substring(secondG, cmdString.length());
         
-        //Serial.println(cmdString);
     }
     
-    //Serial.println("after");
     
     Serial.println("ok");
     
