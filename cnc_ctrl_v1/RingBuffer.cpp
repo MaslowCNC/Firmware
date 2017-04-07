@@ -24,16 +24,93 @@ serial data.
 #include "RingBuffer.h"
 
 char buffer[128];
+int beginningOfString = 0;             //points to the first valid character which can be read
+int endOfString = 0;                   //points to the first open space which can be written
 
 RingBuffer::RingBuffer(){
     
 }
 
 void RingBuffer::write(char letter){
-    Serial.println("would write");
-    Serial.println(letter);
+    /*
+    
+    Write one character into the ring buffer.
+    
+    */
+    
+    buffer[endOfString] = letter;
+    _incrementEnd();
+}
+
+char RingBuffer::read(){
+    /*
+    
+    Read one character from the ring buffer.
+    
+    */
+    
+    char letter;
+    if (beginningOfString == endOfString){
+        letter = '\0';                          //if the buffer is empty return null
+    }
+    else{
+        letter = buffer[beginningOfString];     //else return first charicter
+    }
+    _incrementBeginning();
+    
+    return letter;
 }
 
 void RingBuffer::print(){
-    Serial.println(buffer);
+    Serial.print("Buffer size: ");
+    Serial.println(endOfString - beginningOfString);
+    Serial.print("Begin: ");
+    Serial.println(beginningOfString);
+    Serial.print("End: ");
+    Serial.println(endOfString);
+    Serial.println("Buffer Contents: ");
+    
+    int i = beginningOfString;
+    while (i < endOfString){
+        Serial.print(buffer[i]);
+        i++;
+    }
+    
+    char temp = read();
+    
+    Serial.print("Read: ");
+    Serial.println(temp);
+    
+}
+
+void RingBuffer::_incrementBeginning(){
+    /*
+    
+    Increment the pointer to the beginning of the ring buffer by one.
+    
+    */
+    
+    if (beginningOfString == endOfString){
+        return;                             //don't allow the beginning to pass the end
+    }
+    else if (beginningOfString < 127){
+        beginningOfString++;                //move the beginning up one
+    }
+    else{
+        beginningOfString = 0;              //wrap back to zero
+    }
+}
+
+void RingBuffer::_incrementEnd(){
+    /*
+    
+    Increment the pointer to the end of the ring buffer by one.
+    
+    */
+    if (endOfString < 127){
+        endOfString++;
+    }
+    else{
+        endOfString = 0;
+    }
 }

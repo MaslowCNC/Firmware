@@ -23,11 +23,14 @@
     class RingBuffer{
         public:
             RingBuffer();
-            void write(char letter);
-            void print();
+            void  write(char letter);
+            void  print();
+            char  read();
+            char* readLine();
             
         private:
-            
+            void _incrementBeginning();
+            void _incrementEnd();
     };
 
     #endif

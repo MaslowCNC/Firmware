@@ -108,7 +108,6 @@ void  returnPoz(float x, float y, float z){
         Serial.println("]");
         */
         
-        Serial.println("The buffer is:");
         ringBuffer.print();
         lastRan = millis();
     }
