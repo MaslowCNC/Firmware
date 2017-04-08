@@ -94,7 +94,6 @@ void  returnPoz(float x, float y, float z){
         float errorTerm = (leftAxis.error() + rightAxis.error() )/2;
         
         
-        //Serial.println("<Idle,MPos:1.000,2.000,0.000,WPos:0.000,0.000,0.000>");
         Serial.print("<Idle,MPos:");
         Serial.print(x/_inchesToMMConversion);
         Serial.print(",");
@@ -103,9 +102,9 @@ void  returnPoz(float x, float y, float z){
         Serial.print(z/_inchesToMMConversion);
         Serial.println(",WPos:0.000,0.000,0.000>");
         
-        //Serial.print("[PosError:");
-        //Serial.print(errorTerm);
-        //Serial.println("]");
+        Serial.print("[PosError:");
+        Serial.print(errorTerm);
+        Serial.println("]");
         
         //ringBuffer.print();
         lastRan = millis();
@@ -343,9 +342,6 @@ If no number is found, defaultReturn is returned*/
     end             =  findEndOfNumber(readString,begin+1);
     numberAsString  =  readString.substring(begin+1,end);
     
-    //Serial.print("Number as a string: ");
-    //Serial.println(numberAsString);
-    
     numberAsFloat   =  numberAsString.toFloat();
     
     if (begin == -1){ //if the character was not found, return error
@@ -422,7 +418,6 @@ int   G1(String readString){
                 holdPosition();
             } 
         }
-        //Serial.println("ok");
     }
     
     

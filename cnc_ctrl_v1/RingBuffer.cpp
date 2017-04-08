@@ -84,9 +84,6 @@ String RingBuffer::readLine(){
         i++;
     }
     
-    //Serial.print("Line detected?:");
-    //Serial.println(lineDetected);
-    
     if(lineDetected){
         char lastReadValue;
         while(lastReadValue != '\n'){                   //read until the end of the line is found, building the string
@@ -157,7 +154,7 @@ void RingBuffer::_incrementEnd(){
 int  RingBuffer::_bufferSize(){
     /*
     
-    Returns the number of charicters held in the buffer
+    Returns the number of characters held in the buffer
     
     */
     
