@@ -600,7 +600,7 @@ void  updateSettings(String readString){
     float motorOffsetX       = extractGcodeValue(readString, 'D', (distBetweenMotors - bedWidth)/2); //read the motor offset X IF it is sent, if it's not sent, compute it from the spacing between the motors
     float motorOffsetY       = extractGcodeValue(readString, 'E', motorOffsetY);
     float sledWidth          = extractGcodeValue(readString, 'F', kinematics.l);
-    float sledHeight         = extractGcodeValue(readString, 'G', kinematics.s);
+    float sledHeight         = extractGcodeValue(readString, 'R', kinematics.s);
     float sledCG             = extractGcodeValue(readString, 'H', kinematics.h3);
     zAxisAttached            = extractGcodeValue(readString, 'I', zAxisAttached);
     int encoderSteps         = extractGcodeValue(readString, 'J', ENCODERSTEPS);
@@ -690,10 +690,7 @@ void  executeGcodeLine(String gcodeLine){
             break;
     }
     
-    if(gcodeLine.substring(0, 3) == "M06"){ //Tool change are default so no action is taken
-        gcodeLine = "";
-    }
-    
+
     if(gcodeLine.substring(0, 3) == "B01"){
         
         leftAxis.computeMotorResponse();
@@ -782,19 +779,23 @@ void  interpretCommandString(String cmdString){
     int firstG;  
     int secondG;
     
-    while(cmdString.length() > 0){
-        firstG  = findNextG(cmdString, 0);
-        secondG = findNextG(cmdString, firstG + 1);
-        
-        String gcodeLine = cmdString.substring(firstG, secondG);
-        
-        Serial.println(gcodeLine);
-        executeGcodeLine(gcodeLine);
-        
-        cmdString = cmdString.substring(secondG, cmdString.length());
-        
+    if (cmdString[0] == 'B'){                   //If the command is a B command
+        executeGcodeLine(cmdString);
     }
-    
+    else{
+        while(cmdString.length() > 0){          //Extract each line of gcode from the string
+            firstG  = findNextG(cmdString, 0);
+            secondG = findNextG(cmdString, firstG + 1);
+            
+            String gcodeLine = cmdString.substring(firstG, secondG);
+            
+            Serial.println(gcodeLine);
+            executeGcodeLine(gcodeLine);
+            
+            cmdString = cmdString.substring(secondG, cmdString.length());
+            
+        }
+    }
     
     Serial.println("ok");
     
