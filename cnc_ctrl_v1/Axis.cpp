@@ -157,6 +157,16 @@ int    Axis::attach(){
      return 1;
 }
 
+bool   Axis::attached(){
+    /*
+    
+    Returns true if the axis is attached, false if it is not.
+    
+    */
+    
+    return _motor.attached();
+}
+
 void   Axis::hold(){
     int timeout   = 2000;
     

@@ -106,10 +106,20 @@ void  returnPoz(float x, float y, float z){
         Serial.print(errorTerm);
         Serial.println("]");
         
-        //ringBuffer.print();
         lastRan = millis();
     }
     
+}
+
+void  _signalReady(){
+    /*
+    
+    Signal to the controlling software that the machine has executed the last
+    gcode line successfully.
+    
+    */
+    
+    Serial.println("ok");
 }
 
 void  _watchDog(){
@@ -120,10 +130,10 @@ void  _watchDog(){
     This fixes the issue where the machine is ready, but Ground Control doesn't know the machine is ready and the system locks up.
     */
     static unsigned long lastRan = millis();
-    int                  timeout = 1000;
+    int                  timeout = 3000;
     
     if (millis() - lastRan > timeout){
-        //Serial.println("ok");
+        //_signalReady();
         
         lastRan = millis();
     }
@@ -133,10 +143,8 @@ void readSerialCommands(){
     /*
     Check to see if a new character is available from the serial connection, read it if one is.
     */
-    if (Serial.available() > 0) {
-        
+    while (Serial.available() > 0) {
         ringBuffer.write(Serial.read()); //gets one byte from serial buffer, writes it to the internal ring buffer
-        
     }
 }
 
@@ -697,21 +705,21 @@ void  executeGcodeLine(String gcodeLine){
         rightAxis.computeMotorResponse();
         
         gcodeLine = "";
-        Serial.println("ok");
+        _signalReady();
         Serial.println("ready");
     }
     
     if(gcodeLine.substring(0, 3) == "B02"){
         calibrateChainLengths();
         gcodeLine = "";
-        Serial.println("ok");
+        _signalReady();
         Serial.println("ready");
     }
     
     if(gcodeLine.substring(0, 3) == "B03"){
         updateSettings(gcodeLine);
         gcodeLine = "";
-        Serial.println("ok");
+        _signalReady();
         Serial.println("ready");
     }
     
@@ -725,7 +733,7 @@ void  executeGcodeLine(String gcodeLine){
         zAxis.test();
         Serial.println("Tests complete.");
         gcodeLine = "";
-        Serial.println("ok");
+        _signalReady();
         Serial.println("ready");
     }
     
@@ -733,7 +741,7 @@ void  executeGcodeLine(String gcodeLine){
         Serial.print("Firmware Version ");
         Serial.println(VERSIONNUMBER);
         gcodeLine = "";
-        Serial.println("ok");
+        _signalReady();
         Serial.println("ready");
     }
     
@@ -797,6 +805,6 @@ void  interpretCommandString(String cmdString){
         }
     }
     
-    Serial.println("ok");
+    _signalReady();
     
 }
