@@ -543,7 +543,6 @@ float  Axis::measureMotorSpeed(int speed){
         delay(200);
         
         //print to prevent connection timeout
-        Serial.println("pt(0, 0, 0)mm");
         
         //check to see if motor is moving
         if (_speedSinceLastCall() < .01){
@@ -572,7 +571,6 @@ float  Axis::measureMotorSpeed(int speed){
         hold();
         delay(50);
         //print to prevent connection timeout
-        Serial.println("pt(0, 0, 0)mm");
     }
     
     return RPM;
