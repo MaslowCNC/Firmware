@@ -21,7 +21,7 @@ void setup(){
     Serial.begin(19200);
     
     Serial.println("ready");
-    Serial.println("gready");
+    Serial.println("ok");
     
     leftAxis.initializePID();
     rightAxis.initializePID();
@@ -29,6 +29,8 @@ void setup(){
     
     Timer1.initialize(10000);
     Timer1.attachInterrupt(runsOnATimer);
+    
+    Serial.println("Grbl v1.00");
     
 }
 
@@ -39,6 +41,8 @@ void runsOnATimer(){
 }
 
 void loop(){
+    
+    readyCommandString = ringBuffer.readLine();
     
     if (readyCommandString.length() > 0){
         readyCommandString.toUpperCase();

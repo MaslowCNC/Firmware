@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
     
-    Copyright 2014-2016 Bar Smith*/
+    Copyright 2014-2017 Bar Smith*/
     
     #ifndef Kinematics_h
     #define Kinematics_h

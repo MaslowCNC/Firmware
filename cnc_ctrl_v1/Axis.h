@@ -47,6 +47,7 @@
             void   test();
             void   changePitch(float newPitch);
             void   changeEncoderResolution(int newResolution);
+            bool   attached();
             
         private:
             int        _PWMread(int pin);

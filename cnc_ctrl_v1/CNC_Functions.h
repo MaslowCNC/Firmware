@@ -19,6 +19,7 @@ libraries*/
 #include "GearMotor.h"
 #include "Axis.h"
 #include "Kinematics.h"
+#include "RingBuffer.h"
 
 #define VERSIONNUMBER 0.63
 
@@ -29,11 +30,6 @@ bool zAxisAttached = false;
 
 #define CLOCKWISE        -1
 #define COUNTERCLOCKWISE  1
-
-
-#define XDIRECTION BACKWARD
-#define YDIRECTION BACKWARD
-#define ZDIRECTION BACKWARD
 
 #define LEFT_EEPROM_ADR     5
 #define RIGHT_EEPROM_ADR  105
@@ -71,12 +67,14 @@ Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Z-Axis",         Z_EEPROM_A
 
 
 Kinematics kinematics;
+RingBuffer ringBuffer;
 
-float feedrate             =  125;
+float feedrate              =  125;
 float _inchesToMMConversion =  1;
-String prependString;       //prefix ('G01' for ex) from the previous command
-String readString;          //command being built one character at a time
-String readyCommandString;  //next command queued up and ready to send
+bool  useRelativeUnits      =  false;
+String prependString;                     //prefix ('G01' for ex) from the previous command
+String readString;                        //command being built one character at a time
+String readyCommandString;                //next command queued up and ready to send
 
 //These are used in place of a forward kinematic function at the beginning of each move. They should be replaced
 //by a call to the forward kinematic function when it is available.
@@ -95,26 +93,33 @@ void  returnPoz(float x, float y, float z){
     if (millis() - lastRan > timeout){
         float errorTerm = (leftAxis.error() + rightAxis.error() )/2;
         
-        Serial.print("pz(");
-        Serial.print(x/_inchesToMMConversion);
-        Serial.print(", ");
-        Serial.print(y/_inchesToMMConversion);
-        Serial.print(", ");
-        Serial.print(z/_inchesToMMConversion);
-        Serial.print(", ");
-        Serial.print(errorTerm);
-        Serial.print(")");
         
-        if (_inchesToMMConversion == INCHES){
-            Serial.println("in");
-        }
-        else{
-            Serial.println("mm");
-        }
+        Serial.print("<Idle,MPos:");
+        Serial.print(x/_inchesToMMConversion);
+        Serial.print(",");
+        Serial.print(y/_inchesToMMConversion);
+        Serial.print(",");
+        Serial.print(z/_inchesToMMConversion);
+        Serial.println(",WPos:0.000,0.000,0.000>");
+        
+        Serial.print("[PosError:");
+        Serial.print(errorTerm);
+        Serial.println("]");
         
         lastRan = millis();
     }
     
+}
+
+void  _signalReady(){
+    /*
+    
+    Signal to the controlling software that the machine has executed the last
+    gcode line successfully.
+    
+    */
+    
+    Serial.println("ok");
 }
 
 void  _watchDog(){
@@ -125,10 +130,10 @@ void  _watchDog(){
     This fixes the issue where the machine is ready, but Ground Control doesn't know the machine is ready and the system locks up.
     */
     static unsigned long lastRan = millis();
-    int                  timeout = 1000;
+    int                  timeout = 3000;
     
     if (millis() - lastRan > timeout){
-        //Serial.println("gready");
+        //_signalReady();
         
         lastRan = millis();
     }
@@ -138,15 +143,8 @@ void readSerialCommands(){
     /*
     Check to see if a new character is available from the serial connection, read it if one is.
     */
-    if (Serial.available() > 0) {
-        char c = Serial.read();  //gets one byte from serial buffer
-        if (c == '\n'){
-            readyCommandString = readString;
-            readString = "";
-        }
-        else{
-            readString += c; //makes the string readString
-        }
+    while (Serial.available() > 0) {
+        ringBuffer.write(Serial.read()); //gets one byte from serial buffer, writes it to the internal ring buffer
     }
 }
 
@@ -322,6 +320,22 @@ void  holdPosition(){
     zAxis.hold();
 }
     
+int   findEndOfNumber(String textString, int index){
+    //Return the index of the last digit of the number beginning at the index passed in
+    int i = index;
+    
+    while (i < textString.length()){
+        
+        if(isDigit(textString[i]) or isPunct(textString[i])){ //If we're still looking at a number, keep goin
+            i++;
+        }
+        else{
+            return i;                                         //If we've reached the end of the number, return the last index
+        }
+    }
+    return i;                                                 //If we've reached the end of the string, return the last number
+}
+    
 float extractGcodeValue(String readString, char target,float defaultReturn){
 
 /*Reads a string and returns the value of number following the target character.
@@ -333,8 +347,9 @@ If no number is found, defaultReturn is returned*/
     float numberAsFloat;
     
     begin           =  readString.indexOf(target);
-    end             =  readString.indexOf(' ', begin);
+    end             =  findEndOfNumber(readString,begin+1);
     numberAsString  =  readString.substring(begin+1,end);
+    
     numberAsFloat   =  numberAsString.toFloat();
     
     if (begin == -1){ //if the character was not found, return error
@@ -368,10 +383,17 @@ int   G1(String readString){
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     isNotRapid = extractGcodeValue(readString, 'G', 1);
     
-    feedrate   = constrain(feedrate, 1, 25*_inchesToMMConversion);                                              //constrain the maximum feedrate
-    if (feedrate == 25*_inchesToMMConversion){
-        Serial.println("Feedrate limited to preserve accuracy");
+
+    if (useRelativeUnits){ //if we are using a relative coordinate system 
+        if(readString.indexOf('X') >= 0){ //if there is an X command
+            xgoto = currentXPos/_inchesToMMConversion + xgoto;
+        }
+        if(readString.indexOf('Y') >= 0){ //if y has moved
+            ygoto = currentYPos/_inchesToMMConversion + ygoto;
+        }
     }
+    
+    feedrate   = constrain(feedrate, 1, 25*_inchesToMMConversion);                                              //constrain the maximum feedrate
     
     //if the zaxis is attached
     if(zAxisAttached){
@@ -536,7 +558,6 @@ void  G10(String readString){
     zAxis.set(zgoto);
     zAxis.endMove(zgoto);
     zAxis.attach();
-    leftAxis.detach();
 }
 
 void  calibrateChainLengths(){
@@ -587,7 +608,7 @@ void  updateSettings(String readString){
     float motorOffsetX       = extractGcodeValue(readString, 'D', (distBetweenMotors - bedWidth)/2); //read the motor offset X IF it is sent, if it's not sent, compute it from the spacing between the motors
     float motorOffsetY       = extractGcodeValue(readString, 'E', motorOffsetY);
     float sledWidth          = extractGcodeValue(readString, 'F', kinematics.l);
-    float sledHeight         = extractGcodeValue(readString, 'G', kinematics.s);
+    float sledHeight         = extractGcodeValue(readString, 'R', kinematics.s);
     float sledCG             = extractGcodeValue(readString, 'H', kinematics.h3);
     zAxisAttached            = extractGcodeValue(readString, 'I', zAxisAttached);
     int encoderSteps         = extractGcodeValue(readString, 'J', ENCODERSTEPS);
@@ -628,112 +649,81 @@ void  updateSettings(String readString){
     Serial.println("Machine Settings Updated");
 }
 
-void  interpretCommandString(String readString){
-    int i = 0;
-    char sect[22];
+void  executeGcodeLine(String gcodeLine){
+    /*
     
-    while (i < 23){
-        sect[i] = ' ';
-        i++;
-    }
+    Executes a single line of gcode beginning with the character 'G' or 'B'. If neither code is
+    included on the front of the line, the code from the prevous line will be added.
     
-    Serial.println(readString);
+    */
     
-    if(readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G02" || readString.substring(0, 3) == "G03" || readString.substring(0, 2) == "G0" || readString.substring(0, 2) == "G1" || readString.substring(0, 2) == "G2" || readString.substring(0, 2) == "G3"){
-        prependString = readString.substring(0, 3);
+    int gNumber = extractGcodeValue(gcodeLine,'G', -1);
+    
+    if(gcodeLine.substring(0, 3) == "G00" || gcodeLine.substring(0, 3) == "G01" || gcodeLine.substring(0, 3) == "G02" || gcodeLine.substring(0, 3) == "G03" || gcodeLine.substring(0, 2) == "G0" || gcodeLine.substring(0, 2) == "G1" || gcodeLine.substring(0, 2) == "G2" || gcodeLine.substring(0, 2) == "G3"){
+        prependString = gcodeLine.substring(0, 3);
         prependString = prependString + " ";
     }
     
-    if(readString[0] == 'X' || readString[0] == 'Y' || readString[0] == 'Z'){
-        readString = prependString + readString;
+    if(gcodeLine[0] == 'X' || gcodeLine[0] == 'Y' || gcodeLine[0] == 'Z'){
+        gcodeLine = prependString + gcodeLine;
     }
     
-    if(readString.substring(0, 3) == "G01" || readString.substring(0, 3) == "G00" || readString.substring(0, 3) == "G0 " || readString.substring(0, 3) == "G1 "){
-        
-        G1(readString);
-        Serial.println("gready");
-        Serial.println("ready");
-        readString = "";
+    switch(gNumber){
+        case 0:
+            G1(gcodeLine);
+            break;
+        case 1:
+            G1(gcodeLine);
+            break;
+        case 2:
+            G2(gcodeLine);
+            break;
+        case 3:
+            G2(gcodeLine);
+            break;
+        case 10:
+            G10(gcodeLine);
+            break;
+        case 20:
+            setInchesToMillimetersConversion(INCHES);
+            break;
+        case 21:
+            setInchesToMillimetersConversion(MILLIMETERS);
+            break;
+        case 90:
+            useRelativeUnits = false;
+            break;
+        case 91:
+            useRelativeUnits = true;
+            break;
     }
     
-    if(readString.substring(0, 3) == "G02" || readString.substring(0, 3) == "G2 "){
-        G2(readString);
-        Serial.println("ready");
-        Serial.println("gready");
-        readString = "";
-    }
-    
-    if(readString.substring(0, 3) == "G03" || readString.substring(0, 3) == "G3 "){
-        G2(readString);
-        Serial.println("gready");
-        Serial.println("ready");
-        readString = "";
-    }
-    
-    if(readString.substring(0, 3) == "G10"){
-        G10(readString);
-        Serial.println("gready");
-        Serial.println("ready");
-        readString = "";
-    }
-    
-    if(readString.substring(0, 3) == "G17"){ //XY plane is the default so no action is taken
-        Serial.println("gready");
-        Serial.println("ready");
-        readString = "";
-    }
-    
-    if(readString.substring(0, 3) == "G20"){
-        setInchesToMillimetersConversion(INCHES);
-        Serial.println("gready");
-        Serial.println("ready");
-        readString = "";
-    }
-    
-    if(readString.substring(0, 3) == "G21"){
-        setInchesToMillimetersConversion(MILLIMETERS);
-        Serial.println("gready");
-        Serial.println("ready");
-        readString = "";
-    }
-    
-    if(readString.substring(0, 3) == "G90"){ //G90 is the default so no action is taken
-        Serial.println("gready");
-        Serial.println("ready");
-        readString = "";
-    }
-    
-    if(readString.substring(0, 3) == "M06"){ //Tool change are default so no action is taken
-        Serial.println("gready");
-        Serial.println("ready");
-        readString = "";
-    }
-    
-    if(readString.substring(0, 3) == "B01"){
+
+    if(gcodeLine.substring(0, 3) == "B01"){
         
         leftAxis.computeMotorResponse();
         rightAxis.computeMotorResponse();
         
-        readString = "";
-        Serial.println("gready");
+        gcodeLine = "";
+        _signalReady();
         Serial.println("ready");
     }
     
-    if(readString.substring(0, 3) == "B02"){
+    if(gcodeLine.substring(0, 3) == "B02"){
         calibrateChainLengths();
-        readString = "";
-        Serial.println("gready");
+        gcodeLine = "";
+        _signalReady();
         Serial.println("ready");
     }
     
-    if(readString.substring(0, 3) == "B03"){
-        updateSettings(readString);
-        readString = "";
-        Serial.println("gready");
+    if(gcodeLine.substring(0, 3) == "B03"){
+        updateSettings(gcodeLine);
+        gcodeLine = "";
+        _signalReady();
         Serial.println("ready");
     }
     
-    if(readString.substring(0, 3) == "B04"){
+    if(gcodeLine.substring(0, 3) == "B04"){
         //Test each of the axis
         delay(500);
         leftAxis.test();
@@ -742,23 +732,23 @@ void  interpretCommandString(String readString){
         delay(500);
         zAxis.test();
         Serial.println("Tests complete.");
-        readString = "";
-        Serial.println("gready");
+        gcodeLine = "";
+        _signalReady();
         Serial.println("ready");
     }
     
-    if(readString.substring(0, 3) == "B05"){
+    if(gcodeLine.substring(0, 3) == "B05"){
         Serial.print("Firmware Version ");
         Serial.println(VERSIONNUMBER);
-        readString = "";
-        Serial.println("gready");
+        gcodeLine = "";
+        _signalReady();
         Serial.println("ready");
     }
     
-    if(readString.substring(0, 3) == "B06"){
+    if(gcodeLine.substring(0, 3) == "B06"){
         Serial.println("Manually Setting Chain Lengths To: ");
-        float newL = extractGcodeValue(readString, 'L', 0);
-        float newR = extractGcodeValue(readString, 'R', 0);
+        float newL = extractGcodeValue(gcodeLine, 'L', 0);
+        float newR = extractGcodeValue(gcodeLine, 'R', 0);
         Serial.print("Left: ");
         Serial.print(newL);
         Serial.println("mm");
@@ -770,18 +760,51 @@ void  interpretCommandString(String readString){
         rightAxis.set(newR);
     }
     
-    if((readString[0] == 'T' || readString[0] == 't') && readString[1] != 'e'){
+    if((gcodeLine[0] == 'T' || gcodeLine[0] == 't') && gcodeLine[1] != 'e'){
         Serial.print("Please insert tool ");
-        Serial.println(readString);
-        Serial.println("gready");
-        Serial.println("ready");
-        readString = "";
+        Serial.println(gcodeLine);
+        gcodeLine = "";
     }
     
-    if (readString.length() > 0){
-        Serial.println(readString);
-        readString = "";
-        Serial.println("gready");
-        Serial.println("ready");
-    }
 } 
+
+int   findNextG(String readString, int startingPoint){
+    int nextGIndex = readString.indexOf('G', startingPoint);
+    if(nextGIndex == -1){
+        nextGIndex = readString.length();
+    }
+    
+    return nextGIndex;
+}
+
+void  interpretCommandString(String cmdString){
+    /*
+    
+    Splits a string into lines of gcode which begin with 'G'
+    
+    */
+    
+    int firstG;  
+    int secondG;
+    
+    if (cmdString[0] == 'B'){                   //If the command is a B command
+        executeGcodeLine(cmdString);
+    }
+    else{
+        while(cmdString.length() > 0){          //Extract each line of gcode from the string
+            firstG  = findNextG(cmdString, 0);
+            secondG = findNextG(cmdString, firstG + 1);
+            
+            String gcodeLine = cmdString.substring(firstG, secondG);
+            
+            Serial.println(gcodeLine);
+            executeGcodeLine(gcodeLine);
+            
+            cmdString = cmdString.substring(secondG, cmdString.length());
+            
+        }
+    }
+    
+    _signalReady();
+    
+}
