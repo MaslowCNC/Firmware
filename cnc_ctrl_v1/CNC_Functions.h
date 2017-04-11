@@ -72,6 +72,7 @@ RingBuffer ringBuffer;
 float feedrate              =  125;
 float _inchesToMMConversion =  1;
 bool  useRelativeUnits      =  false;
+bool  stopFlag              =  false;
 String prependString;                     //prefix ('G01' for ex) from the previous command
 String readString;                        //command being built one character at a time
 String readyCommandString;                //next command queued up and ready to send
@@ -147,7 +148,13 @@ void readSerialCommands(){
     Check to see if a new character is available from the serial connection, read it if one is.
     */
     while (Serial.available() > 0) {
-        ringBuffer.write(Serial.read()); //gets one byte from serial buffer, writes it to the internal ring buffer
+        char c = Serial.read();
+        if (c == '!'){
+            stopFlag = true;
+        }
+        else{
+            ringBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
+        }
     }
 }
 
@@ -155,9 +162,10 @@ bool checkForStopCommand(){
     /*
     Check to see if the STOP command has been sent to the machine.
     */
-    if(readString.endsWith("STOP")){
+    if(stopFlag){
         readString = "";
         readyCommandString = "";
+        stopFlag = false;
         return 1;
     }
     return 0;
