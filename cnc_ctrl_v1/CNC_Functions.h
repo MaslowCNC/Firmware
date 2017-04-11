@@ -130,10 +130,13 @@ void  _watchDog(){
     This fixes the issue where the machine is ready, but Ground Control doesn't know the machine is ready and the system locks up.
     */
     static unsigned long lastRan = millis();
-    int                  timeout = 3000;
+    int                  timeout = 5000;
     
     if (millis() - lastRan > timeout){
-        //_signalReady();
+        
+        if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
+            _signalReady();
+        }
         
         lastRan = millis();
     }
