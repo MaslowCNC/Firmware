@@ -276,6 +276,23 @@ void   Axis::_readAllLinSegs(unsigned int addr){
     }
 }
 
+void   Axis::wipeEEPROM(){
+    /*
+    
+    Over-write all the values stored in EEPROM to return the machine to a known state.
+    
+    */
+    
+    int i = 0;
+    while(i < 50){
+        EEPROM.write(_eepromAdr + i, 0);
+        i++;
+    }
+    
+    Serial.print(_axisName);
+    Serial.println(" EEPROM erased");
+}
+
 int    Axis::_sign(float val){
     if (val < 0) return -1;
     if (val==0) return 0;

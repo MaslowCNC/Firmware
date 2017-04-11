@@ -760,6 +760,13 @@ void  executeGcodeLine(String gcodeLine){
         rightAxis.set(newR);
     }
     
+    if(gcodeLine.substring(0, 3) == "B07"){
+        //erase EEPROM
+        leftAxis.wipeEEPROM();
+        rightAxis.wipeEEPROM();
+        zAxis.wipeEEPROM();
+    }
+    
     if((gcodeLine[0] == 'T' || gcodeLine[0] == 't') && gcodeLine[1] != 'e'){
         Serial.print("Please insert tool ");
         Serial.println(gcodeLine);
@@ -789,6 +796,7 @@ void  interpretCommandString(String cmdString){
     
     if (cmdString[0] == 'B'){                   //If the command is a B command
         executeGcodeLine(cmdString);
+        Serial.println(cmdString);
     }
     else{
         while(cmdString.length() > 0){          //Extract each line of gcode from the string
