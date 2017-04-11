@@ -48,6 +48,7 @@
             void   changePitch(float newPitch);
             void   changeEncoderResolution(int newResolution);
             bool   attached();
+            void   wipeEEPROM();
             
         private:
             int        _PWMread(int pin);
