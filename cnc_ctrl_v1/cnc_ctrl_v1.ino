@@ -16,16 +16,11 @@
 #include "CNC_Functions.h"
 #include "TimerOne.h"
 
-
 void setup(){
     Serial.begin(19200);
     
     Serial.println("ready");
     Serial.println("ok");
-    
-    leftAxis.initializePID();
-    rightAxis.initializePID();
-    zAxis.initializePID();
     
     Timer1.initialize(10000);
     Timer1.attachInterrupt(runsOnATimer);

@@ -27,8 +27,21 @@
             MotorGearboxEncoder(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2);
             Encoder    encoder;
             Motor      motor;
+            float      computeSpeed();
         private:
-            
+            double     _lastPosition;
+            double     _lastTimeStamp;
+            float      _runningAverage(int newValue);
+            int        _oldValue1;
+            int        _oldValue2;
+            int        _oldValue3;
+            int        _oldValue4;
+            int        _oldValue5;
+            int        _oldValue6;
+            int        _oldValue7;
+            int        _oldValue8;
+            int        _oldValue9;
+            int        _oldValue10;
     };
 
     #endif
