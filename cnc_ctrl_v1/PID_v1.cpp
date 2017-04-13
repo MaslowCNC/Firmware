@@ -52,31 +52,36 @@ void PID::setup(double* Input, double* Output, double* Setpoint,
 bool PID::Compute()
 {
    if(!inAuto) return false;
-   unsigned long now = millis();
-   unsigned long timeChange = (now - lastTime);
-   if(timeChange>=SampleTime)
-   {
-      /*Compute all the working error variables*/
-	  double input = *myInput;
-      double error = *mySetpoint - input;
-      ITerm+= (ki * error);
-      if(ITerm > outMax) ITerm= outMax;
-      else if(ITerm < outMin) ITerm= outMin;
-      double dInput = (input - lastInput);
- 
-      /*Compute PID Output*/
-      double output = kp * error + ITerm- kd * dInput;
-      
-	  if(output > outMax) output = outMax;
-      else if(output < outMin) output = outMin;
-	  *myOutput = output;
-	  
-      /*Remember some variables for next time*/
-      lastInput = input;
-      lastTime = now;
-	  return true;
-   }
-   else return false;
+   //unsigned long now = millis();
+   //unsigned long timeChange = (now - lastTime);
+   //if(timeChange>=SampleTime)
+   //{  <--- This if statement has been removed to reduce timing jitter on the interrupt.
+    //because we are calling the function from within an interrupt timer it will be called
+    //with a consistent sample period
+       
+    /*Compute all the working error variables*/
+    double input = *myInput;
+    double error = *mySetpoint - input;
+    ITerm+= (ki * error);
+    if(ITerm > outMax) ITerm= outMax;
+    else if(ITerm < outMin) ITerm= outMin;
+    double dInput = (input - lastInput);
+
+    /*Compute PID Output*/
+    double output = kp * error + ITerm- kd * dInput;
+
+    if(output > outMax) output = outMax;
+    else if(output < outMin) output = outMin;
+    *myOutput = output;
+
+    /*Remember some variables for next time*/
+    lastInput = input;
+    //lastTime = now;
+    return true;
+    
+    
+   //}
+   //else return false;
 }
 
 
