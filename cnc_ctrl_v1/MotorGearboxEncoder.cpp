@@ -24,10 +24,13 @@ to be a drop in replacement for a continuous rotation servo.
 #include "Arduino.h"
 #include "MotorGearboxEncoder.h"
 
-MotorGearboxEncoder::MotorGearboxEncoder(int encoderPin1, int encoderPin2)
+MotorGearboxEncoder::MotorGearboxEncoder(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2)
 :
 encoder(encoderPin1,encoderPin2)
 {
     Serial.println("created gear motor encoder");
     
+    
+    //initialize motor
+    motor.setupMotor(pwmPin, directionPin1, directionPin2);
 }

@@ -19,7 +19,6 @@
     #define Axis_h
 
     #include "Arduino.h"
-    #include "Motor.h"
     #include "PID_v1.h"
     #include <EEPROM.h>
     #include "MotorGearboxEncoder.h"
@@ -60,7 +59,6 @@
             void       _writeAllLinSegs(unsigned int addr);
             LinSegment _readLinSeg(unsigned int addr);
             void       _readAllLinSegs(unsigned int addr);
-            Motor      _motor;
             int        _direction;
             int        _encoderPin;
             String     _axisName;
