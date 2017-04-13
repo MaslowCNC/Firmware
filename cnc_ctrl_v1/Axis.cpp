@@ -54,6 +54,7 @@ motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPi
 void   Axis::initializePID(){
     _pidController.SetMode(AUTOMATIC);
     _pidController.SetOutputLimits(-255, 255);
+    _pidController.SetSampleTime(10);
 }
 
 int    Axis::write(float targetPosition){
@@ -87,6 +88,7 @@ int    Axis::set(float newAxisPosition){
 
 void   Axis::computePID(){
     
+    
     if (_disableAxisForTesting){
         return;
     }
@@ -110,10 +112,19 @@ void   Axis::computePID(){
         }
     }
     
+    //return;
+    
     _pidInput      =  motorGearboxEncoder.encoder.read()/_encoderSteps;
+    
+    //return;
+    
     _pidController.Compute();
     
+    //return;
+    
     motorGearboxEncoder.motor.write(_pidOutput);
+    
+    //return;
     
     if(_axisName == "Left-axis"){
         motorGearboxEncoder.computeSpeed();

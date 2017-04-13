@@ -36,9 +36,9 @@ void setup(){
 }
 
 void runsOnATimer(){
-    //leftAxis.computePID();
-    //rightAxis.computePID();
-    //zAxis.computePID();
+    leftAxis.computePID();
+    rightAxis.computePID();
+    zAxis.computePID();
     
     Serial.println(micros() - _lastTimeStamp);
     
