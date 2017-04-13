@@ -28,11 +28,8 @@
 
 Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation, float encoderSteps)
 :
-motorGearboxEncoder(encoderPin1,encoderPin2)
+motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2)
 {
-    
-    //initialize motor
-    _motor.setupMotor(pwmPin, directionPin1, directionPin2);
     
     _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _KiFar, _Kd, REVERSE);
     
@@ -114,7 +111,7 @@ void   Axis::computePID(){
     _pidInput      =  motorGearboxEncoder.encoder.read()/_encoderSteps;
     _pidController.Compute();
     
-    _motor.write(_pidOutput);
+    motorGearboxEncoder.motor.write(_pidOutput);
     
 }
 
@@ -139,7 +136,7 @@ void   Axis::changeEncoderResolution(int newResolution){
 
 int    Axis::detach(){
     
-    if (_motor.attached()){
+    if (motorGearboxEncoder.motor.attached()){
         _writeFloat (_eepromAdr+SIZEOFFLOAT, read());
         EEPROM.write(_eepromAdr, EEPROMVALIDDATA);
         
@@ -147,13 +144,13 @@ int    Axis::detach(){
         
     }
     
-    _motor.detach();
+    motorGearboxEncoder.motor.detach();
     
     return 1;
 }
 
 int    Axis::attach(){
-     _motor.attach();
+     motorGearboxEncoder.motor.attach();
      return 1;
 }
 
@@ -164,7 +161,7 @@ bool   Axis::attached(){
     
     */
     
-    return _motor.attached();
+    return motorGearboxEncoder.motor.attached();
 }
 
 void   Axis::hold(){
@@ -235,10 +232,10 @@ void   Axis::_writeAllLinSegs(unsigned int addr){
     addr = addr + 2*SIZEOFFLOAT;
     
     //Write into memory
-    _writeLinSeg(addr                 , _motor.getSegment(0));
-    _writeLinSeg(addr + 1*SIZEOFLINSEG, _motor.getSegment(1));
-    _writeLinSeg(addr + 2*SIZEOFLINSEG, _motor.getSegment(2));
-    _writeLinSeg(addr + 3*SIZEOFLINSEG, _motor.getSegment(3));
+    _writeLinSeg(addr                 , motorGearboxEncoder.motor.getSegment(0));
+    _writeLinSeg(addr + 1*SIZEOFLINSEG, motorGearboxEncoder.motor.getSegment(1));
+    _writeLinSeg(addr + 2*SIZEOFLINSEG, motorGearboxEncoder.motor.getSegment(2));
+    _writeLinSeg(addr + 3*SIZEOFLINSEG, motorGearboxEncoder.motor.getSegment(3));
     
 }
 
@@ -272,7 +269,7 @@ void   Axis::_readAllLinSegs(unsigned int addr){
     for (int i = 0; i < 4; i++){
         linSeg = _readLinSeg (addr + i*SIZEOFLINSEG);
         
-        _motor.setSegment(i, linSeg.slope, linSeg.intercept,  linSeg.negativeBound, linSeg.positiveBound);
+        motorGearboxEncoder.motor.setSegment(i, linSeg.slope, linSeg.intercept,  linSeg.negativeBound, linSeg.positiveBound);
     }
 }
 
@@ -317,7 +314,7 @@ void   Axis::printBoost(){
     for(int i = -255; i < 255; i = i+10){
         Serial.print(i);
         Serial.print(" -> ");
-        Serial.println(_motor._convolve(i));
+        Serial.println(motorGearboxEncoder.motor._convolve(i));
     }
      
     _disableAxisForTesting = false;
@@ -339,7 +336,7 @@ void   Axis::test(){
     
     //move the motor
     while (i < 1000){
-        _motor.directWrite(255);
+        motorGearboxEncoder.motor.directWrite(255);
         i++;
         delay(1);
     }
@@ -359,7 +356,7 @@ void   Axis::test(){
     //move the motor in the other direction
     i = 0;
     while (i < 1000){
-        _motor.directWrite(-255);
+        motorGearboxEncoder.motor.directWrite(-255);
         i++;
         delay(1);
     }
@@ -373,17 +370,17 @@ void   Axis::test(){
     }
     
     //stop the motor
-    _motor.directWrite(0);
+    motorGearboxEncoder.motor.directWrite(0);
     Serial.println("pt(0,0,0)");
 }
 
 void   Axis::computeMotorResponse(){
     
     //remove whatever transform is applied
-    _motor.setSegment(0 , 1, 0, 0, 0);
-    _motor.setSegment(1 , 1, 0, 0, 0);
-    _motor.setSegment(2 , 1, 0, 0, 0);
-    _motor.setSegment(3 , 1, 0, 0, 0);
+    motorGearboxEncoder.motor.setSegment(0 , 1, 0, 0, 0);
+    motorGearboxEncoder.motor.setSegment(1 , 1, 0, 0, 0);
+    motorGearboxEncoder.motor.setSegment(2 , 1, 0, 0, 0);
+    motorGearboxEncoder.motor.setSegment(3 , 1, 0, 0, 0);
     
     //In the positive direction
     //-----------------------------------------------------------------------------------
@@ -440,8 +437,8 @@ void   Axis::computeMotorResponse(){
     
     
     //Apply the model to the motor
-    _motor.setSegment(2 , M1, I1,    0,   Y2);
-    _motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
+    motorGearboxEncoder.motor.setSegment(2 , M1, I1,    0,   Y2);
+    motorGearboxEncoder.motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
     
     
     //In the negative direction
@@ -498,8 +495,8 @@ void   Axis::computeMotorResponse(){
     
     
     //Apply the model to the motor
-    _motor.setSegment(0 , M1, I1,   Y2,    0);
-    _motor.setSegment(1 , M2, I2, Y3-1, Y2+1);
+    motorGearboxEncoder.motor.setSegment(0 , M1, I1,   Y2,    0);
+    motorGearboxEncoder.motor.setSegment(1 , M2, I2, Y3-1, Y2+1);
     
     Serial.println("Calibration complete.");
     
@@ -554,7 +551,7 @@ float  Axis::measureMotorSpeed(int speed){
         _speedSinceLastCall();
         
         //command motor to spin at speed
-        _motor.write(speed);
+        motorGearboxEncoder.motor.write(speed);
         
         //wait
         delay(200);

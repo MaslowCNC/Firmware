@@ -20,11 +20,13 @@
 
     #include "Arduino.h"
     #include "Encoder.h"
+    #include "Motor.h"
     
     class MotorGearboxEncoder{
         public:
-            MotorGearboxEncoder(int encoderPin1, int encoderPin2);
+            MotorGearboxEncoder(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2);
             Encoder    encoder;
+            Motor      motor;
         private:
             
     };
