@@ -15,8 +15,8 @@
     
     Copyright 2014-2016 Bar Smith*/
     
-    #ifndef GearMotor_h
-    #define GearMotor_h
+    #ifndef Motor_h
+    #define Motor_h
 
     #include "Arduino.h"
     
@@ -31,9 +31,9 @@
     
     
     
-    class GearMotor{
+    class Motor{
         public:
-            GearMotor();
+            Motor();
             void attach();
             int  setupMotor(int pwmPin, int pin1, int pin2);
             void detach();
