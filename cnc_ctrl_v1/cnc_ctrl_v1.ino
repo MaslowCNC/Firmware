@@ -16,6 +16,7 @@
 #include "CNC_Functions.h"
 #include "TimerOne.h"
 
+double _lastTimeStamp;
 
 void setup(){
     Serial.begin(19200);
@@ -23,9 +24,9 @@ void setup(){
     Serial.println("ready");
     Serial.println("ok");
     
-    leftAxis.initializePID();
-    rightAxis.initializePID();
-    zAxis.initializePID();
+    //leftAxis.initializePID();
+    //rightAxis.initializePID();
+    //zAxis.initializePID();
     
     Timer1.initialize(10000);
     Timer1.attachInterrupt(runsOnATimer);
@@ -35,9 +36,13 @@ void setup(){
 }
 
 void runsOnATimer(){
-    leftAxis.computePID();
-    rightAxis.computePID();
-    zAxis.computePID();
+    //leftAxis.computePID();
+    //rightAxis.computePID();
+    //zAxis.computePID();
+    
+    Serial.println(micros() - _lastTimeStamp);
+    
+    _lastTimeStamp = micros();
 }
 
 void loop(){

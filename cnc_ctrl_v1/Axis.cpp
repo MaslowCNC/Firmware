@@ -47,6 +47,8 @@ motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPi
     }
     
     _readAllLinSegs(_eepromAdr);
+    
+    initializePID();
 }
 
 void   Axis::initializePID(){

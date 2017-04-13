@@ -35,9 +35,9 @@ encoder(encoderPin1,encoderPin2)
 }
 
 float MotorGearboxEncoder::computeSpeed(){
-    Serial.println(micros() - _lastTimeStamp);
+    /*Serial.println(micros() - _lastTimeStamp);
     
-    _lastTimeStamp = micros();
+    _lastTimeStamp = micros();*/
     
     return 0;
 }
