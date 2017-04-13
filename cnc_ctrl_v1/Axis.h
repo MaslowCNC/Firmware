@@ -19,10 +19,10 @@
     #define Axis_h
 
     #include "Arduino.h"
-    #include "GearMotor.h"
+    #include "Motor.h"
     #include "PID_v1.h"
     #include <EEPROM.h>
-    #include "Encoder.h"
+    #include "MotorGearboxEncoder.h"
     
 
     class Axis{
@@ -60,7 +60,7 @@
             void       _writeAllLinSegs(unsigned int addr);
             LinSegment _readLinSeg(unsigned int addr);
             void       _readAllLinSegs(unsigned int addr);
-            GearMotor  _motor;
+            Motor      _motor;
             int        _direction;
             int        _encoderPin;
             String     _axisName;
@@ -74,7 +74,7 @@
             int        _eepromAdr;
             float      _mmPerRotation;
             float      _encoderSteps;
-            Encoder    _encoder;
+            MotorGearboxEncoder    motorGearboxEncoder;
             float      _oldSetpoint;
             float      _oldVal;
             bool       _disableAxisForTesting = false;

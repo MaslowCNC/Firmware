@@ -16,7 +16,6 @@
 libraries*/
     
     
-#include "GearMotor.h"
 #include "Axis.h"
 #include "Kinematics.h"
 #include "RingBuffer.h"
