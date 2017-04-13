@@ -60,15 +60,20 @@ void Motor::detach(){
     _attachedState = 0;
     
     //stop the motor
-    digitalWrite(_pin1,    HIGH);
-    digitalWrite(_pin2,    LOW) ;
-    digitalWrite(_pwmPin,  LOW);
+    //digitalWrite(_pin1,    HIGH);
+    //digitalWrite(_pin2,    LOW) ;
+    //digitalWrite(_pwmPin,  LOW);
 }
 
 void Motor::write(int speed){
     /*
     Sets motor speed from input. Speed = 0 is stopped, -255 is full reverse, 255 is full ahead.
     */
+    
+    analogWrite(_pwmPin, 255);
+    digitalWrite(_pin1 , HIGH);
+    digitalWrite(_pin2 , LOW );
+    /*
     if (_attachedState == 1){
         
         //linearize the motor
@@ -100,7 +105,7 @@ void Motor::write(int speed){
         
         analogWrite(_pwmPin, pwmFrequency);
         
-    }
+    }*/
 }
 
 void Motor::directWrite(int voltage){

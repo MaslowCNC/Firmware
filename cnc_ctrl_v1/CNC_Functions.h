@@ -91,7 +91,7 @@ void  returnPoz(float x, float y, float z){
     int                  timeout = 200;
     
     if (millis() - lastRan > timeout){
-        
+        /*
         Serial.print("<Idle,MPos:");
         Serial.print(x/_inchesToMMConversion);
         Serial.print(",");
@@ -105,7 +105,7 @@ void  returnPoz(float x, float y, float z){
         Serial.print(',');
         Serial.print(rightAxis.error());
         Serial.println("]");
-        
+        */
         lastRan = millis();
     }
     

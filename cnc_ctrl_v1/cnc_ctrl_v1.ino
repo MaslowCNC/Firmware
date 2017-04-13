@@ -16,8 +16,6 @@
 #include "CNC_Functions.h"
 #include "TimerOne.h"
 
-double _lastTimeStamp;
-
 void setup(){
     Serial.begin(19200);
     
