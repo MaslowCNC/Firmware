@@ -31,16 +31,3 @@ encoder(encoderPin1,encoderPin2)
     Serial.println("created gear motor encoder");
     
 }
-
-/*
-
-The encoder needs the flowing functions as pass through:
-
--creating the encoder with pins
--read
--write
-
-Let's move the encoder into the MotorGearBoxEncoder object, but keep it accessable so 
-that the axis can reach in and talk to it.
-
-*/
