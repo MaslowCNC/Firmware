@@ -112,19 +112,11 @@ void   Axis::computePID(){
         }
     }
     
-    //return;
-    
     _pidInput      =  motorGearboxEncoder.encoder.read()/_encoderSteps;
-    
-    //return;
     
     _pidController.Compute();
     
-    //return;
-    
     motorGearboxEncoder.motor.write(_pidOutput);
-    
-    //return;
     
     if(_axisName == "Left-axis"){
         motorGearboxEncoder.computeSpeed();
