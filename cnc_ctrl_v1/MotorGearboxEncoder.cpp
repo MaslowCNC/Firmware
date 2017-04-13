@@ -43,16 +43,14 @@ float MotorGearboxEncoder::computeSpeed(){
     double timeElapsed =  micros() - _lastTimeStamp;
     float    distMoved   =  _runningAverage(encoder.read() - _lastPosition);     //because of quantization noise it helps to average these
     
+    //Compute the speed in RPM
     float RPM = (7364.0*distMoved)/float(timeElapsed);  //6*10^7 us per minute, 8148 steps per revolution
     
-    Serial.println(RPM);
-    
-    
-    
+    //Store values for next time
     _lastTimeStamp = micros();
     _lastPosition  = encoder.read();
     
-    return 0;
+    return RPM;
 }
 
 float MotorGearboxEncoder::_runningAverage(int newValue){
