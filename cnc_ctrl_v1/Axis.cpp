@@ -113,6 +113,10 @@ void   Axis::computePID(){
     
     motorGearboxEncoder.motor.write(_pidOutput);
     
+    if(_axisName == "Left-axis"){
+        motorGearboxEncoder.computeSpeed();
+    }
+    
 }
 
 float  Axis::error(){

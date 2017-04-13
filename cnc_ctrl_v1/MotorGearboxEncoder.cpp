@@ -28,9 +28,16 @@ MotorGearboxEncoder::MotorGearboxEncoder(int pwmPin, int directionPin1, int dire
 :
 encoder(encoderPin1,encoderPin2)
 {
-    Serial.println("created gear motor encoder");
-    
     
     //initialize motor
     motor.setupMotor(pwmPin, directionPin1, directionPin2);
+    
+}
+
+float MotorGearboxEncoder::computeSpeed(){
+    Serial.println(micros() - _lastTimeStamp);
+    
+    _lastTimeStamp = micros();
+    
+    return 0;
 }
