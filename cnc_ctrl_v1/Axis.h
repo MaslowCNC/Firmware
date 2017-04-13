@@ -22,7 +22,7 @@
     #include "Motor.h"
     #include "PID_v1.h"
     #include <EEPROM.h>
-    #include "Encoder.h"
+    #include "MotorGearboxEncoder.h"
     
 
     class Axis{
@@ -74,7 +74,7 @@
             int        _eepromAdr;
             float      _mmPerRotation;
             float      _encoderSteps;
-            Encoder    _encoder;
+            MotorGearboxEncoder    motorGearboxEncoder;
             float      _oldSetpoint;
             float      _oldVal;
             bool       _disableAxisForTesting = false;

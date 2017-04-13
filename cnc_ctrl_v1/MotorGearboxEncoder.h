@@ -15,40 +15,17 @@
     
     Copyright 2014-2017 Bar Smith*/
     
-    #ifndef Motor_h
-    #define Motor_h
+    #ifndef MotorGearboxEncoder_h
+    #define MotorGearboxEncoder_h
 
     #include "Arduino.h"
+    #include "Encoder.h"
     
-    struct LinSegment{
-        float slope  = 1;
-        float intercept = 0;
-        //The bounds are strict, so if the bounds are 0,1 .9 would work
-        //but 1 and 0 will not
-        int positiveBound = 0;
-        int negativeBound = 0;
-    };
-    
-    
-    
-    class Motor{
+    class MotorGearboxEncoder{
         public:
-            Motor();
-            void attach();
-            int  setupMotor(int pwmPin, int pin1, int pin2);
-            void detach();
-            void write(int speed);
-            int  attached();
-            int  _convolve(int input);
-            void setSegment(int index, float slope, float intercept, int negativeBound, int positiveBound);
-            LinSegment getSegment(int index);
-            void  directWrite(int voltage);
+            MotorGearboxEncoder(int encoderPin1, int encoderPin2);
+            Encoder    encoder;
         private:
-            int _pwmPin;
-            int _pin1;
-            int _pin2;
-            bool _attachedState;
-            LinSegment _linSegments[4];
             
     };
 

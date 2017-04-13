@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
     
-    Copyright 2014-2016 Bar Smith*/
+    Copyright 2014-2017 Bar Smith*/
 
 /*
 The Motor module imitates the behavior of the Arduino servo module. It allows a gear motor (or any electric motor)
@@ -25,7 +25,6 @@ to be a drop in replacement for a continuous rotation servo.
 #include "Motor.h"
 
 Motor::Motor(){
-  //Serial.println("created gear motor");
   
   _attachedState = 0;
   

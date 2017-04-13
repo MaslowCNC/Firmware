@@ -28,7 +28,7 @@
 
 Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation, float encoderSteps)
 :
-_encoder(encoderPin1,encoderPin2)
+motorGearboxEncoder(encoderPin1,encoderPin2)
 {
     
     //initialize motor
@@ -65,7 +65,7 @@ int    Axis::write(float targetPosition){
 
 float  Axis::read(){
     //returns the true axis position
-    return (_encoder.read()/_encoderSteps)*_mmPerRotation;
+    return (motorGearboxEncoder.encoder.read()/_encoderSteps)*_mmPerRotation;
 }
 
 float  Axis::target(){
@@ -82,7 +82,7 @@ int    Axis::set(float newAxisPosition){
     //reset everything to the new value
     _axisTarget   =  newAxisPosition/_mmPerRotation;
     _pidSetpoint  =  newAxisPosition/_mmPerRotation;
-    _encoder.write((newAxisPosition*_encoderSteps)/_mmPerRotation);
+    motorGearboxEncoder.encoder.write((newAxisPosition*_encoderSteps)/_mmPerRotation);
     
 }
 
@@ -111,7 +111,7 @@ void   Axis::computePID(){
         }
     }
     
-    _pidInput      =  _encoder.read()/_encoderSteps;
+    _pidInput      =  motorGearboxEncoder.encoder.read()/_encoderSteps;
     _pidController.Compute();
     
     _motor.write(_pidOutput);
@@ -119,7 +119,7 @@ void   Axis::computePID(){
 }
 
 float  Axis::error(){
-    return abs((_encoder.read()/_encoderSteps) - _pidSetpoint)*_mmPerRotation;
+    return abs((motorGearboxEncoder.encoder.read()/_encoderSteps) - _pidSetpoint)*_mmPerRotation;
 }
 
 void   Axis::changePitch(float newPitch){
@@ -335,7 +335,7 @@ void   Axis::test(){
     
     Serial.println("pt(0,0,0)");
     int i = 0;
-    double encoderPos = _encoder.read(); //record the position now
+    double encoderPos = motorGearboxEncoder.encoder.read(); //record the position now
     
     //move the motor
     while (i < 1000){
@@ -345,7 +345,7 @@ void   Axis::test(){
     }
     
     //check to see if it moved
-    if(encoderPos - _encoder.read() > 500){
+    if(encoderPos - motorGearboxEncoder.encoder.read() > 500){
         Serial.println("Direction 1 - Pass");
     }
     else{
@@ -353,7 +353,7 @@ void   Axis::test(){
     }
     
     //record the position again
-    encoderPos = _encoder.read();
+    encoderPos = motorGearboxEncoder.encoder.read();
     Serial.println("pt(0,0,0)");
     
     //move the motor in the other direction
@@ -365,7 +365,7 @@ void   Axis::test(){
     }
     
     //check to see if it moved
-    if(encoderPos - _encoder.read() < -500){
+    if(encoderPos - motorGearboxEncoder.encoder.read() < -500){
         Serial.println("Direction 2 - Pass");
     }
     else{
@@ -508,11 +508,11 @@ void   Axis::computeMotorResponse(){
 float  Axis::_speedSinceLastCall(){
     //static variables to persist between calls
     static long time = millis();
-    static long prevEncoderValue = _encoder.read();
+    static long prevEncoderValue = motorGearboxEncoder.encoder.read();
     
     //compute dist moved
     int elapsedTime = millis() - time;
-    int distMoved   = _encoder.read() - prevEncoderValue;
+    int distMoved   = motorGearboxEncoder.encoder.read() - prevEncoderValue;
     float speed = float(distMoved)/float(elapsedTime);
     
     //catch if time is zero
@@ -522,7 +522,7 @@ float  Axis::_speedSinceLastCall(){
     
     //set values for next call
     time = millis();
-    prevEncoderValue = _encoder.read();
+    prevEncoderValue = motorGearboxEncoder.encoder.read();
     
     //return the absolute value because speed is not a vector
     return abs(speed);
@@ -545,11 +545,11 @@ float  Axis::measureMotorSpeed(int speed){
     //run the motor for numberOfStepsToTest steps positive and record the time taken
     
     
-    long originalEncoderPos  = _encoder.read();
+    long originalEncoderPos  = motorGearboxEncoder.encoder.read();
     long startTime = millis();
     
     //until the motor has moved the target distance
-    while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
+    while (abs(originalEncoderPos - motorGearboxEncoder.encoder.read()) < numberOfStepsToTest){
         //establish baseline for speed measurement
         _speedSinceLastCall();
         
@@ -571,7 +571,7 @@ float  Axis::measureMotorSpeed(int speed){
     int posTime = millis() - startTime;
     
     //rotations = number of steps taken / steps per rotation
-    float rotations = (originalEncoderPos - _encoder.read())/_encoderSteps;
+    float rotations = (originalEncoderPos - motorGearboxEncoder.encoder.read())/_encoderSteps;
     //minutes = time elapsed in ms * 1000ms/s *60 seconds per minute
     float minutes   = posTime/(1000.0*60.0);
     
