@@ -543,21 +543,6 @@ int   G2(String readString){
     float feed    = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     int   dir     = extractGcodeValue(readString, 'G', 0);
     
-    Serial.print("X1: ");
-    Serial.println(X1);
-    Serial.print("Y1: ");
-    Serial.println(Y1);
-    Serial.print("X2: ");
-    Serial.println(X2);
-    Serial.print("Y2: ");
-    Serial.println(Y2);
-    Serial.print("I: ");
-    Serial.println(I);
-    Serial.print("J: ");
-    Serial.println(J);
-    Serial.print("Dir: ");
-    Serial.println(dir);
-    
     float centerX = X1 + I;
     float centerY = Y1 + J;
     
@@ -691,12 +676,6 @@ void  executeGcodeLine(String gcodeLine){
         gNumber = lastCommand;                              //apply the last one
     }
     
-    Serial.print("Line: ");
-    Serial.println(gcodeLine);
-    
-    Serial.print("Gnumber: ");
-    Serial.println(gNumber);
-    
     switch(gNumber){
         case 0:
             G1(gcodeLine);
@@ -823,9 +802,6 @@ void  interpretCommandString(String cmdString){
     int firstG;  
     int secondG;
     
-    Serial.print("cmdString: ");
-    Serial.println(cmdString);
-    
     if (cmdString[0] == 'B'){                   //If the command is a B command
         executeGcodeLine(cmdString);
         Serial.println(cmdString);
@@ -838,13 +814,6 @@ void  interpretCommandString(String cmdString){
             if(firstG == cmdString.length()){   //If the line contains no G letters
                 firstG = 0;                     //send the whole line
             }
-            
-            Serial.print("First G: ");
-            Serial.println(firstG);
-            Serial.print("Next G: ");
-            Serial.println(secondG);
-            Serial.println("Cmdstring.len:");
-            Serial.println(cmdString.length());
             
             String gcodeLine = cmdString.substring(firstG, secondG);
             
