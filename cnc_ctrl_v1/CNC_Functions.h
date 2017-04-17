@@ -402,6 +402,9 @@ int   G1(String readString){
         if(readString.indexOf('Y') >= 0){ //if y has moved
             ygoto = currentYPos + ygoto;
         }
+        if(readString.indexOf('Z') >= 0){ //if y has moved
+            zgoto = currentZPos + zgoto;
+        }
     }
     
     feedrate   = constrain(feedrate, 1, 25*_inchesToMMConversion);                                              //constrain the maximum feedrate
