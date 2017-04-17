@@ -72,9 +72,9 @@ float feedrate              =  125;
 float _inchesToMMConversion =  1;
 bool  useRelativeUnits      =  false;
 bool  stopFlag              =  false;
-String prependString;                     //prefix ('G01' for ex) from the previous command
 String readString;                        //command being built one character at a time
 String readyCommandString;                //next command queued up and ready to send
+int   lastCommand           =  0;         //Stores the value of the last command run eg: G01 -> 1
 
 //These are used in place of a forward kinematic function at the beginning of each move. They should be replaced
 //by a call to the forward kinematic function when it is available.
@@ -543,6 +543,21 @@ int   G2(String readString){
     float feed    = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     int   dir     = extractGcodeValue(readString, 'G', 0);
     
+    Serial.print("X1: ");
+    Serial.println(X1);
+    Serial.print("Y1: ");
+    Serial.println(Y1);
+    Serial.print("X2: ");
+    Serial.println(X2);
+    Serial.print("Y2: ");
+    Serial.println(Y2);
+    Serial.print("I: ");
+    Serial.println(I);
+    Serial.print("J: ");
+    Serial.println(J);
+    Serial.print("Dir: ");
+    Serial.println(dir);
+    
     float centerX = X1 + I;
     float centerY = Y1 + J;
     
@@ -669,14 +684,18 @@ void  executeGcodeLine(String gcodeLine){
     
     int gNumber = extractGcodeValue(gcodeLine,'G', -1);
     
-    if(gcodeLine.substring(0, 3) == "G00" || gcodeLine.substring(0, 3) == "G01" || gcodeLine.substring(0, 3) == "G02" || gcodeLine.substring(0, 3) == "G03" || gcodeLine.substring(0, 2) == "G0" || gcodeLine.substring(0, 2) == "G1" || gcodeLine.substring(0, 2) == "G2" || gcodeLine.substring(0, 2) == "G3"){
-        prependString = gcodeLine.substring(0, 3);
-        prependString = prependString + " ";
+    if (gNumber != -1){                                     //If the line has a valid G number
+        lastCommand = gNumber;                              //remember it for next time
+    }
+    else{                                                   //If the line does not have a gcommand
+        gNumber = lastCommand;                              //apply the last one
     }
     
-    if(gcodeLine[0] == 'X' || gcodeLine[0] == 'Y' || gcodeLine[0] == 'Z'){
-        gcodeLine = prependString + gcodeLine;
-    }
+    Serial.print("Line: ");
+    Serial.println(gcodeLine);
+    
+    Serial.print("Gnumber: ");
+    Serial.println(gNumber);
     
     switch(gNumber){
         case 0:
@@ -804,6 +823,9 @@ void  interpretCommandString(String cmdString){
     int firstG;  
     int secondG;
     
+    Serial.print("cmdString: ");
+    Serial.println(cmdString);
+    
     if (cmdString[0] == 'B'){                   //If the command is a B command
         executeGcodeLine(cmdString);
         Serial.println(cmdString);
@@ -812,6 +834,17 @@ void  interpretCommandString(String cmdString){
         while(cmdString.length() > 0){          //Extract each line of gcode from the string
             firstG  = findNextG(cmdString, 0);
             secondG = findNextG(cmdString, firstG + 1);
+            
+            if(firstG == cmdString.length()){   //If the line contains no G letters
+                firstG = 0;                     //send the whole line
+            }
+            
+            Serial.print("First G: ");
+            Serial.println(firstG);
+            Serial.print("Next G: ");
+            Serial.println(secondG);
+            Serial.println("Cmdstring.len:");
+            Serial.println(cmdString.length());
             
             String gcodeLine = cmdString.substring(firstG, secondG);
             
