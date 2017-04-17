@@ -395,11 +395,12 @@ int   G1(String readString){
     
 
     if (useRelativeUnits){ //if we are using a relative coordinate system 
+        
         if(readString.indexOf('X') >= 0){ //if there is an X command
-            xgoto = currentXPos/_inchesToMMConversion + xgoto;
+            xgoto = currentXPos + xgoto;
         }
         if(readString.indexOf('Y') >= 0){ //if y has moved
-            ygoto = currentYPos/_inchesToMMConversion + ygoto;
+            ygoto = currentYPos + ygoto;
         }
     }
     
