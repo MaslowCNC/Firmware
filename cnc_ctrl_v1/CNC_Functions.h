@@ -72,9 +72,9 @@ float feedrate              =  125;
 float _inchesToMMConversion =  1;
 bool  useRelativeUnits      =  false;
 bool  stopFlag              =  false;
-String prependString;                     //prefix ('G01' for ex) from the previous command
 String readString;                        //command being built one character at a time
 String readyCommandString;                //next command queued up and ready to send
+int   lastCommand           =  0;         //Stores the value of the last command run eg: G01 -> 1
 
 //These are used in place of a forward kinematic function at the beginning of each move. They should be replaced
 //by a call to the forward kinematic function when it is available.
@@ -669,13 +669,11 @@ void  executeGcodeLine(String gcodeLine){
     
     int gNumber = extractGcodeValue(gcodeLine,'G', -1);
     
-    if(gcodeLine.substring(0, 3) == "G00" || gcodeLine.substring(0, 3) == "G01" || gcodeLine.substring(0, 3) == "G02" || gcodeLine.substring(0, 3) == "G03" || gcodeLine.substring(0, 2) == "G0" || gcodeLine.substring(0, 2) == "G1" || gcodeLine.substring(0, 2) == "G2" || gcodeLine.substring(0, 2) == "G3"){
-        prependString = gcodeLine.substring(0, 3);
-        prependString = prependString + " ";
+    if (gNumber != -1){                                     //If the line has a valid G number
+        lastCommand = gNumber;                              //remember it for next time
     }
-    
-    if(gcodeLine[0] == 'X' || gcodeLine[0] == 'Y' || gcodeLine[0] == 'Z'){
-        gcodeLine = prependString + gcodeLine;
+    else{                                                   //If the line does not have a gcommand
+        gNumber = lastCommand;                              //apply the last one
     }
     
     switch(gNumber){
@@ -812,6 +810,10 @@ void  interpretCommandString(String cmdString){
         while(cmdString.length() > 0){          //Extract each line of gcode from the string
             firstG  = findNextG(cmdString, 0);
             secondG = findNextG(cmdString, firstG + 1);
+            
+            if(firstG == cmdString.length()){   //If the line contains no G letters
+                firstG = 0;                     //send the whole line
+            }
             
             String gcodeLine = cmdString.substring(firstG, secondG);
             
