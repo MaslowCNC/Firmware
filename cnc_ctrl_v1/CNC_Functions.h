@@ -9,7 +9,7 @@
     GNU General Public License for more details.
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
-    Copyright 2014 Bar Smith*/
+    Copyright 2014-2017 Bar Smith*/
     
     
 /*Right now this file is a catch all for functions which will be broken out into
@@ -20,7 +20,7 @@ libraries*/
 #include "Kinematics.h"
 #include "RingBuffer.h"
 
-#define VERSIONNUMBER 0.66
+#define VERSIONNUMBER 0.67
 
 bool zAxisAttached = false;
 
