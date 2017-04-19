@@ -616,7 +616,7 @@ void  updateSettings(String readString){
     
     //Extract the settings values
 
-    float bedWidth           = extractGcodeValue(readString, 'A', kinematics.machineWidth);
+    /*float bedWidth           = extractGcodeValue(readString, 'A', kinematics.machineWidth);
     float bedHeight          = extractGcodeValue(readString, 'C', kinematics.machineHeight);
     float distBetweenMotors  = extractGcodeValue(readString, 'Q', kinematics.D);
     float motorOffsetX       = extractGcodeValue(readString, 'D', (distBetweenMotors - bedWidth)/2); //read the motor offset X IF it is sent, if it's not sent, compute it from the spacing between the motors
@@ -651,11 +651,11 @@ void  updateSettings(String readString){
     kinematics.motorOffsetY = motorOffsetY;
     kinematics.machineWidth = bedWidth;
     kinematics.machineHeight= bedHeight;
-    kinematics.recomputeGeometry();
+    kinematics.recomputeGeometry();*/
 
 
     
-    Serial.println("Machine Settings Updated");
+    Serial.println("Machine Settings Not Updated");
 }
 
 void  executeGcodeLine(String gcodeLine){
