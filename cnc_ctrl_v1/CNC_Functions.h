@@ -20,7 +20,7 @@ libraries*/
 #include "Kinematics.h"
 #include "RingBuffer.h"
 
-#define VERSIONNUMBER 0.65
+#define VERSIONNUMBER 0.66
 
 bool zAxisAttached = false;
 
@@ -640,11 +640,6 @@ void  updateSettings(String readString){
     leftAxis.changeEncoderResolution(encoderSteps);
     rightAxis.changeEncoderResolution(encoderSteps);
     zAxis.changeEncoderResolution(zEncoderSteps);
-    
-    if (distBetweenMotors == 0){
-        distBetweenMotors = bedWidth + 2*motorOffsetX;
-        Serial.println("Using Old Measuring Method - Consider Updating Ground Control");
-    }
     
     //Change the machine dimensions in the kinematics 
     kinematics.l            = sledWidth;
