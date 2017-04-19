@@ -623,15 +623,16 @@ void  updateSettings(String readString){
     float motorOffsetY       = extractGcodeValue(readString, 'E', motorOffsetY);
     float sledWidth          = extractGcodeValue(readString, 'F', kinematics.l);
     float sledHeight         = extractGcodeValue(readString, 'R', kinematics.s);
-    float sledCG             = extractGcodeValue(readString, 'H', kinematics.h3);
+    float sledCG             = extractGcodeValue(readString, 'H', kinematics.h3);*/
     zAxisAttached            = extractGcodeValue(readString, 'I', zAxisAttached);
-    int encoderSteps         = extractGcodeValue(readString, 'J', ENCODERSTEPS);
+    /*int encoderSteps         = extractGcodeValue(readString, 'J', ENCODERSTEPS);
     float gearTeeth          = extractGcodeValue(readString, 'K', 10);
     float chainPitch         = extractGcodeValue(readString, 'M', 6.35);
+    */
     float zDistPerRot        = extractGcodeValue(readString, 'N', ZDISTPERROT);
     int zEncoderSteps        = extractGcodeValue(readString, 'P', ZENCODERSTEPS);
     
-    //Change the motor properties in cnc_funtions
+    /*//Change the motor properties in cnc_funtions
     float distPerRot = gearTeeth*chainPitch; 
     leftAxis.changePitch(distPerRot);
     rightAxis.changePitch(distPerRot);
