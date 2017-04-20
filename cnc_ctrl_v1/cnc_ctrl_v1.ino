@@ -36,12 +36,8 @@ void runsOnATimer(){
 }
 
 void loop(){
-    float aChainLength;
-    float bChainLength;
-    //find the chain lengths for this step
-    kinematics.inverse(0.00,322.60,&aChainLength,&bChainLength);
     
-    /*readyCommandString = ringBuffer.readLine();
+    readyCommandString = ringBuffer.readLine();
     
     if (readyCommandString.length() > 0){
         readyCommandString.toUpperCase();
@@ -55,5 +51,5 @@ void loop(){
     
     returnPoz(xTarget, yTarget, zAxis.read());
     
-    _watchDog(); */
+    _watchDog();
 }

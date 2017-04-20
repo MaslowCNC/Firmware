@@ -59,11 +59,11 @@ void Kinematics::recomputeGeometry(){
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     
-    Serial.print("Passed in target: (");
+    /*Serial.print("Passed in target: (");
     Serial.print(xTarget);
     Serial.print(",");
     Serial.print(yTarget);
-    Serial.println(")");
+    Serial.println(")");*/
     
     //Confirm that the coordinates are on the wood
     _verifyValidTarget(&xTarget, &yTarget);
@@ -72,11 +72,11 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     x = (D/2.0) + xTarget;
     y = (machineHeight/2.0) + motorOffsetY  - yTarget;
     
-    Serial.print("Becomes: (");
+    /*Serial.print("Becomes: (");
     Serial.print(x);
     Serial.print(",");
     Serial.print(y);
-    Serial.println(")");
+    Serial.println(")");*/
     
     //Coordinates definition:
     //         x -->, y |
@@ -187,10 +187,10 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     }
     
     
-    Serial.print("Returns lengths: ");
+    /*Serial.print("Returns lengths: ");
     Serial.print(Chain1);
     Serial.print(", ");
-    Serial.println(Chain2);
+    Serial.println(Chain2);*/
     
     *aChainLength = Chain1;
     *bChainLength = Chain2;
