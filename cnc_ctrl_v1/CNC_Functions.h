@@ -648,7 +648,6 @@ void  updateSettings(String readString){
     kinematics.h3           = sledCG;
     kinematics.R            = distPerRot / (2.0*3.14159);
     kinematics.D            = distBetweenMotors;
-    kinematics.motorOffsetX = motorOffsetX;
     kinematics.motorOffsetY = motorOffsetY;
     kinematics.machineWidth = bedWidth;
     kinematics.machineHeight= bedHeight;

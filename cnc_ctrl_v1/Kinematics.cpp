@@ -59,13 +59,24 @@ void Kinematics::recomputeGeometry(){
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     
+    Serial.print("Passed in target: (");
+    Serial.print(xTarget);
+    Serial.print(",");
+    Serial.print(yTarget);
+    Serial.println(")");
     
     //Confirm that the coordinates are on the wood
     _verifyValidTarget(&xTarget, &yTarget);
     
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
-    x = machineWidth/2 + motorOffsetX + xTarget;
-    y = machineHeight/2 + motorOffsetY  - yTarget;
+    x = (D/2.0) + xTarget;
+    y = (machineHeight/2.0) + motorOffsetY  - yTarget;
+    
+    Serial.print("Becomes: (");
+    Serial.print(x);
+    Serial.print(",");
+    Serial.print(y);
+    Serial.println(")");
     
     //Coordinates definition:
     //         x -->, y |
@@ -174,7 +185,13 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
         Chain1 = sqrt((x - Offsetx1)*(x - Offsetx1) + (y + Y1Plus - Offsety1)*(y + Y1Plus - Offsety1)) - R * TanGamma + R * Gamma;   //left chain length                       
         Chain2 = sqrt((D - (x + Offsetx2))*(D - (x + Offsetx2))+(y + Y2Plus - Offsety2)*(y + Y2Plus - Offsety2)) - R * TanLambda + R * Lambda;   //right chain length
     }
-     
+    
+    
+    Serial.print("Returns lengths: ");
+    Serial.print(Chain1);
+    Serial.print(", ");
+    Serial.println(Chain2);
+    
     *aChainLength = Chain1;
     *bChainLength = Chain2;
 
