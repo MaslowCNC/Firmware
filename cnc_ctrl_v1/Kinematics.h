@@ -30,10 +30,10 @@
             void  recomputeGeometry();
             //geometry
             float l             = 324.0;                               //horizontal distance between sled attach points
-            float s             = 139.0;                               //vertical distance between sled attach points and bit
+            float s             = 140.0;                               //vertical distance between sled attach points and bit
             float h             = sqrt((l/2)*(l/2) + s * s);           //distance between sled attach point and bit
             float h3            = 79.0;                                //distance from bit to sled center of mass
-            float D             = 3048.0;                              //distance between sprocket centers
+            float D             = 3048;                              //distance between sprocket centers
             float R             = 10.2;                                //sprocket radius
             float machineHeight = 1219.2;                              //this is 4 feet in mm
             float machineWidth  = 2438.4;                              //this is 8 feet in mm

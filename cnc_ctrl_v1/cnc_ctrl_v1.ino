@@ -39,7 +39,7 @@ void loop(){
     float aChainLength;
     float bChainLength;
     //find the chain lengths for this step
-    kinematics.inverse(0,322.6,&aChainLength,&bChainLength);
+    kinematics.inverse(0.00,322.60,&aChainLength,&bChainLength);
     
     /*readyCommandString = ringBuffer.readLine();
     
