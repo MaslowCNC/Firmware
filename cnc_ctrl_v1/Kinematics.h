@@ -29,7 +29,7 @@
             void  inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  recomputeGeometry();
             //geometry
-            float l             = 310.0;                               //distance between sled attach points
+            float l             = 310.0;                               //horizontal distance between sled attach points
             float s             = 139.0;                               //vertical distance between sled attach points and bit
             float h             = sqrt((l/2)*(l/2) + s * s);           //distance between sled attach point and bit
             float h3            = 79.0;                                //distance from bit to sled center of mass
@@ -37,7 +37,6 @@
             float R             = 10.2;                                //sprocket radius
             float machineHeight = 1219.2;                              //this is 4 feet in mm
             float machineWidth  = 2438.4;                              //this is 8 feet in mm
-            float motorOffsetX  = 270.0;                               //horizontal distance from the corner of the work area to the sprocket center
             float motorOffsetY  = 463.0;                               //vertical distance from the corner of the work area to the sprocket center
             
         private:
