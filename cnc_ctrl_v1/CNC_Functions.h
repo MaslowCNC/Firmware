@@ -756,15 +756,19 @@ void  executeGcodeLine(String gcodeLine){
         Serial.println("Manually Setting Chain Lengths To: ");
         float newL = extractGcodeValue(gcodeLine, 'L', 0);
         float newR = extractGcodeValue(gcodeLine, 'R', 0);
-        Serial.print("Left: ");
-        Serial.print(newL);
-        Serial.println("mm");
-        Serial.print("Right: ");
-        Serial.print(newR);
-        Serial.println("mm");
         
         leftAxis.set(newL);
         rightAxis.set(newR);
+        
+        Serial.print("Left: ");
+        Serial.print(leftAxis.read());
+        Serial.println("mm");
+        Serial.print("Right: ");
+        Serial.print(rightAxis.read());
+        Serial.println("mm");
+        
+        Serial.println("Message: The machine chains have been manually re-calibrated.")
+        
     }
     
     if(gcodeLine.substring(0, 3) == "B07"){
