@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
     
-    Copyright 2014-2016 Bar Smith*/
+    Copyright 2014-2017 Bar Smith*/
     
     #ifndef Kinematics_h
     #define Kinematics_h
@@ -21,23 +21,30 @@
     #define ORIGINCHAINLEN   1650
     
     #include "Arduino.h"
-    #include "BigNumber.h"
     #include "FormatDouble.h"
 
     class Kinematics{
         public:
             Kinematics();
-            void  forward   (float chainALength, float chainBLength, float* X, float* Y);
             void  inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
-            void  oldInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength);
-            void  test();
-            void  speedTest(float input);
+            void  recomputeGeometry();
+            //geometry
+            float l             = 310.0;                               //horizontal distance between sled attach points
+            float s             = 139.0;                               //vertical distance between sled attach points and bit
+            float h             = sqrt((l/2)*(l/2) + s * s);           //distance between sled attach point and bit
+            float h3            = 79.0;                                //distance from bit to sled center of mass
+            float D             = 2978.4;                              //distance between sprocket centers
+            float R             = 10.2;                                //sprocket radius
+            float machineHeight = 1219.2;                              //this is 4 feet in mm
+            float machineWidth  = 2438.4;                              //this is 8 feet in mm
+            float motorOffsetY  = 463.0;                               //vertical distance from the corner of the work area to the sprocket center
+            
         private:
-            BigNumber _float2BigNum (float value);
             float _moment(float Y1Plus, float Y2Plus, float Phi, float MSinPhi, float MSinPsi1, float MCosPsi1, float MSinPsi2, float MCosPsi2);
             float _YOffsetEqn(float YPlus, float Denominator, float Psi);
             void  _MatSolv();
             void  _MyTrig();
+            void _verifyValidTarget(float* xTarget,float* yTarget);
             //target router bit coordinates.
             float x = 2708.4;
             float y = 270;
@@ -46,14 +53,6 @@
             float DegPerRad = 360/(4 * atan(1));
             unsigned long Time;
             boolean Mirror;
-
-            //geometry
-            float l = 310.0;                               //distance between sled attach points
-            float s = 139.0;                               //vertical distance between sled attach points and bit
-            float h = sqrt((l/2)*(l/2) + s * s);           //distance between sled attach point and bit
-            float h3 = 79.0;                               //distance from bit to sled center of mass
-            float D = 2978.4;                             //distance between sprocket centers
-            float R = 10.2;                                //sprocket radius
 
             //Calculation tolerances
             float MaxError = 0.001;
@@ -94,7 +93,6 @@
             float Gamma;
 
             // output = chain lengths measured from 12 o'clock
-
             float Chain1; //left chain length 
             float Chain2; //right chain length
 

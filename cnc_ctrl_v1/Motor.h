@@ -13,10 +13,10 @@
     You should have received a copy of the GNU General Public License
     along with the Makesmith Control Software.  If not, see <http://www.gnu.org/licenses/>.
     
-    Copyright 2014-2016 Bar Smith*/
+    Copyright 2014-2017 Bar Smith*/
     
-    #ifndef GearMotor_h
-    #define GearMotor_h
+    #ifndef Motor_h
+    #define Motor_h
 
     #include "Arduino.h"
     
@@ -31,9 +31,9 @@
     
     
     
-    class GearMotor{
+    class Motor{
         public:
-            GearMotor();
+            Motor();
             void attach();
             int  setupMotor(int pwmPin, int pin1, int pin2);
             void detach();
@@ -42,6 +42,7 @@
             int  _convolve(int input);
             void setSegment(int index, float slope, float intercept, int negativeBound, int positiveBound);
             LinSegment getSegment(int index);
+            void  directWrite(int voltage);
         private:
             int _pwmPin;
             int _pin1;

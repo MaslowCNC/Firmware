@@ -1,6 +1,9 @@
-Maslow Guest Book
-___________________________________
 
+    ****************************
+ -=%*                          *%=-
+    *   MaslowCNC Guest Book   *
+ -=%*                          *%=-
+    ****************************
 
 The guest book is a way to say hello, practice contributing to the project, and put your name in the project! Write your name! Put a message to prove you were here!
 
@@ -18,5 +21,13 @@ Andrew was here January 12, 2017
 
 jbnimble - January 14, 2017
 
+<<<<<<< HEAD
 blurfl - January 24, 2017
 
+=======
+jbarchuk March 3 2017 New to git at this level. The more I see it the more I like.
+
+jwolter0 (Ohio, USA) - March 25, 2017 - Figuring out how to use git on my Linux machine.  There's no GitHub Desktop for Linux, so I'm learning how to do it from the command line like the cavemen used to.
+
+TheRiflesSpiral - confusedly contributing correspondence concordently. 3/30/17
+>>>>>>> MaslowCNC/master

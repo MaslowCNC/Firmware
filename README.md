@@ -3,8 +3,6 @@
 ====
 This is the firmware for the Maslow CNC Router
 
-[![Code Climate](https://codeclimate.com/github/MaslowCNC/Firmware/badges/gpa.svg)](https://codeclimate.com/github/MaslowCNC/Firmware)
-
 ====
 
 ## Steps to setup the Firmware development environment
@@ -17,7 +15,7 @@ First clone the Firmware repository, then install and setup the IDE of your choi
 3. Navigate menus: File, Open
 4. In the file chooser navigate to the cloned repository and choose the "cnc_ctrl_v1.ino" file to open
 5. Navigate menu: Tools, Board, change to "Arduino/Genuino Mega or Mega 2560"
-6. Navigate menu: Verify/Compile
+6. Navigate menu: Sketch -> Upload
 
 This should compile the project without errors, and possibly some warnings.
 

@@ -10,27 +10,22 @@
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
     
-    Copyright 2014 Bar Smith*/
+    Copyright 2014-2017 Bar Smith*/
     
     
 #include "CNC_Functions.h"
 #include "TimerOne.h"
 
-
-String readString;
-
 void setup(){
     Serial.begin(19200);
     
     Serial.println("ready");
-    Serial.println("gready");
-    
-    leftAxis.initializePID();
-    rightAxis.initializePID();
-    zAxis.initializePID();
+    Serial.println("ok");
     
     Timer1.initialize(10000);
     Timer1.attachInterrupt(runsOnATimer);
+    
+    Serial.println("Grbl v1.00");
     
 }
 
@@ -41,24 +36,20 @@ void runsOnATimer(){
 }
 
 void loop(){
-    readString = "";
-    if (Serial.available()){
-        while (true) {
-            if (Serial.available() > 0) {
-                char c = Serial.read();  //gets one byte from serial buffer
-                if (c == '\n'){
-                    break;
-                }
-                readString += c; //makes the string readString
-            } 
-        }
-    }
-    if (readString.length() > 0){
-        readString.toUpperCase();
-        interpretCommandString(readString);
+    
+    readyCommandString = ringBuffer.readLine();
+    
+    if (readyCommandString.length() > 0){
+        readyCommandString.toUpperCase();
+        interpretCommandString(readyCommandString);
+        readyCommandString = "";
     }
     
     holdPosition();
     
-    returnPoz();
+    readSerialCommands();
+    
+    returnPoz(xTarget, yTarget, zAxis.read());
+    
+    _watchDog();
 }

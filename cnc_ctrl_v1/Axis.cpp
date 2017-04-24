@@ -26,17 +26,10 @@
 #define SIZEOFFLOAT      4
 #define SIZEOFLINSEG    17
 
-#define NUMBER_OF_ENCODER_STEPS 8148.0 
-
-
-
-Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation)
+Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation, float encoderSteps)
 :
-_encoder(encoderPin1,encoderPin2)
+motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2)
 {
-    
-    //initialize motor
-    _motor.setupMotor(pwmPin, directionPin1, directionPin2);
     
     _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _KiFar, _Kd, REVERSE);
     
@@ -46,6 +39,7 @@ _encoder(encoderPin1,encoderPin2)
     _axisTarget   = 0.0;
     _eepromAdr    = eepromAdr;
     _mmPerRotation= mmPerRotation;
+    _encoderSteps = encoderSteps;
     
     //load position
     if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
@@ -53,37 +47,29 @@ _encoder(encoderPin1,encoderPin2)
     }
     
     _readAllLinSegs(_eepromAdr);
+    
+    initializePID();
 }
 
 void   Axis::initializePID(){
     _pidController.SetMode(AUTOMATIC);
     _pidController.SetOutputLimits(-255, 255);
+    _pidController.SetSampleTime(10);
 }
 
 int    Axis::write(float targetPosition){
     
     _pidSetpoint   =  targetPosition/_mmPerRotation;
-    
-    int acceptableError = 20;
-    if (abs( ((_encoder.read()/NUMBER_OF_ENCODER_STEPS) - _pidSetpoint)*1000 ) < acceptableError){
-        return 1;
-    }
-    else{
-        return 0;
-    }
+    return 1;
 }
 
 float  Axis::read(){
-    
-    if (_motor.attached()){
-        return (_encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
-    }
-    else{
-        return (_encoder.read()/NUMBER_OF_ENCODER_STEPS)*_mmPerRotation;
-    }
+    //returns the true axis position
+    return (motorGearboxEncoder.encoder.read()/_encoderSteps)*_mmPerRotation;
 }
 
 float  Axis::target(){
+    //returns the axis target
     return _axisTarget*_mmPerRotation;
 }
 
@@ -96,11 +82,12 @@ int    Axis::set(float newAxisPosition){
     //reset everything to the new value
     _axisTarget   =  newAxisPosition/_mmPerRotation;
     _pidSetpoint  =  newAxisPosition/_mmPerRotation;
-    _encoder.write((newAxisPosition*NUMBER_OF_ENCODER_STEPS)/_mmPerRotation);
+    motorGearboxEncoder.encoder.write((newAxisPosition*_encoderSteps)/_mmPerRotation);
     
 }
 
 void   Axis::computePID(){
+    
     
     if (_disableAxisForTesting){
         return;
@@ -125,20 +112,38 @@ void   Axis::computePID(){
         }
     }
     
-    _pidInput      =  _encoder.read()/NUMBER_OF_ENCODER_STEPS;
+    _pidInput      =  motorGearboxEncoder.encoder.read()/_encoderSteps;
+    
     _pidController.Compute();
     
-    _motor.write(_pidOutput);
+    motorGearboxEncoder.motor.write(_pidOutput);
+    
+    motorGearboxEncoder.computeSpeed();
     
 }
 
 float  Axis::error(){
-    return abs((_encoder.read()/NUMBER_OF_ENCODER_STEPS) - _pidSetpoint)*_mmPerRotation;
+    return abs((motorGearboxEncoder.encoder.read()/_encoderSteps) - _pidSetpoint)*_mmPerRotation;
+}
+
+void   Axis::changePitch(float newPitch){
+    /*
+    Reassign the distance moved per-rotation for the axis.
+    */
+    _mmPerRotation = newPitch;
+}
+
+void   Axis::changeEncoderResolution(int newResolution){
+    /*
+    Reassign the encoder resolution for the axis.
+    */
+    _encoderSteps = newResolution;
+    
 }
 
 int    Axis::detach(){
     
-    if (_motor.attached()){
+    if (motorGearboxEncoder.motor.attached()){
         _writeFloat (_eepromAdr+SIZEOFFLOAT, read());
         EEPROM.write(_eepromAdr, EEPROMVALIDDATA);
         
@@ -146,14 +151,24 @@ int    Axis::detach(){
         
     }
     
-    _motor.detach();
+    motorGearboxEncoder.motor.detach();
     
     return 1;
 }
 
 int    Axis::attach(){
-     _motor.attach();
+     motorGearboxEncoder.motor.attach();
      return 1;
+}
+
+bool   Axis::attached(){
+    /*
+    
+    Returns true if the axis is attached, false if it is not.
+    
+    */
+    
+    return motorGearboxEncoder.motor.attached();
 }
 
 void   Axis::hold(){
@@ -224,10 +239,10 @@ void   Axis::_writeAllLinSegs(unsigned int addr){
     addr = addr + 2*SIZEOFFLOAT;
     
     //Write into memory
-    _writeLinSeg(addr                 , _motor.getSegment(0));
-    _writeLinSeg(addr + 1*SIZEOFLINSEG, _motor.getSegment(1));
-    _writeLinSeg(addr + 2*SIZEOFLINSEG, _motor.getSegment(2));
-    _writeLinSeg(addr + 3*SIZEOFLINSEG, _motor.getSegment(3));
+    _writeLinSeg(addr                 , motorGearboxEncoder.motor.getSegment(0));
+    _writeLinSeg(addr + 1*SIZEOFLINSEG, motorGearboxEncoder.motor.getSegment(1));
+    _writeLinSeg(addr + 2*SIZEOFLINSEG, motorGearboxEncoder.motor.getSegment(2));
+    _writeLinSeg(addr + 3*SIZEOFLINSEG, motorGearboxEncoder.motor.getSegment(3));
     
 }
 
@@ -261,8 +276,25 @@ void   Axis::_readAllLinSegs(unsigned int addr){
     for (int i = 0; i < 4; i++){
         linSeg = _readLinSeg (addr + i*SIZEOFLINSEG);
         
-        _motor.setSegment(i, linSeg.slope, linSeg.intercept,  linSeg.negativeBound, linSeg.positiveBound);
+        motorGearboxEncoder.motor.setSegment(i, linSeg.slope, linSeg.intercept,  linSeg.negativeBound, linSeg.positiveBound);
     }
+}
+
+void   Axis::wipeEEPROM(){
+    /*
+    
+    Over-write all the values stored in EEPROM to return the machine to a known state.
+    
+    */
+    
+    int i = 0;
+    while(i < 50){
+        EEPROM.write(_eepromAdr + i, 0);
+        i++;
+    }
+    
+    Serial.print(_axisName);
+    Serial.println(" EEPROM erased");
 }
 
 int    Axis::_sign(float val){
@@ -289,57 +321,113 @@ void   Axis::printBoost(){
     for(int i = -255; i < 255; i = i+10){
         Serial.print(i);
         Serial.print(" -> ");
-        Serial.println(_motor._convolve(i));
+        Serial.println(motorGearboxEncoder.motor._convolve(i));
     }
      
     _disableAxisForTesting = false;
 }
 
+void   Axis::test(){
+    /*
+    Test the axis by directly commanding the motor and observing if the encoder moves
+    */
+    
+    Serial.print("Testing ");
+    Serial.print(_axisName);
+    Serial.println(" motor:");
+    
+    
+    Serial.println("pt(0,0,0)");
+    int i = 0;
+    double encoderPos = motorGearboxEncoder.encoder.read(); //record the position now
+    
+    //move the motor
+    while (i < 1000){
+        motorGearboxEncoder.motor.directWrite(255);
+        i++;
+        delay(1);
+    }
+    
+    //check to see if it moved
+    if(encoderPos - motorGearboxEncoder.encoder.read() > 500){
+        Serial.println("Direction 1 - Pass");
+    }
+    else{
+        Serial.println("Direction 1 - Fail");
+    }
+    
+    //record the position again
+    encoderPos = motorGearboxEncoder.encoder.read();
+    Serial.println("pt(0,0,0)");
+    
+    //move the motor in the other direction
+    i = 0;
+    while (i < 1000){
+        motorGearboxEncoder.motor.directWrite(-255);
+        i++;
+        delay(1);
+    }
+    
+    //check to see if it moved
+    if(encoderPos - motorGearboxEncoder.encoder.read() < -500){
+        Serial.println("Direction 2 - Pass");
+    }
+    else{
+        Serial.println("Direction 2 - Fail");
+    }
+    
+    //stop the motor
+    motorGearboxEncoder.motor.directWrite(0);
+    Serial.println("pt(0,0,0)");
+}
+
 void   Axis::computeMotorResponse(){
     
     //remove whatever transform is applied
-    _motor.setSegment(0 , 1, 0, 0, 0);
-    _motor.setSegment(1 , 1, 0, 0, 0);
-    _motor.setSegment(2 , 1, 0, 0, 0);
-    _motor.setSegment(3 , 1, 0, 0, 0);
+    motorGearboxEncoder.motor.setSegment(0 , 1, 0, 0, 0);
+    motorGearboxEncoder.motor.setSegment(1 , 1, 0, 0, 0);
+    motorGearboxEncoder.motor.setSegment(2 , 1, 0, 0, 0);
+    motorGearboxEncoder.motor.setSegment(3 , 1, 0, 0, 0);
     
     //In the positive direction
     //-----------------------------------------------------------------------------------
     
     float scale = 255/measureMotorSpeed(255); //Y3*scale = 255 -> scale = 255/Y3
     
-    int i = 0;
+    int stallPoint;
     float motorSpeed;
     
-    //Increments of 10
-    while (i < 255){
-        Serial.print(".");
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed > 0){break;}
-        i = i + 10;
-    }
-    i = i - 10;
+    int upperBound = 255; //the whole range is valid
+    int lowerBound =   0;
     
-    //Increments of 5
-    while (i < 255){
-        Serial.print("~");
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed > 0){break;}
-        i = i + 5;
-    }
-    i = i - 5;
-    
-    //Find exact value
-    while (i < 255){
-        Serial.print("*");
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed > 0){break;}
-        i = i + 1;
+    while (true){ //until a value is found
+        Serial.print("Testing: ");
+        Serial.println((upperBound + lowerBound)/2);
+        
+        motorSpeed = measureMotorSpeed((upperBound + lowerBound)/2);
+        
+        if (motorSpeed == 0){                               //if the motor stalled
+            lowerBound = (upperBound + lowerBound)/2;           //shift lower bound to be the guess
+            Serial.println("- stall");
+        }
+        else{                                               //if the motor didn't stall
+            upperBound = (upperBound + lowerBound)/2;           //shift upper bound to be the guess
+            Serial.println("- good");
+        }
+        
+        if (upperBound - lowerBound <= 1){                  //when we've converged on the first point which doesn't stall
+            break;                                              //exit loop
+        }
     }
     
+    stallPoint = upperBound;
+    
+    Serial.print("decided on final value of: ");
+    Serial.println(stallPoint);
     
     
-    float X1 = i;
+    //compute a model of the motor from the given data points
+    float X1 = stallPoint;
     float Y1 = scale*motorSpeed;
     
     float X2 = (255 - X1)/2;
@@ -354,43 +442,50 @@ void   Axis::computeMotorResponse(){
     float I1 = -1*(Y1 - (M1*X1));
     float I2 = -1*(Y2 - (M2*X2));
     
-    _motor.setSegment(2 , M1, I1,    0,   Y2);
-    _motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
     
-    Serial.println("+");
+    //Apply the model to the motor
+    motorGearboxEncoder.motor.setSegment(2 , M1, I1,    0,   Y2);
+    motorGearboxEncoder.motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
+    
+    
     //In the negative direction
     //-----------------------------------------------------------------------------
     
     scale = -255/measureMotorSpeed(-255); //Y3*scale = 255 -> scale = 255/Y3
     
-    //Increments of 10
-    i = 0;                                                                                                                                  
-    while (i > -255){
-        Serial.print(".");
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed < 0){break;}
-        i = i - 10;
-    }
-    i = i + 10;
-    //Increments of 5
-    while (i > -255){
-        Serial.print("~");
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed < 0){break;}
-        i = i - 5;
-    }
-    i = i + 5;
-    //Find exact value
-    while (i > -255){
-        Serial.print("*");
-        motorSpeed = measureMotorSpeed(i);
-        if (motorSpeed < 0){break;}
-        i = i - 1;
+    upperBound =      0; //the whole range is valid
+    lowerBound =   -255;
+    
+    while (true){ //until a value is found
+        
+        Serial.print("Testing: ");
+        Serial.println((upperBound + lowerBound)/2);
+        
+        motorSpeed = measureMotorSpeed((upperBound + lowerBound)/2);
+        if (motorSpeed == 0){                               //if the motor stalled
+            upperBound = (upperBound + lowerBound)/2;           //shift lower bound to be the guess
+            Serial.println("-stall");
+        }
+        else{                                               //if the motor didn't stall
+            lowerBound = (upperBound + lowerBound)/2;           //shift upper bound to be the guess
+            Serial.println("-good");
+        }
+        
+        if (upperBound - lowerBound <= 1){                  //when we've converged on the first point which doesn't stall
+            break;                                              //exit loop
+        }
     }
     
-    Serial.println("-");
+    stallPoint = lowerBound;
     
-    X1 = i;
+    Serial.print("decided on a final value of: ");
+    Serial.println(stallPoint);
+    
+    //At this point motorSpeed is the speed in RPM at the value i which is just above the stall speed
+    
+    
+    //Compute a model for the motor's behavior using the given data-points
+    X1 = stallPoint;
     Y1 = scale*motorSpeed;
     
     X2 = (-255 - X1)/3 + X1;
@@ -406,44 +501,35 @@ void   Axis::computeMotorResponse(){
     I2 = -1*(Y2 - (M2*X2));
     
     
-    //_motor.setSegment(0 ,  1.9,  -137.0,  -114,     0);
-    //_motor.setSegment(1 ,  0.7,    23.1,  -256,  -115);
-    _motor.setSegment(0 , M1, I1,   Y2,    0);
-    _motor.setSegment(1 , M2, I2, Y3-1, Y2+1);
+    //Apply the model to the motor
+    motorGearboxEncoder.motor.setSegment(0 , M1, I1,   Y2,    0);
+    motorGearboxEncoder.motor.setSegment(1 , M2, I2, Y3-1, Y2+1);
     
-    /*Serial.print("First point: (");
-    Serial.print(X1);
-    Serial.print(", ");
-    Serial.print(Y1);
-    Serial.println(")");
+    Serial.println("Calibration complete.");
     
-    Serial.print("Second point: (");
-    Serial.print(X2);
-    Serial.print(", ");
-    Serial.print(Y2);
-    Serial.println(")");
+}
+
+float  Axis::_speedSinceLastCall(){
+    //static variables to persist between calls
+    static long time = millis();
+    static long prevEncoderValue = motorGearboxEncoder.encoder.read();
     
-    Serial.print("Third point: (");
-    Serial.print(X3);
-    Serial.print(", ");
-    Serial.print(Y3);
-    Serial.println(")");
+    //compute dist moved
+    int elapsedTime = millis() - time;
+    int distMoved   = motorGearboxEncoder.encoder.read() - prevEncoderValue;
+    float speed = float(distMoved)/float(elapsedTime);
     
-    Serial.print("Slope 1: ");
-    Serial.println(M1);
+    //catch if time is zero
+    if (elapsedTime < 10){
+        speed = 0;
+    }
     
-    Serial.print("Slope 2: ");
-    Serial.println(M2);
+    //set values for next call
+    time = millis();
+    prevEncoderValue = motorGearboxEncoder.encoder.read();
     
-    Serial.print("Intercept 1: ");
-    Serial.println(I1);
-    
-    Serial.print("Intercept 2: ");
-    Serial.println(I2);
-    
-    Serial.print("Scale: ");
-    Serial.println(scale);*/
-    
+    //return the absolute value because speed is not a vector
+    return abs(speed);
 }
 
 float  Axis::measureMotorSpeed(int speed){
@@ -458,54 +544,56 @@ float  Axis::measureMotorSpeed(int speed){
     
     int numberOfStepsToTest = 2000;
     int timeOutMS           = 30*1000; //30 seconds
-    int quickTimeOut        = 1000;
-    int quickTimeOutDist    = 50;
-    bool timeout            = false;
+    bool stall              = false;
     
     //run the motor for numberOfStepsToTest steps positive and record the time taken
     
-    //Future options to improve the speed of this section. 1) Use a newton-raphson type search where it tries over, 
-    //under...over..under until it converges on a value. 2) Compute the speed with every cycle of the while loop and
-    //kick out if the total speed ever drops below a threshold. The motor tends to go a little bit at first and then stall
-    //So continuously monitoring would help quite a bit with catching that.
-    long originalEncoderPos  = _encoder.read();
+    
+    long originalEncoderPos  = motorGearboxEncoder.encoder.read();
     long startTime = millis();
-    while (abs(originalEncoderPos - _encoder.read()) < numberOfStepsToTest){
-        _motor.write(speed);
+    
+    //until the motor has moved the target distance
+    while (abs(originalEncoderPos - motorGearboxEncoder.encoder.read()) < numberOfStepsToTest){
+        //establish baseline for speed measurement
+        _speedSinceLastCall();
         
-        //long timeout
-        if (millis() - startTime > timeOutMS ){
-            timeout = true;
-            break;
-        } 
+        //command motor to spin at speed
+        motorGearboxEncoder.motor.write(speed);
         
-        //very quick timeout if it doesn't move at all
-        if (millis() - startTime > quickTimeOut && abs(originalEncoderPos - _encoder.read()) < quickTimeOutDist){
-            timeout = true;
-            break;
-        }
+        //wait
+        delay(200);
         
-        //medium timeout if it starts to move, then conks out.
-        if (millis() - startTime > quickTimeOut/3 && abs(originalEncoderPos - _encoder.read()) < quickTimeOutDist/4){
-            timeout = true;
-            Serial.print("^");
+        //print to prevent connection timeout
+        Serial.println("<Idle,MPos:0,0,0>");
+        
+        //check to see if motor is moving
+        if (_speedSinceLastCall() < .01){
+            stall = true;
             break;
         }
     }
     int posTime = millis() - startTime;
     
-    float RPM = float(sign)*60.0*1000.0 * 1.0/(4.0*float(posTime));
+    //rotations = number of steps taken / steps per rotation
+    float rotations = (originalEncoderPos - motorGearboxEncoder.encoder.read())/_encoderSteps;
+    //minutes = time elapsed in ms * 1000ms/s *60 seconds per minute
+    float minutes   = posTime/(1000.0*60.0);
     
-    if (timeout){
+    //RPM is rotations per minute.
+    float RPM = rotations/minutes;
+    
+    if (stall){
         RPM = 0;
     }
     
-    //reset to start point
+    //move back to start point
     _disableAxisForTesting = false;
     _timeLastMoved = millis();
     for (long startTime = millis(); millis() - startTime < 2000; millis()){
         hold();
-        delay(10);
+        delay(50);
+        //print to prevent connection timeout
+        Serial.println("<Idle,MPos:0,0,0>");
     }
     
     return RPM;

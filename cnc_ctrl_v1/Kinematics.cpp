@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
     
-    Copyright 2014-2016 Bar Smith*/
+    Copyright 2014-2017 Bar Smith*/
 
 /*
 The Kinematics module relates the lengths of the chains to the position of the cutting head
@@ -23,134 +23,48 @@ in X-Y space.
 #include "Arduino.h"
 #include "Kinematics.h"
 
-//#define OLDKINEMATICS 
-
-#define MACHINEHEIGHT    1219.2 //this is 4 feet in mm
-#define MACHINEWIDTH     2438.4 //this is 8 feet in mm
-#define MOTOROFFSETX     270.0
-#define MOTOROFFSETY     463.0
-#define SLEDWIDTH        310.0
-#define SLEDHEIGHT       139.0
-
-#define AX               -1*MACHINEWIDTH/2 - MOTOROFFSETX
-#define AY               MACHINEHEIGHT/2 + MOTOROFFSETY
-#define BX               MACHINEWIDTH/2 + MOTOROFFSETX
-#define BY               MACHINEHEIGHT/2 + MOTOROFFSETY
-
 
 Kinematics::Kinematics(){
-   
-    BigNumber::begin ();
     
 }
 
-#ifdef OLDKINEMATICS //This lets you use the old kinematics which make a triangle where the tool is at the tip.
-
-void  Kinematics::forward(float chainALength, float chainBLength, float* X, float* Y){
-    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
+void Kinematics::_verifyValidTarget(float* xTarget,float* yTarget){
+    //If the target point is beyond one of the edges of the board, the machine stops at the edge
     
-    //Use the law of cosines to find the angle between the two chains
-    float   a   = chainBLength + chainLengthAtCenterInMM;
-    float   b   = -1*chainALength + chainLengthAtCenterInMM;
-    float   c   = MACHINEWIDTH+2*MOTOROFFSETX;
-    float theta = acos( ( sq(b) + sq(c) - sq(a) ) / (2.0*b*c) );
+    if (*xTarget < -machineWidth/2){
+        *xTarget = -machineWidth/2;
+    }
+    else if (*xTarget >  machineWidth/2){
+        *xTarget =  machineWidth/2;
+    }
+    else if (*yTarget >  machineHeight/2){
+        *yTarget =  machineHeight/2;
+    }
+    else if (*yTarget <  -machineHeight/2){
+        *yTarget =  -machineHeight/2;
+    }
     
-    *Y   = MOTOROFFSETY + MACHINEHEIGHT/2 - (b*sin(theta));
-    *X   = (b*cos(theta)) - (MACHINEWIDTH/2.0 + MOTOROFFSETX);
 }
 
-void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
-    
-    float chainLengthAtCenterInMM       = ORIGINCHAINLEN;
-    
-    float X1 = MOTOROFFSETX + MACHINEWIDTH/2.0   + xTarget;
-    float X2 = MOTOROFFSETX + MACHINEWIDTH/2.0   - xTarget;
-    float Y  = MOTOROFFSETY + MACHINEHEIGHT/2.0  - yTarget;
-    
-    float La = sqrt( sq(X1) + sq(Y) );
-    float Lb = sqrt( sq(X2) + sq(Y) );
-    
-    *aChainLength = -1*(La - chainLengthAtCenterInMM);
-    *bChainLength = Lb - chainLengthAtCenterInMM;
-}
-
-
-#else //Use the regular kinematics
-
-void  Kinematics::forward(float Lac, float Lbd, float* X, float* Y){
-    //Compute xy postion from chain lengths
-    
-    BigNumber::setScale (3);
-    BigNumber neg1 = ("-1");
-    
-    //store variables in BigNumber form
-    BigNumber AYb  = _float2BigNum(AY);
-    BigNumber AXb  = neg1*_float2BigNum(AX);
-    BigNumber BXb  = _float2BigNum(BX);
-    
-    BigNumber Lacb = _float2BigNum(Lac);
-    BigNumber Lbdb = _float2BigNum(Lbd);
-    
-    //Do pre-calculations
-    BigNumber alpha        = Lacb.pow(2) - AYb.pow(2);
-    BigNumber beta         = Lbdb.pow(2) - AYb.pow(2);
-    BigNumber widthb       = _float2BigNum(SLEDWIDTH);
-    BigNumber gamma        = BXb - AXb - widthb;//widthb - AXb + BXb;
-    BigNumber b64          = 64.0;
-    BigNumber b16          = 16.0;
-    BigNumber b8           = 8.0;
-    BigNumber b2           = 2.0; 
-    
-    //Do calculations
-    //Derivation can be found at robotics.stackexchange.com/questions/10607/forward-and-revers-kinematics-for-modified-hanging-plotter
-    BigNumber partOne      = b8*gamma.pow(2)*AYb;
-    BigNumber partTwo      = b64*gamma.pow(4)*AYb.pow(2);
-    BigNumber partThree    = b16*gamma.pow(2);
-    BigNumber partFour     = alpha.pow(2) - b2*alpha*beta - b2*alpha*gamma.pow(2) + beta.pow(2) - b2*beta*gamma.pow(2)+gamma.pow(4);
-    BigNumber partFive     = b8*gamma.pow(2);
-    
-    BigNumber insideRoot   = partTwo - (partThree*partFour);
-    
-    BigNumber Cyb          = (partOne - insideRoot.sqrt())/partFive;
-    BigNumber inside       = Lacb.pow(2) - AYb.pow(2) + b2*AYb*Cyb - Cyb.pow(2);
-    BigNumber Cxb          = AXb + inside.sqrt();
-    
-    BigNumber scaleb = ("10000.0");
-    float     scalef = 10000.0;
-    
-    float Cy = Cyb*scaleb;
-    Cy       = Cy/scalef;
-    
-    float Cx = Cxb*scaleb;
-    Cx       = Cx/scalef;
-    
-    float Fx = Cx + SLEDWIDTH/2;
-    float Fy = Cy - SLEDHEIGHT;
-    
-    *X   = Fx;
-    *Y   = Fy;
-}
-
-void  Kinematics::oldInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
-    //compute chain lengths from an XY position
-    
-    float Cx = xTarget - SLEDWIDTH/2;
-    float Cy = yTarget + SLEDHEIGHT;
-    float Dx = xTarget + SLEDWIDTH/2;
-    float Dy = Cy;
-    
-    float Lac = sqrt(sq(AX-Cx) + sq(AY-Cy));
-    float Lbd = sqrt(sq(BX-Dx) + sq(BY-Dy));
-    
-    
-    *aChainLength = Lac;
-    *bChainLength = Lbd;
+void Kinematics::recomputeGeometry(){
+    /*
+    Some variables are computed on class creation for the geometry of the machine to reduce overhead,
+    calling this function regenerates those values.
+    */
+    h = sqrt((l/2)*(l/2) + s * s);
+    Theta = atan(2*s/l);
+    Psi1 = Theta - Phi;
+    Psi2 = Theta + Phi;
 }
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    
+    //Confirm that the coordinates are on the wood
+    _verifyValidTarget(&xTarget, &yTarget);
+    
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
-    x = ( MACHINEWIDTH/2 - xTarget) + MOTOROFFSETX;
-    y = (MACHINEHEIGHT/2 - yTarget) + MOTOROFFSETY;
+    x = (D/2.0) + xTarget;
+    y = (machineHeight/2.0) + motorOffsetY  - yTarget;
     
     //Coordinates definition:
     //         x -->, y |
@@ -259,9 +173,9 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
         Chain1 = sqrt((x - Offsetx1)*(x - Offsetx1) + (y + Y1Plus - Offsety1)*(y + Y1Plus - Offsety1)) - R * TanGamma + R * Gamma;   //left chain length                       
         Chain2 = sqrt((D - (x + Offsetx2))*(D - (x + Offsetx2))+(y + Y2Plus - Offsety2)*(y + Y2Plus - Offsety2)) - R * TanLambda + R * Lambda;   //right chain length
     }
-     
-    *aChainLength = Chain2;
-    *bChainLength = Chain1;
+    
+    *aChainLength = Chain1;
+    *bChainLength = Chain2;
 
 }
 
@@ -384,84 +298,4 @@ float Kinematics::_YOffsetEqn(float YPlus, float Denominator, float Psi){
     float Temp;
     Temp = ((sqrt(YPlus * YPlus - R * R)/R) - (y + YPlus - h * sin(Psi))/Denominator);
     return Temp;
-}
-
-void  Kinematics::speedTest(float input){
-    Serial.println("Begin Speed Test");
-    
-    float x = 0;
-    float y = .3*1.0;
-    long  startTime = micros();
-    int iterations = 1;
-    float chainA;
-    float chainB;
-    
-    for (int i = 0; i < iterations; i++){
-        oldInverse(100, float(i)/100000.0, &chainA, &chainB);
-    }
-    
-    long time = (micros() - startTime)/iterations;
-    
-    
-    Serial.print("Time per call: ");
-    Serial.print(time);
-    Serial.println("us");
-    
-    
-    inverse(719, 109, &chainA, &chainB);
-    
-    Serial.println("New K Chain Lengths at point");
-    Serial.println(chainB);
-    Serial.println(chainA);
-    
-    
-    oldInverse(719, 109, &chainA, &chainB);
-    
-    Serial.println("Old K Chain Lengths at point");
-    Serial.println(chainB);
-    Serial.println(chainA);
-    
-
-}
-
-#endif
-
-void Kinematics::test(){
-    
-    Serial.println("test kinematics begin-------------------------------------------------------");
-    
-    
-    float chainA;
-    float chainB;
-    float X = -500.0;
-    float Y = 500.0; 
-    
-    Serial.print("X: ");
-    Serial.println(X);
-    Serial.print("Y: ");
-    Serial.println(Y);
-    
-    inverse(X,Y, &chainA, &chainB);
-    
-    Serial.println("New: ");
-    Serial.print("La: ");
-    Serial.println(chainA);
-    Serial.print("Lb: ");
-    Serial.println(chainB);
-    
-    forward(chainA, chainB, &X, &Y);
-    
-    Serial.print("X: ");
-    Serial.println(X);
-    Serial.print("Y: ");
-    Serial.println(Y);
-    
-}
-
-BigNumber Kinematics::_float2BigNum (float value){
-    char buf [20];
-    fmtDouble (value, 6, buf, sizeof buf);
-    BigNumber bigVal = BigNumber (buf);
-    
-    return bigVal;
 }

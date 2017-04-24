@@ -1,33 +1,32 @@
-    /*This file is part of the Makesmith Control Software.
+    /*This file is part of the Maslow Control Software.
 
-    The Makesmith Control Software is free software: you can redistribute it and/or modify
+    The Maslow Control Software is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Makesmith Control Software is distributed in the hope that it will be useful,
+    Maslow Control Software is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with the Makesmith Control Software.  If not, see <http://www.gnu.org/licenses/>.
+    along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
     
-    Copyright 2014-2016 Bar Smith*/ 
+    Copyright 2014-2017 Bar Smith*/ 
     
     #ifndef Axis_h
     #define Axis_h
 
     #include "Arduino.h"
-    #include "GearMotor.h"
     #include "PID_v1.h"
     #include <EEPROM.h>
-    #include "Encoder.h"
+    #include "MotorGearboxEncoder.h"
     
 
     class Axis{
         public:
-            Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation);
+            Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation, float encoderSteps);
             int    write(float targetPosition);
             float  read();
             int    set(float newAxisPosition);
@@ -44,6 +43,11 @@
             void   printBoost();
             float  measureMotorSpeed(int speed);
             void   computeMotorResponse();
+            void   test();
+            void   changePitch(float newPitch);
+            void   changeEncoderResolution(int newResolution);
+            bool   attached();
+            void   wipeEEPROM();
             
         private:
             int        _PWMread(int pin);
@@ -55,7 +59,6 @@
             void       _writeAllLinSegs(unsigned int addr);
             LinSegment _readLinSeg(unsigned int addr);
             void       _readAllLinSegs(unsigned int addr);
-            GearMotor  _motor;
             int        _direction;
             int        _encoderPin;
             String     _axisName;
@@ -68,10 +71,12 @@
             PID        _pidController;
             int        _eepromAdr;
             float      _mmPerRotation;
-            Encoder    _encoder;
+            float      _encoderSteps;
+            MotorGearboxEncoder    motorGearboxEncoder;
             float      _oldSetpoint;
             float      _oldVal;
             bool       _disableAxisForTesting = false;
+            float      _speedSinceLastCall();
     };
 
     #endif
