@@ -407,7 +407,7 @@ int   G1(String readString){
         }
     }
     
-    feedrate   = constrain(feedrate, 1, 25*_inchesToMMConversion);                                              //constrain the maximum feedrate
+    feedrate = constrain(feedrate,1,635);   //constrain the maximum feedrate, 25ips = 635 mmps
     
     //if the zaxis is attached
     if(zAxisAttached){
