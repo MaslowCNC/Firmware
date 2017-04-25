@@ -336,8 +336,9 @@ void   Axis::test(){
     Serial.print(_axisName);
     Serial.println(" motor:");
     
+    //print something to prevent the connection from timing out
+    Serial.print("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>");
     
-    Serial.println("pt(0,0,0)");
     int i = 0;
     double encoderPos = motorGearboxEncoder.encoder.read(); //record the position now
     
@@ -358,7 +359,7 @@ void   Axis::test(){
     
     //record the position again
     encoderPos = motorGearboxEncoder.encoder.read();
-    Serial.println("pt(0,0,0)");
+    Serial.print("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>");
     
     //move the motor in the other direction
     i = 0;
@@ -378,7 +379,7 @@ void   Axis::test(){
     
     //stop the motor
     motorGearboxEncoder.motor.directWrite(0);
-    Serial.println("pt(0,0,0)");
+    Serial.print("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>");
 }
 
 void   Axis::computeMotorResponse(){
