@@ -19,6 +19,8 @@
 void setup(){
     Serial.begin(19200);
     
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+    
     Serial.println("ready");
     Serial.println("ok");
     
@@ -26,9 +28,6 @@ void setup(){
     Timer1.attachInterrupt(runsOnATimer);
     
     Serial.println("Grbl v1.00");
-    float temp1;
-    float temp2;
-    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
 }
 
