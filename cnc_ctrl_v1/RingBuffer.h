@@ -28,12 +28,12 @@
             void  write(char letter);
             void  print();
             char  read();
+            int   size();
             String readLine();
             
         private:
             void _incrementBeginning();
             void _incrementEnd();
-            int  _bufferSize();
             int  _beginningOfString = 0;             //points to the first valid character which can be read
             int  _endOfString       = 0;             //points to the first open space which can be written
             char _buffer[BUFFERSIZE];
