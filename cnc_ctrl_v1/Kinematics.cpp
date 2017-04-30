@@ -206,9 +206,7 @@ void  Kinematics::forward(float chainALength, float chainBLength, float* xPos, f
         guessCount++;
         
         //if we've converged on the point...or it's time to give up, exit the loop
-        if((aChainError < .1 && bChainError < .1) or guessCount > 200){ 
-            Serial.println(aChainError);
-            Serial.println(bChainError);
+        if((aChainError < .1 && bChainError < .1) or guessCount > 200){
             break;
         }
         
