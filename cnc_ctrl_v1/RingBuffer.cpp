@@ -93,15 +93,25 @@ String RingBuffer::readLine(){
 
 void RingBuffer::print(){
     Serial.print("Buffer size: ");
-    Serial.println(_bufferSize());
+    Serial.println(size());
     Serial.print("Begin: ");
     Serial.println(_beginningOfString);
     Serial.print("End: ");
     Serial.println(_endOfString);
+    Serial.print(_buffer[_beginningOfString]);
+    Serial.print(_buffer[_beginningOfString+1]);
+    Serial.print(_buffer[_beginningOfString+2]);
+    Serial.print(_buffer[_beginningOfString+3]);
+    Serial.print(_buffer[_beginningOfString+4]);
+    Serial.println(_buffer[_beginningOfString+5]);
+    Serial.print(_buffer[_endOfString-1]);
+    Serial.print(_buffer[_endOfString-2]);
+    Serial.print(_buffer[_endOfString-3]);
+    Serial.println(_buffer[_endOfString-4]);
     
     Serial.println("Buffer Contents: ");
-    int i = 0;
-    while(i < BUFFERSIZE){
+    int i = _beginningOfString;
+    while(i < _endOfString){
         Serial.print(_buffer[i]);
         i++;
     }
@@ -146,7 +156,7 @@ void RingBuffer::_incrementEnd(){
     }
 }
 
-int  RingBuffer::_bufferSize(){
+int  RingBuffer::size(){
     /*
     
     Returns the number of characters held in the buffer

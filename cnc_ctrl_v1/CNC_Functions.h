@@ -135,7 +135,15 @@ void  _watchDog(){
     if (millis() - lastRan > timeout){
         
         if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
-            _signalReady();
+            //Serial.println("Watch dog");
+            //ringBuffer.print();
+            
+            if (ringBuffer.size() > 0){                  //if there is stuff sitting in the buffer, run it
+                ringBuffer.write('\n');
+            }
+            else{
+                _signalReady();                          //request new code
+            }
         }
         
         lastRan = millis();
@@ -833,8 +841,8 @@ void  interpretCommandString(String cmdString){
     int secondG;
     
     if (cmdString[0] == 'B'){                   //If the command is a B command
-        executeGcodeLine(cmdString);
         Serial.println(cmdString);
+        executeGcodeLine(cmdString);
     }
     else{
         while(cmdString.length() > 0){          //Extract each line of gcode from the string
