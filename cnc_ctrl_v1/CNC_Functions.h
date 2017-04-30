@@ -135,8 +135,6 @@ void  _watchDog(){
     if (millis() - lastRan > timeout){
         
         if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
-            //Serial.println("Watch dog");
-            //ringBuffer.print();
             
             if (ringBuffer.size() > 0){                  //if there is stuff sitting in the buffer, run it
                 ringBuffer.write('\n');
