@@ -23,12 +23,6 @@ serial data.
 #include "Arduino.h"
 #include "RingBuffer.h"
 
-#define BUFFERSIZE 128
-
-char buffer[BUFFERSIZE];
-int beginningOfString = 0;             //points to the first valid character which can be read
-int endOfString       = 0;             //points to the first open space which can be written
-
 RingBuffer::RingBuffer(){
     
 }
@@ -101,7 +95,7 @@ void RingBuffer::print(){
     Serial.println(_bufferSize());
     Serial.print("Begin: ");
     Serial.println(beginningOfString);
-    Serial.print("End: ");
+    /*Serial.print("End: ");
     Serial.println(endOfString);
     
     Serial.println("Buffer Contents: ");
@@ -109,7 +103,7 @@ void RingBuffer::print(){
     while(i < BUFFERSIZE){
         Serial.print(buffer[i]);
         i++;
-    }
+    }*/
     
     Serial.println(" ");
     

@@ -137,6 +137,7 @@ void  _watchDog(){
         
         if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
             Serial.println("watchdog");
+            ringBuffer.print();
             //_signalReady();
         }
         
