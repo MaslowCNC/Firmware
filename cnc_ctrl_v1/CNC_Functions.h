@@ -119,6 +119,7 @@ void  _signalReady(){
     
     */
     
+    Serial.println("signal ready");
     Serial.println("ok");
 }
 
@@ -135,7 +136,8 @@ void  _watchDog(){
     if (millis() - lastRan > timeout){
         
         if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
-            _signalReady();
+            Serial.println("watchdog");
+            //_signalReady();
         }
         
         lastRan = millis();
@@ -488,6 +490,8 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     leftAxis.attach();
     rightAxis.attach();
     
+    Serial.println("Begin arc");
+    
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
         angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
@@ -532,10 +536,14 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     xTarget = X2;
     yTarget = Y2;
     
+    Serial.println("end arc");
+    
     return 1;
 }
 
 int   G2(String readString){
+    
+    Serial.println("Begin G2");
     
     float X1 = xTarget; //does this work if units are inches? (It seems to)
     float Y1 = yTarget;
@@ -556,6 +564,8 @@ int   G2(String readString){
     if (dir == 3){
         arc(X1, Y1, X2, Y2, centerX, centerY, feed, COUNTERCLOCKWISE);
     }
+    
+    return 1;
 }
 
 void  G10(String readString){
@@ -606,13 +616,6 @@ void  calibrateChainLengths(){
 
 void  setInchesToMillimetersConversion(float newConversionFactor){
     _inchesToMMConversion = newConversionFactor;
-}
-
-void  printBeforeAndAfter(float before, float after){
-    Serial.print("Before: ");
-    Serial.print(before);
-    Serial.print(" After: ");
-    Serial.println(after);
 }
 
 void  updateSettings(String readString){
@@ -718,22 +721,19 @@ void  executeGcodeLine(String gcodeLine){
         rightAxis.computeMotorResponse();
         
         gcodeLine = "";
-        _signalReady();
-        Serial.println("ready");
+        Serial.println("ready1");
     }
     
     if(gcodeLine.substring(0, 3) == "B02"){
         calibrateChainLengths();
         gcodeLine = "";
-        _signalReady();
-        Serial.println("ready");
+        Serial.println("ready2");
     }
     
     if(gcodeLine.substring(0, 3) == "B03"){
         updateSettings(gcodeLine);
         gcodeLine = "";
-        _signalReady();
-        Serial.println("ready");
+        Serial.println("ready3");
     }
     
     if(gcodeLine.substring(0, 3) == "B04"){
@@ -746,16 +746,14 @@ void  executeGcodeLine(String gcodeLine){
         zAxis.test();
         Serial.println("Tests complete.");
         gcodeLine = "";
-        _signalReady();
-        Serial.println("ready");
+        Serial.println("rea4dy");
     }
     
     if(gcodeLine.substring(0, 3) == "B05"){
         Serial.print("Firmware Version ");
         Serial.println(VERSIONNUMBER);
         gcodeLine = "";
-        _signalReady();
-        Serial.println("ready");
+        Serial.println("rea5dy");
     }
     
     if(gcodeLine.substring(0, 3) == "B06"){
@@ -841,13 +839,17 @@ void  interpretCommandString(String cmdString){
             
             String gcodeLine = cmdString.substring(firstG, secondG);
             
-            Serial.println(gcodeLine);
             executeGcodeLine(gcodeLine);
+            Serial.print("Finished: ");
+            Serial.println(gcodeLine);
             
             cmdString = cmdString.substring(secondG, cmdString.length());
             
         }
     }
+    
+    Serial.println("here: ");
+    Serial.println(cmdString.length());
     
     _signalReady();
     

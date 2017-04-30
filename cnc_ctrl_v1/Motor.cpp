@@ -45,9 +45,7 @@ int  Motor::setupMotor(int pwmPin, int pin1, int pin2){
   pinMode(_pin2,     OUTPUT);
   
   //stop the motor
-  digitalWrite(_pin1,    HIGH);
-  digitalWrite(_pin2,    LOW) ;
-  digitalWrite(_pwmPin,  LOW);
+  detach();
   
   return 1;
 }

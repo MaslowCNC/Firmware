@@ -77,7 +77,7 @@ String RingBuffer::readLine(){
     bool lineDetected = false;
     
     int  i = 0;
-    while (i < BUFFERSIZE){                     //This will always run 128 times even if the buffer isn't full which is a waste
+    while (i <= BUFFERSIZE){                     //This will always run 128 times even if the buffer isn't full which is a waste
         if(buffer[i] == '\n'){                  //Check to see if the buffer contains a complete line terminated with \n
             lineDetected = true;
         }
