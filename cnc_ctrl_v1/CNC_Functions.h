@@ -709,6 +709,12 @@ void  executeGcodeLine(String gcodeLine){
         case 91:
             useRelativeUnits = true;
             break;
+        default:
+            if(gcodeLine[0] != 'B'){
+                Serial.print("Command G");
+                Serial.print(gNumber);
+                Serial.println(" unsupported and ignored.");
+            }
     }
     
 
