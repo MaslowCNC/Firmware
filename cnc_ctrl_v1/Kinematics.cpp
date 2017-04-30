@@ -212,11 +212,6 @@ void  Kinematics::forward(float chainALength, float chainBLength, float* xPos, f
         
     }
     
-    Serial.print("Loaded Pos: ");
-    Serial.print(xGuess);
-    Serial.print(" ");
-    Serial.println(yGuess);
-    
     *xPos = xGuess;
     *yPos = yGuess;
 }
