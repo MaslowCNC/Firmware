@@ -831,6 +831,8 @@ void  interpretCommandString(String cmdString){
     int firstG;  
     int secondG;
     
+    Serial.println("begin interpret command string");
+    
     if (cmdString[0] == 'B'){                   //If the command is a B command
         executeGcodeLine(cmdString);
         Serial.println(cmdString);

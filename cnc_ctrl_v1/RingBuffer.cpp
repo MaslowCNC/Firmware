@@ -79,6 +79,7 @@ String RingBuffer::readLine(){
     }
     
     if(lineDetected){
+        Serial.println("line Detected");
         char lastReadValue;
         while(lastReadValue != '\n'){                   //read until the end of the line is found, building the string
             lastReadValue = read();
@@ -95,7 +96,7 @@ void RingBuffer::print(){
     Serial.println(_bufferSize());
     Serial.print("Begin: ");
     Serial.println(_beginningOfString);
-    /*Serial.print("End: ");
+    Serial.print("End: ");
     Serial.println(_endOfString);
     
     Serial.println("Buffer Contents: ");
@@ -103,7 +104,7 @@ void RingBuffer::print(){
     while(i < BUFFERSIZE){
         Serial.print(_buffer[i]);
         i++;
-    }*/
+    }
     
     Serial.println(" ");
     
