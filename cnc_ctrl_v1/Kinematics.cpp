@@ -179,6 +179,48 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 
 }
 
+void  Kinematics::forward(float chainALength, float chainBLength, float* xPos, float* yPos){
+    
+    float xGuess = 0;
+    float yGuess = 0;
+    
+    float guessLengthA;
+    float guessLengthB;
+    
+    int guessCount = 0;
+    
+    while(1){
+        
+        
+        //check our guess
+        inverse(xGuess, yGuess, &guessLengthA, &guessLengthB);
+        
+        float aChainError = chainALength - guessLengthA;
+        float bChainError = chainBLength - guessLengthB;
+        
+        
+        //adjust the guess based on the result
+        xGuess = xGuess + .1*aChainError - .1*bChainError;
+        yGuess = yGuess - .1*aChainError - .1*bChainError;
+        
+        guessCount++;
+        
+        //if we've converged on the point...or it's time to give up, exit the loop
+        if((aChainError < .1 && bChainError < .1) or guessCount > 200){
+            break;
+        }
+        
+    }
+    
+    Serial.print("Loaded Pos: ");
+    Serial.print(xGuess);
+    Serial.print(" ");
+    Serial.println(yGuess);
+    
+    *xPos = xGuess;
+    *yPos = yGuess;
+}
+
 void  Kinematics::_MatSolv(){
     float Sum;
     int NN;
