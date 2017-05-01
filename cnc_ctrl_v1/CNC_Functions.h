@@ -605,8 +605,7 @@ void  calibrateChainLengths(){
     Serial.print(rightAxis.read());
     Serial.println("mm");
     
-    xTarget = 0;
-    yTarget = 0;
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
 }
 
@@ -797,6 +796,8 @@ void  executeGcodeLine(String gcodeLine){
         //Manually recalibrate chain lengths
         leftAxis.set(ORIGINCHAINLEN);
         rightAxis.set(ORIGINCHAINLEN);
+        
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
         
         Serial.print("Left: ");
         Serial.print(leftAxis.read());
