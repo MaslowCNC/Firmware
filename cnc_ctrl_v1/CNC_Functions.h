@@ -824,6 +824,12 @@ void  executeGcodeLine(String gcodeLine){
         }
     }
     
+    if(gcodeLine.substring(0, 3) == "B10"){
+        Serial.print("[Measure: ");
+        Serial.print(leftAxis.read());
+        Serial.println("]");
+    }
+    
     if((gcodeLine[0] == 'T' || gcodeLine[0] == 't') && gcodeLine[1] != 'e'){
         Serial.print("Please insert tool ");
         Serial.println(gcodeLine);
