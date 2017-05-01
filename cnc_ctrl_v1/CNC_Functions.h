@@ -811,6 +811,21 @@ void  executeGcodeLine(String gcodeLine){
         Serial.println("Message: The machine chains have been manually re-calibrated.");
     }
     
+    if(gcodeLine.substring(0, 3) == "B09"){
+        //Directly command each axis to move to a given distance
+        float lDist = extractGcodeValue(gcodeLine, 'L', 0);
+        float rDist = extractGcodeValue(gcodeLine, 'R', 0);
+        
+        if(useRelativeUnits){
+            singleAxisMove(&leftAxis,  leftAxis.read()  + lDist, 500);
+            singleAxisMove(&rightAxis, rightAxis.read() + rDist, 500);
+        }
+        else{
+            singleAxisMove(&leftAxis,  lDist, 500);
+            singleAxisMove(&rightAxis, rDist, 500);
+        }
+    }
+    
     if((gcodeLine[0] == 'T' || gcodeLine[0] == 't') && gcodeLine[1] != 'e'){
         Serial.print("Please insert tool ");
         Serial.println(gcodeLine);
