@@ -771,7 +771,6 @@ void  executeGcodeLine(String gcodeLine){
     }
     
     if(gcodeLine.substring(0, 3) == "B06"){
-        Serial.println("Manually Setting Chain Lengths To: ");
         float newL = extractGcodeValue(gcodeLine, 'L', 0);
         float newR = extractGcodeValue(gcodeLine, 'R', 0);
         
@@ -784,8 +783,6 @@ void  executeGcodeLine(String gcodeLine){
         Serial.print("Right: ");
         Serial.print(rightAxis.read());
         Serial.println("mm");
-        
-        Serial.println("Message: The machine chains have been manually re-calibrated.");
         
     }
     

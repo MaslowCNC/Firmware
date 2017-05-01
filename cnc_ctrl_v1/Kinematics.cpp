@@ -206,8 +206,11 @@ void  Kinematics::forward(float chainALength, float chainBLength, float* xPos, f
         guessCount++;
         
         //if we've converged on the point...or it's time to give up, exit the loop
-        if((aChainError < .1 && bChainError < .1) or guessCount > 200){
+        if(aChainError < .1 && bChainError < .1){
             break;
+        }
+        if(guessCount > 100){
+            Serial.println("Message: Unable to find a valid position for the stored chain lengths. It's likely that it is necessary to re-calibrate the chain lengths.")
         }
         
     }
