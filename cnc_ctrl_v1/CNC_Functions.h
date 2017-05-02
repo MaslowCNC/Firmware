@@ -589,7 +589,6 @@ void  calibrateChainLengths(){
     
     //measure out the left chain
     Serial.println("Measuring out left chain");
-    leftAxis.set(0);
     singleAxisMove(&leftAxis, ORIGINCHAINLEN, 500);
     leftAxis.detach();
     
@@ -598,7 +597,6 @@ void  calibrateChainLengths(){
     
     //measure out the right chain
     Serial.println("Measuring out right chain");
-    rightAxis.set(0);
     singleAxisMove(&rightAxis, ORIGINCHAINLEN, 500);
     rightAxis.detach();
     
@@ -717,7 +715,7 @@ void  executeGcodeLine(String gcodeLine){
     }
     
     if(gcodeLine.substring(0, 3) == "B06"){
-        Serial.println("Manually Setting Chain Lengths To: ");
+        Serial.println("Setting Chain Lengths To: ");
         float newL = extractGcodeValue(gcodeLine, 'L', 0);
         float newR = extractGcodeValue(gcodeLine, 'R', 0);
         
@@ -775,6 +773,7 @@ void  executeGcodeLine(String gcodeLine){
         }
         return;
     }
+    
     if(gcodeLine.substring(0, 3) == "B10"){
         Serial.print("[Measure: ");
         Serial.print(leftAxis.read());
