@@ -731,8 +731,6 @@ void  executeGcodeLine(String gcodeLine){
         Serial.print(rightAxis.read());
         Serial.println("mm");
         
-        Serial.println("Message: The machine chains have been manually re-calibrated.");
-        
         return;
     }
     
@@ -776,6 +774,11 @@ void  executeGcodeLine(String gcodeLine){
             singleAxisMove(&rightAxis, rDist, 500);
         }
         return;
+    }
+    if(gcodeLine.substring(0, 3) == "B10"){
+        Serial.print("[Measure: ");
+        Serial.print(leftAxis.read());
+        Serial.println("]");
     }
     
     //Handle G-Codes

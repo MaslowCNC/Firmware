@@ -205,8 +205,18 @@ void  Kinematics::forward(float chainALength, float chainBLength, float* xPos, f
         
         guessCount++;
         
+        //Prevent the connection from timing out
+        Serial.print("[PosError:");
+        Serial.print(aChainError);
+        Serial.print(',');
+        Serial.print(bChainError);
+        Serial.println("]");
+        
         //if we've converged on the point...or it's time to give up, exit the loop
         if((abs(aChainError) < .1 && abs(bChainError) < .1) or guessCount > 200){
+            if(guessCount > 200){
+                Serial.println("unable to find position");
+            }
             break;
         }
     }
