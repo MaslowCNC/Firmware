@@ -605,8 +605,7 @@ void  calibrateChainLengths(){
     Serial.print(rightAxis.read());
     Serial.println("mm");
     
-    xTarget = 0;
-    yTarget = 0;
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
 }
 
@@ -755,6 +754,8 @@ void  executeGcodeLine(String gcodeLine){
         Serial.print("Right: ");
         Serial.print(rightAxis.read());
         Serial.println("mm");
+        
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
         
         Serial.println("Message: The machine chains have been manually re-calibrated.");
         

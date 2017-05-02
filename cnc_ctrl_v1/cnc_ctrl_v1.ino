@@ -19,7 +19,7 @@
 void setup(){
     Serial.begin(19200);
     
-    //kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
     Serial.println("ready");
     Serial.println("ok");
