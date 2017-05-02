@@ -678,6 +678,107 @@ void  executeGcodeLine(String gcodeLine){
     
     */
     
+    
+    //Handle B-codes
+    
+    if(gcodeLine.substring(0, 3) == "B01"){
+        
+        leftAxis.computeMotorResponse();
+        rightAxis.computeMotorResponse();
+        
+        return;
+    }
+    
+    if(gcodeLine.substring(0, 3) == "B02"){
+        calibrateChainLengths();
+        return;
+    }
+    
+    if(gcodeLine.substring(0, 3) == "B03"){
+        updateSettings(gcodeLine);
+        return;
+    }
+    
+    if(gcodeLine.substring(0, 3) == "B04"){
+        //Test each of the axis
+        delay(500);
+        leftAxis.test();
+        delay(500);
+        rightAxis.test();
+        delay(500);
+        zAxis.test();
+        Serial.println("Tests complete.");
+        return;
+    }
+    
+    if(gcodeLine.substring(0, 3) == "B05"){
+        Serial.print("Firmware Version ");
+        Serial.println(VERSIONNUMBER);
+        return;
+    }
+    
+    if(gcodeLine.substring(0, 3) == "B06"){
+        Serial.println("Manually Setting Chain Lengths To: ");
+        float newL = extractGcodeValue(gcodeLine, 'L', 0);
+        float newR = extractGcodeValue(gcodeLine, 'R', 0);
+        
+        leftAxis.set(newL);
+        rightAxis.set(newR);
+        
+        Serial.print("Left: ");
+        Serial.print(leftAxis.read());
+        Serial.println("mm");
+        Serial.print("Right: ");
+        Serial.print(rightAxis.read());
+        Serial.println("mm");
+        
+        Serial.println("Message: The machine chains have been manually re-calibrated.");
+        
+        return;
+    }
+    
+    if(gcodeLine.substring(0, 3) == "B07"){
+        //erase EEPROM
+        leftAxis.wipeEEPROM();
+        rightAxis.wipeEEPROM();
+        zAxis.wipeEEPROM();
+    }
+    
+    if(gcodeLine.substring(0, 3) == "B08"){
+        //Manually recalibrate chain lengths
+        leftAxis.set(ORIGINCHAINLEN);
+        rightAxis.set(ORIGINCHAINLEN);
+        
+        Serial.print("Left: ");
+        Serial.print(leftAxis.read());
+        Serial.println("mm");
+        Serial.print("Right: ");
+        Serial.print(rightAxis.read());
+        Serial.println("mm");
+        
+        Serial.println("Message: The machine chains have been manually re-calibrated.");
+        
+        return;
+    }
+    
+    if(gcodeLine.substring(0, 3) == "B09"){
+        //Directly command each axis to move to a given distance
+        float lDist = extractGcodeValue(gcodeLine, 'L', 0);
+        float rDist = extractGcodeValue(gcodeLine, 'R', 0);
+        
+        if(useRelativeUnits){
+            singleAxisMove(&leftAxis,  leftAxis.read()  + lDist, 500);
+            singleAxisMove(&rightAxis, rightAxis.read() + rDist, 500);
+        }
+        else{
+            singleAxisMove(&leftAxis,  lDist, 500);
+            singleAxisMove(&rightAxis, rDist, 500);
+        }
+        return;
+    }
+    
+    //Handle G-Codes
+   
     int gNumber = extractGcodeValue(gcodeLine,'G', -1);
     
     if (gNumber != -1){                                     //If the line has a valid G number
@@ -721,109 +822,6 @@ void  executeGcodeLine(String gcodeLine){
                 Serial.print(gNumber);
                 Serial.println(" unsupported and ignored.");
             }
-    }
-    
-
-    if(gcodeLine.substring(0, 3) == "B01"){
-        
-        leftAxis.computeMotorResponse();
-        rightAxis.computeMotorResponse();
-        
-        gcodeLine = "";
-        _signalReady();
-        Serial.println("ready");
-    }
-    
-    if(gcodeLine.substring(0, 3) == "B02"){
-        calibrateChainLengths();
-        gcodeLine = "";
-        _signalReady();
-        Serial.println("ready");
-    }
-    
-    if(gcodeLine.substring(0, 3) == "B03"){
-        updateSettings(gcodeLine);
-        gcodeLine = "";
-        _signalReady();
-        Serial.println("ready");
-    }
-    
-    if(gcodeLine.substring(0, 3) == "B04"){
-        //Test each of the axis
-        delay(500);
-        leftAxis.test();
-        delay(500);
-        rightAxis.test();
-        delay(500);
-        zAxis.test();
-        Serial.println("Tests complete.");
-        gcodeLine = "";
-        _signalReady();
-        Serial.println("ready");
-    }
-    
-    if(gcodeLine.substring(0, 3) == "B05"){
-        Serial.print("Firmware Version ");
-        Serial.println(VERSIONNUMBER);
-        gcodeLine = "";
-        _signalReady();
-        Serial.println("ready");
-    }
-    
-    if(gcodeLine.substring(0, 3) == "B06"){
-        Serial.println("Manually Setting Chain Lengths To: ");
-        float newL = extractGcodeValue(gcodeLine, 'L', 0);
-        float newR = extractGcodeValue(gcodeLine, 'R', 0);
-        
-        leftAxis.set(newL);
-        rightAxis.set(newR);
-        
-        Serial.print("Left: ");
-        Serial.print(leftAxis.read());
-        Serial.println("mm");
-        Serial.print("Right: ");
-        Serial.print(rightAxis.read());
-        Serial.println("mm");
-        
-        Serial.println("Message: The machine chains have been manually re-calibrated.");
-        
-    }
-    
-    if(gcodeLine.substring(0, 3) == "B07"){
-        //erase EEPROM
-        leftAxis.wipeEEPROM();
-        rightAxis.wipeEEPROM();
-        zAxis.wipeEEPROM();
-    }
-    
-    if(gcodeLine.substring(0, 3) == "B08"){
-        //Manually recalibrate chain lengths
-        leftAxis.set(ORIGINCHAINLEN);
-        rightAxis.set(ORIGINCHAINLEN);
-        
-        Serial.print("Left: ");
-        Serial.print(leftAxis.read());
-        Serial.println("mm");
-        Serial.print("Right: ");
-        Serial.print(rightAxis.read());
-        Serial.println("mm");
-        
-        Serial.println("Message: The machine chains have been manually re-calibrated.");
-    }
-    
-    if(gcodeLine.substring(0, 3) == "B09"){
-        //Directly command each axis to move to a given distance
-        float lDist = extractGcodeValue(gcodeLine, 'L', 0);
-        float rDist = extractGcodeValue(gcodeLine, 'R', 0);
-        
-        if(useRelativeUnits){
-            singleAxisMove(&leftAxis,  leftAxis.read()  + lDist, 500);
-            singleAxisMove(&rightAxis, rightAxis.read() + rDist, 500);
-        }
-        else{
-            singleAxisMove(&leftAxis,  lDist, 500);
-            singleAxisMove(&rightAxis, rDist, 500);
-        }
     }
     
     if((gcodeLine[0] == 'T' || gcodeLine[0] == 't') && gcodeLine[1] != 'e'){
