@@ -605,8 +605,7 @@ void  calibrateChainLengths(){
     Serial.print(rightAxis.read());
     Serial.println("mm");
     
-    xTarget = 0;
-    yTarget = 0;
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
 }
 
@@ -771,12 +770,13 @@ void  executeGcodeLine(String gcodeLine){
     }
     
     if(gcodeLine.substring(0, 3) == "B06"){
-        Serial.println("Manually Setting Chain Lengths To: ");
         float newL = extractGcodeValue(gcodeLine, 'L', 0);
         float newR = extractGcodeValue(gcodeLine, 'R', 0);
         
         leftAxis.set(newL);
         rightAxis.set(newR);
+        
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
         
         Serial.print("Left: ");
         Serial.print(leftAxis.read());
@@ -784,8 +784,6 @@ void  executeGcodeLine(String gcodeLine){
         Serial.print("Right: ");
         Serial.print(rightAxis.read());
         Serial.println("mm");
-        
-        Serial.println("Message: The machine chains have been manually re-calibrated.");
         
     }
     
@@ -800,6 +798,8 @@ void  executeGcodeLine(String gcodeLine){
         //Manually recalibrate chain lengths
         leftAxis.set(ORIGINCHAINLEN);
         rightAxis.set(ORIGINCHAINLEN);
+        
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
         
         Serial.print("Left: ");
         Serial.print(leftAxis.read());
@@ -824,6 +824,12 @@ void  executeGcodeLine(String gcodeLine){
             singleAxisMove(&leftAxis,  lDist, 500);
             singleAxisMove(&rightAxis, rDist, 500);
         }
+    }
+    
+    if(gcodeLine.substring(0, 3) == "B10"){
+        Serial.print("[Measure: ");
+        Serial.print(leftAxis.read());
+        Serial.println("]");
     }
     
     if((gcodeLine[0] == 'T' || gcodeLine[0] == 't') && gcodeLine[1] != 'e'){

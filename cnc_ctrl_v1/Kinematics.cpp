@@ -187,6 +187,8 @@ void  Kinematics::forward(float chainALength, float chainBLength, float* xPos, f
     float guessLengthA;
     float guessLengthB;
     
+    inverse(xGuess, yGuess, &guessLengthA, &guessLengthB);
+    
     int guessCount = 0;
     
     while(1){
@@ -205,8 +207,20 @@ void  Kinematics::forward(float chainALength, float chainBLength, float* xPos, f
         
         guessCount++;
         
+        Serial.print("[PosError:");
+        Serial.print(aChainError);
+        Serial.print(',');
+        Serial.print(bChainError);
+        Serial.println("]");
+        
         //if we've converged on the point...or it's time to give up, exit the loop
-        if((aChainError < .1 && bChainError < .1) or guessCount > 200){
+        if(abs(aChainError) < .1 && abs(bChainError) < .1){
+            break;
+        }
+        if(guessCount > 200){
+            Serial.println("Message: Unable to find a valid position for the stored chain lengths. It's likely that it is necessary to re-calibrate the chain lengths.");
+            xGuess = 0;
+            yGuess = 0;
             break;
         }
         
