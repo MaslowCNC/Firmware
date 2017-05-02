@@ -390,7 +390,7 @@ int   G1(String readString){
     
     float currentXPos = xTarget;
     float currentYPos = yTarget;
-    //kinematics.forward(leftAxis.target(), rightAxis.target(), &currentXPos, &currentYPos);
+    
     float currentZPos = zAxis.target();
     
     xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
