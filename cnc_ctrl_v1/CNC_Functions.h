@@ -776,6 +776,8 @@ void  executeGcodeLine(String gcodeLine){
         leftAxis.set(newL);
         rightAxis.set(newR);
         
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+        
         Serial.print("Left: ");
         Serial.print(leftAxis.read());
         Serial.println("mm");
