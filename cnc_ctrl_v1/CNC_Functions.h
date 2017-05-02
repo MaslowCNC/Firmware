@@ -664,8 +664,8 @@ void  updateSettings(String readString){
     kinematics.machineWidth = bedWidth;
     kinematics.machineHeight= bedHeight;
     kinematics.recomputeGeometry();
-
-
+    
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
     Serial.println("Machine Settings Updated");
 }
