@@ -731,8 +731,6 @@ void  executeGcodeLine(String gcodeLine){
         Serial.print(rightAxis.read());
         Serial.println("mm");
         
-        Serial.println("Message: The machine chains have been manually re-calibrated.");
-        
         return;
     }
     
