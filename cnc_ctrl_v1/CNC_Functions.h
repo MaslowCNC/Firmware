@@ -294,6 +294,9 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     long numberOfStepsTaken    = 0;
     long  beginingOfLastStep   = millis();
     
+    Serial.print("Starting pos: ");
+    Serial.println(startingPos);
+    
     axis->attach();
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
