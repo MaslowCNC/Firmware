@@ -216,15 +216,16 @@ void  Kinematics::forward(float chainALength, float chainBLength, float* xPos, f
         if((abs(aChainError) < .1 && abs(bChainError) < .1) or guessCount > 200){
             if(guessCount > 200){
                 Serial.println("unable to find position");
+                *xPos = 0;
+                *yPos = 0;
+            }
+            else{
+                *xPos = xGuess;
+                *yPos = yGuess;
             }
             break;
         }
     }
-    
-    
-    
-    *xPos = xGuess;
-    *yPos = yGuess;
 }
 
 void  Kinematics::_MatSolv(){
