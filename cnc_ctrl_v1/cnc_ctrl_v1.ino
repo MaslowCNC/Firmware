@@ -24,6 +24,8 @@ void setup(){
     Serial.println("ready");
     Serial.println("ok");
     
+    Serial.println("Hi Gero! ");
+    
     Timer1.initialize(10000);
     Timer1.attachInterrupt(runsOnATimer);
     
