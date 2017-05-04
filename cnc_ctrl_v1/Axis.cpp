@@ -426,7 +426,6 @@ void   Axis::computeMotorResponse(){
     Serial.print("decided on final value of: ");
     Serial.println(stallPoint);
     
-    
     //compute a model of the motor from the given data points
     float X1 = stallPoint;
     float Y1 = scale*motorSpeed;
@@ -445,9 +444,15 @@ void   Axis::computeMotorResponse(){
     
     
     //Apply the model to the motor
-    motorGearboxEncoder.motor.setSegment(2 , M1, I1,    0,   Y2);
-    motorGearboxEncoder.motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
-    
+    if(abs(stallPoint) == 255){
+        Serial.print("Message: Unable to calibrate ");
+        Serial.print(_axisName);
+        Serial.println(" motor. Please try Test Motors/Encoders");
+    }
+    else{
+        motorGearboxEncoder.motor.setSegment(2 , M1, I1,    0,   Y2);
+        motorGearboxEncoder.motor.setSegment(3 , M2, I2, Y2-1, Y3+1);
+    }
     
     //In the negative direction
     //-----------------------------------------------------------------------------
@@ -484,7 +489,6 @@ void   Axis::computeMotorResponse(){
     
     //At this point motorSpeed is the speed in RPM at the value i which is just above the stall speed
     
-    
     //Compute a model for the motor's behavior using the given data-points
     X1 = stallPoint;
     Y1 = scale*motorSpeed;
@@ -503,8 +507,15 @@ void   Axis::computeMotorResponse(){
     
     
     //Apply the model to the motor
-    motorGearboxEncoder.motor.setSegment(0 , M1, I1,   Y2,    0);
-    motorGearboxEncoder.motor.setSegment(1 , M2, I2, Y3-1, Y2+1);
+     if(abs(stallPoint) == 255){
+        Serial.print("Message: Unable to calibrate ");
+        Serial.print(_axisName);
+        Serial.println(" motor. Please try Test Motors/Encoders");
+    }
+    else{
+        motorGearboxEncoder.motor.setSegment(0 , M1, I1,   Y2,    0);
+        motorGearboxEncoder.motor.setSegment(1 , M2, I2, Y3-1, Y2+1);
+    }
     
     Serial.println("Calibration complete.");
     
