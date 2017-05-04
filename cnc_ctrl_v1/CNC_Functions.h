@@ -92,6 +92,8 @@ void  returnPoz(float x, float y, float z){
     
     if (millis() - lastRan > timeout){
         
+        rightAxis.printStuff();
+        
         Serial.print("<Idle,MPos:");
         Serial.print(x/_inchesToMMConversion);
         Serial.print(",");
