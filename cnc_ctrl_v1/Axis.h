@@ -48,7 +48,6 @@
             void   changeEncoderResolution(int newResolution);
             bool   attached();
             void   wipeEEPROM();
-            void   printStuff();
             
         private:
             int        _PWMread(int pin);

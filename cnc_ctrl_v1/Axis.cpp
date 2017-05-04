@@ -116,20 +116,9 @@ void   Axis::computePID(){
     
     _pidController.Compute();
     
-    
     motorGearboxEncoder.motor.write(_pidOutput);
     
     motorGearboxEncoder.computeSpeed();
-    
-}
-
-void   Axis::printStuff(){
-    
-        Serial.print(_axisName);
-        Serial.println(":");
-        Serial.println(_pidInput);
-        Serial.println(_pidOutput);
-        Serial.println(_pidSetpoint);
     
 }
 
