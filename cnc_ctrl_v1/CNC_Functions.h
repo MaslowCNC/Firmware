@@ -787,16 +787,16 @@ void  executeGcodeLine(String gcodeLine){
         float  speed      = extractGcodeValue(gcodeLine, 'S', 100);
         float  time       = extractGcodeValue(gcodeLine, 'T', 1);
         
-        Serial.println("Speed: ");
-        Serial.println(speed);
-        Serial.println("Time: ");
-        Serial.println(time);
-        
         double ms    = 1000*time;
         double begin = millis();
         
-        while (millis() - begin < time){
-            leftAxis.motorGearboxEncoder.motor.directWrite(60);
+        int i = 0;
+        while (millis() - begin < ms){
+            leftAxis.motorGearboxEncoder.motor.directWrite(speed);
+            if (i % 10000 == 0){
+                Serial.println("pulling");                              //Keep the connection from timing out
+            }
+            i++;
         }
         return;
     }
