@@ -798,6 +798,7 @@ void  executeGcodeLine(String gcodeLine){
             }
             i++;
         }
+        leftAxis.set(leftAxis.read());
         return;
     }
     
