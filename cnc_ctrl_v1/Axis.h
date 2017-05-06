@@ -48,6 +48,7 @@
             void   changeEncoderResolution(int newResolution);
             bool   attached();
             void   wipeEEPROM();
+            MotorGearboxEncoder    motorGearboxEncoder;
             
         private:
             int        _PWMread(int pin);
@@ -72,7 +73,6 @@
             int        _eepromAdr;
             float      _mmPerRotation;
             float      _encoderSteps;
-            MotorGearboxEncoder    motorGearboxEncoder;
             float      _oldSetpoint;
             float      _oldVal;
             bool       _disableAxisForTesting = false;
