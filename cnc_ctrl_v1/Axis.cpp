@@ -314,19 +314,6 @@ int    Axis::_change(float val){
     }
 }
 
-void   Axis::printBoost(){
-    
-    _disableAxisForTesting = true;
-    
-    for(int i = -255; i < 255; i = i+10){
-        Serial.print(i);
-        Serial.print(" -> ");
-        Serial.println(motorGearboxEncoder.motor._convolve(i));
-    }
-     
-    _disableAxisForTesting = false;
-}
-
 void   Axis::test(){
     /*
     Test the axis by directly commanding the motor and observing if the encoder moves

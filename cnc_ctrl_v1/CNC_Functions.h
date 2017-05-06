@@ -775,9 +775,31 @@ void  executeGcodeLine(String gcodeLine){
     }
     
     if(gcodeLine.substring(0, 3) == "B10"){
+        //measure the left axis chain length
         Serial.print("[Measure: ");
         Serial.print(leftAxis.read());
         Serial.println("]");
+        return;
+    }
+    
+    if(gcodeLine.substring(0, 3) == "B11"){
+        //run right motor in the given direction at the given speed for the given time
+        float  speed      = extractGcodeValue(gcodeLine, 'S', 100);
+        float  time       = extractGcodeValue(gcodeLine, 'T', 1);
+        
+        double ms    = 1000*time;
+        double begin = millis();
+        
+        int i = 0;
+        while (millis() - begin < ms){
+            leftAxis.motorGearboxEncoder.motor.directWrite(speed);
+            if (i % 10000 == 0){
+                Serial.println("pulling");                              //Keep the connection from timing out
+            }
+            i++;
+        }
+        leftAxis.set(leftAxis.read());
+        return;
     }
     
     //Handle G-Codes
