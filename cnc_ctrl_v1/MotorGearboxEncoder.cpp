@@ -53,7 +53,8 @@ void  MotorGearboxEncoder::computePID(){
         Serial.println(_currentSpeed);
     }
     
-    motor.write(_targetSpeed);
+    motor.attach();
+    motor.write(50);
 }
 
 float MotorGearboxEncoder::computeSpeed(){
