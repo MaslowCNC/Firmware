@@ -39,9 +39,8 @@ void  MotorGearboxEncoder::write(float speed){
     Command the motor to turn at the given speed. Should be RPM is PWM right now.
     */
     
-    speed = 15.0*speed; //15 is 255 (max pwm) / 17 (max RPM)
+    _targetSpeed = 15.0*speed; //15 is 255 (max pwm) / 17 (max RPM)
     
-    motor.write(speed);
 }
 
 void  MotorGearboxEncoder::computePID(){
@@ -49,6 +48,8 @@ void  MotorGearboxEncoder::computePID(){
     Recompute the speed control PID loop and command the motor to move.
     */
     computeSpeed();
+    
+    motor.write(_targetSpeed);
 }
 
 float MotorGearboxEncoder::computeSpeed(){

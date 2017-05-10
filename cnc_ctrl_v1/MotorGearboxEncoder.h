@@ -31,6 +31,7 @@
             void       write(float speed);
             void       computePID();
         private:
+            float      _targetSpeed;
             double     _lastPosition;
             double     _lastTimeStamp;
             float      _runningAverage(int newValue);
