@@ -31,6 +31,12 @@ encoder(encoderPin1,encoderPin2)
     
     //initialize motor
     motor.setupMotor(pwmPin, directionPin1, directionPin2);
+    motor.write(0);
+    
+    //initialize the PID
+    _pidController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, DIRECT);
+    initializePID();
+    
     
 }
 
@@ -39,8 +45,14 @@ void  MotorGearboxEncoder::write(float speed){
     Command the motor to turn at the given speed. Should be RPM is PWM right now.
     */
     
-    _targetSpeed = 15.0*speed; //15 is 255 (max pwm) / 17 (max RPM)
+    _targetSpeed = speed;
     
+}
+
+void   MotorGearboxEncoder::initializePID(){
+    _pidController.SetMode(AUTOMATIC);
+    _pidController.SetOutputLimits(-255, 255);
+    _pidController.SetSampleTime(10);
 }
 
 void  MotorGearboxEncoder::computePID(){
@@ -49,12 +61,29 @@ void  MotorGearboxEncoder::computePID(){
     */
     _currentSpeed = computeSpeed();
     
-    if(_motorName[0] == 'R'){
-        Serial.println(_currentSpeed);
+    /*if (millis() < 8000){
+        _targetSpeed = 0;
     }
+    else if (millis() < 12000){
+        _targetSpeed = 10;
+    }
+    else if (millis() < 18000){
+         _targetSpeed = 0;
+    }
+    else{
+        _targetSpeed = -10;
+    }*/
     
-    motor.attach();
-    motor.write(50);
+    _pidController.Compute();
+    
+    /*if(_motorName[0] == 'R'){
+        Serial.print(_currentSpeed);
+        Serial.print(" ");
+        Serial.println(_targetSpeed);
+    }*/
+    
+    //motor.attach();
+    motor.write(_pidOutput);
 }
 
 float MotorGearboxEncoder::computeSpeed(){
@@ -73,7 +102,7 @@ float MotorGearboxEncoder::computeSpeed(){
     _lastTimeStamp = micros();
     _lastPosition  = encoder.read();
     
-    return RPM;
+    return -1.0*RPM;
 }
 
 float MotorGearboxEncoder::_runningAverage(int newValue){
