@@ -72,7 +72,7 @@ void Motor::write(int speed){
     if (_attachedState == 1){
         
         //linearize the motor
-        speed = _convolve(speed);
+        //speed = _convolve(speed);
         
         //set direction range is 0-180
         if (speed > 0){

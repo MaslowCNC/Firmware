@@ -21,6 +21,7 @@
     #include "Arduino.h"
     #include "Encoder.h"
     #include "Motor.h"
+    #include "PID_v1.h"
     
     class MotorGearboxEncoder{
         public:
@@ -31,13 +32,17 @@
             void       write(float speed);
             void       computePID();
             void       setName(String newName);
+            void       initializePID();
         private:
-            float      _targetSpeed;
-            float      _currentSpeed;
+            double     _targetSpeed;
+            double     _currentSpeed;
             double     _lastPosition;
             double     _lastTimeStamp;
             float      _runningAverage(int newValue);
             String     _motorName;
+            double     _pidOutput;
+            double     _Kp=43, _Ki=.4, _Kd=3;
+            PID        _pidController;
             int        _oldValue1;
             int        _oldValue2;
             int        _oldValue3;
