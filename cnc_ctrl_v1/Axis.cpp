@@ -116,7 +116,7 @@ void   Axis::computePID(){
     
     _pidController.Compute();
     
-    motorGearboxEncoder.motor.write(_pidOutput);
+    motorGearboxEncoder.write(_pidOutput);
     
     motorGearboxEncoder.computeSpeed();
     

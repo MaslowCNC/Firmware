@@ -34,6 +34,13 @@ encoder(encoderPin1,encoderPin2)
     
 }
 
+void  MotorGearboxEncoder::write(int speed){
+    /*
+    Command the motor to turn at the given speed. Should be RPM is PWM right now.
+    */
+    motor.write(speed);
+}
+
 float MotorGearboxEncoder::computeSpeed(){
     /*
     
