@@ -30,11 +30,14 @@
             float      computeSpeed();
             void       write(float speed);
             void       computePID();
+            void       setName(String newName);
         private:
             float      _targetSpeed;
+            float      _currentSpeed;
             double     _lastPosition;
             double     _lastTimeStamp;
             float      _runningAverage(int newValue);
+            String     _motorName;
             int        _oldValue1;
             int        _oldValue2;
             int        _oldValue3;

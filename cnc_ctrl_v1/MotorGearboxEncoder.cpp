@@ -47,7 +47,11 @@ void  MotorGearboxEncoder::computePID(){
     /*
     Recompute the speed control PID loop and command the motor to move.
     */
-    computeSpeed();
+    _currentSpeed = computeSpeed();
+    
+    if(_motorName[0] == 'R'){
+        Serial.println(_currentSpeed);
+    }
     
     motor.write(_targetSpeed);
 }
@@ -93,4 +97,11 @@ float MotorGearboxEncoder::_runningAverage(int newValue){
     _oldValue1 = newValue;
     
     return runningAverage;
+}
+
+void MotorGearboxEncoder::setName(String newName){
+    /*
+    Set the name for the object
+    */
+    _motorName = newName;
 }
