@@ -53,7 +53,7 @@ motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPi
 
 void   Axis::initializePID(){
     _pidController.SetMode(AUTOMATIC);
-    _pidController.SetOutputLimits(-255, 255);
+    _pidController.SetOutputLimits(-17, 17);
     _pidController.SetSampleTime(10);
 }
 

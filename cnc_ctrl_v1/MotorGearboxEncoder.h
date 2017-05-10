@@ -28,7 +28,7 @@
             Encoder    encoder;
             Motor      motor;
             float      computeSpeed();
-            void       write(int speed);
+            void       write(float speed);
         private:
             double     _lastPosition;
             double     _lastTimeStamp;
