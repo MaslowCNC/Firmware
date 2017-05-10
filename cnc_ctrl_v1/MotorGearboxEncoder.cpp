@@ -44,6 +44,13 @@ void  MotorGearboxEncoder::write(float speed){
     motor.write(speed);
 }
 
+void  MotorGearboxEncoder::computePID(){
+    /*
+    Recompute the speed control PID loop and command the motor to move.
+    */
+    computeSpeed();
+}
+
 float MotorGearboxEncoder::computeSpeed(){
     /*
     

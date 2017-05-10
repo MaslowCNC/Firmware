@@ -29,6 +29,7 @@
             Motor      motor;
             float      computeSpeed();
             void       write(float speed);
+            void       computePID();
         private:
             double     _lastPosition;
             double     _lastTimeStamp;

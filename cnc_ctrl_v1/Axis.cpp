@@ -118,7 +118,7 @@ void   Axis::computePID(){
     
     motorGearboxEncoder.write(_pidOutput);
     
-    motorGearboxEncoder.computeSpeed();
+    motorGearboxEncoder.computePID();
     
 }
 
