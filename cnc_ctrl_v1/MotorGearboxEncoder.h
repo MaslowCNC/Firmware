@@ -41,7 +41,7 @@
             float      _runningAverage(int newValue);
             String     _motorName;
             double     _pidOutput;
-            double     _Kp=43, _Ki=.4, _Kd=3;
+            double     _Kp=20, _Ki=1, _Kd=0;
             PID        _pidController;
             int        _oldValue1;
             int        _oldValue2;

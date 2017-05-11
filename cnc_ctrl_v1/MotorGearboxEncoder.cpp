@@ -61,7 +61,7 @@ void  MotorGearboxEncoder::computePID(){
     */
     _currentSpeed = computeSpeed();
     
-    /*if (millis() < 8000){
+    if (millis() < 8000){
         _targetSpeed = 0;
     }
     else if (millis() < 12000){
@@ -72,17 +72,18 @@ void  MotorGearboxEncoder::computePID(){
     }
     else{
         _targetSpeed = -10;
-    }*/
+    }
+    
     
     _pidController.Compute();
     
-    /*if(_motorName[0] == 'R'){
+    if(_motorName[0] == 'R'){
         Serial.print(_currentSpeed);
         Serial.print(" ");
-        Serial.println(_targetSpeed);
-    }*/
+        Serial.println(_pidOutput/15);
+    }
     
-    //motor.attach();
+    motor.attach();
     motor.write(_pidOutput);
 }
 
@@ -93,6 +94,7 @@ float MotorGearboxEncoder::computeSpeed(){
     
     */
     double timeElapsed =  micros() - _lastTimeStamp;
+    
     float    distMoved   =  _runningAverage(encoder.read() - _lastPosition);     //because of quantization noise it helps to average these
     
     //Compute the speed in RPM
