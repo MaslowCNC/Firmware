@@ -30,8 +30,8 @@ void setup(){
     Serial.println("Grbl v1.00");
     
     
-    /*
-    int i = 0;
+    
+    /*int i = 0;
     String testGcode = "G20 \nG1 X-1 Y-1 F25 \nG1 X1 \nG3 Y2 J1.5\nG1 X-1 \nG1 Y-1\nG1 X0 Y0G20 \nG1 X-1 Y-1 F25 \nG1 X1 \nG3 Y2 J1.5\nG1 X-1 \nG1 Y-1\nG1 X0 Y0";
     
     Serial.println(testGcode.length());
