@@ -29,6 +29,19 @@ void setup(){
     
     Serial.println("Grbl v1.00");
     
+    
+    Serial.println("before");
+    int i;
+    String testGcode = "this is my test gcode\nand more";
+    
+    Serial.println(testGcode.length());
+    while (i < testGcode.length()){
+        Serial.println("loop");
+        Serial.println(testGcode[i]);
+        i++;
+    }
+    Serial.println("after");
+    
 }
 
 void runsOnATimer(){
