@@ -34,7 +34,8 @@ encoder(encoderPin1,encoderPin2)
     motor.write(0);
     
     //initialize the PID
-    _pidController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, DIRECT);
+    _posPIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, DIRECT);
+    _negPIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, DIRECT);
     initializePID();
     
     
@@ -50,9 +51,15 @@ void  MotorGearboxEncoder::write(float speed){
 }
 
 void   MotorGearboxEncoder::initializePID(){
-    _pidController.SetMode(AUTOMATIC);
-    _pidController.SetOutputLimits(-255, 255);
-    _pidController.SetSampleTime(10);
+    //setup positive PID controller
+    _posPIDController.SetMode(AUTOMATIC);
+    _posPIDController.SetOutputLimits(-255, 255);
+    _posPIDController.SetSampleTime(10);
+    
+    //setup negative PID controller
+    _negPIDController.SetMode(AUTOMATIC);
+    _negPIDController.SetOutputLimits(-255, 255);
+    _negPIDController.SetSampleTime(10);
 }
 
 void  MotorGearboxEncoder::computePID(){
@@ -78,7 +85,12 @@ void  MotorGearboxEncoder::computePID(){
     }
     
     
-    _pidController.Compute();
+    if(_targetSpeed > 0){
+        _posPIDController.Compute();
+    }
+    else{
+        _negPIDController.Compute();
+    }
     
     if(_motorName[0] == 'R'){
         Serial.print(_currentSpeed);
