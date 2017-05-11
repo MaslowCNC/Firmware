@@ -95,7 +95,7 @@ void   Axis::computePID(){
         return;
     }
     
-    if (_change(_sign(_oldSetpoint - _pidSetpoint))){ //this determines if the axis has changed direction of movement and flushes the acumulator in the PID if it has
+    if (_change(_sign(_oldSetpoint - _pidSetpoint))){ //this determines if the axis has changed direction of movement and flushes the accumulator in the PID if it has
         _pidController.FlipIntegrator();
     }
     _oldSetpoint = _pidSetpoint;

@@ -70,6 +70,9 @@ void  MotorGearboxEncoder::computePID(){
     else if (millis() < 18000){
          _targetSpeed = 0;
     }
+    else if(millis() < 24000){
+        _targetSpeed = float((millis() - 18000))/400.0;
+    }
     else{
         _targetSpeed = -10;
     }
@@ -80,7 +83,7 @@ void  MotorGearboxEncoder::computePID(){
     if(_motorName[0] == 'R'){
         Serial.print(_currentSpeed);
         Serial.print(" ");
-        Serial.println(_pidOutput/15);
+        Serial.println(_targetSpeed);
     }
     
     motor.attach();
