@@ -93,7 +93,7 @@ void  returnPoz(float x, float y, float z){
     if (millis() - lastRan > timeout){
         
         
-        Serial.print("<Idle,MPos:");
+        /*Serial.print("<Idle,MPos:");
         Serial.print(x/_inchesToMMConversion);
         Serial.print(",");
         Serial.print(y/_inchesToMMConversion);
@@ -105,7 +105,7 @@ void  returnPoz(float x, float y, float z){
         Serial.print(leftAxis.error());
         Serial.print(',');
         Serial.print(rightAxis.error());
-        Serial.println("]");
+        Serial.println("]");*/
         
         lastRan = millis();
     }
@@ -191,6 +191,17 @@ float calculateDelay(float stepSizeMM, float feedrateMMPerMin){
     return msPerStep;
 }
 
+float computeStepSize(float MMPerMin){
+    /*
+    
+    Determines the minimum step size which can be taken for the given feed-rate
+    and still have there be enough time for the kinematics to run
+    
+    */
+    
+    return .0003149*MMPerMin; //value found empirically 
+}
+
 int   cordinatedMove(float xEnd, float yEnd, float MMPerMin){
     
 /*The move() function moves the tool in a straight line to the position (xEnd, yEnd) at 
@@ -200,7 +211,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     
     float  xStartingLocation = xTarget;
     float  yStartingLocation = yTarget;
-    float  stepSizeMM         = .1;
+    float  stepSizeMM         = computeStepSize(MMPerMin);
     
     //find the total distances to move
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
@@ -222,11 +233,14 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     float bChainLength;
     long   numberOfStepsTaken         =  0;
     long  beginingOfLastStep          = millis();
+    int i = 0;
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
         //if enough time has passed to take the next step
         if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
-            
+            Serial.println(i);
+            Serial.println(stepSizeMM);
+            i = 0;
             //reset the counter 
             beginingOfLastStep          = millis();
             
@@ -266,6 +280,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
             }
             
         }
+        else{i++;}
     }
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
@@ -479,7 +494,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     //set up variables for movement
     int numberOfStepsTaken       =  0;
     
-    float stepSizeMM             =  .2;
+    float stepSizeMM             =  computeStepSize(MMPerMin);
     int   finalNumberOfSteps     =  arcLengthMM/stepSizeMM;
     float stepSizeRadians        =  theta/finalNumberOfSteps;
     
