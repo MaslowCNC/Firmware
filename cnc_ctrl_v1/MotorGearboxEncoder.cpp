@@ -80,6 +80,27 @@ void  MotorGearboxEncoder::computePID(){
     else if(millis() < 24000){
         _targetSpeed = float((millis() - 18000))/400.0;
     }
+    else if (millis() < 32000){
+        _targetSpeed = 0;
+    }
+    else if (millis() < 40000){
+        _targetSpeed = 10;
+    }
+    else if (millis() < 48000){
+        _targetSpeed = 0;
+    }
+    else if (millis() < 56000){
+        _targetSpeed = -10;
+    }
+    else if (millis() < 64000){
+        _targetSpeed = 0;
+    }
+    else if (millis() < 72000){
+        _targetSpeed = 10;
+    }
+    else if (millis() < 80000){
+        _targetSpeed = 0;
+    }
     else{
         _targetSpeed = -10;
     }
