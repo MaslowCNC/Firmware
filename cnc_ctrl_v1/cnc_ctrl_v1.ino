@@ -31,13 +31,12 @@ void setup(){
     
     
     Serial.println("before");
-    int i;
+    int i = 0;
     String testGcode = "this is my test gcode\nand more";
     
     Serial.println(testGcode.length());
     while (i < testGcode.length()){
-        Serial.println("loop");
-        Serial.println(testGcode[i]);
+        Serial.print(testGcode[i]);
         i++;
     }
     Serial.println("after");
