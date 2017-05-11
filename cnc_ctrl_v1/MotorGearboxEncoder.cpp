@@ -68,7 +68,7 @@ void  MotorGearboxEncoder::computePID(){
     */
     _currentSpeed = computeSpeed();
     
-    if (millis() < 8000){
+    /*if (millis() < 8000){
         _targetSpeed = 0;
     }
     else if (millis() < 12000){
@@ -102,8 +102,8 @@ void  MotorGearboxEncoder::computePID(){
         _targetSpeed = 0;
     }
     else{
-        _targetSpeed = -10;
-    }
+        _targetSpeed = 0;
+    }*/
     
     
     if(_targetSpeed > 0){
@@ -113,13 +113,13 @@ void  MotorGearboxEncoder::computePID(){
         _negPIDController.Compute();
     }
     
-    if(_motorName[0] == 'R'){
-        Serial.print(_currentSpeed);
-        Serial.print(" ");
+    /*if(_motorName[0] == 'R'){
+        //Serial.print(_currentSpeed);
+        //Serial.print(" ");
         Serial.println(_targetSpeed);
-    }
+    }*/
     
-    motor.attach();
+    //motor.attach();
     motor.write(_pidOutput);
 }
 
