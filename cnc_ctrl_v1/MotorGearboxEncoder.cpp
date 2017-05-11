@@ -113,11 +113,11 @@ void  MotorGearboxEncoder::computePID(){
         _negPIDController.Compute();
     }
     
-    if(_motorName[0] == 'R'){
+    /*if(_motorName[0] == 'R'){
         //Serial.print(_currentSpeed);
         //Serial.print(" ");
         Serial.println(_targetSpeed);
-    }
+    }*/
     
     //motor.attach();
     motor.write(_pidOutput);

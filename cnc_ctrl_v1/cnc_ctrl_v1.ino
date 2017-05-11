@@ -32,11 +32,11 @@ void setup(){
     
     Serial.println("before");
     int i = 0;
-    String testGcode = "this is my test gcode\nand more";
+    String testGcode = "G01 X100 F500 \nG01 X-100 \n G00 X0 Y0 ";
     
     Serial.println(testGcode.length());
     while (i < testGcode.length()){
-        Serial.print(testGcode[i]);
+        ringBuffer.write(testGcode[i]);
         i++;
     }
     Serial.println("after");

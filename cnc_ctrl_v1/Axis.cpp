@@ -100,7 +100,7 @@ void   Axis::computePID(){
     }
     _oldSetpoint = _pidSetpoint;
     
-    //antiWindup code
+    /*//antiWindup code
     if (abs(_pidOutput) > 20){ //if the actuator is saturated
         _pidController.SetTunings(_Kp, _KiFar, _Kd); //disable the integration term
     }
@@ -112,13 +112,19 @@ void   Axis::computePID(){
         if (abs(_pidInput - _pidSetpoint) < .06){
             _pidController.SetTunings(_Kp, _KiMid, _Kd);
         }
-    }
+    }*/
     
     _pidInput      =  motorGearboxEncoder.encoder.read()/_encoderSteps;
     
     _pidController.Compute();
     
     motorGearboxEncoder.write(_pidOutput);
+    
+    if(_axisName[0] == 'R'){
+        Serial.print(_pidSetpoint*10.0);
+        Serial.print(" ");
+        Serial.println(_pidInput*10.0);
+    }
     
     motorGearboxEncoder.computePID();
     
