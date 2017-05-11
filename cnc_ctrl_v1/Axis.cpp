@@ -31,7 +31,7 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, in
 motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2)
 {
     
-    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _KiFar, _Kd, REVERSE);
+    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _Ki, _Kd, REVERSE);
     
     //initialize variables
     _direction    = FORWARD;
@@ -49,11 +49,13 @@ motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPi
     _readAllLinSegs(_eepromAdr);
     
     initializePID();
+    
+    motorGearboxEncoder.setName(_axisName);
 }
 
 void   Axis::initializePID(){
     _pidController.SetMode(AUTOMATIC);
-    _pidController.SetOutputLimits(-255, 255);
+    _pidController.SetOutputLimits(-17, 17);
     _pidController.SetSampleTime(10);
 }
 
@@ -93,32 +95,25 @@ void   Axis::computePID(){
         return;
     }
     
-    if (_change(_sign(_oldSetpoint - _pidSetpoint))){ //this determines if the axis has changed direction of movement and flushes the acumulator in the PID if it has
+    if (_detectDirectionChange(_pidSetpoint)){ //this determines if the axis has changed direction of movement and flushes the accumulator in the PID if it has
         _pidController.FlipIntegrator();
-    }
-    _oldSetpoint = _pidSetpoint;
-    
-    //antiWindup code
-    if (abs(_pidOutput) > 20){ //if the actuator is saturated
-        _pidController.SetTunings(_Kp, _KiFar, _Kd); //disable the integration term
-    }
-    else{
-        if (abs(_pidInput - _pidSetpoint) < .02){
-            //This second check catches the corner case where the setpoint has just jumped, but compute has not been run yet
-            _pidController.SetTunings(_Kp, _KiClose, _Kd);
-        }
-        if (abs(_pidInput - _pidSetpoint) < .06){
-            _pidController.SetTunings(_Kp, _KiMid, _Kd);
-        }
     }
     
     _pidInput      =  motorGearboxEncoder.encoder.read()/_encoderSteps;
     
     _pidController.Compute();
     
-    motorGearboxEncoder.motor.write(_pidOutput);
+    motorGearboxEncoder.write(_pidOutput);
     
-    motorGearboxEncoder.computeSpeed();
+    /*if(_axisName[0] == 'R'){
+        Serial.print(_pidSetpoint*10.0);
+        Serial.print(" ");
+        Serial.print(_pidInput*10.0);
+        Serial.print(" ");
+        Serial.println((_pidSetpoint*10.0) + _pidOutput/30.0);
+    }*/
+    
+    motorGearboxEncoder.computePID();
     
 }
 
@@ -297,22 +292,33 @@ void   Axis::wipeEEPROM(){
     Serial.println(" EEPROM erased");
 }
 
-int    Axis::_sign(float val){
-    if (val < 0) return -1;
-    if (val==0) return 0;
-    return 1;
-}
-
-int    Axis::_change(float val){
-    if (val != _oldVal){
-        _oldVal = val;
-        return true;
+int    Axis::_detectDirectionChange(float _pidSetpoint){
+    
+    float difference = _pidSetpoint - _oldSetpoint;
+    
+    if(difference == 0){
+        return 0;
+    }
+    
+    int direction;
+    if(difference > 0){
+        direction = 1;
     }
     else{
-        _oldVal = val;
-        return false;
+        direction = 0;
     }
+    
+    int retVal = 0;
+    if(direction != _oldDir){
+        retVal = 1;
+    }
+    
+    _oldSetpoint = _pidSetpoint;
+    _oldDir = direction;
+    
+    return retVal;
 }
+
 
 void   Axis::test(){
     /*

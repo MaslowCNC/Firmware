@@ -130,7 +130,7 @@ void RingBuffer::_incrementBeginning(){
     if (_beginningOfString == _endOfString){
         return;                             //don't allow the beginning to pass the end
     }
-    else if (_beginningOfString < 127){
+    else if (_beginningOfString < BUFFERSIZE){
         _beginningOfString++;                //move the beginning up one
     }
     else{
@@ -148,7 +148,7 @@ void RingBuffer::_incrementEnd(){
         Serial.println("buffer overflow");
         return;
     }
-    else if (_endOfString < 127){
+    else if (_endOfString < BUFFERSIZE){
         _endOfString++;
     }
     else{
