@@ -32,7 +32,7 @@ void setup(){
     
     Serial.println("before");
     int i = 0;
-    String testGcode = "G01 X20 F500 \nG01 X-20 \n G00 X0 Y0 \nG01 X20 F500 \nG01 X-20 \n G00 X0 Y0";
+    String testGcode = "G01X50F500\nG01X-50\nG00X0Y0\nG01X50F500\nG01X-50\nG01Y50\nG01Y-50\nG01X0Y0\nG01X-50\nG01X0Y0 ";
     
     Serial.println(testGcode.length());
     while (i < testGcode.length()){

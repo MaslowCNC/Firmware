@@ -125,7 +125,7 @@ void   Axis::computePID(){
         Serial.print(" ");
         Serial.print(_pidInput*10.0);
         Serial.print(" ");
-        Serial.println((_pidSetpoint*10.0) + _pidOutput/20.0);
+        Serial.println((_pidSetpoint*10.0) + _pidOutput/30.0);
     }
     
     motorGearboxEncoder.computePID();
