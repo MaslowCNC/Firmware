@@ -17,7 +17,7 @@
 #include "TimerOne.h"
 
 void setup(){
-    Serial.begin(115200);
+    Serial.begin(19200);
     
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     

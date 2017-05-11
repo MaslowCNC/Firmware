@@ -31,7 +31,7 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, in
 motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2)
 {
     
-    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _KiFar, _Kd, REVERSE);
+    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _Ki, _Kd, REVERSE);
     
     //initialize variables
     _direction    = FORWARD;
@@ -98,21 +98,6 @@ void   Axis::computePID(){
     if (_detectDirectionChange(_pidSetpoint)){ //this determines if the axis has changed direction of movement and flushes the accumulator in the PID if it has
         _pidController.FlipIntegrator();
     }
-    
-    
-    /*//antiWindup code
-    if (abs(_pidOutput) > 20){ //if the actuator is saturated
-        _pidController.SetTunings(_Kp, _KiFar, _Kd); //disable the integration term
-    }
-    else{
-        if (abs(_pidInput - _pidSetpoint) < .02){
-            //This second check catches the corner case where the setpoint has just jumped, but compute has not been run yet
-            _pidController.SetTunings(_Kp, _KiClose, _Kd);
-        }
-        if (abs(_pidInput - _pidSetpoint) < .06){
-            _pidController.SetTunings(_Kp, _KiMid, _Kd);
-        }
-    }*/
     
     _pidInput      =  motorGearboxEncoder.encoder.read()/_encoderSteps;
     
