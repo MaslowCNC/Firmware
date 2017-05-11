@@ -95,10 +95,10 @@ void   Axis::computePID(){
         return;
     }
     
-    if (_change(_sign(_oldSetpoint - _pidSetpoint))){ //this determines if the axis has changed direction of movement and flushes the accumulator in the PID if it has
+    if (_detectDirectionChange(_pidSetpoint)){ //this determines if the axis has changed direction of movement and flushes the accumulator in the PID if it has
         _pidController.FlipIntegrator();
     }
-    _oldSetpoint = _pidSetpoint;
+    
     
     /*//antiWindup code
     if (abs(_pidOutput) > 20){ //if the actuator is saturated
@@ -305,22 +305,33 @@ void   Axis::wipeEEPROM(){
     Serial.println(" EEPROM erased");
 }
 
-int    Axis::_sign(float val){
-    if (val < 0) return -1;
-    if (val==0) return 0;
-    return 1;
-}
-
-int    Axis::_change(float val){
-    if (val != _oldVal){
-        _oldVal = val;
-        return true;
+int    Axis::_detectDirectionChange(float _pidSetpoint){
+    
+    float difference = _pidSetpoint - _oldSetpoint;
+    
+    if(difference == 0){
+        return 0;
+    }
+    
+    int direction;
+    if(difference > 0){
+        direction = 1;
     }
     else{
-        _oldVal = val;
-        return false;
+        direction = 0;
     }
+    
+    int retVal = 0;
+    if(direction != _oldDir){
+        retVal = 1;
+    }
+    
+    _oldSetpoint = _pidSetpoint;
+    _oldDir = direction;
+    
+    return retVal;
 }
+
 
 void   Axis::test(){
     /*

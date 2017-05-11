@@ -53,8 +53,7 @@
             int        _PWMread(int pin);
             void       _writeFloat(unsigned int addr, float x);
             float      _readFloat(unsigned int addr);
-            int        _sign(float val);
-            int        _change(float val);
+            int        _detectDirectionChange(float _pidSetpoint);
             void       _writeLinSeg(unsigned int addr, LinSegment linSeg);
             void       _writeAllLinSegs(unsigned int addr);
             LinSegment _readLinSeg(unsigned int addr);
@@ -73,7 +72,7 @@
             float      _mmPerRotation;
             float      _encoderSteps;
             float      _oldSetpoint;
-            float      _oldVal;
+            float      _oldDir;
             bool       _disableAxisForTesting = false;
             float      _speedSinceLastCall();
     };

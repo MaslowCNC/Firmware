@@ -197,7 +197,7 @@ void PID::FlushIntegrator(){
 }
 
 void PID::FlipIntegrator(){
-    ITerm = -.5*ITerm;
+    ITerm = -.7*ITerm;
 }
 
 /* Status Funcions*************************************************************
