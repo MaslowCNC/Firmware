@@ -30,16 +30,15 @@ void setup(){
     Serial.println("Grbl v1.00");
     
     
-    Serial.println("before");
+    /*
     int i = 0;
-    String testGcode = "G01X50F500\nG01X-50\nG00X0Y0\nG01X50F500\nG01X-50\nG01Y50\nG01Y-50\nG01X0Y0\nG01X-50\nG01X0Y0 ";
+    String testGcode = "G20 \nG1 X-1 Y-1 F25 \nG1 X1 \nG3 Y2 J1.5\nG1 X-1 \nG1 Y-1\nG1 X0 Y0G20 \nG1 X-1 Y-1 F25 \nG1 X1 \nG3 Y2 J1.5\nG1 X-1 \nG1 Y-1\nG1 X0 Y0";
     
     Serial.println(testGcode.length());
     while (i < testGcode.length()){
         ringBuffer.write(testGcode[i]);
         i++;
-    }
-    Serial.println("after");
+    }*/
     
 }
 
