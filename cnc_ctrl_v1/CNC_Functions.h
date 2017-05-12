@@ -105,6 +105,8 @@ void  returnPoz(float x, float y, float z){
         Serial.print(leftAxis.error());
         Serial.print(',');
         Serial.print(rightAxis.error());
+        Serial.print(',');
+        Serial.print(ringBuffer.size());
         Serial.println("]");
         
         lastRan = millis();
