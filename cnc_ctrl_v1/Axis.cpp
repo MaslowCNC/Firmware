@@ -105,13 +105,13 @@ void   Axis::computePID(){
     
     motorGearboxEncoder.write(_pidOutput);
     
-    /*if(_axisName[0] == 'R'){
+    if(_axisName[0] == 'R'){
         Serial.print(_pidSetpoint*10.0);
         Serial.print(" ");
         Serial.print(_pidInput*10.0);
         Serial.print(" ");
         Serial.println((_pidSetpoint*10.0) + _pidOutput/30.0);
-    }*/
+    }
     
     motorGearboxEncoder.computePID();
     
