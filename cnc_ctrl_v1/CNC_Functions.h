@@ -93,7 +93,7 @@ void  returnPoz(float x, float y, float z){
     if (millis() - lastRan > timeout){
         
         
-        /*Serial.print("<Idle,MPos:");
+        Serial.print("<Idle,MPos:");
         Serial.print(x/_inchesToMMConversion);
         Serial.print(",");
         Serial.print(y/_inchesToMMConversion);
@@ -107,7 +107,7 @@ void  returnPoz(float x, float y, float z){
         Serial.print(rightAxis.error());
         Serial.print(',');
         Serial.print(ringBuffer.spaceAvailable());
-        Serial.println("]");*/
+        Serial.println("]");
         
         lastRan = millis();
     }
@@ -468,7 +468,7 @@ int   G1(String readString){
     }
     else{
         //if this is a rapid move
-        cordinatedMove(xgoto, ygoto, 1200); //move the same as a regular move, but go fast
+        cordinatedMove(xgoto, ygoto, 1000); //move the same as a regular move, but go fast
     }
 }
 
