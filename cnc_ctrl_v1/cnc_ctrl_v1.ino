@@ -32,7 +32,7 @@ void setup(){
     
     
     /*int i = 0;
-    String testGcode = "G20 \nG1 X-1 Y-1 F25 \nG1 X1 \nG3 Y2 J1.5\nG1 X-1 \nG1 Y-1\nG1 X0 Y0G20 \nG1 X-1 Y-1 F25 \nG1 X1 \nG3 Y2 J1.5\nG1 X-1 \nG1 Y-1\nG1 X0 Y0";
+    String testGcode = "G20 \nG1X-1 Y-1 F25 \nG1 X1 \nG3 Y2 J1.5\nG1 X-1 \nG1 Y-1\nG1 X0 Y0\nG0 X-10 Y-10\nG1 X-1 Y-1 F25 \nG1 X1 \nG3 Y2 J1.5\nG1 X-1";
     
     Serial.println(testGcode.length());
     while (i < testGcode.length()){

@@ -468,7 +468,7 @@ int   G1(String readString){
     }
     else{
         //if this is a rapid move
-        cordinatedMove(xgoto, ygoto, 1200); //move the same as a regular move, but go fast
+        cordinatedMove(xgoto, ygoto, 1000); //move the same as a regular move, but go fast
     }
 }
 
