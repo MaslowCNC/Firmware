@@ -173,3 +173,13 @@ int  RingBuffer::size(){
         return (BUFFERSIZE - _beginningOfString) + _endOfString;
     }
 }
+
+int RingBuffer::spaceAvailable(){
+    /*
+    
+    Returns the number of character spaces available in the buffer
+    
+    */
+    
+    return (BUFFERSIZE - 1) - size();
+}
