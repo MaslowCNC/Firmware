@@ -141,6 +141,7 @@ void  _watchDog(){
             
             if (ringBuffer.size() > 0){                  //if there is stuff sitting in the buffer, run it
                 ringBuffer.write('\n');
+                Serial.println("watch dog catch");
             }
             else{
                 _signalReady();                          //request new code
