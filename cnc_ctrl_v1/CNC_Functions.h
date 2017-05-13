@@ -68,7 +68,7 @@ Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Z-Axis",         Z_EEPROM_A
 Kinematics kinematics;
 RingBuffer ringBuffer;
 
-float feedrate              =  125;
+float feedrate              =  500;
 float _inchesToMMConversion =  1;
 bool  useRelativeUnits      =  false;
 bool  stopFlag              =  false;
