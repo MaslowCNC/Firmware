@@ -71,12 +71,12 @@ String RingBuffer::readLine(){
     
     bool lineDetected = false;
     
-    int  i = 0;
-    while (i < BUFFERSIZE){                     //This will always run 128 times even if the buffer isn't full which is a waste
+    int  i = _beginningOfString;
+    while (i !=  _endOfString){                  // if we haven't gotten to the end of the buffer yet
         if(_buffer[i] == '\n'){                  //Check to see if the buffer contains a complete line terminated with \n
             lineDetected = true;
         }
-        i++;
+        _incrementVariable(&i);
     }
     
     if(lineDetected){
@@ -153,6 +153,21 @@ void RingBuffer::_incrementEnd(){
     }
     else{
         _endOfString = 0;
+    }
+}
+
+void RingBuffer::_incrementVariable(int* variable){
+    /*
+    
+    Increment the target variable.
+    
+    */
+    
+    if (*variable < BUFFERSIZE){
+        *variable = *variable + 1;                //move the variable up one
+    }
+    else{
+        *variable = 0;              //wrap back to zero
     }
 }
 
