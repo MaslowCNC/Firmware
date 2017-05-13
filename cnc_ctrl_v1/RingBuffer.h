@@ -20,7 +20,7 @@
     
     #include "Arduino.h"
     
-    #define BUFFERSIZE 128
+    #define BUFFERSIZE 256
 
     class RingBuffer{
         public:
