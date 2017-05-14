@@ -198,3 +198,12 @@ int RingBuffer::spaceAvailable(){
     
     return (BUFFERSIZE - 1) - size();
 }
+
+void RingBuffer::empty(){
+    /*
+    Empty the contents of the ring buffer
+    */
+    
+    _beginningOfString = 0;
+    _endOfString       = 0;
+}

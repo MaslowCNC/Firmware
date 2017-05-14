@@ -174,6 +174,7 @@ bool checkForStopCommand(){
     if(stopFlag){
         readString = "";
         readyCommandString = "";
+        ringBuffer.empty();
         stopFlag = false;
         return 1;
     }
