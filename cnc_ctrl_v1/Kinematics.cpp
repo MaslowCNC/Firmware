@@ -210,6 +210,8 @@ void  Kinematics::forward(float chainALength, float chainBLength, float* xPos, f
         Serial.print(aChainError);
         Serial.print(',');
         Serial.print(bChainError);
+        Serial.print(',');
+        Serial.print('0');
         Serial.println("]");
         
         //if we've converged on the point...or it's time to give up, exit the loop
