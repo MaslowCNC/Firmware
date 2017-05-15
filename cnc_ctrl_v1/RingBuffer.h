@@ -30,6 +30,7 @@
             char  read();
             int   size();
             int   spaceAvailable();
+            void  empty();
             String readLine();
             
         private:
