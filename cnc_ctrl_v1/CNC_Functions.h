@@ -60,6 +60,12 @@ bool zAxisAttached = false;
 #define ENCODERSTEPS   8148.0
 #define ZENCODERSTEPS  7560.0 //7*270*4 --- 7ppr, 270:1 gear ratio, quadrature encoding
 
+#define AUX1 17
+#define AUX2 16
+#define AUX3 15
+#define AUX4 14
+#define Probe AUX4 // use this input for zeroing zAxis with G38.2 gcode
+
 Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "Left-axis",   LEFT_EEPROM_ADR, DISTPERROT, ENCODERSTEPS);
 Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, "Right-axis", RIGHT_EEPROM_ADR, DISTPERROT, ENCODERSTEPS);
 Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Z-Axis",         Z_EEPROM_ADR, ZDISTPERROT, ZENCODERSTEPS);
@@ -179,6 +185,18 @@ bool checkForStopCommand(){
         return 1;
     }
     return 0;
+}
+
+bool checkForProbeTouch(int probePin) {
+  /*
+      Check to see if AUX4 has gone LOW
+  */
+  if (digitalRead(probePin) == LOW) {
+    readString = "";
+    readyCommandString = "";
+    return 1;
+  }
+  return 0;
 }
 
 float calculateDelay(float stepSizeMM, float feedrateMMPerMin){
@@ -595,6 +613,131 @@ void  G10(String readString){
     zAxis.attach();
 }
 
+void  G38(String readString) {
+  //if the zaxis is attached
+  if (zAxisAttached) {
+    /*
+       The G38() function handles the G38 gcode which zeros the machine's z axis.
+       Currently ignores X and Y options
+    */
+    if (readString.substring(3, 5) == ".2") {
+      Serial.println("probing for z axis zero");
+      float zgoto;
+
+      readString.toUpperCase(); //Make the string all uppercase to remove variability
+
+      float currentZPos = zAxis.target();
+
+      zgoto      = _inchesToMMConversion * extractGcodeValue(readString, 'Z', currentZPos / _inchesToMMConversion);
+      feedrate   = _inchesToMMConversion * extractGcodeValue(readString, 'F', feedrate / _inchesToMMConversion);
+
+      if (useRelativeUnits) { //if we are using a relative coordinate system
+        if (readString.indexOf('Z') >= 0) { //if z has moved
+          zgoto = currentZPos + zgoto;
+        }
+      }
+
+      Serial.print("max depth ");
+      Serial.print(zgoto);
+      Serial.println(" mm.");
+      Serial.print("feedrate ");
+      Serial.print(feedrate);
+      Serial.println(" mm per min.");
+
+
+      //set Probe to input with pullup
+      pinMode(Probe, INPUT_PULLUP);
+      digitalWrite(Probe,   HIGH);
+
+      if (zgoto != currentZPos / _inchesToMMConversion) {
+        //        now move z to the Z destination;
+        //        Currently ignores X and Y options
+        //          we need a version of singleAxisMove that quits if the AUXn input changes (goes LOW)
+        //          which will act the same as the checkForStopCommand() found in singleAxisMove (need both?)
+        //        singleAxisMove(&zAxis, zgoto, feedrate);
+
+        /*
+           Takes a pointer to an axis object and moves that axis to endPos at speed MMPerMin
+        */
+
+        Axis* axis = &zAxis;
+        float MMPerMin             = feedrate;
+        float startingPos          = axis->target();
+        float endPos               = zgoto;
+        float moveDist             = currentZPos - endPos; //total distance to move
+
+        float direction            = -1 * moveDist / abs(moveDist); //determine the direction of the move
+
+        float stepSizeMM           = 0.01;                    //step size in mm
+        long finalNumberOfSteps    = moveDist / stepSizeMM;    //number of steps taken in move
+
+        long numberOfStepsTaken    = 0;
+        long  beginingOfLastStep   = millis();
+
+        axis->attach();
+        //  zAxis->attach();
+
+        while (abs(numberOfStepsTaken) < abs(finalNumberOfSteps)) {
+
+          //reset the counter
+          beginingOfLastStep          = millis();
+
+          //find the target point for this step
+          float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken * stepSizeMM * direction;
+
+          //write to each axis
+          axis->write(whereAxisShouldBeAtThisStep);
+
+          //update position on display
+          returnPoz(xTarget, yTarget, zAxis.read());
+
+          //calculate the correct delay between steps to set feedrate
+          delay(calculateDelay(stepSizeMM, MMPerMin));
+
+          //increment the number of steps taken
+          numberOfStepsTaken++;
+
+          //check for new serial commands
+          readSerialCommands();
+
+          //check for a STOP command
+          if (checkForStopCommand()) {
+            axis->endMove(whereAxisShouldBeAtThisStep);
+            return;
+          }
+
+          //check for Probe touchdown
+          if (checkForProbeTouch(Probe)) {
+            zAxis.set(0);
+            zAxis.endMove(0);
+            zAxis.attach();
+            Serial.println("z axis zeroed");
+            return;
+          }
+        }
+
+        /*
+           If wen get here, the probe failed to touch down
+            - print error
+            - STOP execution
+        */
+        axis->endMove(endPos);
+        Serial.println("error: probe did not connect\nprogram stopped\nz axis not set\n");
+        stopFlag = true;
+        checkForStopCommand();
+
+      } // end if zgoto != currentZPos / _inchesToMMConversion
+
+    } else {
+      Serial.print("G38");
+      Serial.print(readString.substring(3, 5));
+      Serial.println(" is invalid. Only G38.2 recognized.");
+    }
+  } else {
+    Serial.println("G38.2 gcode only valid with z-axis attached");
+  }
+}
+
 void  calibrateChainLengths(){
     /*
     The calibrateChainLengths function lets the machine know that the chains are set to a given length where each chain is ORIGINCHAINLEN
@@ -849,6 +992,9 @@ void  executeGcodeLine(String gcodeLine){
             break;
         case 21:
             setInchesToMillimetersConversion(MILLIMETERS);
+            break;
+        case 38:
+            G38(gcodeLine);
             break;
         case 90:
             useRelativeUnits = false;
