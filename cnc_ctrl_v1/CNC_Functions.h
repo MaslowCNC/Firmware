@@ -221,7 +221,7 @@ float computeStepSize(float MMPerMin){
     
     */
     
-    return .0003149*MMPerMin; //value found empirically 
+    return .0001575*MMPerMin; //value found empirically by running loop until there were not spare cycles
 }
 
 int   cordinatedMove(float xEnd, float yEnd, float MMPerMin){
@@ -255,6 +255,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     float bChainLength;
     long   numberOfStepsTaken         =  0;
     long  beginingOfLastStep          = millis();
+
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
         //if enough time has passed to take the next step
@@ -446,7 +447,7 @@ int   G1(String readString){
         }
     }
     
-    feedrate = constrain(feedrate, 1, 635);   //constrain the maximum feedrate, 25ips = 635 mmps
+    feedrate = constrain(feedrate, 1, 900);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     
     //if the zaxis is attached
     if(zAxisAttached){

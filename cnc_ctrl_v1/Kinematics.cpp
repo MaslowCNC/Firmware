@@ -85,11 +85,8 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     TanLambda = y/(D-x);
     Y1Plus = R * sqrt(1 + TanGamma * TanGamma);
     Y2Plus = R * sqrt(1 + TanLambda * TanLambda);
-    Phi = -0.2 * (-8.202e-4 * x + 1.22) - 0.03;
   
     _MyTrig();
-    Psi1 = Theta - Phi;
-    Psi2 = Theta + Phi;
                                              //These criteria will be zero when the correct values are reached 
                                              //They are negated here as a numerical efficiency expedient
                                              
