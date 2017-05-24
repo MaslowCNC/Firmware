@@ -528,40 +528,45 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     leftAxis.attach();
     rightAxis.attach();
     
+    long  beginingOfLastStep          = millis();
+    
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
         
-        angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
-        
-        whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
-        whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
-        
-        kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
-        
-        
-        leftAxis.write(aChainLength);
-        rightAxis.write(bChainLength);
-        
-        delay(calculateDelay(stepSizeMM, MMPerMin));
-        
-        returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
-        
-        numberOfStepsTaken = numberOfStepsTaken + 1;
-        
-        //check for new serial commands
-        readSerialCommands();
-        
-        //check for a STOP command
-        if(checkForStopCommand()){
-            //set the axis positions to save
+        //if enough time has passed to take the next step
+        if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
+            
+            //reset the counter 
+            beginingOfLastStep          = millis();
+            angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
+            
+            whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
+            whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
+            
             kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
-            leftAxis.endMove(aChainLength);
-            rightAxis.endMove(bChainLength);
             
-            //make sure the positions are displayed correctly after stop
-            xTarget = whereXShouldBeAtThisStep;
-            yTarget = whereYShouldBeAtThisStep;
+            leftAxis.write(aChainLength);
+            rightAxis.write(bChainLength);
             
-            return 1;
+            returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
+            
+            numberOfStepsTaken = numberOfStepsTaken + 1;
+            
+            //check for new serial commands
+            readSerialCommands();
+            
+            //check for a STOP command
+            if(checkForStopCommand()){
+                //set the axis positions to save
+                kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+                leftAxis.endMove(aChainLength);
+                rightAxis.endMove(bChainLength);
+                
+                //make sure the positions are displayed correctly after stop
+                xTarget = whereXShouldBeAtThisStep;
+                yTarget = whereYShouldBeAtThisStep;
+                
+                return 1;
+            }
         }
     }
     
