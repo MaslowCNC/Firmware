@@ -20,7 +20,7 @@ libraries*/
 #include "Kinematics.h"
 #include "RingBuffer.h"
 
-#define VERSIONNUMBER 0.71
+#define VERSIONNUMBER 0.72
 
 bool zAxisAttached = false;
 
@@ -844,8 +844,7 @@ void  executeGcodeLine(String gcodeLine){
     
     if(gcodeLine.substring(0, 3) == "B01"){
         
-        leftAxis.computeMotorResponse();
-        rightAxis.computeMotorResponse();
+        Serial.println("Motor Calibration Not Needed");
         
         return;
     }
