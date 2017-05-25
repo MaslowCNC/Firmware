@@ -494,6 +494,13 @@ int   G1(String readString){
 }
 
 int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float MMPerMin, int direction){
+    /*
+    
+    Move the machine through an arc from point (X1, Y1) to point (X2, Y2) along the 
+    arc defined by center (centerX, centerY) at speed MMPerMin
+    
+    */
+    
     
     //compute geometry 
     float pi                     =  3.1415;
@@ -520,6 +527,12 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     
     float whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
     float whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
+    
+    Serial.print("Y Error: ");
+    
+    float temp1 = startingAngle + direction*stepSizeRadians*finalNumberOfSteps;
+    float temp2 = radius * sin(temp1) + centerY;
+    Serial.println(temp2 - X2);
     
     float aChainLength;
     float bChainLength;
