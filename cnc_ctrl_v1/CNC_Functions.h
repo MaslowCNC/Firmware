@@ -501,7 +501,6 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     
     */
     
-    
     //compute geometry 
     float pi                     =  3.1415;
     float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
@@ -511,9 +510,9 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float startingAngle          =  atan2(Y1 - centerY, X1 - centerX);
     float endingAngle            =  atan2(Y2 - centerY, X2 - centerX);
     
-    
     //compute angle between lines
-    float theta                  =  startingAngle - endingAngle;
+    float theta                  =  abs(startingAngle) - abs(endingAngle);
+    
     float arcLengthMM            =  circumference * (theta / (2*pi) );
     
     //set up variables for movement
