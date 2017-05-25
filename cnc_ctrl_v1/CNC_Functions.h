@@ -527,18 +527,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float angleNow = startingAngle;
     float whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
     float whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
-    
-    
-    //DEBUG------------------------------------------------------------------------
-    Serial.print("Y Error: ");
-    
-    float finalY = radius * sin(startingAngle + theta*direction*1.0) + centerY;
-    float finalY2 = radius * sin(endingAngle) + centerY;
-    Serial.println(finalY - Y2);
-    Serial.print("Alt Y Error: ");
-    Serial.println(finalY2 - Y2);
-    
-    //-------------------------------------------------------------------------------------
+    float degreeComplete = 0.0;
     
     float aChainLength;
     float bChainLength;
@@ -557,7 +546,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
             //reset the counter 
             beginingOfLastStep          = millis();
             
-            float degreeComplete = float(numberOfStepsTaken)/float(finalNumberOfSteps);
+            degreeComplete = float(numberOfStepsTaken)/float(finalNumberOfSteps);
             
             angleNow = startingAngle + theta*direction*degreeComplete;
             
