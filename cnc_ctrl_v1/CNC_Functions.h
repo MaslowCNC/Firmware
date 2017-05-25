@@ -493,7 +493,13 @@ int   G1(String readString){
     }
 }
 
-int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float MMPerMin, int direction){
+int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float MMPerMin, float direction){
+    /*
+    
+    Move the machine through an arc from point (X1, Y1) to point (X2, Y2) along the 
+    arc defined by center (centerX, centerY) at speed MMPerMin
+    
+    */
     
     //compute geometry 
     float pi                     =  3.1415;
@@ -501,25 +507,26 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float distanceBetweenPoints  =  sqrt( sq(  X2 - X1   ) + sq(    Y2  - Y1) );
     float circumference          =  2.0*pi*radius;
     
+    float startingAngle          =  atan2(Y1 - centerY, X1 - centerX);
+    float endingAngle            =  atan2(Y2 - centerY, X2 - centerX);
+    
     //compute angle between lines
-    float cosTheta = (sq(radius)+sq(radius)-sq(distanceBetweenPoints)) / (2*radius*radius);
-    cosTheta       = constrain(cosTheta, -1.0, 1.0); //when the angle is exactly 180 degrees, rounding errors can push the argument of acos() outside its +-1 range
-    float theta                  =  acos(cosTheta);
+    float theta                  =  abs(startingAngle) - abs(endingAngle);
     
     float arcLengthMM            =  circumference * (theta / (2*pi) );
-    float startingAngle          =  atan2(Y1 - centerY, X1 - centerX);
     
     //set up variables for movement
     int numberOfStepsTaken       =  0;
     
     float stepSizeMM             =  computeStepSize(MMPerMin);
     int   finalNumberOfSteps     =  arcLengthMM/stepSizeMM;
-    float stepSizeRadians        =  theta/finalNumberOfSteps;
     
-    float angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
     
+    //Compute the starting position
+    float angleNow = startingAngle;
     float whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
     float whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
+    float degreeComplete = 0.0;
     
     float aChainLength;
     float bChainLength;
@@ -537,7 +544,10 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
             
             //reset the counter 
             beginingOfLastStep          = millis();
-            angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
+            
+            degreeComplete = float(numberOfStepsTaken)/float(finalNumberOfSteps);
+            
+            angleNow = startingAngle + theta*direction*degreeComplete;
             
             whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
             whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
