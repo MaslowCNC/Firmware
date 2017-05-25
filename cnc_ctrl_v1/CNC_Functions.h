@@ -493,7 +493,7 @@ int   G1(String readString){
     }
 }
 
-int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float MMPerMin, int direction){
+int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float MMPerMin, float direction){
     /*
     
     Move the machine through an arc from point (X1, Y1) to point (X2, Y2) along the 
@@ -508,31 +508,37 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float distanceBetweenPoints  =  sqrt( sq(  X2 - X1   ) + sq(    Y2  - Y1) );
     float circumference          =  2.0*pi*radius;
     
-    //compute angle between lines
-    float cosTheta = (sq(radius)+sq(radius)-sq(distanceBetweenPoints)) / (2*radius*radius);
-    cosTheta       = constrain(cosTheta, -1.0, 1.0); //when the angle is exactly 180 degrees, rounding errors can push the argument of acos() outside its +-1 range
-    float theta                  =  acos(cosTheta);
-    
-    float arcLengthMM            =  circumference * (theta / (2*pi) );
     float startingAngle          =  atan2(Y1 - centerY, X1 - centerX);
+    float endingAngle            =  atan2(Y2 - centerY, X2 - centerX);
+    
+    
+    //compute angle between lines
+    float theta                  =  startingAngle - endingAngle;
+    float arcLengthMM            =  circumference * (theta / (2*pi) );
     
     //set up variables for movement
     int numberOfStepsTaken       =  0;
     
     float stepSizeMM             =  computeStepSize(MMPerMin);
     int   finalNumberOfSteps     =  arcLengthMM/stepSizeMM;
-    float stepSizeRadians        =  theta/finalNumberOfSteps;
     
-    float angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
     
+    //Compute the starting position
+    float angleNow = startingAngle;
     float whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
     float whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
     
+    
+    //DEBUG------------------------------------------------------------------------
     Serial.print("Y Error: ");
     
-    float temp1 = startingAngle + direction*stepSizeRadians*finalNumberOfSteps;
-    float temp2 = radius * sin(temp1) + centerY;
-    Serial.println(temp2 - X2);
+    float finalY = radius * sin(startingAngle + theta*direction*1.0) + centerY;
+    float finalY2 = radius * sin(endingAngle) + centerY;
+    Serial.println(finalY - Y2);
+    Serial.print("Alt Y Error: ");
+    Serial.println(finalY2 - Y2);
+    
+    //-------------------------------------------------------------------------------------
     
     float aChainLength;
     float bChainLength;
@@ -550,7 +556,10 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
             
             //reset the counter 
             beginingOfLastStep          = millis();
-            angleNow = startingAngle + direction*stepSizeRadians*numberOfStepsTaken;
+            
+            float degreeComplete = float(numberOfStepsTaken)/float(finalNumberOfSteps);
+            
+            angleNow = startingAngle + theta*direction*degreeComplete;
             
             whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
             whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
