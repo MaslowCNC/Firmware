@@ -159,6 +159,7 @@ void  _watchDog(){
             }
             else{
                 _signalReady();                          //request new code
+                returnError();
             }
         }
         
@@ -459,7 +460,10 @@ int   G1(String readString){
     
     //if the zaxis is attached
     if(zAxisAttached){
-        if (zgoto != currentZPos/_inchesToMMConversion){
+        leftAxis.detach();
+        rightAxis.detach();
+        float threshold = .01;
+        if (abs(zgoto- currentZPos/_inchesToMMConversion) > threshold){
             singleAxisMove(&zAxis, zgoto,45);
         }
     }
