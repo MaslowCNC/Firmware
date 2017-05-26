@@ -463,7 +463,7 @@ int   G1(String readString){
         leftAxis.detach();
         rightAxis.detach();
         float threshold = .01;
-        if (abs(zgoto- currentZPos/_inchesToMMConversion) > threshold){
+        if (abs(zgoto- currentZPos) > threshold){
             singleAxisMove(&zAxis, zgoto,45);
         }
     }
