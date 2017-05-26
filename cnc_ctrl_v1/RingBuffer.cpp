@@ -150,7 +150,7 @@ void RingBuffer::_incrementEnd(){
         Serial.println(_beginningOfString);
         Serial.print("Buffer end: ");
         Serial.println(_endOfString);
-        Serial.print("BufferSize: ")
+        Serial.print("BufferSize: ");
         Serial.println(size());
         return;
     }
