@@ -146,6 +146,12 @@ void RingBuffer::_incrementEnd(){
     */
     if (_endOfString + 1 == _beginningOfString){
         Serial.println("buffer overflow");
+        Serial.print("Buffer begin: ");
+        Serial.println(_beginningOfString);
+        Serial.print("Buffer end: ");
+        Serial.println(_endOfString);
+        Serial.print("BufferSize: ");
+        Serial.println(size());
         return;
     }
     else if (_endOfString < BUFFERSIZE){

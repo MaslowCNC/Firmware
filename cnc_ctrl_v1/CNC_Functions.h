@@ -87,6 +87,20 @@ int   lastCommand           =  0;         //Stores the value of the last command
 float xTarget = 0;
 float yTarget = 0;
 
+void  returnError(){
+    /*
+    Prints the machine's positional error and the amount of space available in the 
+    gcode buffer
+    */
+        Serial.print("[PosError:");
+        Serial.print(leftAxis.error());
+        Serial.print(',');
+        Serial.print(rightAxis.error());
+        Serial.print(',');
+        Serial.print(ringBuffer.spaceAvailable());
+        Serial.println("]");
+}
+
 void  returnPoz(float x, float y, float z){
     /*
     Causes the machine's position (x,y) to be sent over the serial connection updated on the UI
@@ -107,13 +121,7 @@ void  returnPoz(float x, float y, float z){
         Serial.print(z/_inchesToMMConversion);
         Serial.println(",WPos:0.000,0.000,0.000>");
         
-        Serial.print("[PosError:");
-        Serial.print(leftAxis.error());
-        Serial.print(',');
-        Serial.print(rightAxis.error());
-        Serial.print(',');
-        Serial.print(ringBuffer.spaceAvailable());
-        Serial.println("]");
+        returnError();
         
         lastRan = millis();
     }
@@ -151,6 +159,7 @@ void  _watchDog(){
             }
             else{
                 _signalReady();                          //request new code
+                returnError();
             }
         }
         
@@ -451,7 +460,10 @@ int   G1(String readString){
     
     //if the zaxis is attached
     if(zAxisAttached){
-        if (zgoto != currentZPos/_inchesToMMConversion){
+        leftAxis.detach();
+        rightAxis.detach();
+        float threshold = .01;
+        if (abs(zgoto- currentZPos) > threshold){
             singleAxisMove(&zAxis, zgoto,45);
         }
     }
@@ -849,7 +861,6 @@ void  executeGcodeLine(String gcodeLine){
     
     */
     
-    
     //Handle B-codes
     
     if(gcodeLine.substring(0, 3) == "B01"){
@@ -1048,6 +1059,8 @@ void  interpretCommandString(String cmdString){
     Splits a string into lines of gcode which begin with 'G'
     
     */
+    
+    returnError();  //Cue up sending the next line
     
     int firstG;  
     int secondG;
