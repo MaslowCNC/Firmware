@@ -49,6 +49,11 @@
             //target router bit coordinates.
             float x = 2708.4;
             float y = 270;
+            //machine dimensions
+            float halfWidth;
+            float halfHeight;
+
+
 
             //utility variables
             float DegPerRad = 360/(4 * atan(1));
