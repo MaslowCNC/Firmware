@@ -12,7 +12,7 @@
 
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Copyright 2014-2017 Bar Smith*/
 
 /*
@@ -25,25 +25,18 @@ in X-Y space.
 
 
 Kinematics::Kinematics(){
-    
+
 }
 
 void Kinematics::_verifyValidTarget(float* xTarget,float* yTarget){
     //If the target point is beyond one of the edges of the board, the machine stops at the edge
-    
-    if (*xTarget < -machineWidth/2){
-        *xTarget = -machineWidth/2;
-    }
-    else if (*xTarget >  machineWidth/2){
-        *xTarget =  machineWidth/2;
-    }
-    else if (*yTarget >  machineHeight/2){
-        *yTarget =  machineHeight/2;
-    }
-    else if (*yTarget <  -machineHeight/2){
-        *yTarget =  -machineHeight/2;
-    }
-    
+
+    float halfWidth = machineWidth / 2.0f;
+    float halfHeight = machineHeight / 2.0f;
+
+    *xTarget = (*xTarget < -halfWidth) ? -halfWidth : (*xTarget > halfWidth) ? halfWidth : *xTarget;
+    *yTarget = (*yTarget < -halfHeight) ? -halfHeight : (*yTarget > halfHeight) ? halfHeight : *yTarget;
+
 }
 
 void Kinematics::recomputeGeometry(){
@@ -58,21 +51,21 @@ void Kinematics::recomputeGeometry(){
 }
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
-    
+
     //Confirm that the coordinates are on the wood
     _verifyValidTarget(&xTarget, &yTarget);
-    
+
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
     x = (D/2.0) + xTarget;
     y = (machineHeight/2.0) + motorOffsetY  - yTarget;
-    
+
     //Coordinates definition:
     //         x -->, y |
     //                  v
     // (0,0) at center of left sprocket
     // upper left corner of plywood (270, 270)
-    
-    Tries = 0;                                  //initialize                   
+
+    Tries = 0;                                  //initialize
     if(x > D/2.0){                              //the right half of the board mirrors the left half so all computations are done  using left half coordinates.
       x = D-x;                                  //Chain lengths are swapped at exit if the x,y is on the right half
       Mirror = true;
@@ -80,24 +73,21 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     else{
         Mirror = false;
     }
-    
+
     TanGamma = y/x;
     TanLambda = y/(D-x);
     Y1Plus = R * sqrt(1 + TanGamma * TanGamma);
     Y2Plus = R * sqrt(1 + TanLambda * TanLambda);
-    Phi = -0.2 * (-8.202e-4 * x + 1.22) - 0.03;
-  
+
     _MyTrig();
-    Psi1 = Theta - Phi;
-    Psi2 = Theta + Phi;
-                                             //These criteria will be zero when the correct values are reached 
+                                             //These criteria will be zero when the correct values are reached
                                              //They are negated here as a numerical efficiency expedient
-                                             
+
     Crit[0]=  - _moment(Y1Plus, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
     Crit[1] = - _YOffsetEqn(Y1Plus, x - h * CosPsi1, SinPsi1);
     Crit[2] = - _YOffsetEqn(Y2Plus, D - (x + h * CosPsi2), SinPsi2);
 
-  
+
     while (Tries <= MaxTries) {
         if (abs(Crit[0]) < MaxError) {
             if (abs(Crit[1]) < MaxError) {
@@ -105,15 +95,15 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
                     break;
                 }
             }
-        } 
-                  
+        }
+
                    //estimate the tilt angle that results in zero net _moment about the pen
                    //and refine the estimate until the error is acceptable or time runs out
-    
-                          //Estimate the Jacobian components 
-                                                       
+
+                          //Estimate the Jacobian components
+
         Jac[0] = (_moment( Y1Plus, Y2Plus,Phi + DeltaPhi, MySinPhiDelta, SinPsi1D, CosPsi1D, SinPsi2D, CosPsi2D) + Crit[0])/DeltaPhi;
-        Jac[1] = (_moment( Y1Plus + DeltaY, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DeltaY;  
+        Jac[1] = (_moment( Y1Plus + DeltaY, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DeltaY;
         Jac[2] = (_moment(Y1Plus, Y2Plus + DeltaY,  Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DeltaY;
         Jac[3] = (_YOffsetEqn(Y1Plus, x - h * CosPsi1D, SinPsi1D) + Crit[1])/DeltaPhi;
         Jac[4] = (_YOffsetEqn(Y1Plus + DeltaY, x - h * CosPsi1,SinPsi1) + Crit[1])/DeltaY;
@@ -124,33 +114,30 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 
 
         //solve for the next guess
-        _MatSolv();     // solves the matrix equation Jx=-Criterion                                                     
-                   
+        _MatSolv();     // solves the matrix equation Jx=-Criterion
+
         // update the variables with the new estimate
 
         Phi = Phi + Solution[0];
         Y1Plus = Y1Plus + Solution[1];                         //don't allow the anchor points to be inside a sprocket
-        if (Y1Plus < R){
-            Y1Plus = R;                               
-        }
+        Y1Plus = (Y1Plus < R) ? R : Y1Plus;
+
         Y2Plus = Y2Plus + Solution[2];                         //don't allow the anchor points to be inside a sprocke
-        if (Y2Plus < R){
-            Y2Plus = R;
-        }
+        Y2Plus = (Y2Plus < R) ? R : Y2Plus;
 
         Psi1 = Theta - Phi;
-        Psi2 = Theta + Phi;   
+        Psi2 = Theta + Phi;
                                                              //evaluate the
                                                              //three criterion equations
     _MyTrig();
-    
+
     Crit[0] = - _moment(Y1Plus, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
     Crit[1] = - _YOffsetEqn(Y1Plus, x - h * CosPsi1, SinPsi1);
     Crit[2] = - _YOffsetEqn(Y2Plus, D - (x + h * CosPsi2), SinPsi2);
     Tries = Tries + 1;                                       // increment itteration count
 
-    }                                       
-  
+    }
+
     //Variables are within accuracy limits
     //  perform output computation
 
@@ -166,45 +153,45 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     //compute the chain lengths
 
     if(Mirror){
-        Chain2 = sqrt((x - Offsetx1)*(x - Offsetx1) + (y + Y1Plus - Offsety1)*(y + Y1Plus - Offsety1)) - R * TanGamma + R * Gamma;   //right chain length                       
+        Chain2 = sqrt((x - Offsetx1)*(x - Offsetx1) + (y + Y1Plus - Offsety1)*(y + Y1Plus - Offsety1)) - R * TanGamma + R * Gamma;   //right chain length
         Chain1 = sqrt((D - (x + Offsetx2))*(D - (x + Offsetx2))+(y + Y2Plus - Offsety2)*(y + Y2Plus - Offsety2)) - R * TanLambda + R * Lambda;   //left chain length
     }
     else{
-        Chain1 = sqrt((x - Offsetx1)*(x - Offsetx1) + (y + Y1Plus - Offsety1)*(y + Y1Plus - Offsety1)) - R * TanGamma + R * Gamma;   //left chain length                       
+        Chain1 = sqrt((x - Offsetx1)*(x - Offsetx1) + (y + Y1Plus - Offsety1)*(y + Y1Plus - Offsety1)) - R * TanGamma + R * Gamma;   //left chain length
         Chain2 = sqrt((D - (x + Offsetx2))*(D - (x + Offsetx2))+(y + Y2Plus - Offsety2)*(y + Y2Plus - Offsety2)) - R * TanLambda + R * Lambda;   //right chain length
     }
-    
+
     *aChainLength = Chain1;
     *bChainLength = Chain2;
 
 }
 
 void  Kinematics::forward(float chainALength, float chainBLength, float* xPos, float* yPos){
-    
+
     float xGuess = 0;
     float yGuess = 0;
-    
+
     float guessLengthA;
     float guessLengthB;
-    
+
     int guessCount = 0;
-    
+
     while(1){
-        
-        
+
+
         //check our guess
         inverse(xGuess, yGuess, &guessLengthA, &guessLengthB);
-        
+
         float aChainError = chainALength - guessLengthA;
         float bChainError = chainBLength - guessLengthB;
-        
-        
+
+
         //adjust the guess based on the result
         xGuess = xGuess + .1*aChainError - .1*bChainError;
         yGuess = yGuess - .1*aChainError - .1*bChainError;
-        
+
         guessCount++;
-        
+
         //Prevent the connection from timing out
         Serial.print("[PosError:");
         Serial.print(aChainError);
@@ -213,7 +200,7 @@ void  Kinematics::forward(float chainALength, float chainBLength, float* xPos, f
         Serial.print(',');
         Serial.print('0');
         Serial.println("]");
-        
+
         //if we've converged on the point...or it's time to give up, exit the loop
         if((abs(aChainError) < .1 && abs(bChainError) < .1) or guessCount > 100){
             if(guessCount > 100){
@@ -259,7 +246,7 @@ void  Kinematics::_MatSolv(){
             for (M=1;M<=J;M++){
                 Jac[KK + M]= Jac[KK + M] -fact * Jac[JJ+M];
             }
-        KK = KK + N;      
+        KK = KK + N;
         Crit[K] = Crit[K] - fact * Crit[J-1];
         }
     }
@@ -272,7 +259,7 @@ void  Kinematics::_MatSolv(){
         M = i -1;
         Sum = Crit[i-1];
         for (J=1;J<=M;J++){
-            Sum = Sum-Jac[ii+J]*Solution[J-1]; 
+            Sum = Sum-Jac[ii+J]*Solution[J-1];
         }
     Solution[i-1] = Sum/Jac[ii+i];
     ii = ii + N;
@@ -292,15 +279,15 @@ float Kinematics::_moment(float Y1Plus, float Y2Plus, float Phi, float MSinPhi, 
 
     Psi1 = Theta - Phi;
     Psi2 = Theta + Phi;
-    
+
     Offsetx1 = h * MCosPsi1;
     Offsetx2 = h * MCosPsi2;
     Offsety1 = h * MSinPsi1;
     Offsety2 = h * MSinPsi2;
     TanGamma = (y - Offsety1 + Y1Plus)/(x - Offsetx1);
     TanLambda = (y - Offsety2 + Y2Plus)/(D -(x + Offsetx2));
-    
-    return h3*MSinPhi + (h/(TanLambda+TanGamma))*(MSinPsi2 - MSinPsi1 + (TanGamma*MCosPsi1 - TanLambda * MCosPsi2));   
+
+    return h3*MSinPhi + (h/(TanLambda+TanGamma))*(MSinPsi2 - MSinPsi1 + (TanGamma*MCosPsi1 - TanLambda * MCosPsi2));
 }
 
 void Kinematics::_MyTrig(){
@@ -319,14 +306,14 @@ void Kinematics::_MyTrig(){
     float Psi2del = Psi2 + DeltaPhi;
     float Psi2delsq = Psi2del * Psi2del;
     float Psi2delcu = Psi2del * Psi2delsq;
-  
+
     // Phirange is 0 to -27 degrees
-    // sin -0.1616   -0.0021    1.0002   -0.0000 (error < 6e-6) 
+    // sin -0.1616   -0.0021    1.0002   -0.0000 (error < 6e-6)
     // cos(phi): 0.0388   -0.5117    0.0012    1.0000 (error < 3e-5)
-    // Psi1 range is 42 to  69 degrees, 
+    // Psi1 range is 42 to  69 degrees,
     // sin(Psi1):  -0.0942   -0.1368    1.0965   -0.0241 (error < 2.5 e-5)
     // cos(Psi1):  0.1369   -0.6799    0.1077    0.9756  (error < 1.75e-5)
-    // Psi2 range is 15 to 42 degrees 
+    // Psi2 range is 15 to 42 degrees
     // sin(Psi2): -0.1460   -0.0197    1.0068   -0.0008 (error < 1.5e-5)
     // cos(Psi2):  0.0792   -0.5559    0.0171    0.9981 (error < 2.5e-5)
 

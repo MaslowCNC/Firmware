@@ -40,8 +40,6 @@
             float  error();
             float  setpoint();
             void   computePID();
-            float  measureMotorSpeed(int speed);
-            void   computeMotorResponse();
             void   test();
             void   changePitch(float newPitch);
             void   changeEncoderResolution(int newResolution);
@@ -54,10 +52,6 @@
             void       _writeFloat(unsigned int addr, float x);
             float      _readFloat(unsigned int addr);
             int        _detectDirectionChange(float _pidSetpoint);
-            void       _writeLinSeg(unsigned int addr, LinSegment linSeg);
-            void       _writeAllLinSegs(unsigned int addr);
-            LinSegment _readLinSeg(unsigned int addr);
-            void       _readAllLinSegs(unsigned int addr);
             int        _direction;
             int        _encoderPin;
             String     _axisName;
@@ -74,7 +68,6 @@
             float      _oldSetpoint;
             float      _oldDir;
             bool       _disableAxisForTesting = false;
-            float      _speedSinceLastCall();
     };
 
     #endif
