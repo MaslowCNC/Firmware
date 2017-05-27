@@ -48,6 +48,8 @@ void Kinematics::recomputeGeometry(){
     Theta = atan(2*s/l);
     Psi1 = Theta - Phi;
     Psi2 = Theta + Phi;
+    halfWidth = machineWidth / 2.0f;
+    halfHeight = machineHeight / 2.0f;
 }
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
