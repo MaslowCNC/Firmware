@@ -337,6 +337,12 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     long numberOfStepsTaken    = 0;
     long  beginingOfLastStep   = millis();
     
+    //disconnect all the axis
+    leftAxis.detach();
+    rightAxis.detach();
+    zAxis.detach();
+    
+    //re-attach the one we want to move
     axis->attach();
     
     while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
@@ -460,8 +466,6 @@ int   G1(String readString){
     
     //if the zaxis is attached
     if(zAxisAttached){
-        leftAxis.detach();
-        rightAxis.detach();
         float threshold = .01;
         if (abs(zgoto- currentZPos) > threshold){
             singleAxisMove(&zAxis, zgoto,45);
@@ -776,7 +780,6 @@ void  calibrateChainLengths(){
     //measure out the left chain
     Serial.println("Measuring out left chain");
     singleAxisMove(&leftAxis, ORIGINCHAINLEN, 500);
-    leftAxis.detach();
     
     Serial.print(leftAxis.read());
     Serial.println("mm");
@@ -784,7 +787,6 @@ void  calibrateChainLengths(){
     //measure out the right chain
     Serial.println("Measuring out right chain");
     singleAxisMove(&rightAxis, ORIGINCHAINLEN, 500);
-    rightAxis.detach();
     
     Serial.print(rightAxis.read());
     Serial.println("mm");
