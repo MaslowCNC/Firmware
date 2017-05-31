@@ -10,12 +10,12 @@
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
     Copyright 2014-2017 Bar Smith*/
-    
-    
+
+
 /*Right now this file is a catch all for functions which will be broken out into
 libraries*/
-    
-    
+
+
 #include "Axis.h"
 #include "Kinematics.h"
 #include "RingBuffer.h"
@@ -78,7 +78,7 @@ float feedrate              =  500;
 float _inchesToMMConversion =  1;
 bool  useRelativeUnits      =  false;
 bool  stopFlag              =  false;
-String readString;                        //command being built one character at a time
+
 String readyCommandString;                //next command queued up and ready to send
 int   lastCommand           =  0;         //Stores the value of the last command run eg: G01 -> 1
 
@@ -89,7 +89,7 @@ float yTarget = 0;
 
 void  returnError(){
     /*
-    Prints the machine's positional error and the amount of space available in the 
+    Prints the machine's positional error and the amount of space available in the
     gcode buffer
     */
         Serial.print("[PosError:");
@@ -106,13 +106,13 @@ void  returnPoz(float x, float y, float z){
     Causes the machine's position (x,y) to be sent over the serial connection updated on the UI
     in Ground Control. Only executes if hasn't been called in at least timeout ms.
     */
-    
+
     static unsigned long lastRan = millis();
     int                  timeout = 200;
-    
+
     if (millis() - lastRan > timeout){
-        
-        
+
+
         Serial.print("<Idle,MPos:");
         Serial.print(x/_inchesToMMConversion);
         Serial.print(",");
@@ -120,39 +120,39 @@ void  returnPoz(float x, float y, float z){
         Serial.print(",");
         Serial.print(z/_inchesToMMConversion);
         Serial.println(",WPos:0.000,0.000,0.000>");
-        
+
         returnError();
-        
+
         lastRan = millis();
     }
-    
+
 }
 
 void  _signalReady(){
     /*
-    
+
     Signal to the controlling software that the machine has executed the last
     gcode line successfully.
-    
+
     */
-    
+
     Serial.println("ok");
 }
 
 void  _watchDog(){
     /*
-    Watchdog tells ground control that the machine is ready every second. _watchDog() should only be called when 
+    Watchdog tells ground control that the machine is ready every second. _watchDog() should only be called when
     the machine is actually ready.
-    
+
     This fixes the issue where the machine is ready, but Ground Control doesn't know the machine is ready and the system locks up.
     */
     static unsigned long lastRan = millis();
     int                  timeout = 5000;
-    
+
     if (millis() - lastRan > timeout){
-        
+
         if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
-            
+
             if (ringBuffer.size() > 0){                  //if there is stuff sitting in the buffer, run it
                 ringBuffer.write('\n');
                 Serial.println("watch dog catch");
@@ -162,7 +162,7 @@ void  _watchDog(){
                 returnError();
             }
         }
-        
+
         lastRan = millis();
     }
 }
@@ -171,8 +171,10 @@ void readSerialCommands(){
     /*
     Check to see if a new character is available from the serial connection, read it if one is.
     */
+    char c;
+
     while (Serial.available() > 0) {
-        char c = Serial.read();
+        c = Serial.read();
         if (c == '!'){
             stopFlag = true;
         }
@@ -187,7 +189,7 @@ bool checkForStopCommand(){
     Check to see if the STOP command has been sent to the machine.
     */
     if(stopFlag){
-        readString = "";
+
         readyCommandString = "";
         ringBuffer.empty();
         stopFlag = false;
@@ -201,7 +203,7 @@ bool checkForProbeTouch(int probePin) {
       Check to see if AUX4 has gone LOW
   */
   if (digitalRead(probePin) == LOW) {
-    readString = "";
+
     readyCommandString = "";
     return 1;
   }
@@ -212,171 +214,177 @@ float calculateDelay(float stepSizeMM, float feedrateMMPerMin){
     /*
     Calculate the time delay between each step for a given feedrate
     */
-    
+
     #define MINUTEINMS 60000.0
-    
+
     // derivation: ms / step = 1 min in ms / dist in one min
-    
+
     float msPerStep = (stepSizeMM*MINUTEINMS)/feedrateMMPerMin;
-    
+
     return msPerStep;
 }
 
 float computeStepSize(float MMPerMin){
     /*
-    
+
     Determines the minimum step size which can be taken for the given feed-rate
     and still have there be enough time for the kinematics to run
-    
+
     */
-    
+
     return .0001575*MMPerMin; //value found empirically by running loop until there were not spare cycles
 }
 
 int   cordinatedMove(float xEnd, float yEnd, float MMPerMin){
-    
-/*The move() function moves the tool in a straight line to the position (xEnd, yEnd) at 
-the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
-direction, the tool moves to the target in a straight line. This function is used by the G00 
+
+/*The move() function moves the tool in a straight line to the position (xEnd, yEnd) at
+the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each
+direction, the tool moves to the target in a straight line. This function is used by the G00
 and G01 commands. The units at this point should all be in mm or mm per minute*/
-    
+
     float  xStartingLocation = xTarget;
     float  yStartingLocation = yTarget;
     float  stepSizeMM         = computeStepSize(MMPerMin);
-    
+
     //find the total distances to move
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
     float  yDistanceToMoveInMM        = yEnd - yStartingLocation;
-    
+
     //compute the total  number of steps in the move
-    long   finalNumberOfSteps         = abs(distanceToMoveInMM/stepSizeMM);
-    
+    long   finalNumberOfSteps         = distanceToMoveInMM/stepSizeMM;
+    //due to the way that abs is implemented in the arduino library it should only be executed on
+    //a variable. i.e no calcs or functions inside the parens
+    finalNumberOfSteps = abs(finalNumberOfSteps);
+
     // (fraction of distance in x direction)* size of step toward target
     float  xStepSize                  = (xDistanceToMoveInMM/distanceToMoveInMM)*stepSizeMM;
     float  yStepSize                  = (yDistanceToMoveInMM/distanceToMoveInMM)*stepSizeMM;
-    
+
     //attach the axes
     leftAxis.attach();
     rightAxis.attach();
-    
+
     float aChainLength;
     float bChainLength;
     long   numberOfStepsTaken         =  0;
     long  beginingOfLastStep          = millis();
 
-    while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
-        
+    while(numberOfStepsTaken < finalNumberOfSteps){
+
         //if enough time has passed to take the next step
         if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
-            
-            //reset the counter 
+
+            //reset the counter
             beginingOfLastStep          = millis();
-            
+
             //find the target point for this step
             float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
             float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
-            
+
             //find the chain lengths for this step
             kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
-            
+
             //write to each axis
             leftAxis.write(aChainLength);
             rightAxis.write(bChainLength);
-            
+
             //increment the number of steps taken
             numberOfStepsTaken++;
-            
+
             //update position on display
             returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
-            
+
             //check for new serial commands
             readSerialCommands();
-            
+
             //check for a STOP command
             if(checkForStopCommand()){
-                
+
                 //set the axis positions to save
                 kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
                 leftAxis.endMove(aChainLength);
                 rightAxis.endMove(bChainLength);
-                
+
                 //make sure the positions are displayed correctly after stop
                 xTarget = whereXShouldBeAtThisStep;
                 yTarget = whereYShouldBeAtThisStep;
-                
+
                 return 1;
             }
         }
     }
-    
+
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
     leftAxis.endMove(aChainLength);
     rightAxis.endMove(bChainLength);
-    
+
     xTarget = xEnd;
     yTarget = yEnd;
-    
+
     return 1;
-    
+
 }
 
 void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     /*
     Takes a pointer to an axis object and moves that axis to endPos at speed MMPerMin
     */
-    
+
     float startingPos          = axis->target();
     float moveDist             = startingPos - endPos; //total distance to move
-    
+
     float direction            = -1* moveDist/abs(moveDist); //determine the direction of the move
-    
+
     float stepSizeMM           = 0.01;                    //step size in mm
     long finalNumberOfSteps    = moveDist/stepSizeMM;      //number of steps taken in move
-    
+    //due to the way that abs is implemented in the arduino library it should only be executed on
+    //a variable. i.e no calcs or functions inside the parens
+    finalNumberOfSteps = abs(finalNumberOfSteps);
+
     long numberOfStepsTaken    = 0;
     long  beginingOfLastStep   = millis();
-    
+
     //disconnect all the axis
     leftAxis.detach();
     rightAxis.detach();
     zAxis.detach();
-    
+
     //re-attach the one we want to move
     axis->attach();
-    
-    while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
-        
-        //reset the counter 
+
+    while(numberOfStepsTaken < finalNumberOfSteps){
+
+        //reset the counter
         beginingOfLastStep          = millis();
-        
+
         //find the target point for this step
         float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM*direction;
-        
+
         //write to each axis
         axis->write(whereAxisShouldBeAtThisStep);
-        
+
         //update position on display
         returnPoz(xTarget, yTarget, zAxis.read());
-        
+
         //calculate the correct delay between steps to set feedrate
         delay(calculateDelay(stepSizeMM, MMPerMin));
-        
+
         //increment the number of steps taken
         numberOfStepsTaken++;
-        
+
         //check for new serial commands
         readSerialCommands();
-        
+
         //check for a STOP command
         if(checkForStopCommand()){
             axis->endMove(whereAxisShouldBeAtThisStep);
             return;
         }
     }
-    
+
     axis->endMove(endPos);
-    
+
 }
 
 void  holdPosition(){
@@ -384,13 +392,13 @@ void  holdPosition(){
     rightAxis.hold();
     zAxis.hold();
 }
-    
-int   findEndOfNumber(String textString, int index){
+
+int   findEndOfNumber(const String& textString, int index){
     //Return the index of the last digit of the number beginning at the index passed in
     int i = index;
-    
+
     while (i < textString.length()){
-        
+
         if(isDigit(textString[i]) or isPunct(textString[i])){ //If we're still looking at a number, keep goin
             i++;
         }
@@ -400,8 +408,8 @@ int   findEndOfNumber(String textString, int index){
     }
     return i;                                                 //If we've reached the end of the string, return the last number
 }
-    
-float extractGcodeValue(String readString, char target,float defaultReturn){
+
+float extractGcodeValue(const String& readString, char target,float defaultReturn){
 
 /*Reads a string and returns the value of number following the target character.
 If no number is found, defaultReturn is returned*/
@@ -410,47 +418,46 @@ If no number is found, defaultReturn is returned*/
     int end;
     String numberAsString;
     float numberAsFloat;
-    
+
     begin           =  readString.indexOf(target);
     end             =  findEndOfNumber(readString,begin+1);
     numberAsString  =  readString.substring(begin+1,end);
-    
+
     numberAsFloat   =  numberAsString.toFloat();
-    
+
     if (begin == -1){ //if the character was not found, return error
         return defaultReturn;
     }
-    
+
     return numberAsFloat;
 }
 
-int   G1(String readString){
-    
-/*G1() is the function which is called to process the string if it begins with 
+int   G1(const String& readString){
+
+/*G1() is the function which is called to process the string if it begins with
 'G01' or 'G00'*/
-    
+
     float xgoto;
     float ygoto;
     float zgoto;
     float gospeed;
     int   isNotRapid;
-    
-    readString.toUpperCase(); //Make the string all uppercase to remove variability
-    
+
+
     float currentXPos = xTarget;
     float currentYPos = yTarget;
-    
+
     float currentZPos = zAxis.target();
-    
+
     xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
     ygoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
     zgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Z', currentZPos/_inchesToMMConversion);
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     isNotRapid = extractGcodeValue(readString, 'G', 1);
-    
 
-    if (useRelativeUnits){ //if we are using a relative coordinate system 
-        
+
+    if (useRelativeUnits){ //if we are using a relative coordinate system
+
         if(readString.indexOf('X') >= 0){ //if there is an X command
             xgoto = currentXPos + xgoto;
         }
@@ -461,19 +468,27 @@ int   G1(String readString){
             zgoto = currentZPos + zgoto;
         }
     }
-    
+
     feedrate = constrain(feedrate, 1, 900);   //constrain the maximum feedrate, 35ipm = 900 mmpm
-    
+
     //if the zaxis is attached
     if(zAxisAttached){
         float threshold = .01;
-        if (abs(zgoto- currentZPos) > threshold){
+
+        //temp variable because abs function shouldn't have calcs within
+        float zToGo1 = zgoto - currentZPos;
+
+        if (abs(zToGo1) > threshold){
             singleAxisMove(&zAxis, zgoto,45);
         }
     }
     else{
         float threshold = .1; //units of mm
-        if (abs(currentZPos - zgoto) > threshold){
+
+        //temp variable because abs function shouldn't have calcs within
+        float zToGo2 = currentZPos - zgoto;
+
+        if (abs(zToGo2) > threshold){
             Serial.print("Message: Please adjust Z-Axis to a depth of ");
             if (zgoto > 0){
                 Serial.print("+");
@@ -485,20 +500,20 @@ int   G1(String readString){
             else{
                 Serial.println(" mm");
             }
-            
+
             zAxis.set(zgoto);
-            
+
             int    waitTimeMs = 1000;
             double startTime  = millis();
-            
+
             while (millis() - startTime < waitTimeMs){
                 delay(1);
                 holdPosition();
-            } 
+            }
         }
     }
-    
-    
+
+
     if (isNotRapid){
         //if this is a regular move
         cordinatedMove(xgoto, ygoto, feedrate); //The XY move is performed
@@ -511,116 +526,118 @@ int   G1(String readString){
 
 int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float MMPerMin, float direction){
     /*
-    
-    Move the machine through an arc from point (X1, Y1) to point (X2, Y2) along the 
+
+    Move the machine through an arc from point (X1, Y1) to point (X2, Y2) along the
     arc defined by center (centerX, centerY) at speed MMPerMin
-    
+
     */
-    
-    //compute geometry 
+
+    //compute geometry
     float pi                     =  3.1415;
-    float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
+    float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) );
     float distanceBetweenPoints  =  sqrt( sq(  X2 - X1   ) + sq(    Y2  - Y1) );
     float circumference          =  2.0*pi*radius;
-    
+
     float startingAngle          =  atan2(Y1 - centerY, X1 - centerX);
     float endingAngle            =  atan2(Y2 - centerY, X2 - centerX);
-    
+
     //compute angle between lines
     float theta                  =  abs(startingAngle) - abs(endingAngle);
-    
+
     float arcLengthMM            =  circumference * (theta / (2*pi) );
-    
+
     //set up variables for movement
     int numberOfStepsTaken       =  0;
-    
+
     float stepSizeMM             =  computeStepSize(MMPerMin);
     int   finalNumberOfSteps     =  arcLengthMM/stepSizeMM;
-    
-    
+    //due to the way that abs is implemented in the arduino library it should only be executed on
+    //a variable. i.e no calcs or functions inside the parens
+    finalNumberOfSteps = abs(finalNumberOfSteps);
+
     //Compute the starting position
     float angleNow = startingAngle;
     float whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
     float whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
     float degreeComplete = 0.0;
-    
+
     float aChainLength;
     float bChainLength;
-    
+
     //attach the axes
     leftAxis.attach();
     rightAxis.attach();
-    
+
     long  beginingOfLastStep          = millis();
-    
-    while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
-        
+
+    while(numberOfStepsTaken < finalNumberOfSteps){
+
         //if enough time has passed to take the next step
         if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
-            
-            //reset the counter 
+
+            //reset the counter
             beginingOfLastStep          = millis();
-            
+
             degreeComplete = float(numberOfStepsTaken)/float(finalNumberOfSteps);
-            
+
             angleNow = startingAngle + theta*direction*degreeComplete;
-            
+
             whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
             whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
-            
+
             kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
-            
+
             leftAxis.write(aChainLength);
             rightAxis.write(bChainLength);
-            
+
             returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
-            
-            numberOfStepsTaken = numberOfStepsTaken + 1;
-            
+
+            numberOfStepsTaken++;
+
             //check for new serial commands
             readSerialCommands();
-            
+
             //check for a STOP command
             if(checkForStopCommand()){
                 //set the axis positions to save
                 kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
                 leftAxis.endMove(aChainLength);
                 rightAxis.endMove(bChainLength);
-                
+
                 //make sure the positions are displayed correctly after stop
                 xTarget = whereXShouldBeAtThisStep;
                 yTarget = whereYShouldBeAtThisStep;
-                
+
                 return 1;
             }
         }
     }
-    
+
     kinematics.inverse(X2,Y2,&aChainLength,&bChainLength);
     leftAxis.endMove(aChainLength);
     rightAxis.endMove(bChainLength);
-    
+
     xTarget = X2;
     yTarget = Y2;
-    
+
     return 1;
 }
 
-int   G2(String readString){
-    
+int   G2(const String& readString){
+
     float X1 = xTarget; //does this work if units are inches? (It seems to)
     float Y1 = yTarget;
-    
+
     float X2      = _inchesToMMConversion*extractGcodeValue(readString, 'X', X1/_inchesToMMConversion);
     float Y2      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', Y1/_inchesToMMConversion);
     float I       = _inchesToMMConversion*extractGcodeValue(readString, 'I', 0.0);
     float J       = _inchesToMMConversion*extractGcodeValue(readString, 'J', 0.0);
     float feed    = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     int   dir     = extractGcodeValue(readString, 'G', 0);
-    
+
     float centerX = X1 + I;
     float centerY = Y1 + J;
-    
+
     if (dir == 2){
         arc(X1, Y1, X2, Y2, centerX, centerY, feed, CLOCKWISE);
     }
@@ -629,23 +646,23 @@ int   G2(String readString){
     }
 }
 
-void  G10(String readString){
+void  G10(const String& readString){
     /*The G10() function handles the G10 gcode which re-zeros one or all of the machine's axes.*/
-    
+
     float currentXPos = xTarget;
     float currentYPos = yTarget;
     float currentZPos = zAxis.read();
-    
+
     float xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
     float ygoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
     float zgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Z', currentZPos/_inchesToMMConversion);
-    
+
     zAxis.set(zgoto);
     zAxis.endMove(zgoto);
     zAxis.attach();
 }
 
-void  G38(String readString) {
+void  G38(const String& readString) {
   //if the zaxis is attached
   if (zAxisAttached) {
     /*
@@ -655,8 +672,6 @@ void  G38(String readString) {
     if (readString.substring(3, 5) == ".2") {
       Serial.println("probing for z axis zero");
       float zgoto;
-
-      readString.toUpperCase(); //Make the string all uppercase to remove variability
 
       float currentZPos = zAxis.target();
 
@@ -702,6 +717,9 @@ void  G38(String readString) {
 
         float stepSizeMM           = 0.01;                    //step size in mm
         long finalNumberOfSteps    = moveDist / stepSizeMM;    //number of steps taken in move
+        //due to the way that abs is implemented in the arduino library it should only be executed on
+        //a variable. i.e no calcs or functions inside the parens
+        finalNumberOfSteps = abs(finalNumberOfSteps);
 
         long numberOfStepsTaken    = 0;
         long  beginingOfLastStep   = millis();
@@ -709,7 +727,7 @@ void  G38(String readString) {
         axis->attach();
         //  zAxis->attach();
 
-        while (abs(numberOfStepsTaken) < abs(finalNumberOfSteps)) {
+        while (numberOfStepsTaken < finalNumberOfSteps) {
 
           //reset the counter
           beginingOfLastStep          = millis();
@@ -775,24 +793,24 @@ void  calibrateChainLengths(){
     The calibrateChainLengths function lets the machine know that the chains are set to a given length where each chain is ORIGINCHAINLEN
     in length
     */
-    
-    
+
+
     //measure out the left chain
     Serial.println("Measuring out left chain");
     singleAxisMove(&leftAxis, ORIGINCHAINLEN, 500);
-    
+
     Serial.print(leftAxis.read());
     Serial.println("mm");
-    
+
     //measure out the right chain
     Serial.println("Measuring out right chain");
     singleAxisMove(&rightAxis, ORIGINCHAINLEN, 500);
-    
+
     Serial.print(rightAxis.read());
     Serial.println("mm");
-    
+
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
-    
+
 }
 
 void  setInchesToMillimetersConversion(float newConversionFactor){
@@ -806,11 +824,11 @@ void  printBeforeAndAfter(float before, float after){
     Serial.println(after);
 }
 
-void  updateSettings(String readString){
+void  updateSettings(const String& readString){
     /*
     Updates the machine dimensions from the Ground Control settings
     */
-    
+
     //Extract the settings values
 
     float bedWidth           = extractGcodeValue(readString, 'A', kinematics.machineWidth);
@@ -825,21 +843,21 @@ void  updateSettings(String readString){
     int encoderSteps         = extractGcodeValue(readString, 'J', ENCODERSTEPS);
     float gearTeeth          = extractGcodeValue(readString, 'K', 10);
     float chainPitch         = extractGcodeValue(readString, 'M', 6.35);
-    
+
     float zDistPerRot        = extractGcodeValue(readString, 'N', ZDISTPERROT);
     int zEncoderSteps        = extractGcodeValue(readString, 'P', ZENCODERSTEPS);
-    
+
     //Change the motor properties in cnc_funtions
-    float distPerRot = gearTeeth*chainPitch; 
+    float distPerRot = gearTeeth*chainPitch;
     leftAxis.changePitch(distPerRot);
     rightAxis.changePitch(distPerRot);
     zAxis.changePitch(zDistPerRot);
-    
+
     leftAxis.changeEncoderResolution(encoderSteps);
     rightAxis.changeEncoderResolution(encoderSteps);
     zAxis.changeEncoderResolution(zEncoderSteps);
-    
-    //Change the machine dimensions in the kinematics 
+
+    //Change the machine dimensions in the kinematics
     kinematics.l            = sledWidth;
     kinematics.s            = sledHeight;
     kinematics.h3           = sledCG;
@@ -849,39 +867,39 @@ void  updateSettings(String readString){
     kinematics.machineWidth = bedWidth;
     kinematics.machineHeight= bedHeight;
     kinematics.recomputeGeometry();
-    
+
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
-    
+
     Serial.println("Machine Settings Updated");
 }
 
-void  executeGcodeLine(String gcodeLine){
+void  executeGcodeLine(const String& gcodeLine){
     /*
-    
+
     Executes a single line of gcode beginning with the character 'G' or 'B'. If neither code is
     included on the front of the line, the code from the prevous line will be added.
-    
+
     */
-    
+
     //Handle B-codes
-    
+
     if(gcodeLine.substring(0, 3) == "B01"){
-        
+
         Serial.println("Motor Calibration Not Needed");
-        
+
         return;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B02"){
         calibrateChainLengths();
         return;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B03"){
         updateSettings(gcodeLine);
         return;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B04"){
         //Test each of the axis
         delay(500);
@@ -893,62 +911,62 @@ void  executeGcodeLine(String gcodeLine){
         Serial.println("Tests complete.");
         return;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B05"){
         Serial.print("Firmware Version ");
         Serial.println(VERSIONNUMBER);
         return;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B06"){
         Serial.println("Setting Chain Lengths To: ");
         float newL = extractGcodeValue(gcodeLine, 'L', 0);
         float newR = extractGcodeValue(gcodeLine, 'R', 0);
-        
+
         leftAxis.set(newL);
         rightAxis.set(newR);
-        
+
         Serial.print("Left: ");
         Serial.print(leftAxis.read());
         Serial.println("mm");
         Serial.print("Right: ");
         Serial.print(rightAxis.read());
         Serial.println("mm");
-        
+
         return;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B07"){
         //erase EEPROM
         leftAxis.wipeEEPROM();
         rightAxis.wipeEEPROM();
         zAxis.wipeEEPROM();
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B08"){
         //Manually recalibrate chain lengths
         leftAxis.set(ORIGINCHAINLEN);
         rightAxis.set(ORIGINCHAINLEN);
-        
+
         Serial.print("Left: ");
         Serial.print(leftAxis.read());
         Serial.println("mm");
         Serial.print("Right: ");
         Serial.print(rightAxis.read());
         Serial.println("mm");
-        
+
         kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
-        
+
         Serial.println("Message: The machine chains have been manually re-calibrated.");
-        
+
         return;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B09"){
         //Directly command each axis to move to a given distance
         float lDist = extractGcodeValue(gcodeLine, 'L', 0);
         float rDist = extractGcodeValue(gcodeLine, 'R', 0);
-        
+
         if(useRelativeUnits){
             singleAxisMove(&leftAxis,  leftAxis.read()  + lDist, 500);
             singleAxisMove(&rightAxis, rightAxis.read() + rDist, 500);
@@ -959,7 +977,7 @@ void  executeGcodeLine(String gcodeLine){
         }
         return;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B10"){
         //measure the left axis chain length
         Serial.print("[Measure: ");
@@ -967,15 +985,15 @@ void  executeGcodeLine(String gcodeLine){
         Serial.println("]");
         return;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B11"){
         //run right motor in the given direction at the given speed for the given time
         float  speed      = extractGcodeValue(gcodeLine, 'S', 100);
         float  time       = extractGcodeValue(gcodeLine, 'T', 1);
-        
+
         double ms    = 1000*time;
         double begin = millis();
-        
+
         int i = 0;
         while (millis() - begin < ms){
             leftAxis.motorGearboxEncoder.motor.directWrite(speed);
@@ -987,18 +1005,18 @@ void  executeGcodeLine(String gcodeLine){
         leftAxis.set(leftAxis.read());
         return;
     }
-    
+
     //Handle G-Codes
-   
+
     int gNumber = extractGcodeValue(gcodeLine,'G', -1);
-    
+
     if (gNumber != -1){                                     //If the line has a valid G number
         lastCommand = gNumber;                              //remember it for next time
     }
     else{                                                   //If the line does not have a gcommand
         gNumber = lastCommand;                              //apply the last one
     }
-    
+
     switch(gNumber){
         case 0:
             G1(gcodeLine);
@@ -1037,36 +1055,36 @@ void  executeGcodeLine(String gcodeLine){
                 Serial.println(" unsupported and ignored.");
             }
     }
-    
+
     if((gcodeLine[0] == 'T' || gcodeLine[0] == 't') && gcodeLine[1] != 'e'){
         Serial.print("Please insert tool ");
         Serial.println(gcodeLine);
-        gcodeLine = "";
-    }
-    
-} 
 
-int   findNextG(String readString, int startingPoint){
+    }
+
+}
+
+int   findNextG(const String& readString, int startingPoint){
     int nextGIndex = readString.indexOf('G', startingPoint);
     if(nextGIndex == -1){
         nextGIndex = readString.length();
     }
-    
+
     return nextGIndex;
 }
 
-void  interpretCommandString(String cmdString){
+void  interpretCommandString(const String& cmdString){
     /*
-    
+
     Splits a string into lines of gcode which begin with 'G'
-    
+
     */
-    
+
     returnError();  //Cue up sending the next line
-    
-    int firstG;  
+
+    int firstG;
     int secondG;
-    
+
     if (cmdString[0] == 'B'){                   //If the command is a B command
         Serial.println(cmdString);
         executeGcodeLine(cmdString);
@@ -1075,21 +1093,21 @@ void  interpretCommandString(String cmdString){
         while(cmdString.length() > 0){          //Extract each line of gcode from the string
             firstG  = findNextG(cmdString, 0);
             secondG = findNextG(cmdString, firstG + 1);
-            
+
             if(firstG == cmdString.length()){   //If the line contains no G letters
                 firstG = 0;                     //send the whole line
             }
-            
+
             String gcodeLine = cmdString.substring(firstG, secondG);
-            
+
             Serial.println(gcodeLine);
             executeGcodeLine(gcodeLine);
-            
+
             cmdString = cmdString.substring(secondG, cmdString.length());
-            
+
         }
     }
-    
+
     _signalReady();
-    
+
 }
