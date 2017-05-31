@@ -12,8 +12,8 @@
 
     You should have received a copy of the GNU General Public License
     along with the Makesmith Control Software.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Copyright 2014-2016 Bar Smith*/ 
+
+    Copyright 2014-2016 Bar Smith*/
 
 
 #include "Arduino.h"
@@ -30,9 +30,9 @@ Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, in
 :
 motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2)
 {
-    
+
     _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _Ki, _Kd, REVERSE);
-    
+
     //initialize variables
     _direction    = FORWARD;
     _axisName     = axisName;
@@ -40,14 +40,14 @@ motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPi
     _eepromAdr    = eepromAdr;
     _mmPerRotation= mmPerRotation;
     _encoderSteps = encoderSteps;
-    
+
     //load position
     if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
         set(_readFloat(_eepromAdr + SIZEOFFLOAT));
     }
-    
+
     initializePID();
-    
+
     motorGearboxEncoder.setName(_axisName);
 }
 
@@ -58,7 +58,7 @@ void   Axis::initializePID(){
 }
 
 int    Axis::write(float targetPosition){
-    
+
     _pidSetpoint   =  targetPosition/_mmPerRotation;
     return 1;
 }
@@ -78,31 +78,31 @@ float  Axis::setpoint(){
 }
 
 int    Axis::set(float newAxisPosition){
-    
+
     //reset everything to the new value
     _axisTarget   =  newAxisPosition/_mmPerRotation;
     _pidSetpoint  =  newAxisPosition/_mmPerRotation;
     motorGearboxEncoder.encoder.write((newAxisPosition*_encoderSteps)/_mmPerRotation);
-    
+
 }
 
 void   Axis::computePID(){
-    
-    
+
+
     if (_disableAxisForTesting){
         return;
     }
-    
+
     if (_detectDirectionChange(_pidSetpoint)){ //this determines if the axis has changed direction of movement and flushes the accumulator in the PID if it has
         _pidController.FlipIntegrator();
     }
-    
+
     _pidInput      =  motorGearboxEncoder.encoder.read()/_encoderSteps;
-    
+
     _pidController.Compute();
-    
+
     motorGearboxEncoder.write(_pidOutput);
-    
+
     /*if(_axisName[0] == 'R'){
         Serial.print(_pidSetpoint*10.0);
         Serial.print(" ");
@@ -110,13 +110,18 @@ void   Axis::computePID(){
         Serial.print(" ");
         Serial.println((_pidSetpoint*10.0) + _pidOutput/30.0);
     }*/
-    
+
     motorGearboxEncoder.computePID();
-    
+
 }
 
 float  Axis::error(){
-    return abs((motorGearboxEncoder.encoder.read()/_encoderSteps) - _pidSetpoint)*_mmPerRotation;
+
+    //temp variable because abs function shouldn't have calcs within
+    float errVal = (motorGearboxEncoder.encoder.read()/_encoderSteps) - _pidSetpoint;
+    errVal = abs(errVal);
+
+    return errVal *_mmPerRotation;
 }
 
 void   Axis::changePitch(float newPitch){
@@ -131,19 +136,19 @@ void   Axis::changeEncoderResolution(int newResolution){
     Reassign the encoder resolution for the axis.
     */
     _encoderSteps = newResolution;
-    
+
 }
 
 int    Axis::detach(){
-    
+
     if (motorGearboxEncoder.motor.attached()){
         _writeFloat (_eepromAdr+SIZEOFFLOAT, read());      //Store the axis position
         EEPROM.write(_eepromAdr, EEPROMVALIDDATA);
-        
+
     }
-    
+
     motorGearboxEncoder.motor.detach();
-    
+
     return 1;
 }
 
@@ -154,31 +159,31 @@ int    Axis::attach(){
 
 bool   Axis::attached(){
     /*
-    
+
     Returns true if the axis is attached, false if it is not.
-    
+
     */
-    
+
     return motorGearboxEncoder.motor.attached();
 }
 
 void   Axis::hold(){
     int timeout   = 2000;
-    
+
     if (millis() - _timeLastMoved < timeout){
         write(_axisTarget*_mmPerRotation);
     }
     else{
         detach();
     }
-    
+
 }
 
 void   Axis::endMove(float finalTarget){
-    
+
     _timeLastMoved = millis();
     _axisTarget    = finalTarget/_mmPerRotation;
-    
+
 }
 
 float  Axis::_readFloat(unsigned int addr){
@@ -198,9 +203,9 @@ float  Axis::_readFloat(unsigned int addr){
 }
 
 void   Axis::_writeFloat(unsigned int addr, float x){
-    
+
     //Writes a floating point number into the eeprom memory by splitting it into four one byte chunks and saving them
-    
+
     union{
         byte b[4];
         float f;
@@ -213,29 +218,29 @@ void   Axis::_writeFloat(unsigned int addr, float x){
 
 void   Axis::wipeEEPROM(){
     /*
-    
+
     Over-write all the values stored in EEPROM to return the machine to a known state.
-    
+
     */
-    
+
     int i = 0;
     while(i < 50){
         EEPROM.write(_eepromAdr + i, 0);
         i++;
     }
-    
+
     Serial.print(_axisName);
     Serial.println(" EEPROM erased");
 }
 
 int    Axis::_detectDirectionChange(float _pidSetpoint){
-    
+
     float difference = _pidSetpoint - _oldSetpoint;
-    
+
     if(difference == 0){
         return 0;
     }
-    
+
     int direction;
     if(difference > 0){
         direction = 1;
@@ -243,15 +248,15 @@ int    Axis::_detectDirectionChange(float _pidSetpoint){
     else{
         direction = 0;
     }
-    
+
     int retVal = 0;
     if(direction != _oldDir){
         retVal = 1;
     }
-    
+
     _oldSetpoint = _pidSetpoint;
     _oldDir = direction;
-    
+
     return retVal;
 }
 
@@ -259,24 +264,24 @@ void   Axis::test(){
     /*
     Test the axis by directly commanding the motor and observing if the encoder moves
     */
-    
+
     Serial.print("Testing ");
     Serial.print(_axisName);
     Serial.println(" motor:");
-    
+
     //print something to prevent the connection from timing out
     Serial.print("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>");
-    
+
     int i = 0;
     double encoderPos = motorGearboxEncoder.encoder.read(); //record the position now
-    
+
     //move the motor
     while (i < 1000){
         motorGearboxEncoder.motor.directWrite(255);
         i++;
         delay(1);
     }
-    
+
     //check to see if it moved
     if(encoderPos - motorGearboxEncoder.encoder.read() > 500){
         Serial.println("Direction 1 - Pass");
@@ -284,11 +289,11 @@ void   Axis::test(){
     else{
         Serial.println("Direction 1 - Fail");
     }
-    
+
     //record the position again
     encoderPos = motorGearboxEncoder.encoder.read();
     Serial.print("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>");
-    
+
     //move the motor in the other direction
     i = 0;
     while (i < 1000){
@@ -296,7 +301,7 @@ void   Axis::test(){
         i++;
         delay(1);
     }
-    
+
     //check to see if it moved
     if(encoderPos - motorGearboxEncoder.encoder.read() < -500){
         Serial.println("Direction 2 - Pass");
@@ -304,7 +309,7 @@ void   Axis::test(){
     else{
         Serial.println("Direction 2 - Fail");
     }
-    
+
     //stop the motor
     motorGearboxEncoder.motor.directWrite(0);
     Serial.print("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>");
