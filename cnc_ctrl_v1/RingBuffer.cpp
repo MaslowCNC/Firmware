@@ -130,7 +130,7 @@ void RingBuffer::_incrementBeginning(){
     if (_beginningOfString == _endOfString){
         return;                             //don't allow the beginning to pass the end
     }
-    else if (_beginningOfString < BUFFERSIZE){
+    else if (_beginningOfString < BUFFERSIZE+1){
         _beginningOfString++;                //move the beginning up one
     }
     else{
@@ -154,7 +154,7 @@ void RingBuffer::_incrementEnd(){
         Serial.println(size());
         return;
     }
-    else if (_endOfString < BUFFERSIZE){
+    else if (_endOfString < BUFFERSIZE + 1){
         _endOfString++;
     }
     else{
@@ -169,7 +169,7 @@ void RingBuffer::_incrementVariable(int* variable){
     
     */
     
-    if (*variable < BUFFERSIZE){
+    if (*variable < BUFFERSIZE + 1){
         *variable = *variable + 1;                //move the variable up one
     }
     else{
