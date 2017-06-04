@@ -391,7 +391,7 @@ void  holdPosition(){
     zAxis.hold();
 }
     
-int   findEndOfNumber(String textString, int index){
+int   findEndOfNumber(String& textString, int index){
     //Return the index of the last digit of the number beginning at the index passed in
     int i = index;
     
@@ -407,7 +407,7 @@ int   findEndOfNumber(String textString, int index){
     return i;                                                 //If we've reached the end of the string, return the last number
 }
     
-float extractGcodeValue(String readString, char target,float defaultReturn){
+float extractGcodeValue(String& readString, char target,float defaultReturn){
 
 /*Reads a string and returns the value of number following the target character.
 If no number is found, defaultReturn is returned*/
@@ -430,7 +430,7 @@ If no number is found, defaultReturn is returned*/
     return numberAsFloat;
 }
 
-int   G1(String readString){
+int   G1(String& readString){
     
 /*G1() is the function which is called to process the string if it begins with 
 'G01' or 'G00'*/
@@ -612,7 +612,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     return 1;
 }
 
-int   G2(String readString){
+int   G2(String& readString){
     
     float X1 = xTarget; //does this work if units are inches? (It seems to)
     float Y1 = yTarget;
@@ -635,7 +635,7 @@ int   G2(String readString){
     }
 }
 
-void  G10(String readString){
+void  G10(String& readString){
     /*The G10() function handles the G10 gcode which re-zeros one or all of the machine's axes.*/
     
     float currentXPos = xTarget;
@@ -651,7 +651,7 @@ void  G10(String readString){
     zAxis.attach();
 }
 
-void  G38(String readString) {
+void  G38(String& readString) {
   //if the zaxis is attached
   if (zAxisAttached) {
     /*
@@ -814,7 +814,7 @@ void  printBeforeAndAfter(float before, float after){
     Serial.println(after);
 }
 
-void  updateSettings(String readString){
+void  updateSettings(String& readString){
     /*
     Updates the machine dimensions from the Ground Control settings
     */
@@ -863,7 +863,7 @@ void  updateSettings(String readString){
     Serial.println("Machine Settings Updated");
 }
 
-void  executeGcodeLine(String gcodeLine){
+void  executeGcodeLine(String& gcodeLine){
     /*
     
     Executes a single line of gcode beginning with the character 'G' or 'B'. If neither code is
@@ -1054,7 +1054,7 @@ void  executeGcodeLine(String gcodeLine){
     
 } 
 
-int   findNextG(String readString, int startingPoint){
+int   findNextG(String& readString, int startingPoint){
     int nextGIndex = readString.indexOf('G', startingPoint);
     if(nextGIndex == -1){
         nextGIndex = readString.length();
@@ -1063,7 +1063,7 @@ int   findNextG(String readString, int startingPoint){
     return nextGIndex;
 }
 
-void  interpretCommandString(String cmdString){
+void  interpretCommandString(String& cmdString){
     /*
     
     Splits a string into lines of gcode which begin with 'G'
