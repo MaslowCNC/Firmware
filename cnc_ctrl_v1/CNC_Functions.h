@@ -78,6 +78,7 @@ float feedrate              =  500;
 float _inchesToMMConversion =  1;
 bool  useRelativeUnits      =  false;
 bool  stopFlag              =  false;
+bool  pauseFlag             =  false;
 String readString;                        //command being built one character at a time
 String readyCommandString;                //next command queued up and ready to send
 int   lastCommand           =  0;         //Stores the value of the last command run eg: G01 -> 1
@@ -176,6 +177,9 @@ void readSerialCommands(){
         if (c == '!'){
             stopFlag = true;
         }
+        else if (c == '~'){
+            pauseFlag = false;
+        }
         else{
             ringBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
         }
@@ -194,6 +198,47 @@ bool checkForStopCommand(){
         return 1;
     }
     return 0;
+}
+
+void  holdPosition(){
+    leftAxis.hold();
+    rightAxis.hold();
+    zAxis.hold();
+}
+
+void pause(){
+    /*
+    
+    The pause command pauses the machine in place without flushing the lines stored in the machine's
+    buffer.
+    
+    When paused the machine enters a while() loop and doesn't exit until the '~' cycle resume command 
+    is issued from Ground Control.
+    
+    */
+    
+    pauseFlag = true;
+    
+    long timeLastPrinted = 0;
+    while(1){
+        
+        //remind us that the machine is in the paused state
+        if (millis() - timeLastPrinted > 5000){
+            Serial.println("Maslow Paused");
+            timeLastPrinted = millis();
+        }
+        
+        holdPosition();
+    
+        readSerialCommands();
+    
+        returnPoz(xTarget, yTarget, zAxis.read());
+        
+        if (!pauseFlag){
+            return;
+        }
+    }
+    
 }
 
 bool checkForProbeTouch(int probePin) {
@@ -378,12 +423,6 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     axis->endMove(endPos);
     
 }
-
-void  holdPosition(){
-    leftAxis.hold();
-    rightAxis.hold();
-    zAxis.hold();
-}
     
 int   findEndOfNumber(String textString, int index){
     //Return the index of the last digit of the number beginning at the index passed in
@@ -485,6 +524,8 @@ int   G1(String readString){
             else{
                 Serial.println(" mm");
             }
+            
+            pause(); //Wait until the z-axis is adjusted
             
             zAxis.set(zgoto);
             
