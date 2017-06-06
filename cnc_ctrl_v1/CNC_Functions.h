@@ -585,7 +585,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
 
     //the argument to abs should only be a variable -- splitting calc into 2 lines
     long   finalNumberOfSteps     =  arcLengthMM/stepSizeMM;
-    finalNumberOfSteps = abs(finalNumberOfSteps);
+    //finalNumberOfSteps = abs(finalNumberOfSteps);
     
     //Compute the starting position
     float angleNow = startingAngle;
@@ -602,7 +602,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     
     long  beginingOfLastStep          = millis();
     
-    while(numberOfStepsTaken < finalNumberOfSteps){
+    while(numberOfStepsTaken < abs(finalNumberOfSteps)){
         
         //if enough time has passed to take the next step
         if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
