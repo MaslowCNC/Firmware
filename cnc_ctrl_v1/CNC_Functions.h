@@ -36,6 +36,7 @@ bool zAxisAttached = false;
 
 #define MILLIMETERS 1
 #define INCHES      25.4
+#define MAXFEED     900      //The maximum allowable feedrate in mm/min
 
 #define ENCODER1A 18
 #define ENCODER1B 19
@@ -294,7 +295,10 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     float  yDistanceToMoveInMM        = yEnd - yStartingLocation;
     
     //compute the total  number of steps in the move
-    long   finalNumberOfSteps         = abs(distanceToMoveInMM/stepSizeMM);
+    //the argument to abs should only be a variable -- splitting calc into 2 lines
+    long   finalNumberOfSteps         = distanceToMoveInMM/stepSizeMM;
+    finalNumberOfSteps = abs(finalNumberOfSteps);
+    
     
     // (fraction of distance in x direction)* size of step toward target
     float  xStepSize                  = (xDistanceToMoveInMM/distanceToMoveInMM)*stepSizeMM;
@@ -309,7 +313,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     long   numberOfStepsTaken         =  0;
     long  beginingOfLastStep          = millis();
 
-    while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
+    while(numberOfStepsTaken < finalNumberOfSteps){
         
         //if enough time has passed to take the next step
         if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
@@ -376,7 +380,10 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     float direction            = -1* moveDist/abs(moveDist); //determine the direction of the move
     
     float stepSizeMM           = 0.01;                    //step size in mm
+
+    //the argument to abs should only be a variable -- splitting calc into 2 lines
     long finalNumberOfSteps    = moveDist/stepSizeMM;      //number of steps taken in move
+    finalNumberOfSteps = abs(finalNumberOfSteps);
     
     long numberOfStepsTaken    = 0;
     long  beginingOfLastStep   = millis();
@@ -389,7 +396,7 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     //re-attach the one we want to move
     axis->attach();
     
-    while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
+    while(numberOfStepsTaken < finalNumberOfSteps){
         
         //reset the counter 
         beginingOfLastStep          = millis();
@@ -423,7 +430,7 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     
 }
     
-int   findEndOfNumber(String textString, int index){
+int   findEndOfNumber(String& textString, int index){
     //Return the index of the last digit of the number beginning at the index passed in
     int i = index;
     
@@ -439,7 +446,7 @@ int   findEndOfNumber(String textString, int index){
     return i;                                                 //If we've reached the end of the string, return the last number
 }
     
-float extractGcodeValue(String readString, char target,float defaultReturn){
+float extractGcodeValue(String& readString, char target,float defaultReturn){
 
 /*Reads a string and returns the value of number following the target character.
 If no number is found, defaultReturn is returned*/
@@ -462,7 +469,7 @@ If no number is found, defaultReturn is returned*/
     return numberAsFloat;
 }
 
-int   G1(String readString){
+int   G1(String& readString){
     
 /*G1() is the function which is called to process the string if it begins with 
 'G01' or 'G00'*/
@@ -472,9 +479,7 @@ int   G1(String readString){
     float zgoto;
     float gospeed;
     int   isNotRapid;
-    
-    readString.toUpperCase(); //Make the string all uppercase to remove variability
-    
+        
     float currentXPos = xTarget;
     float currentYPos = yTarget;
     
@@ -486,7 +491,6 @@ int   G1(String readString){
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     isNotRapid = extractGcodeValue(readString, 'G', 1);
     
-
     if (useRelativeUnits){ //if we are using a relative coordinate system 
         
         if(readString.indexOf('X') >= 0){ //if there is an X command
@@ -500,7 +504,7 @@ int   G1(String readString){
         }
     }
     
-    feedrate = constrain(feedrate, 1, 900);   //constrain the maximum feedrate, 35ipm = 900 mmpm
+    feedrate = constrain(feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     
     //if the zaxis is attached
     if(zAxisAttached){
@@ -572,11 +576,13 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     float arcLengthMM            =  circumference * (theta / (2*pi) );
     
     //set up variables for movement
-    int numberOfStepsTaken       =  0;
+    long numberOfStepsTaken       =  0;
     
     float stepSizeMM             =  computeStepSize(MMPerMin);
-    int   finalNumberOfSteps     =  arcLengthMM/stepSizeMM;
-    
+
+    //the argument to abs should only be a variable -- splitting calc into 2 lines
+    long   finalNumberOfSteps     =  arcLengthMM/stepSizeMM;
+    //finalNumberOfSteps = abs(finalNumberOfSteps);
     
     //Compute the starting position
     float angleNow = startingAngle;
@@ -593,7 +599,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     
     long  beginingOfLastStep          = millis();
     
-    while(abs(numberOfStepsTaken) < abs(finalNumberOfSteps)){
+    while(numberOfStepsTaken < abs(finalNumberOfSteps)){
         
         //if enough time has passed to take the next step
         if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
@@ -615,7 +621,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
             
             returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
             
-            numberOfStepsTaken = numberOfStepsTaken + 1;
+            numberOfStepsTaken++;
             
             //check for new serial commands
             readSerialCommands();
@@ -646,7 +652,13 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     return 1;
 }
 
-int   G2(String readString){
+int   G2(String& readString){
+    /*
+    
+    The G2 function handles the processing of the gcode line for both the command G2 and the
+    command G3 which cut arcs.
+    
+    */
     
     float X1 = xTarget; //does this work if units are inches? (It seems to)
     float Y1 = yTarget;
@@ -655,21 +667,23 @@ int   G2(String readString){
     float Y2      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', Y1/_inchesToMMConversion);
     float I       = _inchesToMMConversion*extractGcodeValue(readString, 'I', 0.0);
     float J       = _inchesToMMConversion*extractGcodeValue(readString, 'J', 0.0);
-    float feed    = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
+    feedrate      = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     int   dir     = extractGcodeValue(readString, 'G', 0);
     
     float centerX = X1 + I;
     float centerY = Y1 + J;
     
+    feedrate = constrain(feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
+    
     if (dir == 2){
-        arc(X1, Y1, X2, Y2, centerX, centerY, feed, CLOCKWISE);
+        arc(X1, Y1, X2, Y2, centerX, centerY, feedrate, CLOCKWISE);
     }
     if (dir == 3){
-        arc(X1, Y1, X2, Y2, centerX, centerY, feed, COUNTERCLOCKWISE);
+        arc(X1, Y1, X2, Y2, centerX, centerY, feedrate, COUNTERCLOCKWISE);
     }
 }
 
-void  G10(String readString){
+void  G10(String& readString){
     /*The G10() function handles the G10 gcode which re-zeros one or all of the machine's axes.*/
     
     float currentXPos = xTarget;
@@ -685,7 +699,7 @@ void  G10(String readString){
     zAxis.attach();
 }
 
-void  G38(String readString) {
+void  G38(String& readString) {
   //if the zaxis is attached
   if (zAxisAttached) {
     /*
@@ -696,7 +710,6 @@ void  G38(String readString) {
       Serial.println("probing for z axis zero");
       float zgoto;
 
-      readString.toUpperCase(); //Make the string all uppercase to remove variability
 
       float currentZPos = zAxis.target();
 
@@ -729,7 +742,7 @@ void  G38(String readString) {
         //        singleAxisMove(&zAxis, zgoto, feedrate);
 
         /*
-           Takes a pointer to an axis object and moves that axis to endPos at speed MMPerMin
+           Takes a pointer to an axis object and mo ves that axis to endPos at speed MMPerMin
         */
 
         Axis* axis = &zAxis;
@@ -741,7 +754,10 @@ void  G38(String readString) {
         float direction            = -1 * moveDist / abs(moveDist); //determine the direction of the move
 
         float stepSizeMM           = 0.01;                    //step size in mm
+
+        //the argument to abs should only be a variable -- splitting calc into 2 lines
         long finalNumberOfSteps    = moveDist / stepSizeMM;    //number of steps taken in move
+        finalNumberOfSteps = abs(finalNumberOfSteps);
 
         long numberOfStepsTaken    = 0;
         long  beginingOfLastStep   = millis();
@@ -749,7 +765,7 @@ void  G38(String readString) {
         axis->attach();
         //  zAxis->attach();
 
-        while (abs(numberOfStepsTaken) < abs(finalNumberOfSteps)) {
+        while (numberOfStepsTaken < finalNumberOfSteps) {
 
           //reset the counter
           beginingOfLastStep          = millis();
@@ -846,7 +862,7 @@ void  printBeforeAndAfter(float before, float after){
     Serial.println(after);
 }
 
-void  updateSettings(String readString){
+void  updateSettings(String& readString){
     /*
     Updates the machine dimensions from the Ground Control settings
     */
@@ -895,7 +911,7 @@ void  updateSettings(String readString){
     Serial.println("Machine Settings Updated");
 }
 
-void  executeGcodeLine(String gcodeLine){
+void  executeGcodeLine(String& gcodeLine){
     /*
     
     Executes a single line of gcode beginning with the character 'G' or 'B'. If neither code is
@@ -1086,7 +1102,7 @@ void  executeGcodeLine(String gcodeLine){
     
 } 
 
-int   findNextG(String readString, int startingPoint){
+int   findNextG(String& readString, int startingPoint){
     int nextGIndex = readString.indexOf('G', startingPoint);
     if(nextGIndex == -1){
         nextGIndex = readString.length();
@@ -1095,7 +1111,7 @@ int   findNextG(String readString, int startingPoint){
     return nextGIndex;
 }
 
-void  interpretCommandString(String cmdString){
+void  interpretCommandString(String& cmdString){
     /*
     
     Splits a string into lines of gcode which begin with 'G'
