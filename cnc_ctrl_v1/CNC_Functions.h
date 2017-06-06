@@ -474,6 +474,8 @@ int   G1(String& readString){
 /*G1() is the function which is called to process the string if it begins with 
 'G01' or 'G00'*/
     
+    Serial.println("Begin G1");
+    
     float xgoto;
     float ygoto;
     float zgoto;
@@ -654,6 +656,14 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
 }
 
 int   G2(String& readString){
+    /*
+    
+    The G2 function handles the processing of the gcode line for both the command G2 and the
+    command G3 which cut arcs.
+    
+    */
+    
+    Serial.println("Begin G2");
     
     float X1 = xTarget; //does this work if units are inches? (It seems to)
     float Y1 = yTarget;
