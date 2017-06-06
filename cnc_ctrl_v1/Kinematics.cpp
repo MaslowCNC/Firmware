@@ -195,7 +195,7 @@ void  Kinematics::forward(float chainALength, float chainBLength, float* xPos, f
         guessCount++;
 
         //Prevent the connection from timing out
-        Serial.print("[PosError:");
+        Serial.print("[PEk:");
         Serial.print(aChainError);
         Serial.print(',');
         Serial.print(bChainError);
