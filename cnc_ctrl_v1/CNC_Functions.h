@@ -36,6 +36,7 @@ bool zAxisAttached = false;
 
 #define MILLIMETERS 1
 #define INCHES      25.4
+#define MAXFEED     900      //The maximum allowable feedrate in mm/min
 
 #define ENCODER1A 18
 #define ENCODER1B 19
@@ -474,8 +475,6 @@ int   G1(String& readString){
 /*G1() is the function which is called to process the string if it begins with 
 'G01' or 'G00'*/
     
-    Serial.println("Begin G1");
-    
     float xgoto;
     float ygoto;
     float zgoto;
@@ -493,7 +492,6 @@ int   G1(String& readString){
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     isNotRapid = extractGcodeValue(readString, 'G', 1);
     
-
     if (useRelativeUnits){ //if we are using a relative coordinate system 
         
         if(readString.indexOf('X') >= 0){ //if there is an X command
@@ -507,7 +505,7 @@ int   G1(String& readString){
         }
     }
     
-    feedrate = constrain(feedrate, 1, 900);   //constrain the maximum feedrate, 35ipm = 900 mmpm
+    feedrate = constrain(feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     
     //if the zaxis is attached
     if(zAxisAttached){
@@ -663,8 +661,6 @@ int   G2(String& readString){
     
     */
     
-    Serial.println("Begin G2");
-    
     float X1 = xTarget; //does this work if units are inches? (It seems to)
     float Y1 = yTarget;
     
@@ -672,17 +668,19 @@ int   G2(String& readString){
     float Y2      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', Y1/_inchesToMMConversion);
     float I       = _inchesToMMConversion*extractGcodeValue(readString, 'I', 0.0);
     float J       = _inchesToMMConversion*extractGcodeValue(readString, 'J', 0.0);
-    float feed    = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
+    feedrate      = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     int   dir     = extractGcodeValue(readString, 'G', 0);
     
     float centerX = X1 + I;
     float centerY = Y1 + J;
     
+    feedrate = constrain(feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
+    
     if (dir == 2){
-        arc(X1, Y1, X2, Y2, centerX, centerY, feed, CLOCKWISE);
+        arc(X1, Y1, X2, Y2, centerX, centerY, feedrate, CLOCKWISE);
     }
     if (dir == 3){
-        arc(X1, Y1, X2, Y2, centerX, centerY, feed, COUNTERCLOCKWISE);
+        arc(X1, Y1, X2, Y2, centerX, centerY, feedrate, COUNTERCLOCKWISE);
     }
 }
 
