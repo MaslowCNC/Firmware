@@ -27,7 +27,7 @@ serial data.
 RingBuffer::RingBuffer(){
     
 }
-
+String temps;
 void RingBuffer::write(char letter){
     /*
     
@@ -72,7 +72,7 @@ String RingBuffer::readLine(){
     bool lineDetected = false;
     
     int  i = _beginningOfString;
-    while (i !=  _endOfString){                  // if we haven't gotten to the end of the buffer yet
+    while (i !=  _endOfString && !lineDetected){  // if we haven't gotten to the end of the buffer yet
         if(_buffer[i] == '\n'){                  //Check to see if the buffer contains a complete line terminated with \n
             lineDetected = true;
         }
@@ -80,7 +80,7 @@ String RingBuffer::readLine(){
     }
     
     if(lineDetected){
-        char lastReadValue;
+        char lastReadValue = '\0';
         while(lastReadValue != '\n'){                   //read until the end of the line is found, building the string
             lastReadValue = read();
             lineToReturn += lastReadValue;
@@ -92,8 +92,8 @@ String RingBuffer::readLine(){
 }
 
 void RingBuffer::print(){
-    Serial.print("Buffer size: ");
-    Serial.println(size());
+    Serial.print("Buffer Used: ");
+    Serial.println(length());
     Serial.print("Begin: ");
     Serial.println(_beginningOfString);
     Serial.print("End: ");
@@ -109,11 +109,13 @@ void RingBuffer::print(){
     Serial.print(_buffer[_endOfString-3]);
     Serial.println(_buffer[_endOfString-4]);
     
-    Serial.println("Buffer Contents: ");
-    int i = _beginningOfString;
-    while(i < _endOfString){
-        Serial.print(_buffer[i]);
-        i++;
+    if (_beginningOfString < _endOfString ){  // only if buffer is linear
+        Serial.println("Buffer Contents: ");
+        int i = _beginningOfString;
+        while(i < _endOfString){
+            Serial.print(_buffer[i]);
+            i++;
+        }
     }
     
     Serial.println(" ");
@@ -127,15 +129,10 @@ void RingBuffer::_incrementBeginning(){
     
     */
     
-    if (_beginningOfString == _endOfString){
-        return;                             //don't allow the beginning to pass the end
-    }
-    else if (_beginningOfString < BUFFERSIZE){
-        _beginningOfString++;                //move the beginning up one
-    }
-    else{
-        _beginningOfString = 0;              //wrap back to zero
-    }
+    if (_beginningOfString == _endOfString)  
+        return;   //don't allow the beginning to pass the end
+    else 
+        _beginningOfString = (_beginningOfString + 1) % BUFFERSIZE;    //move the beginning up one and wrap to zero based upon BUFFERSIZE
 }
 
 void RingBuffer::_incrementEnd(){
@@ -144,66 +141,41 @@ void RingBuffer::_incrementEnd(){
     Increment the pointer to the end of the ring buffer by one.
     
     */
-    if (_endOfString + 1 == _beginningOfString){
+    if ( spaceAvailable() == 0 ) {
         Serial.println("buffer overflow");
         Serial.print("Buffer begin: ");
         Serial.println(_beginningOfString);
         Serial.print("Buffer end: ");
         Serial.println(_endOfString);
-        Serial.print("BufferSize: ");
-        Serial.println(size());
-        return;
-    }
-    else if (_endOfString < BUFFERSIZE){
-        _endOfString++;
-    }
-    else{
-        _endOfString = 0;
-    }
-}
+        Serial.print("BufferLength: ");
+        Serial.println(length());
+        }
+    else
+        _endOfString = (_endOfString+1) % BUFFERSIZE;
+ }
 
 void RingBuffer::_incrementVariable(int* variable){
     /*
-    
-    Increment the target variable.
-    
+    Increment the target variable. 
     */
-    
-    if (*variable < BUFFERSIZE){
-        *variable = *variable + 1;                //move the variable up one
-    }
-    else{
-        *variable = 0;              //wrap back to zero
-    }
-}
+    *variable = (*variable + 1 ) % BUFFERSIZE;
+   }
 
-int  RingBuffer::size(){
+int  RingBuffer::spaceAvailable(){
     /*
-    
     Returns the number of characters held in the buffer
-    
     */
-    
-    if(_endOfString > _beginningOfString){                //if the buffer is linear
-        return _endOfString - _beginningOfString;
-    }
-    else if (_endOfString == _beginningOfString){
-        return 0;                                       //if the buffer is empty
-    }
-    else{                                               //if the buffer has wrapped
-        return (BUFFERSIZE - _beginningOfString) + _endOfString;
-    }
+  return  BUFFERSIZE - length() - 1;
 }
 
-int RingBuffer::spaceAvailable(){
-    /*
-    
-    Returns the number of character spaces available in the buffer
-    
-    */
-    
-    return (BUFFERSIZE - 1) - size();
+int RingBuffer::length(void)
+{
+  if ( _endOfString >= _beginningOfString ) // Linear
+    return _endOfString - _beginningOfString ;
+  else          // must have rolled
+    return  ( BUFFERSIZE - _beginningOfString + _endOfString); 
 }
+
 
 void RingBuffer::empty(){
     /*
