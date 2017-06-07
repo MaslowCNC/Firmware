@@ -25,20 +25,20 @@
     
     class MotorGearboxEncoder{
         public:
-            MotorGearboxEncoder(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2);
+            MotorGearboxEncoder(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2);
             Encoder    encoder;
             Motor      motor;
             float      computeSpeed();
-            void       write(float speed);
+            void       write(const float& speed);
             void       computePID();
-            void       setName(String newName);
+            void       setName(const String& newName);
             void       initializePID();
         private:
             double     _targetSpeed;
             double     _currentSpeed;
             double     _lastPosition;
             double     _lastTimeStamp;
-            float      _runningAverage(int newValue);
+            float      _runningAverage(const int& newValue);
             String     _motorName;
             double     _pidOutput;
             double     _Kp=20, _Ki=5, _Kd=0;

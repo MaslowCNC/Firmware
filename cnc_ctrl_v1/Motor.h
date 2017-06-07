@@ -35,13 +35,13 @@
         public:
             Motor();
             void attach();
-            int  setupMotor(int pwmPin, int pin1, int pin2);
+            int  setupMotor(const int& pwmPin, const int& pin1, const int& pin2);
             void detach();
             void write(int speed);
             int  attached();
-            int  _convolve(int input);
-            void setSegment(int index, float slope, float intercept, int negativeBound, int positiveBound);
-            LinSegment getSegment(int index);
+            int  _convolve(const int& input);
+            void setSegment(const int& index, const float& slope, const float& intercept, const int& negativeBound, const int& positiveBound);
+            LinSegment getSegment(const int& index);
             void  directWrite(int voltage);
         private:
             int _pwmPin;

@@ -24,7 +24,7 @@ to be a drop in replacement for a continuous rotation servo.
 #include "Arduino.h"
 #include "MotorGearboxEncoder.h"
 
-MotorGearboxEncoder::MotorGearboxEncoder(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2)
+MotorGearboxEncoder::MotorGearboxEncoder(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2)
 :
 encoder(encoderPin1,encoderPin2)
 {
@@ -41,7 +41,7 @@ encoder(encoderPin1,encoderPin2)
     
 }
 
-void  MotorGearboxEncoder::write(float speed){
+void  MotorGearboxEncoder::write(const float& speed){
     /*
     Command the motor to turn at the given speed. Should be RPM is PWM right now.
     */
@@ -143,7 +143,7 @@ float MotorGearboxEncoder::computeSpeed(){
     return -1.0*RPM;
 }
 
-float MotorGearboxEncoder::_runningAverage(int newValue){
+float MotorGearboxEncoder::_runningAverage(const int& newValue){
     /*
     
     Compute a running average from the number passed in.
@@ -167,7 +167,7 @@ float MotorGearboxEncoder::_runningAverage(int newValue){
     return runningAverage;
 }
 
-void MotorGearboxEncoder::setName(String newName){
+void MotorGearboxEncoder::setName(const String& newName){
     /*
     Set the name for the object
     */

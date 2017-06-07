@@ -103,7 +103,7 @@ void  returnError(){
         Serial.println("]");
 }
 
-void  returnPoz(float x, float y, float z){
+void  returnPoz(const float& x, const float& y, const float& z){
     /*
     Causes the machine's position (x,y) to be sent over the serial connection updated on the UI
     in Ground Control. Only executes if hasn't been called in at least timeout ms.
@@ -242,7 +242,7 @@ void pause(){
     
 }
 
-bool checkForProbeTouch(int probePin) {
+bool checkForProbeTouch(const int& probePin) {
   /*
       Check to see if AUX4 has gone LOW
   */
@@ -254,7 +254,7 @@ bool checkForProbeTouch(int probePin) {
   return 0;
 }
 
-float calculateDelay(float stepSizeMM, float feedrateMMPerMin){
+float calculateDelay(const float& stepSizeMM, const float& feedrateMMPerMin){
     /*
     Calculate the time delay between each step for a given feedrate
     */
@@ -268,7 +268,7 @@ float calculateDelay(float stepSizeMM, float feedrateMMPerMin){
     return msPerStep;
 }
 
-float computeStepSize(float MMPerMin){
+float computeStepSize(const float& MMPerMin){
     /*
     
     Determines the minimum step size which can be taken for the given feed-rate
@@ -279,7 +279,7 @@ float computeStepSize(float MMPerMin){
     return .0001575*MMPerMin; //value found empirically by running loop until there were not spare cycles
 }
 
-int   cordinatedMove(float xEnd, float yEnd, float MMPerMin){
+int   cordinatedMove(const float& xEnd, const float& yEnd, const float& MMPerMin){
     
 /*The move() function moves the tool in a straight line to the position (xEnd, yEnd) at 
 the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
@@ -372,7 +372,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     
 }
 
-void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
+void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     /*
     Takes a pointer to an axis object and moves that axis to endPos at speed MMPerMin
     */
@@ -435,7 +435,7 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     
 }
     
-int   findEndOfNumber(String& textString, int index){
+int   findEndOfNumber(const String& textString, const int& index){
     //Return the index of the last digit of the number beginning at the index passed in
     int i = index;
     
@@ -451,7 +451,7 @@ int   findEndOfNumber(String& textString, int index){
     return i;                                                 //If we've reached the end of the string, return the last number
 }
     
-float extractGcodeValue(String& readString, char target,float defaultReturn){
+float extractGcodeValue(const String& readString, char target, const float& defaultReturn){
 
 /*Reads a string and returns the value of number following the target character.
 If no number is found, defaultReturn is returned*/
@@ -474,7 +474,7 @@ If no number is found, defaultReturn is returned*/
     return numberAsFloat;
 }
 
-int   G1(String& readString){
+int   G1(const String& readString){
     
 /*G1() is the function which is called to process the string if it begins with 
 'G01' or 'G00'*/
@@ -558,7 +558,7 @@ int   G1(String& readString){
     }
 }
 
-int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, float MMPerMin, float direction){
+int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, const float& centerX, const float& centerY, const float& MMPerMin, const float& direction){
     /*
     
     Move the machine through an arc from point (X1, Y1) to point (X2, Y2) along the 
@@ -659,7 +659,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     return 1;
 }
 
-int   G2(String& readString){
+int   G2(const String& readString){
     /*
     
     The G2 function handles the processing of the gcode line for both the command G2 and the
@@ -690,7 +690,7 @@ int   G2(String& readString){
     }
 }
 
-void  G10(String& readString){
+void  G10(const String& readString){
     /*The G10() function handles the G10 gcode which re-zeros one or all of the machine's axes.*/
     
     float currentXPos = xTarget;
@@ -706,7 +706,7 @@ void  G10(String& readString){
     zAxis.attach();
 }
 
-void  G38(String& readString) {
+void  G38(const String& readString) {
   //if the zaxis is attached
   if (zAxisAttached) {
     /*
@@ -864,14 +864,14 @@ void  setInchesToMillimetersConversion(float newConversionFactor){
     _inchesToMMConversion = newConversionFactor;
 }
 
-void  printBeforeAndAfter(float before, float after){
+void  printBeforeAndAfter(const float& before, const float& after){
     Serial.print("Before: ");
     Serial.print(before);
     Serial.print(" After: ");
     Serial.println(after);
 }
 
-void  updateSettings(String& readString){
+void  updateSettings(const String& readString){
     /*
     Updates the machine dimensions from the Ground Control settings
     */
@@ -920,7 +920,7 @@ void  updateSettings(String& readString){
     Serial.println("Machine Settings Updated");
 }
 
-void  executeGcodeLine(String& gcodeLine){
+void  executeGcodeLine(const String& gcodeLine){
     /*
     
     Executes a single line of gcode beginning with the character 'G' or 'B'. If neither code is
@@ -1111,7 +1111,7 @@ void  executeGcodeLine(String& gcodeLine){
     
 } 
 
-int   findNextG(String& readString, int startingPoint){
+int   findNextG(const String& readString, const int& startingPoint){
     int nextGIndex = readString.indexOf('G', startingPoint);
     if(nextGIndex == -1){
         nextGIndex = readString.length();
@@ -1120,7 +1120,7 @@ int   findNextG(String& readString, int startingPoint){
     return nextGIndex;
 }
 
-void  interpretCommandString(String& cmdString){
+void  interpretCommandString(const String& cmdString){
     /*
     
     Splits a string into lines of gcode which begin with 'G'

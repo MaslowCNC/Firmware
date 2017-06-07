@@ -19,30 +19,30 @@ class PID
     PID();
     
     void setup(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 
-        double, double, double, int);     //   Setpoint.  Initial tuning parameters are also set here
+        const double&, const double&, const double&, const int&);     //   Setpoint.  Initial tuning parameters are also set here
 	
-    void SetMode(int Mode);               // * sets PID to either Manual (0) or Auto (non-0)
+    void SetMode(const int& Mode);               // * sets PID to either Manual (0) or Auto (non-0)
 
     bool Compute();                       // * performs the PID calculation.  it should be
                                           //   called every time loop() cycles. ON/OFF and
                                           //   calculation frequency can be set using SetMode
                                           //   SetSampleTime respectively
 
-    void SetOutputLimits(double, double); //clamps the output to a specific range. 0-255 by default, but
+    void SetOutputLimits(const double&, const double&); //clamps the output to a specific range. 0-255 by default, but
 										  //it's likely the user will want to change this depending on
 										  //the application
 	
 
 
   //available but not commonly used functions ********************************************************
-    void SetTunings(double, double,       // * While most users will set the tunings once in the 
-                    double);         	  //   constructor, this function gives the user the option
+    void SetTunings(const double&, const double&,       // * While most users will set the tunings once in the 
+                    const double&);         	  //   constructor, this function gives the user the option
                                           //   of changing tunings during runtime for Adaptive control
-	void SetControllerDirection(int);	  // * Sets the Direction, or "Action" of the controller. DIRECT
+	void SetControllerDirection(const int&);	  // * Sets the Direction, or "Action" of the controller. DIRECT
 										  //   means the output will increase when error is positive. REVERSE
 										  //   means the opposite.  it's very unlikely that this will be needed
 										  //   once it is set in the constructor.
-    void SetSampleTime(int);              // * sets the frequency, in Milliseconds, with which 
+    void SetSampleTime(const int&);              // * sets the frequency, in Milliseconds, with which 
                                           //   the PID calculation is performed.  default is 100
 										  
 										  

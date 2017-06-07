@@ -31,7 +31,7 @@ Motor::Motor(){
   
 }
 
-int  Motor::setupMotor(int pwmPin, int pin1, int pin2){
+int  Motor::setupMotor(const int& pwmPin, const int& pin1, const int& pin2){
   
   //store pin numbers as private variables
   _pwmPin = pwmPin;
@@ -90,9 +90,7 @@ void Motor::write(int speed){
         }
         
         //enforce range
-        if (speed > 255){speed = 255;}
-        
-        if (speed < -255)  {speed = -255;  }
+        speed = constrain(speed, -255, 255);
         
         speed = abs(speed); //remove sign from input because direction is set by control pins on H-bridge
         
@@ -128,7 +126,7 @@ int  Motor::attached(){
     return _attachedState;
 }
 
-int  Motor::_convolve(int input){
+int  Motor::_convolve(const int& input){
     /*
     This function distorts the input signal in a manner which is the inverse of the way
     the mechanics of the motor distort it to give a linear response.
@@ -147,7 +145,7 @@ int  Motor::_convolve(int input){
     return output;
 }
 
-void Motor::setSegment(int index, float slope, float intercept, int negativeBound, int positiveBound){
+void Motor::setSegment(const int& index, const float& slope, const float& intercept, const int& negativeBound, const int& positiveBound){
     
     //Adds a linearizion segment to the linSegments object in location index
     
@@ -158,6 +156,6 @@ void Motor::setSegment(int index, float slope, float intercept, int negativeBoun
     
 }
 
-LinSegment Motor::getSegment(int index){
+LinSegment Motor::getSegment(const int& index){
     return _linSegments[index];
 }

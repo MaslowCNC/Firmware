@@ -164,7 +164,7 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 
 }
 
-void  Kinematics::forward(float chainALength, float chainBLength, float* xPos, float* yPos){
+void  Kinematics::forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos){
 
     float xGuess = 0;
     float yGuess = 0;
@@ -264,7 +264,7 @@ void  Kinematics::_MatSolv(){
     }
 }
 
-float Kinematics::_moment(float Y1Plus, float Y2Plus, float Phi, float MSinPhi, float MSinPsi1, float MCosPsi1, float MSinPsi2, float MCosPsi2){   //computes net moment about center of mass
+float Kinematics::_moment(const float& Y1Plus, const float& Y2Plus, const float& Phi, const float& MSinPhi, const float& MSinPsi1, const float& MCosPsi1, const float& MSinPsi2, const float& MCosPsi2){   //computes net moment about center of mass
     float Temp;
     float Offsetx1;
     float Offsetx2;
@@ -330,7 +330,7 @@ void Kinematics::_MyTrig(){
 
 }
 
-float Kinematics::_YOffsetEqn(float YPlus, float Denominator, float Psi){
+float Kinematics::_YOffsetEqn(const float& YPlus, const float& Denominator, const float& Psi){
     float Temp;
     Temp = ((sqrt(YPlus * YPlus - R * R)/R) - (y + YPlus - h * sin(Psi))/Denominator);
     return Temp;

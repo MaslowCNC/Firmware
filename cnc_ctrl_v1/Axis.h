@@ -26,32 +26,32 @@
 
     class Axis{
         public:
-            Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation, float encoderSteps);
-            int    write(float targetPosition);
+            Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const String& axisName, const int& eepromAdr, const float& mmPerRotation, const float& encoderSteps);
+            int    write(const float& targetPosition);
             float  read();
-            int    set(float newAxisPosition);
+            int    set(const float& newAxisPosition);
             int    updatePositionFromEncoder();
             void   initializePID();
             int    detach();
             int    attach();
             void   hold();
-            void   endMove(float finalTarget);
+            void   endMove(const float& finalTarget);
             float  target();
             float  error();
             float  setpoint();
             void   computePID();
             void   test();
-            void   changePitch(float newPitch);
-            void   changeEncoderResolution(int newResolution);
+            void   changePitch(const float& newPitch);
+            void   changeEncoderResolution(const int& newResolution);
             bool   attached();
             void   wipeEEPROM();
             MotorGearboxEncoder    motorGearboxEncoder;
             
         private:
             int        _PWMread(int pin);
-            void       _writeFloat(unsigned int addr, float x);
-            float      _readFloat(unsigned int addr);
-            int        _detectDirectionChange(float _pidSetpoint);
+            void       _writeFloat(const unsigned int& addr, const float& x);
+            float      _readFloat(const unsigned int& addr);
+            int        _detectDirectionChange(const float& _pidSetpoint);
             int        _direction;
             int        _encoderPin;
             String     _axisName;
