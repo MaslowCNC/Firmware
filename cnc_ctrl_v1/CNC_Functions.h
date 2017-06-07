@@ -1124,7 +1124,9 @@ void  interpretCommandString(String& cmdString){
     int lineLen = extractGcodeValue(cmdString, 'L', 0);
     if (cmdString.length() != lineLen){
         Serial.print(cmdString.length() - lineLen);
-        Serial.println("-->>Chars lost in serial \/\/");
+        Serial.println("-->>Chars lost in serial -->>");
+        Serial.println(cmdString.length());
+        Serial.println(lineLen);
     }
     else{
         Serial.println("All characters received");
