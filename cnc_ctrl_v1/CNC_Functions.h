@@ -1132,7 +1132,7 @@ void  interpretCommandString(String& cmdString){
     int secondG;
     
     if (cmdString[0] == 'B'){                   //If the command is a B command
-        Serial.print("P:" + cmdString);
+        Serial.print(cmdString);
         executeGcodeLine(cmdString);
     }
     else{
@@ -1146,7 +1146,7 @@ void  interpretCommandString(String& cmdString){
             
             String gcodeLine = cmdString.substring(firstG, secondG);
             
-            Serial.print("P:" + gcodeLine);
+            Serial.print(gcodeLine);
             executeGcodeLine(gcodeLine);
             
             cmdString = cmdString.substring(secondG, cmdString.length());
