@@ -31,9 +31,6 @@ Kinematics::Kinematics(){
 void Kinematics::_verifyValidTarget(float* xTarget,float* yTarget){
     //If the target point is beyond one of the edges of the board, the machine stops at the edge
 
-    float halfWidth = machineWidth / 2.0f;
-    float halfHeight = machineHeight / 2.0f;
-
     *xTarget = (*xTarget < -halfWidth) ? -halfWidth : (*xTarget > halfWidth) ? halfWidth : *xTarget;
     *yTarget = (*yTarget < -halfHeight) ? -halfHeight : (*yTarget > halfHeight) ? halfHeight : *yTarget;
 
@@ -48,8 +45,7 @@ void Kinematics::recomputeGeometry(){
     Theta = atan(2*s/l);
     Psi1 = Theta - Phi;
     Psi2 = Theta + Phi;
-    halfWidth = machineWidth / 2.0f;
-    halfHeight = machineHeight / 2.0f;
+
 }
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
@@ -59,7 +55,7 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
     x = (D/2.0) + xTarget;
-    y = (machineHeight/2.0) + motorOffsetY  - yTarget;
+    y = (halfHeight) + motorOffsetY  - yTarget;
 
     //Coordinates definition:
     //         x -->, y |
