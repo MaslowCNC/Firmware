@@ -94,7 +94,7 @@ void  returnError(){
     Prints the machine's positional error and the amount of space available in the 
     gcode buffer
     */
-        Serial.print("[PosError:");
+        Serial.print("[PE:");
         Serial.print(leftAxis.error());
         Serial.print(',');
         Serial.print(rightAxis.error());
@@ -155,7 +155,7 @@ void  _watchDog(){
         
         if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
             
-            if (ringBuffer.size() > 0){                  //if there is stuff sitting in the buffer, run it
+            if (ringBuffer.length() > 0){                  //if there is stuff sitting in the buffer, run it
                 ringBuffer.write('\n');
                 Serial.println("watch dog catch");
             }
@@ -238,8 +238,7 @@ void pause(){
         if (!pauseFlag){
             return;
         }
-    }
-    
+    }    
 }
 
 bool checkForProbeTouch(int probePin) {
@@ -300,6 +299,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     long   finalNumberOfSteps         = distanceToMoveInMM/stepSizeMM;
     finalNumberOfSteps = abs(finalNumberOfSteps);
     
+    float delayTime = calculateDelay(stepSizeMM, MMPerMin);
     
     // (fraction of distance in x direction)* size of step toward target
     float  xStepSize                  = (xDistanceToMoveInMM/distanceToMoveInMM)*stepSizeMM;
@@ -314,10 +314,11 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     long   numberOfStepsTaken         =  0;
     long  beginingOfLastStep          = millis();
 
+
     while(numberOfStepsTaken < finalNumberOfSteps){
         
         //if enough time has passed to take the next step
-        if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
+        if (millis() - beginingOfLastStep > delayTime){
             
             //reset the counter 
             beginingOfLastStep          = millis();
@@ -385,6 +386,8 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     //the argument to abs should only be a variable -- splitting calc into 2 lines
     long finalNumberOfSteps    = moveDist/stepSizeMM;      //number of steps taken in move
     finalNumberOfSteps = abs(finalNumberOfSteps);
+
+    float delayTime = calculateDelay(stepSizeMM, MMPerMin);
     
     long numberOfStepsTaken    = 0;
     long  beginingOfLastStep   = millis();
@@ -412,7 +415,7 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
         returnPoz(xTarget, yTarget, zAxis.read());
         
         //calculate the correct delay between steps to set feedrate
-        delay(calculateDelay(stepSizeMM, MMPerMin));
+        delay(delayTime);
         
         //increment the number of steps taken
         numberOfStepsTaken++;
@@ -593,6 +596,8 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     
     float aChainLength;
     float bChainLength;
+
+    float delayTime = calculateDelay(stepSizeMM, MMPerMin);
     
     //attach the axes
     leftAxis.attach();
@@ -603,7 +608,7 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     while(numberOfStepsTaken < abs(finalNumberOfSteps)){
         
         //if enough time has passed to take the next step
-        if (millis() - beginingOfLastStep > calculateDelay(stepSizeMM, MMPerMin)){
+        if (millis() - beginingOfLastStep > delayTime){
             
             //reset the counter 
             beginingOfLastStep          = millis();
@@ -760,9 +765,11 @@ void  G38(String& readString) {
         long finalNumberOfSteps    = moveDist / stepSizeMM;    //number of steps taken in move
         finalNumberOfSteps = abs(finalNumberOfSteps);
 
+        float delayTime = calculateDelay(stepSizeMM, MMPerMin);
+
         long numberOfStepsTaken    = 0;
         long  beginingOfLastStep   = millis();
-
+  
         axis->attach();
         //  zAxis->attach();
 
@@ -781,7 +788,7 @@ void  G38(String& readString) {
           returnPoz(xTarget, yTarget, zAxis.read());
 
           //calculate the correct delay between steps to set feedrate
-          delay(calculateDelay(stepSizeMM, MMPerMin));
+          delay(delayTime);
 
           //increment the number of steps taken
           numberOfStepsTaken++;
@@ -1136,7 +1143,7 @@ void  interpretCommandString(String& cmdString){
     int secondG;
     
     if (cmdString[0] == 'B'){                   //If the command is a B command
-        Serial.println(cmdString);
+        Serial.print(cmdString);
         executeGcodeLine(cmdString);
     }
     else{
@@ -1150,7 +1157,7 @@ void  interpretCommandString(String& cmdString){
             
             String gcodeLine = cmdString.substring(firstG, secondG);
             
-            Serial.println(gcodeLine);
+            Serial.print(gcodeLine);
             executeGcodeLine(gcodeLine);
             
             cmdString = cmdString.substring(secondG, cmdString.length());

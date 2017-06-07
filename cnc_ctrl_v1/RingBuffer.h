@@ -28,7 +28,7 @@
             void  write(char letter);
             void  print();
             char  read();
-            int   size();
+            int   length();
             int   spaceAvailable();
             void  empty();
             String readLine();

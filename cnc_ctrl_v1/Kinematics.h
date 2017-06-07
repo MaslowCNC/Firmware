@@ -36,9 +36,14 @@
             float h3            = 79.0;                                //distance from bit to sled center of mass
             float D             = 2978.4;                              //distance between sprocket centers
             float R             = 10.2;                                //sprocket radius
+
+
+            //machine dimensions
             float machineHeight = 1219.2;                              //this is 4 feet in mm
             float machineWidth  = 2438.4;                              //this is 8 feet in mm
             float motorOffsetY  = 463.0;                               //vertical distance from the corner of the work area to the sprocket center
+            float halfWidth = machineWidth / 2.0;                      //Half the machine width
+            float halfHeight = machineHeight / 2.0;                    //Half the machine height
             
         private:
             float _moment(float Y1Plus, float Y2Plus, float Phi, float MSinPhi, float MSinPsi1, float MCosPsi1, float MSinPsi2, float MCosPsi2);
@@ -49,9 +54,7 @@
             //target router bit coordinates.
             float x = 2708.4;
             float y = 270;
-            //machine dimensions
-            float halfWidth;
-            float halfHeight;
+
 
 
 
