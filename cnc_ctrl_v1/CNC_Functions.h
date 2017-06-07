@@ -1132,8 +1132,7 @@ void  interpretCommandString(String& cmdString){
     if (cmdString.length() != lineLen){
         Serial.print(cmdString.length() - lineLen);
         Serial.println("-->>Chars lost in serial -->>");
-        Serial.println(cmdString.length());
-        Serial.println(lineLen);
+        ringBuffer.print();
     }
     else{
         Serial.println("All characters received");
