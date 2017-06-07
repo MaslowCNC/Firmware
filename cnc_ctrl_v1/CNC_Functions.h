@@ -94,7 +94,7 @@ void  returnError(){
     Prints the machine's positional error and the amount of space available in the 
     gcode buffer
     */
-        Serial.print("[PosError:");
+        Serial.print("[PE:");
         Serial.print(leftAxis.error());
         Serial.print(',');
         Serial.print(rightAxis.error());
@@ -155,7 +155,7 @@ void  _watchDog(){
         
         if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
             
-            if (ringBuffer.size() > 0){                  //if there is stuff sitting in the buffer, run it
+            if (ringBuffer.length() > 0){                  //if there is stuff sitting in the buffer, run it
                 ringBuffer.write('\n');
                 Serial.println("watch dog catch");
             }
@@ -238,8 +238,7 @@ void pause(){
         if (!pauseFlag){
             return;
         }
-    }
-    
+    }    
 }
 
 bool checkForProbeTouch(int probePin) {
@@ -1125,7 +1124,7 @@ void  interpretCommandString(String& cmdString){
     int secondG;
     
     if (cmdString[0] == 'B'){                   //If the command is a B command
-        Serial.println(cmdString);
+        Serial.print("P:" + cmdString);
         executeGcodeLine(cmdString);
     }
     else{
@@ -1139,7 +1138,7 @@ void  interpretCommandString(String& cmdString){
             
             String gcodeLine = cmdString.substring(firstG, secondG);
             
-            Serial.println(gcodeLine);
+            Serial.print("P:" + gcodeLine);
             executeGcodeLine(gcodeLine);
             
             cmdString = cmdString.substring(secondG, cmdString.length());
