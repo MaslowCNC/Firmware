@@ -20,7 +20,7 @@ libraries*/
 #include "Kinematics.h"
 #include "RingBuffer.h"
 
-#define VERSIONNUMBER 0.72
+#define VERSIONNUMBER 0.73
 
 bool zAxisAttached = false;
 
