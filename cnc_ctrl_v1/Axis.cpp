@@ -116,7 +116,11 @@ void   Axis::computePID(){
 }
 
 float  Axis::error(){
-    return abs((motorGearboxEncoder.encoder.read()/_encoderSteps) - _pidSetpoint)*_mmPerRotation;
+
+    float encoderErr = (motorGearboxEncoder.encoder.read()/_encoderSteps) - _pidSetpoint;
+    float absEncoderErr = abs(encoderErr);
+
+    return absEncoderErr *_mmPerRotation;
 }
 
 void   Axis::changePitch(const float& newPitch){
