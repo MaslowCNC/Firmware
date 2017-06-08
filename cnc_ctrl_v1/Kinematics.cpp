@@ -77,16 +77,17 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     Y1Plus = R * sqrt(1 + TanGamma * TanGamma);
     Y2Plus = R * sqrt(1 + TanLambda * TanLambda);
 
-    _MyTrig();
+
+    while (Tries <= MaxTries) {
+
+        _MyTrig();
                                              //These criteria will be zero when the correct values are reached
                                              //They are negated here as a numerical efficiency expedient
 
-    Crit[0]=  - _moment(Y1Plus, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
-    Crit[1] = - _YOffsetEqn(Y1Plus, x - h * CosPsi1, SinPsi1);
-    Crit[2] = - _YOffsetEqn(Y2Plus, D - (x + h * CosPsi2), SinPsi2);
+        Crit[0]=  - _moment(Y1Plus, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
+        Crit[1] = - _YOffsetEqn(Y1Plus, x - h * CosPsi1, SinPsi1);
+        Crit[2] = - _YOffsetEqn(Y2Plus, D - (x + h * CosPsi2), SinPsi2);
 
-
-    while (Tries <= MaxTries) {
         if (abs(Crit[0]) < MaxError) {
             if (abs(Crit[1]) < MaxError) {
                 if (abs(Crit[2]) < MaxError){
@@ -125,13 +126,7 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 
         Psi1 = Theta - Phi;
         Psi2 = Theta + Phi;
-                                                             //evaluate the
-                                                             //three criterion equations
-    _MyTrig();
 
-    Crit[0] = - _moment(Y1Plus, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
-    Crit[1] = - _YOffsetEqn(Y1Plus, x - h * CosPsi1, SinPsi1);
-    Crit[2] = - _YOffsetEqn(Y2Plus, D - (x + h * CosPsi2), SinPsi2);
     Tries = Tries + 1;                                       // increment itteration count
 
     }
