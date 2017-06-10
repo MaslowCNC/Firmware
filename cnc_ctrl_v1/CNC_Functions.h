@@ -565,8 +565,6 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     
     */
     
-    Serial.println("Begin Arc");
-    
     //compute geometry 
     float pi                     =  3.1415;
     float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
@@ -673,9 +671,6 @@ int   G2(String& readString,int G2orG3){
     
     */
     
-    Serial.println("Begin G2");
-    Serial.println(readString);
-    
     float X1 = xTarget; //does this work if units are inches? (It seems to)
     float Y1 = yTarget;
     
@@ -684,7 +679,6 @@ int   G2(String& readString,int G2orG3){
     float I       = _inchesToMMConversion*extractGcodeValue(readString, 'I', 0.0);
     float J       = _inchesToMMConversion*extractGcodeValue(readString, 'J', 0.0);
     feedrate      = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
-    //int   dir     = extractGcodeValue(readString, 'G', 0);
     
     float centerX = X1 + I;
     float centerY = Y1 + J;
