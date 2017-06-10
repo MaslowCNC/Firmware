@@ -565,6 +565,8 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     
     */
     
+    Serial.println("Begin Arc");
+    
     //compute geometry 
     float pi                     =  3.1415;
     float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
@@ -663,13 +665,16 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     return 1;
 }
 
-int   G2(String& readString){
+int   G2(String& readString,int G2orG3){
     /*
     
     The G2 function handles the processing of the gcode line for both the command G2 and the
     command G3 which cut arcs.
     
     */
+    
+    Serial.println("Begin G2");
+    Serial.println(readString);
     
     float X1 = xTarget; //does this work if units are inches? (It seems to)
     float Y1 = yTarget;
@@ -679,17 +684,17 @@ int   G2(String& readString){
     float I       = _inchesToMMConversion*extractGcodeValue(readString, 'I', 0.0);
     float J       = _inchesToMMConversion*extractGcodeValue(readString, 'J', 0.0);
     feedrate      = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
-    int   dir     = extractGcodeValue(readString, 'G', 0);
+    //int   dir     = extractGcodeValue(readString, 'G', 0);
     
     float centerX = X1 + I;
     float centerY = Y1 + J;
     
     feedrate = constrain(feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     
-    if (dir == 2){
+    if (G2orG3 == 2){
         arc(X1, Y1, X2, Y2, centerX, centerY, feedrate, CLOCKWISE);
     }
-    if (dir == 3){
+    if (G2orG3 == 3){
         arc(X1, Y1, X2, Y2, centerX, centerY, feedrate, COUNTERCLOCKWISE);
     }
 }
@@ -1076,10 +1081,10 @@ void  executeGcodeLine(String& gcodeLine){
             G1(gcodeLine);
             break;
         case 2:
-            G2(gcodeLine);
+            G2(gcodeLine, gNumber);
             break;
         case 3:
-            G2(gcodeLine);
+            G2(gcodeLine, gNumber);
             break;
         case 10:
             G10(gcodeLine);
