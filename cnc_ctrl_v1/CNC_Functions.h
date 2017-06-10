@@ -577,6 +577,11 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     //compute angle between lines
     float theta                  =  abs(startingAngle) - abs(endingAngle);
     
+    //Catch the corner case where the beginning and end of the circle are the same
+    if (startingAngle == endingAngle){
+        theta = direction*2*pi;
+    }
+    
     float arcLengthMM            =  circumference * (theta / (2*pi) );
     
     //set up variables for movement
