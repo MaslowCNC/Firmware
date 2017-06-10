@@ -671,6 +671,7 @@ int   G2(String& readString,int G2orG3){
     
     */
     
+    
     float X1 = xTarget; //does this work if units are inches? (It seems to)
     float Y1 = yTarget;
     
@@ -1150,7 +1151,7 @@ void  interpretCommandString(String& cmdString){
             
             String gcodeLine = cmdString.substring(firstG, secondG);
             
-            Serial.print(gcodeLine);
+            Serial.println(gcodeLine);
             executeGcodeLine(gcodeLine);
             
             cmdString = cmdString.substring(secondG, cmdString.length());
