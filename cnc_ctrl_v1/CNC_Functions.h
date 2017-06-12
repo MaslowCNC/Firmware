@@ -314,7 +314,9 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     long   numberOfStepsTaken         =  0;
     long  beginingOfLastStep          = millis();
 
-
+    
+    Serial.println(rightAxis.attached());
+    
     while(numberOfStepsTaken < finalNumberOfSteps){
         
         //if enough time has passed to take the next step
