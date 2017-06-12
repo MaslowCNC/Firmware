@@ -1015,6 +1015,9 @@ void  executeGcodeLine(String& gcodeLine){
         float lDist = extractGcodeValue(gcodeLine, 'L', 0);
         float rDist = extractGcodeValue(gcodeLine, 'R', 0);
         
+        leftAxis.setPIDAggressiveness(0.1);
+        rightAxis.setPIDAggressiveness(0.1);
+        
         if(useRelativeUnits){
             singleAxisMove(&leftAxis,  leftAxis.read()  + lDist, 500);
             leftAxis.detach();

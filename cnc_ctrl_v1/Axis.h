@@ -40,6 +40,7 @@
             float  error();
             float  setpoint();
             void   computePID();
+            void   setPIDAggressiveness(float aggressiveness);
             void   test();
             void   changePitch(float newPitch);
             void   changeEncoderResolution(int newResolution);

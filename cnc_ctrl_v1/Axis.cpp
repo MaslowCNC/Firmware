@@ -115,6 +115,19 @@ void   Axis::computePID(){
     
 }
 
+void   Axis::setPIDAggressiveness(float aggressiveness){
+    /*
+    
+    The setPIDAggressiveness() function sets the aggressiveness of the PID controller to
+    compensate for a change in the load on the motor.
+    
+    */
+    Serial.print("set aggressiveness: ");
+    Serial.println(aggressiveness);
+    
+    motorGearboxEncoder.setPIDAggressiveness(aggressiveness);
+}
+
 float  Axis::error(){
     return abs((motorGearboxEncoder.encoder.read()/_encoderSteps) - _pidSetpoint)*_mmPerRotation;
 }
