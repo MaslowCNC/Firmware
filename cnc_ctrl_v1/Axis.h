@@ -47,6 +47,7 @@
             bool   attached();
             void   wipeEEPROM();
             MotorGearboxEncoder    motorGearboxEncoder;
+            String     _axisName;
             
         private:
             int        _PWMread(int pin);
@@ -55,7 +56,6 @@
             int        _detectDirectionChange(float _pidSetpoint);
             int        _direction;
             int        _encoderPin;
-            String     _axisName;
             float      _axisTarget;
             int        _currentAngle;
             int        _previousAngle;

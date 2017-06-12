@@ -131,9 +131,6 @@ void MotorGearboxEncoder::setPIDAggressiveness(float aggressiveness){
     
     */
     
-    Serial.print("Lower level: ");
-    Serial.println(aggressiveness);
-    
     _posPIDController.SetTunings(aggressiveness*_Kp, _Ki, _Kd);
     _negPIDController.SetTunings(aggressiveness*_Kp, _Ki, _Kd);
     

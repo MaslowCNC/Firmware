@@ -122,8 +122,6 @@ void   Axis::setPIDAggressiveness(float aggressiveness){
     compensate for a change in the load on the motor.
     
     */
-    Serial.print("set aggressiveness: ");
-    Serial.println(aggressiveness);
     
     motorGearboxEncoder.setPIDAggressiveness(aggressiveness);
 }
