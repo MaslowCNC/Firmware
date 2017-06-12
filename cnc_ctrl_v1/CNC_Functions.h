@@ -378,9 +378,6 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     Takes a pointer to an axis object and moves that axis to endPos at speed MMPerMin
     */
     
-    Serial.println("Begin Single Axis Move");
-    Serial.println(axis->_axisName);
-    
     float startingPos          = axis->read();
     float moveDist             = startingPos - endPos; //total distance to move
     
@@ -397,19 +394,8 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     long numberOfStepsTaken    = 0;
     long  beginingOfLastStep   = millis();
     
-    //re-attach the one we want to move
+    //attach the axis we want to move
     axis->attach();
-    
-    if(axis->_axisName == "Left-axis"){
-        Serial.print(axis->_axisName);
-        Serial.println(" move:");
-        Serial.print("startingPos "); Serial.println(startingPos);
-        Serial.print("endPos "); Serial.println(endPos);
-        Serial.print("dada "); Serial.println(startingPos + numberOfStepsTaken*stepSizeMM*direction);
-        Serial.print("numberOfStepsTaken "); Serial.println(numberOfStepsTaken);
-        Serial.print("stepSizeMM "); Serial.println(stepSizeMM);
-        Serial.print("direction "); Serial.println(direction);
-    }
     
     while(numberOfStepsTaken < finalNumberOfSteps){
         
@@ -418,10 +404,6 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
         
         //find the target point for this step
         float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM*direction;
-        
-        /*if(axis->_axisName == "Left-axis"){
-            Serial.println(whereAxisShouldBeAtThisStep);
-        }*/
         
         //write to axis
         axis->write(whereAxisShouldBeAtThisStep);
