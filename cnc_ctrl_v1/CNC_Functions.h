@@ -394,11 +394,6 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     long numberOfStepsTaken    = 0;
     long  beginingOfLastStep   = millis();
     
-    //disconnect all the axis
-    leftAxis.detach();
-    rightAxis.detach();
-    zAxis.detach();
-    
     //re-attach the one we want to move
     axis->attach();
     
@@ -1022,7 +1017,9 @@ void  executeGcodeLine(String& gcodeLine){
         
         if(useRelativeUnits){
             singleAxisMove(&leftAxis,  leftAxis.read()  + lDist, 500);
+            leftAxis.detach();
             singleAxisMove(&rightAxis, rightAxis.read() + rDist, 500);
+            rightAxis.detach();
         }
         else{
             singleAxisMove(&leftAxis,  lDist, 500);
