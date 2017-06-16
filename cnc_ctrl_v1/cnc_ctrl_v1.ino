@@ -16,7 +16,6 @@
 #define SERIAL_TX_BUFFER_SIZE 512
     
 #include "CNC_Functions.h"
-#include "TimerOne.h"
 
 void setup(){
     Serial.begin(57600);
@@ -31,22 +30,7 @@ void setup(){
     Timer1.attachInterrupt(runsOnATimer);
     
     Serial.println("Grbl v1.00");
-    
-    /*int i = 0;
-    String testGcode = "G20 \nG1X-1 Y-1 F100 \nG1 X1 \nG3 Y2 J1.5\nG1 X-1 \nG1 Y-1\nG1 X0 Y0\n";
-    
-    Serial.println(testGcode.length());
-    while (i < testGcode.length()){
-        ringBuffer.write(testGcode[i]);
-        i++;
-    }*/
-    
-}
 
-void runsOnATimer(){
-    leftAxis.computePID();
-    rightAxis.computePID();
-    zAxis.computePID();
 }
 
 void loop(){
