@@ -1172,7 +1172,7 @@ void  interpretCommandString(String& cmdString){
     
     returnError();  //Cue up sending the next line
     
-    int lineLen = extractGcodeValue(cmdString, 'L', 0);
+    int lineLen = extractGcodeValue(cmdString, 'W', 0);
     if (cmdString.length() != lineLen){
         Serial.print(cmdString.length() - lineLen);
         Serial.println("-->>Chars lost in serial -->>");
