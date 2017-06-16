@@ -127,7 +127,7 @@ void   Axis::setPIDAggressiveness(float aggressiveness){
 }
 
 float  Axis::error(){
-    return abs((motorGearboxEncoder.encoder.read()/_encoderSteps) - _pidSetpoint)*_mmPerRotation;
+    return ((motorGearboxEncoder.encoder.read()/_encoderSteps) - _pidSetpoint)*_mmPerRotation;
 }
 
 void   Axis::changePitch(float newPitch){
