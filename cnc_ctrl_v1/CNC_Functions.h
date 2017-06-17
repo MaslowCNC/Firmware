@@ -383,6 +383,12 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     float startingPos          = axis->read();
     float moveDist             = startingPos - endPos; //total distance to move
     
+	Serial.println("*****");
+	Serial.print("startingPos "); Serial.println(startingPos);
+	Serial.print("endPos "); Serial.println(endPos);
+	Serial.print("moveDist "); Serial.println(moveDist);
+	
+	
     float direction            = -1* moveDist/abs(moveDist); //determine the direction of the move
     
     float stepSizeMM           = 0.01;                    //step size in mm
@@ -1021,18 +1027,6 @@ void  executeGcodeLine(String& gcodeLine){
         //Directly command each axis to move to a given distance
         float lDist = extractGcodeValue(gcodeLine, 'L', 0);
         float rDist = extractGcodeValue(gcodeLine, 'R', 0);
-        
-        //Establish that we are in a reasonable state where neither axis is very far from where
-        //it should be (due to a previous failed calibration attempt)
-        float threshold = .2;
-        if(abs(leftAxis.target() - leftAxis.read()) > threshold){
-            Serial.println("Reseting left axis");
-            leftAxis.set(0.0);
-        }
-        if(abs(rightAxis.target() - rightAxis.read()) > threshold){
-            Serial.println("Reseting right axis");
-            rightAxis.set(0.0);
-        }
         
         leftAxis.setPIDAggressiveness(.1);
         rightAxis.setPIDAggressiveness(.1);
