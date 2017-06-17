@@ -12,9 +12,6 @@
     
     Copyright 2014-2017 Bar Smith*/
     
-#define SERIAL_RX_BUFFER_SIZE 512
-#define SERIAL_TX_BUFFER_SIZE 512
-    
 #include "CNC_Functions.h"
 
 void setup(){

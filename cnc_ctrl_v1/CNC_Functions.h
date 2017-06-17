@@ -182,7 +182,11 @@ void readSerialCommands(){
     Check to see if a new character is available from the serial connection, read it if one is.
     */
     if(Serial.available() > 0){
-        Timer1.detachInterrupt();
+        //Timer1.detachInterrupt();
+        if(Serial.available() > 62){
+            Serial.print("Default buffer-size overflows here with: ");
+            Serial.println(Serial.available());
+        }
         while (Serial.available() > 0) {
             char c = Serial.read();
             if (c == '!'){
@@ -195,7 +199,7 @@ void readSerialCommands(){
                 ringBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
             }
         }
-        Timer1.attachInterrupt(runsOnATimer);
+        //Timer1.attachInterrupt(runsOnATimer);
     }
 }
 
