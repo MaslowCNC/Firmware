@@ -382,12 +382,6 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     
     float startingPos          = axis->read();
     float moveDist             = startingPos - endPos; //total distance to move
-    
-	Serial.println("*****");
-	Serial.print("startingPos "); Serial.println(startingPos);
-	Serial.print("endPos "); Serial.println(endPos);
-	Serial.print("moveDist "); Serial.println(moveDist);
-	
 	
     float direction            = -1* moveDist/abs(moveDist); //determine the direction of the move
     
