@@ -313,9 +313,6 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     float bChainLength;
     long   numberOfStepsTaken         =  0;
     long  beginingOfLastStep          = millis();
-
-    
-    Serial.println(rightAxis.attached());
     
     while(numberOfStepsTaken < finalNumberOfSteps){
         
@@ -365,8 +362,6 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
     leftAxis.endMove(aChainLength);
     rightAxis.endMove(bChainLength);
-    
-    Serial.print("Kinematics returns: "); Serial.print(aChainLength); Serial.print(" "); Serial.println(bChainLength);
     
     xTarget = xEnd;
     yTarget = yEnd;
@@ -1168,8 +1163,10 @@ void  interpretCommandString(String& cmdString){
             
             String gcodeLine = cmdString.substring(firstG, secondG);
             
-            Serial.println(gcodeLine);
-            executeGcodeLine(gcodeLine);
+            if (gcodeLine.length() > 1){
+                Serial.println(gcodeLine);
+                executeGcodeLine(gcodeLine);
+            }
             
             cmdString = cmdString.substring(secondG, cmdString.length());
             
