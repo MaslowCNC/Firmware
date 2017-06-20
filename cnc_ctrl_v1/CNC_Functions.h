@@ -857,6 +857,8 @@ void  calibrateChainLengths(){
     Serial.print(leftAxis.read());
     Serial.println("mm");
     
+    leftAxis.detach();
+    
     //measure out the right chain
     Serial.println("Measuring out right chain");
     rightAxis.setPIDAggressiveness(.1);
