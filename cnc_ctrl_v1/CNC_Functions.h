@@ -1018,21 +1018,22 @@ void  executeGcodeLine(String& gcodeLine){
         //Directly command each axis to move to a given distance
         float lDist = extractGcodeValue(gcodeLine, 'L', 0);
         float rDist = extractGcodeValue(gcodeLine, 'R', 0);
+		float speed = extractGcodeValue(gcodeLine, 'F', 500);
         
         leftAxis.setPIDAggressiveness(.1);
         rightAxis.setPIDAggressiveness(.1);
         
         if(useRelativeUnits){
             if(abs(lDist) > 0){
-                singleAxisMove(&leftAxis,  leftAxis.read()  + lDist, 100);
+                singleAxisMove(&leftAxis,  leftAxis.read()  + lDist, speed);
             }
             if(abs(rDist) > 0){
-                singleAxisMove(&rightAxis, rightAxis.read() + rDist, 100);
+                singleAxisMove(&rightAxis, rightAxis.read() + rDist, speed);
             }
         }
         else{
-            singleAxisMove(&leftAxis,  lDist, 100);
-            singleAxisMove(&rightAxis, rDist, 100);
+            singleAxisMove(&leftAxis,  lDist, speed);
+            singleAxisMove(&rightAxis, rDist, speed);
         }
         
         leftAxis.setPIDAggressiveness(1);
