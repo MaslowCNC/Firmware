@@ -98,7 +98,7 @@ void RingBuffer::print(){
     Serial.println(_beginningOfString);
     Serial.print("End: ");
     Serial.println(_endOfString);
-    Serial.print(_buffer[_beginningOfString]);
+    /*Serial.print(_buffer[_beginningOfString]);
     Serial.print(_buffer[_beginningOfString+1]);
     Serial.print(_buffer[_beginningOfString+2]);
     Serial.print(_buffer[_beginningOfString+3]);
@@ -118,7 +118,7 @@ void RingBuffer::print(){
         }
     }
     
-    Serial.println(" ");
+    Serial.println(" ");*/
     
 }
 

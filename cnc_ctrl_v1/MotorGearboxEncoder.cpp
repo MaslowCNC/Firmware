@@ -68,44 +68,6 @@ void  MotorGearboxEncoder::computePID(){
     */
     _currentSpeed = computeSpeed();
     
-    /*if (millis() < 8000){
-        _targetSpeed = 0;
-    }
-    else if (millis() < 12000){
-        _targetSpeed = 10;
-    }
-    else if (millis() < 18000){
-         _targetSpeed = 0;
-    }
-    else if(millis() < 24000){
-        _targetSpeed = float((millis() - 18000))/400.0;
-    }
-    else if (millis() < 32000){
-        _targetSpeed = 0;
-    }
-    else if (millis() < 40000){
-        _targetSpeed = 10;
-    }
-    else if (millis() < 48000){
-        _targetSpeed = 0;
-    }
-    else if (millis() < 56000){
-        _targetSpeed = -10;
-    }
-    else if (millis() < 64000){
-        _targetSpeed = 0;
-    }
-    else if (millis() < 72000){
-        _targetSpeed = 10;
-    }
-    else if (millis() < 80000){
-        _targetSpeed = 0;
-    }
-    else{
-        _targetSpeed = 0;
-    }*/
-    
-    
     if(_targetSpeed > 0){
         _posPIDController.Compute();
     }
@@ -113,13 +75,6 @@ void  MotorGearboxEncoder::computePID(){
         _negPIDController.Compute();
     }
     
-    /*if(_motorName[0] == 'R'){
-        //Serial.print(_currentSpeed);
-        //Serial.print(" ");
-        Serial.println(_targetSpeed);
-    }*/
-    
-    //motor.attach();
     motor.write(_pidOutput);
 }
 

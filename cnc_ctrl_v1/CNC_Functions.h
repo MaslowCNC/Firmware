@@ -19,6 +19,7 @@ libraries*/
 #include "Axis.h"
 #include "Kinematics.h"
 #include "RingBuffer.h"
+#include "TimerOne.h"
 
 #define VERSIONNUMBER 0.76
 
@@ -88,6 +89,13 @@ int   lastCommand           =  0;         //Stores the value of the last command
 //by a call to the forward kinematic function when it is available.
 float xTarget = 0;
 float yTarget = 0;
+
+
+void runsOnATimer(){
+    leftAxis.computePID();
+    rightAxis.computePID();
+    zAxis.computePID();
+}
 
 void  returnError(){
     /*
@@ -173,17 +181,25 @@ void readSerialCommands(){
     /*
     Check to see if a new character is available from the serial connection, read it if one is.
     */
-    while (Serial.available() > 0) {
-        char c = Serial.read();
-        if (c == '!'){
-            stopFlag = true;
+    if(Serial.available() > 0){
+        //Timer1.detachInterrupt();
+        if(Serial.available() > 62){
+            Serial.print("Default buffer-size overflows here with: ");
+            Serial.println(Serial.available());
         }
-        else if (c == '~'){
-            pauseFlag = false;
+        while (Serial.available() > 0) {
+            char c = Serial.read();
+            if (c == '!'){
+                stopFlag = true;
+            }
+            else if (c == '~'){
+                pauseFlag = false;
+            }
+            else{
+                ringBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
+            }
         }
-        else{
-            ringBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
-        }
+        //Timer1.attachInterrupt(runsOnATimer);
     }
 }
 
@@ -1149,6 +1165,15 @@ void  interpretCommandString(String& cmdString){
     */
     
     returnError();  //Cue up sending the next line
+    
+    int lineLen = extractGcodeValue(cmdString, 'W', 0);
+    if (cmdString.length() != lineLen){
+        Serial.print(cmdString.length() - lineLen);
+        Serial.println("-->>Chars lost in serial -->>");
+    }
+    else{
+        Serial.println("All characters received");
+    }
     
     int firstG;  
     int secondG;
