@@ -382,7 +382,7 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     
     float startingPos          = axis->read();
     float moveDist             = startingPos - endPos; //total distance to move
-	
+    
     float direction            = -1* moveDist/abs(moveDist); //determine the direction of the move
     
     float stepSizeMM           = 0.01;                    //step size in mm
@@ -853,6 +853,8 @@ void  calibrateChainLengths(){
     Serial.print(leftAxis.read());
     Serial.println("mm");
     
+    leftAxis.detach();
+    
     //measure out the right chain
     Serial.println("Measuring out right chain");
     rightAxis.setPIDAggressiveness(.1);
@@ -1027,15 +1029,15 @@ void  executeGcodeLine(String& gcodeLine){
         
         if(useRelativeUnits){
             if(abs(lDist) > 0){
-                singleAxisMove(&leftAxis,  leftAxis.target()  + lDist, 500);
+                singleAxisMove(&leftAxis,  leftAxis.read()  + lDist, 100);
             }
             if(abs(rDist) > 0){
-                singleAxisMove(&rightAxis, rightAxis.target() + rDist, 500);
+                singleAxisMove(&rightAxis, rightAxis.read() + rDist, 100);
             }
         }
         else{
-            singleAxisMove(&leftAxis,  lDist, 500);
-            singleAxisMove(&rightAxis, rDist, 500);
+            singleAxisMove(&leftAxis,  lDist, 100);
+            singleAxisMove(&rightAxis, rDist, 100);
         }
         
         leftAxis.setPIDAggressiveness(1);
