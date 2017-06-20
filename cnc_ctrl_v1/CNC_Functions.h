@@ -382,7 +382,11 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     
     float startingPos          = axis->read();
     float moveDist             = startingPos - endPos; //total distance to move
-	
+    
+    Serial.print("startingPos "); Serial.println(startingPos);
+    Serial.print("endPos "); Serial.println(endPos);
+    Serial.print("moveDist "); Serial.println(moveDist);
+    
     float direction            = -1* moveDist/abs(moveDist); //determine the direction of the move
     
     float stepSizeMM           = 0.01;                    //step size in mm
@@ -1027,10 +1031,10 @@ void  executeGcodeLine(String& gcodeLine){
         
         if(useRelativeUnits){
             if(abs(lDist) > 0){
-                singleAxisMove(&leftAxis,  leftAxis.target()  + lDist, 500);
+                singleAxisMove(&leftAxis,  leftAxis.read()  + lDist, 500);
             }
             if(abs(rDist) > 0){
-                singleAxisMove(&rightAxis, rightAxis.target() + rDist, 500);
+                singleAxisMove(&rightAxis, rightAxis.read() + rDist, 500);
             }
         }
         else{
