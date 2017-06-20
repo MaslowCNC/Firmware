@@ -57,7 +57,7 @@ void   Axis::initializePID(){
     _pidController.SetSampleTime(10);
 }
 
-int    Axis::write(float targetPosition){
+void    Axis::write(float targetPosition){
     
     _pidSetpoint   =  targetPosition/_mmPerRotation;
     return 1;
