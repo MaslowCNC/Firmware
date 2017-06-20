@@ -366,7 +366,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     leftAxis.endMove(aChainLength);
     rightAxis.endMove(bChainLength);
     
-    Serial.print("Kinematics returns: "); Serial.print(aChainLength); Serial.print(" "); Serial.println(bChainLength);
+    Serial.print("Kinematics: "); Serial.print(aChainLength); Serial.print(" "); Serial.println(bChainLength);
     
     xTarget = xEnd;
     yTarget = yEnd;
