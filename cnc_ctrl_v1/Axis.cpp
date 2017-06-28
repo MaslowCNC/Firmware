@@ -60,7 +60,7 @@ void   Axis::initializePID(){
 void    Axis::write(float targetPosition){
     
     _pidSetpoint   =  targetPosition/_mmPerRotation;
-    return 1;
+    return;
 }
 
 float  Axis::read(){
