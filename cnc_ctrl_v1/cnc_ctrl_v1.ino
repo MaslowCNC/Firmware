@@ -29,10 +29,6 @@ void setup(){
     
     Serial.println("Grbl v1.00");
     
-    while(true){
-        Timer1.pwm(2, 512);//leftAxis.motorGearboxEncoder.motor.directWrite(255);
-    }
-    
 }
 
 void runsOnATimer(){
