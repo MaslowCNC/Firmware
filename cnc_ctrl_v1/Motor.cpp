@@ -37,7 +37,7 @@ int  Motor::setupMotor(int pwmPin, int pin1, int pin2){
   _pwmPin = pwmPin;
   _pin1  = pin1;
   _pin2  = pin2;
-  _attachedState = 1;
+  _attachedState = 0;
   
   //set pinmodes
   pinMode(_pwmPin,   OUTPUT); 
@@ -72,7 +72,7 @@ void Motor::write(int speed){
     if (_attachedState == 1){
         
         //linearize the motor
-        speed = _convolve(speed);
+        //speed = _convolve(speed);
         
         //set direction range is 0-180
         if (speed > 0){

@@ -12,15 +12,17 @@
     
     Copyright 2014-2017 Bar Smith*/
     
-    
 #include "CNC_Functions.h"
 #include "TimerOne.h"
 
 void setup(){
-    Serial.begin(19200);
+    Serial.begin(57600);
+    
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
     Serial.println("ready");
     Serial.println("ok");
+    
     
     Timer1.initialize(10000);
     Timer1.attachInterrupt(runsOnATimer);

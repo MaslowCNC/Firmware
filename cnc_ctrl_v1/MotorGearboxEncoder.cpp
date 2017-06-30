@@ -31,6 +31,108 @@ encoder(encoderPin1,encoderPin2)
     
     //initialize motor
     motor.setupMotor(pwmPin, directionPin1, directionPin2);
+    motor.write(0);
+    
+    //initialize the PID
+    _posPIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, DIRECT);
+    _negPIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, DIRECT);
+    initializePID();
+    
+    
+}
+
+void  MotorGearboxEncoder::write(float speed){
+    /*
+    Command the motor to turn at the given speed. Should be RPM is PWM right now.
+    */
+    
+    _targetSpeed = speed;
+    
+}
+
+void   MotorGearboxEncoder::initializePID(){
+    //setup positive PID controller
+    _posPIDController.SetMode(AUTOMATIC);
+    _posPIDController.SetOutputLimits(-255, 255);
+    _posPIDController.SetSampleTime(10);
+    
+    //setup negative PID controller
+    _negPIDController.SetMode(AUTOMATIC);
+    _negPIDController.SetOutputLimits(-255, 255);
+    _negPIDController.SetSampleTime(10);
+}
+
+void  MotorGearboxEncoder::computePID(){
+    /*
+    Recompute the speed control PID loop and command the motor to move.
+    */
+    _currentSpeed = computeSpeed();
+    
+    /*if (millis() < 8000){
+        _targetSpeed = 0;
+    }
+    else if (millis() < 12000){
+        _targetSpeed = 10;
+    }
+    else if (millis() < 18000){
+         _targetSpeed = 0;
+    }
+    else if(millis() < 24000){
+        _targetSpeed = float((millis() - 18000))/400.0;
+    }
+    else if (millis() < 32000){
+        _targetSpeed = 0;
+    }
+    else if (millis() < 40000){
+        _targetSpeed = 10;
+    }
+    else if (millis() < 48000){
+        _targetSpeed = 0;
+    }
+    else if (millis() < 56000){
+        _targetSpeed = -10;
+    }
+    else if (millis() < 64000){
+        _targetSpeed = 0;
+    }
+    else if (millis() < 72000){
+        _targetSpeed = 10;
+    }
+    else if (millis() < 80000){
+        _targetSpeed = 0;
+    }
+    else{
+        _targetSpeed = 0;
+    }*/
+    
+    
+    if(_targetSpeed > 0){
+        _posPIDController.Compute();
+    }
+    else{
+        _negPIDController.Compute();
+    }
+    
+    /*if(_motorName[0] == 'R'){
+        //Serial.print(_currentSpeed);
+        //Serial.print(" ");
+        Serial.println(_targetSpeed);
+    }*/
+    
+    //motor.attach();
+    motor.write(_pidOutput);
+}
+
+void MotorGearboxEncoder::setPIDAggressiveness(float aggressiveness){
+    /*
+    
+    The setPIDAggressiveness() function sets the aggressiveness of the PID controller to
+    compensate for a change in the load on the motor.
+    
+    */
+    
+    _posPIDController.SetTunings(aggressiveness*_Kp, _Ki, _Kd);
+    _negPIDController.SetTunings(aggressiveness*_Kp, _Ki, _Kd);
     
 }
 
@@ -41,6 +143,7 @@ float MotorGearboxEncoder::computeSpeed(){
     
     */
     double timeElapsed =  micros() - _lastTimeStamp;
+    
     float    distMoved   =  _runningAverage(encoder.read() - _lastPosition);     //because of quantization noise it helps to average these
     
     //Compute the speed in RPM
@@ -50,7 +153,7 @@ float MotorGearboxEncoder::computeSpeed(){
     _lastTimeStamp = micros();
     _lastPosition  = encoder.read();
     
-    return RPM;
+    return -1.0*RPM;
 }
 
 float MotorGearboxEncoder::_runningAverage(int newValue){
@@ -75,4 +178,11 @@ float MotorGearboxEncoder::_runningAverage(int newValue){
     _oldValue1 = newValue;
     
     return runningAverage;
+}
+
+void MotorGearboxEncoder::setName(String newName){
+    /*
+    Set the name for the object
+    */
+    _motorName = newName;
 }

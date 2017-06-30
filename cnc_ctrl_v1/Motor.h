@@ -47,7 +47,7 @@
             int _pwmPin;
             int _pin1;
             int _pin2;
-            bool _attachedState;
+            bool _attachedState = false;
             LinSegment _linSegments[4];
             
     };

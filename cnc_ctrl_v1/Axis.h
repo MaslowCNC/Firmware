@@ -27,7 +27,7 @@
     class Axis{
         public:
             Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation, float encoderSteps);
-            int    write(float targetPosition);
+            void   write(float targetPosition);
             float  read();
             int    set(float newAxisPosition);
             int    updatePositionFromEncoder();
@@ -40,43 +40,35 @@
             float  error();
             float  setpoint();
             void   computePID();
-            void   printBoost();
-            float  measureMotorSpeed(int speed);
-            void   computeMotorResponse();
+            void   setPIDAggressiveness(float aggressiveness);
             void   test();
             void   changePitch(float newPitch);
             void   changeEncoderResolution(int newResolution);
             bool   attached();
             void   wipeEEPROM();
+            MotorGearboxEncoder    motorGearboxEncoder;
+            String     _axisName;
             
         private:
             int        _PWMread(int pin);
             void       _writeFloat(unsigned int addr, float x);
             float      _readFloat(unsigned int addr);
-            int        _sign(float val);
-            int        _change(float val);
-            void       _writeLinSeg(unsigned int addr, LinSegment linSeg);
-            void       _writeAllLinSegs(unsigned int addr);
-            LinSegment _readLinSeg(unsigned int addr);
-            void       _readAllLinSegs(unsigned int addr);
+            int        _detectDirectionChange(float _pidSetpoint);
             int        _direction;
             int        _encoderPin;
-            String     _axisName;
             float      _axisTarget;
             int        _currentAngle;
             int        _previousAngle;
             double     _timeLastMoved;
             double     _pidSetpoint, _pidInput, _pidOutput;
-            double     _Kp=4700, _KiClose=250, _KiMid = 50, _KiFar = 0, _Kd=170;
+            double     _Kp=600, _Ki = 10, _Kd=10;
             PID        _pidController;
             int        _eepromAdr;
             float      _mmPerRotation;
             float      _encoderSteps;
-            MotorGearboxEncoder    motorGearboxEncoder;
             float      _oldSetpoint;
-            float      _oldVal;
+            float      _oldDir;
             bool       _disableAxisForTesting = false;
-            float      _speedSinceLastCall();
     };
 
     #endif
