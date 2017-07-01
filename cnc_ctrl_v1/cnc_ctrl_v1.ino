@@ -21,7 +21,7 @@ void setup(){
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
     Serial.println("ready");
-    Serial.println("ok");
+    _signalReady();
     
     
     Timer1.initialize(10000);

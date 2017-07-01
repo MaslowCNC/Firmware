@@ -23,6 +23,7 @@ to be a drop in replacement for a continuous rotation servo.
 
 #include "Arduino.h"
 #include "Motor.h"
+#include "TimerOne.h"
 
 Motor::Motor(){
   
@@ -98,7 +99,13 @@ void Motor::write(int speed){
         
         int pwmFrequency = round(speed);
         
-        analogWrite(_pwmPin, pwmFrequency);
+        if(_pwmPin == 12){
+            pwmFrequency = map(pwmFrequency, 0, 255, 0, 1023);  //Scales 0-255 to 0-1023
+            Timer1.pwm(2, pwmFrequency);  //Special case for pin 12 due to timer blocking analogWrite()
+        }
+        else{
+            analogWrite(_pwmPin, pwmFrequency);
+        }
         
     }
 }
@@ -120,7 +127,14 @@ void Motor::directWrite(int voltage){
         digitalWrite(_pin2 , HIGH );
     }
     
-    analogWrite(_pwmPin, abs(voltage));
+    if(_pwmPin == 12){
+        voltage = abs(voltage);
+        voltage = map(voltage, 0, 255, 0, 1023);  //Scales 0-255 to 0-1023
+        Timer1.pwm(2, voltage);  //Special case for pin 12 due to timer blocking analogWrite()
+    }
+    else{
+        analogWrite(_pwmPin, abs(voltage));
+    }
 }
 
 int  Motor::attached(){

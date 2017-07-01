@@ -177,6 +177,7 @@ void readSerialCommands(){
         char c = Serial.read();
         if (c == '!'){
             stopFlag = true;
+            pauseFlag = false;
         }
         else if (c == '~'){
             pauseFlag = false;
@@ -219,15 +220,10 @@ void pause(){
     */
     
     pauseFlag = true;
+    Serial.println("Maslow Paused");
     
     long timeLastPrinted = 0;
     while(1){
-        
-        //remind us that the machine is in the paused state
-        if (millis() - timeLastPrinted > 5000){
-            Serial.println("Maslow Paused");
-            timeLastPrinted = millis();
-        }
         
         holdPosition();
     
@@ -236,6 +232,7 @@ void pause(){
         returnPoz(xTarget, yTarget, zAxis.read());
         
         if (!pauseFlag){
+            _signalReady();
             return;
         }
     }    
