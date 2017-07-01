@@ -74,9 +74,9 @@ int   setupPins(){
     
     */
     
-    int boardRevision = digitalRead(22);
+    int pcbRevisionIndicator = digitalRead(22);
     
-    if(boardRevision == 1){
+    if(pcbRevisionIndicator == 1){
         ENCODER1A = 18;
         ENCODER1B = 19;
         ENCODER2A = 2;
