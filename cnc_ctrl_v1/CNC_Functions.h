@@ -38,6 +38,7 @@ bool zAxisAttached = false;
 #define INCHES      25.4
 #define MAXFEED     900      //The maximum allowable feedrate in mm/min
 
+
 int ENCODER1A;
 int ENCODER1B;
 int ENCODER2A;
@@ -94,9 +95,30 @@ int   setupPins(){
         ENA = 6;
         ENB = 7;
         ENC = 5;
+        
+        return 1;
     }
-    
-    return 1;
+    else{
+        ENCODER1A = 20;
+        ENCODER1B = 21;
+        ENCODER2A = 18;
+        ENCODER2B = 19;
+        ENCODER3A = 2;
+        ENCODER3B = 3;
+
+        IN1 = 6;
+        IN2 = 4;
+        IN3 = 9;
+        IN4 = 7;
+        IN5 = 10;
+        IN6 = 11;
+
+        ENA = 5;
+        ENB = 8;
+        ENC = 12;
+        
+        return 0;
+    }
 }
 
 int pinsSetup       = setupPins();
@@ -211,6 +233,7 @@ void readSerialCommands(){
         char c = Serial.read();
         if (c == '!'){
             stopFlag = true;
+            pauseFlag = false;
         }
         else if (c == '~'){
             pauseFlag = false;
@@ -253,15 +276,10 @@ void pause(){
     */
     
     pauseFlag = true;
+    Serial.println("Maslow Paused");
     
     long timeLastPrinted = 0;
     while(1){
-        
-        //remind us that the machine is in the paused state
-        if (millis() - timeLastPrinted > 5000){
-            Serial.println("Maslow Paused");
-            timeLastPrinted = millis();
-        }
         
         holdPosition();
     
@@ -270,6 +288,7 @@ void pause(){
         returnPoz(xTarget, yTarget, zAxis.read());
         
         if (!pauseFlag){
+            _signalReady();
             return;
         }
     }    

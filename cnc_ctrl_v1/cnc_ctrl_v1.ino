@@ -28,7 +28,7 @@ void setup(){
     }
     
     Serial.println("ready");
-    Serial.println("ok");
+    _signalReady();
     
     
     Timer1.initialize(10000);
