@@ -67,14 +67,14 @@ int ENC;
 #define AUX4 14
 #define Probe AUX4 // use this input for zeroing zAxis with G38.2 gcode
 
+int pcbRevisionIndicator = digitalRead(22);
+
 int   setupPins(){
     /*
     
     Detect the version of the Arduino shield connected, and use the aproprate pins
     
     */
-    
-    int pcbRevisionIndicator = digitalRead(22);
     
     if(pcbRevisionIndicator == 1){
         ENCODER1A = 18;
