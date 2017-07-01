@@ -288,7 +288,6 @@ void pause(){
         returnPoz(xTarget, yTarget, zAxis.read());
         
         if (!pauseFlag){
-            _signalReady();
             return;
         }
     }    
