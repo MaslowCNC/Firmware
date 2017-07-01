@@ -26,7 +26,6 @@ void setup(){
     if(pcbRevisionIndicator == 1){
         Serial.println("Beta PCB v1.0 Detected");
     }
-    Serial.println(pinsSetup);
     
     Serial.println("ready");
     _signalReady();

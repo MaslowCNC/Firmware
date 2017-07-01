@@ -99,23 +99,23 @@ int   setupPins(){
         return 1;
     }
     else{
-        int ENCODER1A = 21;
-        int ENCODER1B = 20;
-        int ENCODER2A = 18;
-        int ENCODER2B = 19;
-        int ENCODER3A = 2;
-        int ENCODER3B = 3;
+        ENCODER1A = 20;
+        ENCODER1B = 21;
+        ENCODER2A = 18;
+        ENCODER2B = 19;
+        ENCODER3A = 2;
+        ENCODER3B = 3;
 
-        int IN1 = 6;
-        int IN2 = 4;
-        int IN3 = 9;
-        int IN4 = 7;
-        int IN5 = 10;
-        int IN6 = 11;
+        IN1 = 6;
+        IN2 = 4;
+        IN3 = 9;
+        IN4 = 7;
+        IN5 = 10;
+        IN6 = 11;
 
-        int ENA = 5;
-        int ENB = 8;
-        int ENC = 12;
+        ENA = 5;
+        ENB = 8;
+        ENC = 12;
         
         return 0;
     }
