@@ -99,10 +99,10 @@ int   setupPins(){
         return 1;
     }
     else{
-        int ENCODER1A = 18;
-        int ENCODER1B = 19;
-        int ENCODER2A = 20;
-        int ENCODER2B = 21;
+        int ENCODER1A = 21;
+        int ENCODER1B = 20;
+        int ENCODER2A = 18;
+        int ENCODER2B = 19;
         int ENCODER3A = 2;
         int ENCODER3B = 3;
 
@@ -124,8 +124,8 @@ int   setupPins(){
 int pinsSetup       = setupPins();
 
 Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "Left-axis",   LEFT_EEPROM_ADR, DISTPERROT, ENCODERSTEPS);
-Axis rightAxis(ENA, IN1, IN2, ENCODER2A, ENCODER2B, "Right-axis", RIGHT_EEPROM_ADR, DISTPERROT, ENCODERSTEPS);
-Axis zAxis    (ENB, IN3, IN4, ENCODER1A, ENCODER1B, "Z-Axis",         Z_EEPROM_ADR, ZDISTPERROT, ZENCODERSTEPS);
+Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, "Right-axis", RIGHT_EEPROM_ADR, DISTPERROT, ENCODERSTEPS);
+Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Z-Axis",         Z_EEPROM_ADR, ZDISTPERROT, ZENCODERSTEPS);
 
 
 Kinematics kinematics;
