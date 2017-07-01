@@ -95,6 +95,8 @@ int   setupPins(){
         ENA = 6;
         ENB = 7;
         ENC = 5;
+        
+        return 1;
     }
     else{
         int ENCODER1A = 18;
@@ -114,9 +116,9 @@ int   setupPins(){
         int ENA = 5;
         int ENB = 8;
         int ENC = 12;
+        
+        return 0;
     }
-    
-    return 1;
 }
 
 int pinsSetup       = setupPins();
