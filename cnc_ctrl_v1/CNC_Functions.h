@@ -38,23 +38,23 @@ bool zAxisAttached = false;
 #define INCHES      25.4
 #define MAXFEED     900      //The maximum allowable feedrate in mm/min
 
-#define ENCODER1A 18
-#define ENCODER1B 19
-#define ENCODER2A 2
-#define ENCODER2B 3
-#define ENCODER3A 21
-#define ENCODER3B 20
+int ENCODER1A;
+int ENCODER1B;
+int ENCODER2A;
+int ENCODER2B;
+int ENCODER3A;
+int ENCODER3B;
 
-#define IN1 9
-#define IN2 8
-#define IN3 11
-#define IN4 10
-#define IN5 12
-#define IN6 13
+int IN1;
+int IN2;
+int IN3;
+int IN4;
+int IN5;
+int IN6;
 
-#define ENA 6
-#define ENB 7
-#define ENC 5
+int ENA;
+int ENB;
+int ENC;
 
 #define DISTPERROT     10*6.35//#teeth*pitch of chain
 #define ZDISTPERROT    3.17//1/8inch in mm
@@ -66,6 +66,40 @@ bool zAxisAttached = false;
 #define AUX3 15
 #define AUX4 14
 #define Probe AUX4 // use this input for zeroing zAxis with G38.2 gcode
+
+int   setupPins(){
+    /*
+    
+    Detect the version of the Arduino shield connected, and use the aproprate pins
+    
+    */
+    
+    int boardRevision = digitalRead(22);
+    
+    if(boardRevision == 1){
+        ENCODER1A = 18;
+        ENCODER1B = 19;
+        ENCODER2A = 2;
+        ENCODER2B = 3;
+        ENCODER3A = 21;
+        ENCODER3B = 20;
+
+        IN1 = 9;
+        IN2 = 8;
+        IN3 = 11;
+        IN4 = 10;
+        IN5 = 12;
+        IN6 = 13;
+
+        ENA = 6;
+        ENB = 7;
+        ENC = 5;
+    }
+    
+    return 1;
+}
+
+int pinsSetup       = setupPins();
 
 Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "Left-axis",   LEFT_EEPROM_ADR, DISTPERROT, ENCODERSTEPS);
 Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, "Right-axis", RIGHT_EEPROM_ADR, DISTPERROT, ENCODERSTEPS);

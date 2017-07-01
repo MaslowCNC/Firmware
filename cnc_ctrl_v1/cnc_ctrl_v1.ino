@@ -20,6 +20,13 @@ void setup(){
     
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
+    /*if(boardRevision == 1){
+        Serial.println("Beta PCB v1.0 detected");
+    }
+    else{
+        Serial.println("PCB v1.1 detected");
+    }*/
+    
     Serial.println("ready");
     Serial.println("ok");
     
