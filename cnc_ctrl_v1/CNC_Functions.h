@@ -78,6 +78,7 @@ int   setupPins(){
     */
     
     if(pcbRevisionIndicator == 1){
+        //Beta PCB v1.0 Detected
         ENCODER1A = 18;
         ENCODER1B = 19;
         ENCODER2A = 2;
@@ -99,10 +100,11 @@ int   setupPins(){
         return 1;
     }
     else{
+        //PCB v1.1 Detected
         ENCODER1A = 20;
         ENCODER1B = 21;
-        ENCODER2A = 18;
-        ENCODER2B = 19;
+        ENCODER2A = 19;
+        ENCODER2B = 18;
         ENCODER3A = 2;
         ENCODER3B = 3;
 
