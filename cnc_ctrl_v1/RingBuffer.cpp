@@ -92,11 +92,11 @@ String RingBuffer::readLine(){
 }
 
 void RingBuffer::print(){
-    Serial.print("Buffer Used: ");
+    Serial.print(F("Buffer Used: "));
     Serial.println(length());
-    Serial.print("Begin: ");
+    Serial.print(F("Begin: "));
     Serial.println(_beginningOfString);
-    Serial.print("End: ");
+    Serial.print(F("End: "));
     Serial.println(_endOfString);
     Serial.print(_buffer[_beginningOfString]);
     Serial.print(_buffer[_beginningOfString+1]);
@@ -110,7 +110,7 @@ void RingBuffer::print(){
     Serial.println(_buffer[_endOfString-4]);
     
     if (_beginningOfString < _endOfString ){  // only if buffer is linear
-        Serial.println("Buffer Contents: ");
+        Serial.println(F("Buffer Contents: "));
         int i = _beginningOfString;
         while(i < _endOfString){
             Serial.print(_buffer[i]);
@@ -118,7 +118,7 @@ void RingBuffer::print(){
         }
     }
     
-    Serial.println(" ");
+    Serial.println(F(" "));
     
 }
 
@@ -142,12 +142,12 @@ void RingBuffer::_incrementEnd(){
     
     */
     if ( spaceAvailable() == 0 ) {
-        Serial.println("buffer overflow");
-        Serial.print("Buffer begin: ");
+        Serial.println(F("buffer overflow"));
+        Serial.print(F("Buffer begin: "));
         Serial.println(_beginningOfString);
-        Serial.print("Buffer end: ");
+        Serial.print(F("Buffer end: "));
         Serial.println(_endOfString);
-        Serial.print("BufferLength: ");
+        Serial.print(F("BufferLength: "));
         Serial.println(length());
         }
     else

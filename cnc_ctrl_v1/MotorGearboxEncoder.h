@@ -33,6 +33,7 @@
             void       computePID();
             void       setName(const String& newName);
             void       initializePID();
+            void       setPIDAggressiveness(float aggressiveness);
         private:
             double     _targetSpeed;
             double     _currentSpeed;

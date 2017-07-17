@@ -168,6 +168,7 @@ void  Kinematics::forward(const float& chainALength, const float& chainBLength, 
     float guessLengthB;
 
     int guessCount = 0;
+    int maxNumberOfGuesses = 200;
 
     while(1){
 
@@ -186,18 +187,21 @@ void  Kinematics::forward(const float& chainALength, const float& chainBLength, 
         guessCount++;
 
         //Prevent the connection from timing out
-        Serial.print("[PEk:");
+        Serial.print(F("[PEk:"));
         Serial.print(aChainError);
         Serial.print(',');
         Serial.print(bChainError);
         Serial.print(',');
         Serial.print('0');
-        Serial.println("]");
+        Serial.println(F("]"));
 
         //if we've converged on the point...or it's time to give up, exit the loop
-        if((abs(aChainError) < .1 && abs(bChainError) < .1) or guessCount > 100){
-            if(guessCount > 100){
-                Serial.println("Message: Unable to find valid machine position. Please calibrate chain lengths.");
+        if((abs(aChainError) < .1 && abs(bChainError) < .1) or guessCount > maxNumberOfGuesses){
+            if(guessCount > maxNumberOfGuesses){
+                Serial.println(F("Message: Unable to find valid machine position. Please calibrate chain lengths."));
+                Serial.println(F("Lengths: "));
+                Serial.println(chainALength);
+                Serial.println(chainBLength);
                 *xPos = 0;
                 *yPos = 0;
             }

@@ -1,19 +1,19 @@
-/*This file is part of the Makesmith Control Software.
+/*This file is part of the Maslow Control Software.
 
-    The Makesmith Control Software is free software: you can redistribute it and/or modify
+    The Maslow Control Software is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Makesmith Control Software is distributed in the hope that it will be useful,
+    Maslow Control Software is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with the Makesmith Control Software.  If not, see <http://www.gnu.org/licenses/>.
+    along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
     
-    Copyright 2014-2016 Bar Smith*/ 
+    Copyright 2014-2017 Bar Smith*/ 
 
 
 #include "Arduino.h"
@@ -57,10 +57,10 @@ void   Axis::initializePID(){
     _pidController.SetSampleTime(10);
 }
 
-int    Axis::write(const float& targetPosition){
+void    Axis::write(const float& targetPosition){
     
     _pidSetpoint   =  targetPosition/_mmPerRotation;
-    return 1;
+    return;
 }
 
 float  Axis::read(){
@@ -105,9 +105,9 @@ void   Axis::computePID(){
     
     /*if(_axisName[0] == 'R'){
         Serial.print(_pidSetpoint*10.0);
-        Serial.print(" ");
+        Serial.print(F(" "));
         Serial.print(_pidInput*10.0);
-        Serial.print(" ");
+        Serial.print(F(" "));
         Serial.println((_pidSetpoint*10.0) + _pidOutput/30.0);
     }*/
     
@@ -115,12 +115,22 @@ void   Axis::computePID(){
     
 }
 
+void   Axis::setPIDAggressiveness(float aggressiveness){
+    /*
+    
+    The setPIDAggressiveness() function sets the aggressiveness of the PID controller to
+    compensate for a change in the load on the motor.
+    
+    */
+    
+    motorGearboxEncoder.setPIDAggressiveness(aggressiveness);
+}
+
 float  Axis::error(){
 
     float encoderErr = (motorGearboxEncoder.encoder.read()/_encoderSteps) - _pidSetpoint;
-    float absEncoderErr = abs(encoderErr);
 
-    return absEncoderErr *_mmPerRotation;
+    return encoderErr *_mmPerRotation;
 }
 
 void   Axis::changePitch(const float& newPitch){
@@ -229,7 +239,7 @@ void   Axis::wipeEEPROM(){
     }
     
     Serial.print(_axisName);
-    Serial.println(" EEPROM erased");
+    Serial.println(F(" EEPROM erased"));
 }
 
 int    Axis::_detectDirectionChange(const float& _pidSetpoint){
@@ -264,12 +274,12 @@ void   Axis::test(){
     Test the axis by directly commanding the motor and observing if the encoder moves
     */
     
-    Serial.print("Testing ");
+    Serial.print(F("Testing "));
     Serial.print(_axisName);
-    Serial.println(" motor:");
+    Serial.println(F(" motor:"));
     
     //print something to prevent the connection from timing out
-    Serial.print("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>");
+    Serial.print(F("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>"));
     
     int i = 0;
     double encoderPos = motorGearboxEncoder.encoder.read(); //record the position now
@@ -283,15 +293,15 @@ void   Axis::test(){
     
     //check to see if it moved
     if(encoderPos - motorGearboxEncoder.encoder.read() > 500){
-        Serial.println("Direction 1 - Pass");
+        Serial.println(F("Direction 1 - Pass"));
     }
     else{
-        Serial.println("Direction 1 - Fail");
+        Serial.println(F("Direction 1 - Fail"));
     }
     
     //record the position again
     encoderPos = motorGearboxEncoder.encoder.read();
-    Serial.print("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>");
+    Serial.print(F("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>"));
     
     //move the motor in the other direction
     i = 0;
@@ -303,13 +313,13 @@ void   Axis::test(){
     
     //check to see if it moved
     if(encoderPos - motorGearboxEncoder.encoder.read() < -500){
-        Serial.println("Direction 2 - Pass");
+        Serial.println(F("Direction 2 - Pass"));
     }
     else{
-        Serial.println("Direction 2 - Fail");
+        Serial.println(F("Direction 2 - Fail"));
     }
     
     //stop the motor
     motorGearboxEncoder.motor.directWrite(0);
-    Serial.print("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>");
+    Serial.print(F("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>"));
 }

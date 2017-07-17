@@ -12,9 +12,6 @@
     
     Copyright 2014-2017 Bar Smith*/
     
-#define SERIAL_RX_BUFFER_SIZE 512
-#define SERIAL_TX_BUFFER_SIZE 512
-    
 #include "CNC_Functions.h"
 #include "TimerOne.h"
 
@@ -23,23 +20,21 @@ void setup(){
     
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
-    Serial.println("ready");
-    Serial.println("ok");
+    if(pcbRevisionIndicator == 0){
+    Serial.println(F("PCB v1.1 Detected"));
+    } 
+    if(pcbRevisionIndicator == 1){
+        Serial.println(F("Beta PCB v1.0 Detected"));
+    }
+    
+    Serial.println(F("ready"));
+    _signalReady();
     
     
     Timer1.initialize(10000);
     Timer1.attachInterrupt(runsOnATimer);
     
-    Serial.println("Grbl v1.00");
-    
-    /*int i = 0;
-    String testGcode = "G20 \nG1X-1 Y-1 F100 \nG1 X1 \nG3 Y2 J1.5\nG1 X-1 \nG1 Y-1\nG1 X0 Y0\n";
-    
-    Serial.println(testGcode.length());
-    while (i < testGcode.length()){
-        ringBuffer.write(testGcode[i]);
-        i++;
-    }*/
+    Serial.println(F("Grbl v1.00"));
     
 }
 
