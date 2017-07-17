@@ -77,16 +77,17 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     Y1Plus = R * sqrt(1 + TanGamma * TanGamma);
     Y2Plus = R * sqrt(1 + TanLambda * TanLambda);
 
-    _MyTrig();
+
+    while (Tries <= MaxTries) {
+
+        _MyTrig();
                                              //These criteria will be zero when the correct values are reached
                                              //They are negated here as a numerical efficiency expedient
 
-    Crit[0]=  - _moment(Y1Plus, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
-    Crit[1] = - _YOffsetEqn(Y1Plus, x - h * CosPsi1, SinPsi1);
-    Crit[2] = - _YOffsetEqn(Y2Plus, D - (x + h * CosPsi2), SinPsi2);
+        Crit[0]=  - _moment(Y1Plus, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
+        Crit[1] = - _YOffsetEqn(Y1Plus, x - h * CosPsi1, SinPsi1);
+        Crit[2] = - _YOffsetEqn(Y2Plus, D - (x + h * CosPsi2), SinPsi2);
 
-
-    while (Tries <= MaxTries) {
         if (abs(Crit[0]) < MaxError) {
             if (abs(Crit[1]) < MaxError) {
                 if (abs(Crit[2]) < MaxError){
@@ -125,13 +126,7 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 
         Psi1 = Theta - Phi;
         Psi2 = Theta + Phi;
-                                                             //evaluate the
-                                                             //three criterion equations
-    _MyTrig();
 
-    Crit[0] = - _moment(Y1Plus, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
-    Crit[1] = - _YOffsetEqn(Y1Plus, x - h * CosPsi1, SinPsi1);
-    Crit[2] = - _YOffsetEqn(Y2Plus, D - (x + h * CosPsi2), SinPsi2);
     Tries = Tries + 1;                                       // increment itteration count
 
     }
@@ -164,7 +159,7 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 
 }
 
-void  Kinematics::forward(float chainALength, float chainBLength, float* xPos, float* yPos){
+void  Kinematics::forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos){
 
     float xGuess = 0;
     float yGuess = 0;
@@ -268,7 +263,7 @@ void  Kinematics::_MatSolv(){
     }
 }
 
-float Kinematics::_moment(float Y1Plus, float Y2Plus, float Phi, float MSinPhi, float MSinPsi1, float MCosPsi1, float MSinPsi2, float MCosPsi2){   //computes net moment about center of mass
+float Kinematics::_moment(const float& Y1Plus, const float& Y2Plus, const float& Phi, const float& MSinPhi, const float& MSinPsi1, const float& MCosPsi1, const float& MSinPsi2, const float& MCosPsi2){   //computes net moment about center of mass
     float Temp;
     float Offsetx1;
     float Offsetx2;
@@ -334,7 +329,7 @@ void Kinematics::_MyTrig(){
 
 }
 
-float Kinematics::_YOffsetEqn(float YPlus, float Denominator, float Psi){
+float Kinematics::_YOffsetEqn(const float& YPlus, const float& Denominator, const float& Psi){
     float Temp;
     Temp = ((sqrt(YPlus * YPlus - R * R)/R) - (y + YPlus - h * sin(Psi))/Denominator);
     return Temp;
