@@ -27,7 +27,7 @@
     class Axis{
         public:
             Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation, float encoderSteps);
-            int    write(float targetPosition);
+            void   write(float targetPosition);
             float  read();
             int    set(float newAxisPosition);
             int    updatePositionFromEncoder();
@@ -40,12 +40,14 @@
             float  error();
             float  setpoint();
             void   computePID();
+            void   setPIDAggressiveness(float aggressiveness);
             void   test();
             void   changePitch(float newPitch);
             void   changeEncoderResolution(int newResolution);
             bool   attached();
             void   wipeEEPROM();
             MotorGearboxEncoder    motorGearboxEncoder;
+            String     _axisName;
             
         private:
             int        _PWMread(int pin);
@@ -54,7 +56,6 @@
             int        _detectDirectionChange(float _pidSetpoint);
             int        _direction;
             int        _encoderPin;
-            String     _axisName;
             float      _axisTarget;
             int        _currentAngle;
             int        _previousAngle;

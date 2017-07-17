@@ -20,7 +20,7 @@ libraries*/
 #include "Kinematics.h"
 #include "RingBuffer.h"
 
-#define VERSIONNUMBER 0.73
+#define VERSIONNUMBER 0.80
 
 bool zAxisAttached = false;
 
@@ -38,23 +38,24 @@ bool zAxisAttached = false;
 #define INCHES      25.4
 #define MAXFEED     900      //The maximum allowable feedrate in mm/min
 
-#define ENCODER1A 18
-#define ENCODER1B 19
-#define ENCODER2A 2
-#define ENCODER2B 3
-#define ENCODER3A 21
-#define ENCODER3B 20
 
-#define IN1 9
-#define IN2 8
-#define IN3 11
-#define IN4 10
-#define IN5 12
-#define IN6 13
+int ENCODER1A;
+int ENCODER1B;
+int ENCODER2A;
+int ENCODER2B;
+int ENCODER3A;
+int ENCODER3B;
 
-#define ENA 6
-#define ENB 7
-#define ENC 5
+int IN1;
+int IN2;
+int IN3;
+int IN4;
+int IN5;
+int IN6;
+
+int ENA;
+int ENB;
+int ENC;
 
 #define DISTPERROT     10*6.35//#teeth*pitch of chain
 #define ZDISTPERROT    3.17//1/8inch in mm
@@ -66,6 +67,63 @@ bool zAxisAttached = false;
 #define AUX3 15
 #define AUX4 14
 #define Probe AUX4 // use this input for zeroing zAxis with G38.2 gcode
+
+int pcbRevisionIndicator = digitalRead(22);
+
+int   setupPins(){
+    /*
+    
+    Detect the version of the Arduino shield connected, and use the aproprate pins
+    
+    */
+    
+    if(pcbRevisionIndicator == 1){
+        //Beta PCB v1.0 Detected
+        ENCODER1A = 18;
+        ENCODER1B = 19;
+        ENCODER2A = 2;
+        ENCODER2B = 3;
+        ENCODER3A = 21;
+        ENCODER3B = 20;
+
+        IN1 = 9;
+        IN2 = 8;
+        IN3 = 11;
+        IN4 = 10;
+        IN5 = 12;
+        IN6 = 13;
+
+        ENA = 6;
+        ENB = 7;
+        ENC = 5;
+        
+        return 1;
+    }
+    else{
+        //PCB v1.1 Detected
+        ENCODER1A = 20;
+        ENCODER1B = 21;
+        ENCODER2A = 19;
+        ENCODER2B = 18;
+        ENCODER3A = 2;
+        ENCODER3B = 3;
+
+        IN1 = 6;
+        IN2 = 4;
+        IN3 = 9;
+        IN4 = 7;
+        IN5 = 10;
+        IN6 = 11;
+
+        ENA = 5;
+        ENB = 8;
+        ENC = 12;
+        
+        return 0;
+    }
+}
+
+int pinsSetup       = setupPins();
 
 Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "Left-axis",   LEFT_EEPROM_ADR, DISTPERROT, ENCODERSTEPS);
 Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, "Right-axis", RIGHT_EEPROM_ADR, DISTPERROT, ENCODERSTEPS);
@@ -177,6 +235,7 @@ void readSerialCommands(){
         char c = Serial.read();
         if (c == '!'){
             stopFlag = true;
+            pauseFlag = false;
         }
         else if (c == '~'){
             pauseFlag = false;
@@ -219,15 +278,10 @@ void pause(){
     */
     
     pauseFlag = true;
+    Serial.println("Maslow Paused");
     
     long timeLastPrinted = 0;
     while(1){
-        
-        //remind us that the machine is in the paused state
-        if (millis() - timeLastPrinted > 5000){
-            Serial.println("Maslow Paused");
-            timeLastPrinted = millis();
-        }
         
         holdPosition();
     
@@ -313,8 +367,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     float bChainLength;
     long   numberOfStepsTaken         =  0;
     long  beginingOfLastStep          = millis();
-
-
+    
     while(numberOfStepsTaken < finalNumberOfSteps){
         
         //if enough time has passed to take the next step
@@ -376,7 +429,7 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     Takes a pointer to an axis object and moves that axis to endPos at speed MMPerMin
     */
     
-    float startingPos          = axis->target();
+    float startingPos          = axis->read();
     float moveDist             = startingPos - endPos; //total distance to move
     
     float direction            = -1* moveDist/abs(moveDist); //determine the direction of the move
@@ -392,12 +445,7 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
     long numberOfStepsTaken    = 0;
     long  beginingOfLastStep   = millis();
     
-    //disconnect all the axis
-    leftAxis.detach();
-    rightAxis.detach();
-    zAxis.detach();
-    
-    //re-attach the one we want to move
+    //attach the axis we want to move
     axis->attach();
     
     while(numberOfStepsTaken < finalNumberOfSteps){
@@ -408,7 +456,7 @@ void  singleAxisMove(Axis* axis, float endPos, float MMPerMin){
         //find the target point for this step
         float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM*direction;
         
-        //write to each axis
+        //write to axis
         axis->write(whereAxisShouldBeAtThisStep);
         
         //update position on display
@@ -577,6 +625,11 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     //compute angle between lines
     float theta                  =  abs(startingAngle) - abs(endingAngle);
     
+    //Catch the corner case where the beginning and end of the circle are the same
+    if (startingAngle == endingAngle){
+        theta = direction*2*pi;
+    }
+    
     float arcLengthMM            =  circumference * (theta / (2*pi) );
     
     //set up variables for movement
@@ -658,13 +711,14 @@ int   arc(float X1, float Y1, float X2, float Y2, float centerX, float centerY, 
     return 1;
 }
 
-int   G2(String& readString){
+int   G2(String& readString,int G2orG3){
     /*
     
     The G2 function handles the processing of the gcode line for both the command G2 and the
     command G3 which cut arcs.
     
     */
+    
     
     float X1 = xTarget; //does this work if units are inches? (It seems to)
     float Y1 = yTarget;
@@ -674,17 +728,16 @@ int   G2(String& readString){
     float I       = _inchesToMMConversion*extractGcodeValue(readString, 'I', 0.0);
     float J       = _inchesToMMConversion*extractGcodeValue(readString, 'J', 0.0);
     feedrate      = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
-    int   dir     = extractGcodeValue(readString, 'G', 0);
     
     float centerX = X1 + I;
     float centerY = Y1 + J;
     
     feedrate = constrain(feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     
-    if (dir == 2){
+    if (G2orG3 == 2){
         arc(X1, Y1, X2, Y2, centerX, centerY, feedrate, CLOCKWISE);
     }
-    if (dir == 3){
+    if (G2orG3 == 3){
         arc(X1, Y1, X2, Y2, centerX, centerY, feedrate, COUNTERCLOCKWISE);
     }
 }
@@ -843,13 +896,17 @@ void  calibrateChainLengths(){
     
     //measure out the left chain
     Serial.println("Measuring out left chain");
+    leftAxis.setPIDAggressiveness(.1);
     singleAxisMove(&leftAxis, ORIGINCHAINLEN, 500);
     
     Serial.print(leftAxis.read());
     Serial.println("mm");
     
+    leftAxis.detach();
+    
     //measure out the right chain
     Serial.println("Measuring out right chain");
+    rightAxis.setPIDAggressiveness(.1);
     singleAxisMove(&rightAxis, ORIGINCHAINLEN, 500);
     
     Serial.print(rightAxis.read());
@@ -857,6 +914,9 @@ void  calibrateChainLengths(){
     
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
+    
+    leftAxis.setPIDAggressiveness(1);
+    rightAxis.setPIDAggressiveness(1);
 }
 
 void  setInchesToMillimetersConversion(float newConversionFactor){
@@ -1012,15 +1072,27 @@ void  executeGcodeLine(String& gcodeLine){
         //Directly command each axis to move to a given distance
         float lDist = extractGcodeValue(gcodeLine, 'L', 0);
         float rDist = extractGcodeValue(gcodeLine, 'R', 0);
+		float speed = extractGcodeValue(gcodeLine, 'F', 500);
+        
+        leftAxis.setPIDAggressiveness(.1);
+        rightAxis.setPIDAggressiveness(.1);
         
         if(useRelativeUnits){
-            singleAxisMove(&leftAxis,  leftAxis.read()  + lDist, 500);
-            singleAxisMove(&rightAxis, rightAxis.read() + rDist, 500);
+            if(abs(lDist) > 0){
+                singleAxisMove(&leftAxis,  leftAxis.read()  + lDist, speed);
+            }
+            if(abs(rDist) > 0){
+                singleAxisMove(&rightAxis, rightAxis.read() + rDist, speed);
+            }
         }
         else{
-            singleAxisMove(&leftAxis,  lDist, 500);
-            singleAxisMove(&rightAxis, rDist, 500);
+            singleAxisMove(&leftAxis,  lDist, speed);
+            singleAxisMove(&rightAxis, rDist, speed);
         }
+        
+        leftAxis.setPIDAggressiveness(1);
+        rightAxis.setPIDAggressiveness(1);
+        
         return;
     }
     
@@ -1071,10 +1143,10 @@ void  executeGcodeLine(String& gcodeLine){
             G1(gcodeLine);
             break;
         case 2:
-            G2(gcodeLine);
+            G2(gcodeLine, gNumber);
             break;
         case 3:
-            G2(gcodeLine);
+            G2(gcodeLine, gNumber);
             break;
         case 10:
             G10(gcodeLine);
@@ -1146,8 +1218,10 @@ void  interpretCommandString(String& cmdString){
             
             String gcodeLine = cmdString.substring(firstG, secondG);
             
-            Serial.print(gcodeLine);
-            executeGcodeLine(gcodeLine);
+            if (gcodeLine.length() > 1){
+                Serial.println(gcodeLine);
+                executeGcodeLine(gcodeLine);
+            }
             
             cmdString = cmdString.substring(secondG, cmdString.length());
             

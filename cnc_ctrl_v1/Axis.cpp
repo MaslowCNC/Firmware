@@ -57,10 +57,10 @@ void   Axis::initializePID(){
     _pidController.SetSampleTime(10);
 }
 
-int    Axis::write(float targetPosition){
+void    Axis::write(float targetPosition){
     
     _pidSetpoint   =  targetPosition/_mmPerRotation;
-    return 1;
+    return;
 }
 
 float  Axis::read(){
@@ -115,8 +115,19 @@ void   Axis::computePID(){
     
 }
 
+void   Axis::setPIDAggressiveness(float aggressiveness){
+    /*
+    
+    The setPIDAggressiveness() function sets the aggressiveness of the PID controller to
+    compensate for a change in the load on the motor.
+    
+    */
+    
+    motorGearboxEncoder.setPIDAggressiveness(aggressiveness);
+}
+
 float  Axis::error(){
-    return abs((motorGearboxEncoder.encoder.read()/_encoderSteps) - _pidSetpoint)*_mmPerRotation;
+    return ((motorGearboxEncoder.encoder.read()/_encoderSteps) - _pidSetpoint)*_mmPerRotation;
 }
 
 void   Axis::changePitch(float newPitch){
