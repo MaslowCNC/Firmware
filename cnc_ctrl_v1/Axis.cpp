@@ -105,9 +105,9 @@ void   Axis::computePID(){
     
     /*if(_axisName[0] == 'R'){
         Serial.print(_pidSetpoint*10.0);
-        Serial.print(" ");
+        Serial.print(F(" "));
         Serial.print(_pidInput*10.0);
-        Serial.print(" ");
+        Serial.print(F(" "));
         Serial.println((_pidSetpoint*10.0) + _pidOutput/30.0);
     }*/
     
@@ -236,7 +236,7 @@ void   Axis::wipeEEPROM(){
     }
     
     Serial.print(_axisName);
-    Serial.println(" EEPROM erased");
+    Serial.println(F(" EEPROM erased"));
 }
 
 int    Axis::_detectDirectionChange(float _pidSetpoint){
@@ -271,12 +271,12 @@ void   Axis::test(){
     Test the axis by directly commanding the motor and observing if the encoder moves
     */
     
-    Serial.print("Testing ");
+    Serial.print(F("Testing "));
     Serial.print(_axisName);
-    Serial.println(" motor:");
+    Serial.println(F(" motor:"));
     
     //print something to prevent the connection from timing out
-    Serial.print("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>");
+    Serial.print(F("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>"));
     
     int i = 0;
     double encoderPos = motorGearboxEncoder.encoder.read(); //record the position now
@@ -290,15 +290,15 @@ void   Axis::test(){
     
     //check to see if it moved
     if(encoderPos - motorGearboxEncoder.encoder.read() > 500){
-        Serial.println("Direction 1 - Pass");
+        Serial.println(F("Direction 1 - Pass"));
     }
     else{
-        Serial.println("Direction 1 - Fail");
+        Serial.println(F("Direction 1 - Fail"));
     }
     
     //record the position again
     encoderPos = motorGearboxEncoder.encoder.read();
-    Serial.print("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>");
+    Serial.print(F("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>"));
     
     //move the motor in the other direction
     i = 0;
@@ -310,13 +310,13 @@ void   Axis::test(){
     
     //check to see if it moved
     if(encoderPos - motorGearboxEncoder.encoder.read() < -500){
-        Serial.println("Direction 2 - Pass");
+        Serial.println(F("Direction 2 - Pass"));
     }
     else{
-        Serial.println("Direction 2 - Fail");
+        Serial.println(F("Direction 2 - Fail"));
     }
     
     //stop the motor
     motorGearboxEncoder.motor.directWrite(0);
-    Serial.print("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>");
+    Serial.print(F("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>"));
 }

@@ -152,13 +152,13 @@ void  returnError(){
     Prints the machine's positional error and the amount of space available in the 
     gcode buffer
     */
-        Serial.print("[PE:");
+        Serial.print(F("[PE:"));
         Serial.print(leftAxis.error());
         Serial.print(',');
         Serial.print(rightAxis.error());
         Serial.print(',');
         Serial.print(ringBuffer.spaceAvailable());
-        Serial.println("]");
+        Serial.println(F("]"));
 }
 
 void  returnPoz(float x, float y, float z){
@@ -173,13 +173,13 @@ void  returnPoz(float x, float y, float z){
     if (millis() - lastRan > timeout){
         
         
-        Serial.print("<Idle,MPos:");
+        Serial.print(F("<Idle,MPos:"));
         Serial.print(x/_inchesToMMConversion);
-        Serial.print(",");
+        Serial.print(F(","));
         Serial.print(y/_inchesToMMConversion);
-        Serial.print(",");
+        Serial.print(F(","));
         Serial.print(z/_inchesToMMConversion);
-        Serial.println(",WPos:0.000,0.000,0.000>");
+        Serial.println(F(",WPos:0.000,0.000,0.000>"));
         
         returnError();
         
@@ -196,7 +196,7 @@ void  _signalReady(){
     
     */
     
-    Serial.println("ok");
+    Serial.println(F("ok"));
 }
 
 void  _watchDog(){
@@ -215,7 +215,7 @@ void  _watchDog(){
             
             if (ringBuffer.length() > 0){                  //if there is stuff sitting in the buffer, run it
                 ringBuffer.write('\n');
-                Serial.println("watch dog catch");
+                Serial.println(F("watch dog catch"));
             }
             else{
                 _signalReady();                          //request new code
@@ -278,7 +278,7 @@ void pause(){
     */
     
     pauseFlag = true;
-    Serial.println("Maslow Paused");
+    Serial.println(F("Maslow Paused"));
     
     long timeLastPrinted = 0;
     while(1){
@@ -568,16 +568,16 @@ int   G1(String& readString){
     else{
         float threshold = .1; //units of mm
         if (abs(currentZPos - zgoto) > threshold){
-            Serial.print("Message: Please adjust Z-Axis to a depth of ");
+            Serial.print(F("Message: Please adjust Z-Axis to a depth of "));
             if (zgoto > 0){
-                Serial.print("+");
+                Serial.print(F("+"));
             }
             Serial.print(zgoto/_inchesToMMConversion);
             if (_inchesToMMConversion == INCHES){
-                Serial.println(" in");
+                Serial.println(F(" in"));
             }
             else{
-                Serial.println(" mm");
+                Serial.println(F(" mm"));
             }
             
             pause(); //Wait until the z-axis is adjusted
@@ -766,7 +766,7 @@ void  G38(String& readString) {
        Currently ignores X and Y options
     */
     if (readString.substring(3, 5) == ".2") {
-      Serial.println("probing for z axis zero");
+      Serial.println(F("probing for z axis zero"));
       float zgoto;
 
 
@@ -781,12 +781,12 @@ void  G38(String& readString) {
         }
       }
 
-      Serial.print("max depth ");
+      Serial.print(F("max depth "));
       Serial.print(zgoto);
-      Serial.println(" mm.");
-      Serial.print("feedrate ");
+      Serial.println(F(" mm."));
+      Serial.print(F("feedrate "));
       Serial.print(feedrate);
-      Serial.println(" mm per min.");
+      Serial.println(F(" mm per min."));
 
 
       //set Probe to input with pullup
@@ -860,7 +860,7 @@ void  G38(String& readString) {
             zAxis.set(0);
             zAxis.endMove(0);
             zAxis.attach();
-            Serial.println("z axis zeroed");
+            Serial.println(F("z axis zeroed"));
             return;
           }
         }
@@ -871,19 +871,19 @@ void  G38(String& readString) {
             - STOP execution
         */
         axis->endMove(endPos);
-        Serial.println("error: probe did not connect\nprogram stopped\nz axis not set\n");
+        Serial.println(F("error: probe did not connect\nprogram stopped\nz axis not set\n"));
         stopFlag = true;
         checkForStopCommand();
 
       } // end if zgoto != currentZPos / _inchesToMMConversion
 
     } else {
-      Serial.print("G38");
+      Serial.print(F("G38"));
       Serial.print(readString.substring(3, 5));
-      Serial.println(" is invalid. Only G38.2 recognized.");
+      Serial.println(F(" is invalid. Only G38.2 recognized."));
     }
   } else {
-    Serial.println("G38.2 gcode only valid with z-axis attached");
+    Serial.println(F("G38.2 gcode only valid with z-axis attached"));
   }
 }
 
@@ -895,22 +895,22 @@ void  calibrateChainLengths(){
     
     
     //measure out the left chain
-    Serial.println("Measuring out left chain");
+    Serial.println(F("Measuring out left chain"));
     leftAxis.setPIDAggressiveness(.1);
     singleAxisMove(&leftAxis, ORIGINCHAINLEN, 500);
     
     Serial.print(leftAxis.read());
-    Serial.println("mm");
+    Serial.println(F("mm"));
     
     leftAxis.detach();
     
     //measure out the right chain
-    Serial.println("Measuring out right chain");
+    Serial.println(F("Measuring out right chain"));
     rightAxis.setPIDAggressiveness(.1);
     singleAxisMove(&rightAxis, ORIGINCHAINLEN, 500);
     
     Serial.print(rightAxis.read());
-    Serial.println("mm");
+    Serial.println(F("mm"));
     
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
@@ -924,9 +924,9 @@ void  setInchesToMillimetersConversion(float newConversionFactor){
 }
 
 void  printBeforeAndAfter(float before, float after){
-    Serial.print("Before: ");
+    Serial.print(F("Before: "));
     Serial.print(before);
-    Serial.print(" After: ");
+    Serial.print(F(" After: "));
     Serial.println(after);
 }
 
@@ -976,7 +976,7 @@ void  updateSettings(String& readString){
     
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
-    Serial.println("Machine Settings Updated");
+    Serial.println(F("Machine Settings Updated"));
 }
 
 void  executeGcodeLine(String& gcodeLine){
@@ -991,7 +991,7 @@ void  executeGcodeLine(String& gcodeLine){
     
     if(gcodeLine.substring(0, 3) == "B01"){
         
-        Serial.println("Motor Calibration Not Needed");
+        Serial.println(F("Motor Calibration Not Needed"));
         
         return;
     }
@@ -1014,30 +1014,30 @@ void  executeGcodeLine(String& gcodeLine){
         rightAxis.test();
         delay(500);
         zAxis.test();
-        Serial.println("Tests complete.");
+        Serial.println(F("Tests complete."));
         return;
     }
     
     if(gcodeLine.substring(0, 3) == "B05"){
-        Serial.print("Firmware Version ");
+        Serial.print(F("Firmware Version "));
         Serial.println(VERSIONNUMBER);
         return;
     }
     
     if(gcodeLine.substring(0, 3) == "B06"){
-        Serial.println("Setting Chain Lengths To: ");
+        Serial.println(F("Setting Chain Lengths To: "));
         float newL = extractGcodeValue(gcodeLine, 'L', 0);
         float newR = extractGcodeValue(gcodeLine, 'R', 0);
         
         leftAxis.set(newL);
         rightAxis.set(newR);
         
-        Serial.print("Left: ");
+        Serial.print(F("Left: "));
         Serial.print(leftAxis.read());
-        Serial.println("mm");
-        Serial.print("Right: ");
+        Serial.println(F("mm"));
+        Serial.print(F("Right: "));
         Serial.print(rightAxis.read());
-        Serial.println("mm");
+        Serial.println(F("mm"));
         
         return;
     }
@@ -1054,16 +1054,16 @@ void  executeGcodeLine(String& gcodeLine){
         leftAxis.set(ORIGINCHAINLEN);
         rightAxis.set(ORIGINCHAINLEN);
         
-        Serial.print("Left: ");
+        Serial.print(F("Left: "));
         Serial.print(leftAxis.read());
-        Serial.println("mm");
-        Serial.print("Right: ");
+        Serial.println(F("mm"));
+        Serial.print(F("Right: "));
         Serial.print(rightAxis.read());
-        Serial.println("mm");
+        Serial.println(F("mm"));
         
         kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
         
-        Serial.println("Message: The machine chains have been manually re-calibrated.");
+        Serial.println(F("Message: The machine chains have been manually re-calibrated."));
         
         return;
     }
@@ -1098,9 +1098,9 @@ void  executeGcodeLine(String& gcodeLine){
     
     if(gcodeLine.substring(0, 3) == "B10"){
         //measure the left axis chain length
-        Serial.print("[Measure: ");
+        Serial.print(F("[Measure: "));
         Serial.print(leftAxis.read());
-        Serial.println("]");
+        Serial.println(F("]"));
         return;
     }
     
@@ -1116,7 +1116,7 @@ void  executeGcodeLine(String& gcodeLine){
         while (millis() - begin < ms){
             leftAxis.motorGearboxEncoder.motor.directWrite(speed);
             if (i % 10000 == 0){
-                Serial.println("pulling");                              //Keep the connection from timing out
+                Serial.println(F("pulling"));                              //Keep the connection from timing out
             }
             i++;
         }
@@ -1168,14 +1168,14 @@ void  executeGcodeLine(String& gcodeLine){
             break;
         default:
             if(gcodeLine[0] != 'B'){
-                Serial.print("Command G");
+                Serial.print(F("Command G"));
                 Serial.print(gNumber);
-                Serial.println(" unsupported and ignored.");
+                Serial.println(F(" unsupported and ignored."));
             }
     }
     
     if((gcodeLine[0] == 'T' || gcodeLine[0] == 't') && gcodeLine[1] != 'e'){
-        Serial.print("Please insert tool ");
+        Serial.print(F("Please insert tool "));
         Serial.println(gcodeLine);
         gcodeLine = "";
     }
