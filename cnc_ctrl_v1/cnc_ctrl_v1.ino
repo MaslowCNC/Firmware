@@ -21,20 +21,20 @@ void setup(){
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
     if(pcbRevisionIndicator == 0){
-    Serial.println("PCB v1.1 Detected");
+    Serial.println(F("PCB v1.1 Detected"));
     } 
     if(pcbRevisionIndicator == 1){
-        Serial.println("Beta PCB v1.0 Detected");
+        Serial.println(F("Beta PCB v1.0 Detected"));
     }
     
-    Serial.println("ready");
+    Serial.println(F("ready"));
     _signalReady();
     
     
     Timer1.initialize(10000);
     Timer1.attachInterrupt(runsOnATimer);
     
-    Serial.println("Grbl v1.00");
+    Serial.println(F("Grbl v1.00"));
     
 }
 
