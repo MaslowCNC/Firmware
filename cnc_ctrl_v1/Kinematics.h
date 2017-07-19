@@ -28,7 +28,7 @@
             Kinematics();
             void  inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  recomputeGeometry();
-            void  forward(float chainALength, float chainBLength, float* xPos, float* yPos);
+            void  forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos);
             //geometry
             float l             = 310.0;                               //horizontal distance between sled attach points
             float s             = 139.0;                               //vertical distance between sled attach points and bit
@@ -46,8 +46,8 @@
             float halfHeight = machineHeight / 2.0;                    //Half the machine height
             
         private:
-            float _moment(float Y1Plus, float Y2Plus, float Phi, float MSinPhi, float MSinPsi1, float MCosPsi1, float MSinPsi2, float MCosPsi2);
-            float _YOffsetEqn(float YPlus, float Denominator, float Psi);
+            float _moment(const float& Y1Plus, const float& Y2Plus, const float& Phi, const float& MSinPhi, const float& MSinPsi1, const float& MCosPsi1, const float& MSinPsi2, const float& MCosPsi2);
+            float _YOffsetEqn(const float& YPlus, const float& Denominator, const float& Psi);
             void  _MatSolv();
             void  _MyTrig();
             void _verifyValidTarget(float* xTarget,float* yTarget);

@@ -26,7 +26,7 @@
 #define SIZEOFFLOAT      4
 #define SIZEOFLINSEG    17
 
-Axis::Axis(int pwmPin, int directionPin1, int directionPin2, int encoderPin1, int encoderPin2, String axisName, int eepromAdr, float mmPerRotation, float encoderSteps)
+Axis::Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const String& axisName, const int& eepromAdr, const float& mmPerRotation, const float& encoderSteps)
 :
 motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2)
 {
@@ -57,7 +57,7 @@ void   Axis::initializePID(){
     _pidController.SetSampleTime(10);
 }
 
-void    Axis::write(float targetPosition){
+void    Axis::write(const float& targetPosition){
     
     _pidSetpoint   =  targetPosition/_mmPerRotation;
     return;
@@ -77,7 +77,7 @@ float  Axis::setpoint(){
     return _pidSetpoint*_mmPerRotation;
 }
 
-int    Axis::set(float newAxisPosition){
+int    Axis::set(const float& newAxisPosition){
     
     //reset everything to the new value
     _axisTarget   =  newAxisPosition/_mmPerRotation;
@@ -127,17 +127,20 @@ void   Axis::setPIDAggressiveness(float aggressiveness){
 }
 
 float  Axis::error(){
-    return ((motorGearboxEncoder.encoder.read()/_encoderSteps) - _pidSetpoint)*_mmPerRotation;
+
+    float encoderErr = (motorGearboxEncoder.encoder.read()/_encoderSteps) - _pidSetpoint;
+
+    return encoderErr *_mmPerRotation;
 }
 
-void   Axis::changePitch(float newPitch){
+void   Axis::changePitch(const float& newPitch){
     /*
     Reassign the distance moved per-rotation for the axis.
     */
     _mmPerRotation = newPitch;
 }
 
-void   Axis::changeEncoderResolution(int newResolution){
+void   Axis::changeEncoderResolution(const int& newResolution){
     /*
     Reassign the encoder resolution for the axis.
     */
@@ -185,14 +188,14 @@ void   Axis::hold(){
     
 }
 
-void   Axis::endMove(float finalTarget){
+void   Axis::endMove(const float& finalTarget){
     
     _timeLastMoved = millis();
     _axisTarget    = finalTarget/_mmPerRotation;
     
 }
 
-float  Axis::_readFloat(unsigned int addr){
+float  Axis::_readFloat(const unsigned int& addr){
 
 //readFloat and writeFloat functions courtesy of http://www.alexenglish.info/2014/05/saving-floats-longs-ints-eeprom-arduino-using-unions/
 
@@ -208,7 +211,7 @@ float  Axis::_readFloat(unsigned int addr){
     return data.f;
 }
 
-void   Axis::_writeFloat(unsigned int addr, float x){
+void   Axis::_writeFloat(const unsigned int& addr, const float& x){
     
     //Writes a floating point number into the eeprom memory by splitting it into four one byte chunks and saving them
     
@@ -239,7 +242,7 @@ void   Axis::wipeEEPROM(){
     Serial.println(F(" EEPROM erased"));
 }
 
-int    Axis::_detectDirectionChange(float _pidSetpoint){
+int    Axis::_detectDirectionChange(const float& _pidSetpoint){
     
     float difference = _pidSetpoint - _oldSetpoint;
     

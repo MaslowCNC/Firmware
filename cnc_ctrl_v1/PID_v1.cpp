@@ -23,7 +23,7 @@ PID::PID()
 }
 
 void PID::setup(double* Input, double* Output, double* Setpoint,
-        double Kp, double Ki, double Kd, int ControllerDirection)
+        const double& Kp, const double& Ki, const double& Kd, const int& ControllerDirection)
 {
 
     myOutput = Output;
@@ -90,7 +90,7 @@ bool PID::Compute()
  * it's called automatically from the constructor, but tunings can also
  * be adjusted on the fly during normal operation
  ******************************************************************************/
-void PID::SetTunings(double Kp, double Ki, double Kd)
+void PID::SetTunings(const double& Kp, const double& Ki, const double& Kd)
 {
    if (Kp<0 || Ki<0 || Kd<0) return;
 
@@ -112,7 +112,7 @@ void PID::SetTunings(double Kp, double Ki, double Kd)
 /* SetSampleTime(...) *********************************************************
  * sets the period, in Milliseconds, at which the calculation is performed
  ******************************************************************************/
-void PID::SetSampleTime(int NewSampleTime)
+void PID::SetSampleTime(const int& NewSampleTime)
 {
    if (NewSampleTime > 0)
    {
@@ -132,7 +132,7 @@ void PID::SetSampleTime(int NewSampleTime)
  *  want to clamp it from 0-125.  who knows.  at any rate, that can all be done
  *  here.
  **************************************************************************/
-void PID::SetOutputLimits(double Min, double Max)
+void PID::SetOutputLimits(const double& Min, const double& Max)
 {
    if(Min >= Max) return;
    outMin = Min;
@@ -155,7 +155,7 @@ void PID::SetOutputLimits(double Min, double Max)
  * when the transition from manual to auto occurs, the controller is
  * automatically initialized
  ******************************************************************************/
-void PID::SetMode(int Mode)
+void PID::SetMode(const int& Mode)
 {
     bool newAuto = (Mode == AUTOMATIC);
     if(newAuto == !inAuto)
@@ -184,7 +184,7 @@ void PID::Initialize()
  * know which one, because otherwise we may increase the output when we should
  * be decreasing.  This is called from the constructor.
  ******************************************************************************/
-void PID::SetControllerDirection(int Direction)
+void PID::SetControllerDirection(const int& Direction)
 {
    if(inAuto && Direction !=controllerDirection)
    {
