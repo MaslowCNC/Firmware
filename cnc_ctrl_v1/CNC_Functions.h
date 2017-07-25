@@ -432,7 +432,7 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     float startingPos          = axis->read();
     float moveDist             = endPos - startingPos; //total distance to move
     
-    float direction            = -1* moveDist/abs(moveDist); //determine the direction of the move
+    float direction            = moveDist/abs(moveDist); //determine the direction of the move
     
     float stepSizeMM           = 0.01;                    //step size in mm
 
@@ -810,7 +810,7 @@ void  G38(const String& readString) {
         float endPos               = zgoto;
         float moveDist             = endPos - currentZPos; //total distance to move
 
-        float direction            = -1 * moveDist / abs(moveDist); //determine the direction of the move
+        float direction            = moveDist / abs(moveDist); //determine the direction of the move
 
         float stepSizeMM           = 0.01;                    //step size in mm
 
