@@ -430,7 +430,7 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     */
     
     float startingPos          = axis->read();
-    float moveDist             = startingPos - endPos; //total distance to move
+    float moveDist             = endPos - startingPos; //total distance to move
     
     float direction            = -1* moveDist/abs(moveDist); //determine the direction of the move
     
@@ -808,7 +808,7 @@ void  G38(const String& readString) {
         float MMPerMin             = feedrate;
         float startingPos          = axis->target();
         float endPos               = zgoto;
-        float moveDist             = currentZPos - endPos; //total distance to move
+        float moveDist             = endPos - currentZPos; //total distance to move
 
         float direction            = -1 * moveDist / abs(moveDist); //determine the direction of the move
 
