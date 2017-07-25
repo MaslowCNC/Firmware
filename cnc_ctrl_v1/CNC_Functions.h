@@ -563,7 +563,13 @@ int   G1(const String& readString){
     if(zAxisAttached){
         float threshold = .01;
         if (abs(zgoto- currentZPos) > threshold){
-            float zfeedrate = constrain(feedrate, 1, MAXZROTMIN * ZDISTPERROT);
+            float zfeedrate
+            if (isNotRapid) {
+                zfeedrate = constrain(feedrate, 1, MAXZROTMIN * ZDISTPERROT);
+            }
+            else {
+                zfeedrate = MAXZROTMIN * ZDISTPERROT;
+            }
             singleAxisMove(&zAxis, zgoto, zfeedrate);
         }
     }
