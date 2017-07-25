@@ -37,6 +37,7 @@ bool zAxisAttached = false;
 #define MILLIMETERS 1
 #define INCHES      25.4
 #define MAXFEED     900      //The maximum allowable feedrate in mm/min
+#define MAXZROTMIN  12.60    // the maximum z rotations per minute
 
 
 int ENCODER1A;
@@ -430,9 +431,9 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     */
     
     float startingPos          = axis->read();
-    float moveDist             = startingPos - endPos; //total distance to move
+    float moveDist             = endPos - startingPos; //total distance to move
     
-    float direction            = -1* moveDist/abs(moveDist); //determine the direction of the move
+    float direction            = moveDist/abs(moveDist); //determine the direction of the move
     
     float stepSizeMM           = 0.01;                    //step size in mm
 
@@ -562,7 +563,14 @@ int   G1(const String& readString){
     if(zAxisAttached){
         float threshold = .01;
         if (abs(zgoto- currentZPos) > threshold){
-            singleAxisMove(&zAxis, zgoto,45);
+            float zfeedrate
+            if (isNotRapid) {
+                zfeedrate = constrain(feedrate, 1, MAXZROTMIN * ZDISTPERROT);
+            }
+            else {
+                zfeedrate = MAXZROTMIN * ZDISTPERROT;
+            }
+            singleAxisMove(&zAxis, zgoto, zfeedrate);
         }
     }
     else{
@@ -774,6 +782,7 @@ void  G38(const String& readString) {
 
       zgoto      = _inchesToMMConversion * extractGcodeValue(readString, 'Z', currentZPos / _inchesToMMConversion);
       feedrate   = _inchesToMMConversion * extractGcodeValue(readString, 'F', feedrate / _inchesToMMConversion);
+      feedrate = constrain(feedrate, 1, MAXZROTMIN * ZDISTPERROT);
 
       if (useRelativeUnits) { //if we are using a relative coordinate system
         if (readString.indexOf('Z') >= 0) { //if z has moved
@@ -808,9 +817,9 @@ void  G38(const String& readString) {
         float MMPerMin             = feedrate;
         float startingPos          = axis->target();
         float endPos               = zgoto;
-        float moveDist             = currentZPos - endPos; //total distance to move
+        float moveDist             = endPos - currentZPos; //total distance to move
 
-        float direction            = -1 * moveDist / abs(moveDist); //determine the direction of the move
+        float direction            = moveDist / abs(moveDist); //determine the direction of the move
 
         float stepSizeMM           = 0.01;                    //step size in mm
 
