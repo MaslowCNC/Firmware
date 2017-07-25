@@ -37,6 +37,7 @@ bool zAxisAttached = false;
 #define MILLIMETERS 1
 #define INCHES      25.4
 #define MAXFEED     900      //The maximum allowable feedrate in mm/min
+#define MAXZROTMIN  12.60    // the maximum z rotations per minute
 
 
 int ENCODER1A;
@@ -562,7 +563,8 @@ int   G1(const String& readString){
     if(zAxisAttached){
         float threshold = .01;
         if (abs(zgoto- currentZPos) > threshold){
-            singleAxisMove(&zAxis, zgoto,45);
+            float zfeedrate = constrain(feedrate, 1, MAXZROTMIN * ZDISTPERROT);
+            singleAxisMove(&zAxis, zgoto, zfeedrate);
         }
     }
     else{
@@ -774,6 +776,7 @@ void  G38(const String& readString) {
 
       zgoto      = _inchesToMMConversion * extractGcodeValue(readString, 'Z', currentZPos / _inchesToMMConversion);
       feedrate   = _inchesToMMConversion * extractGcodeValue(readString, 'F', feedrate / _inchesToMMConversion);
+      feedrate = constrain(feedrate, 1, MAXZROTMIN * ZDISTPERROT);
 
       if (useRelativeUnits) { //if we are using a relative coordinate system
         if (readString.indexOf('Z') >= 0) { //if z has moved
