@@ -18,8 +18,8 @@
 void setup(){
     Serial.begin(57600);
     
-    readyCommandString.reserve(60);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
-    gcodeLine.reserve(60);
+    readyCommandString.reserve(128);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
+    gcodeLine.reserve(128);
     
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
