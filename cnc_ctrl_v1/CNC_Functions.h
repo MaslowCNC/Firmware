@@ -367,51 +367,46 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     float aChainLength;
     float bChainLength;
     long   numberOfStepsTaken         =  0;
-    long  beginingOfLastStep          = millis();
     
     while(numberOfStepsTaken < finalNumberOfSteps){
+            
+        //find the target point for this step
+        float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
+        float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
         
-        //if enough time has passed to take the next step
-        if (millis() - beginingOfLastStep > delayTime){
+        //find the chain lengths for this step
+        kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+        
+        //write to each axis
+        leftAxis.write(aChainLength);
+        rightAxis.write(bChainLength);
+        
+        //increment the number of steps taken
+        numberOfStepsTaken++;
+        
+        //update position on display
+        returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
+        
+        //check for new serial commands
+        readSerialCommands();
+        
+        //check for a STOP command
+        if(checkForStopCommand()){
             
-            //reset the counter 
-            beginingOfLastStep          = millis();
-            
-            //find the target point for this step
-            float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
-            float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
-            
-            //find the chain lengths for this step
+            //set the axis positions to save
             kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+            leftAxis.endMove(aChainLength);
+            rightAxis.endMove(bChainLength);
             
-            //write to each axis
-            leftAxis.write(aChainLength);
-            rightAxis.write(bChainLength);
+            //make sure the positions are displayed correctly after stop
+            xTarget = whereXShouldBeAtThisStep;
+            yTarget = whereYShouldBeAtThisStep;
             
-            //increment the number of steps taken
-            numberOfStepsTaken++;
-            
-            //update position on display
-            returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
-            
-            //check for new serial commands
-            readSerialCommands();
-            
-            //check for a STOP command
-            if(checkForStopCommand()){
-                
-                //set the axis positions to save
-                kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
-                leftAxis.endMove(aChainLength);
-                rightAxis.endMove(bChainLength);
-                
-                //make sure the positions are displayed correctly after stop
-                xTarget = whereXShouldBeAtThisStep;
-                yTarget = whereYShouldBeAtThisStep;
-                
-                return 1;
-            }
+            return 1;
         }
+        
+        //wait for the step to be completed
+        delay(delayTime);
     }
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
@@ -444,15 +439,11 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     float delayTime = calculateDelay(stepSizeMM, MMPerMin);
     
     long numberOfStepsTaken    = 0;
-    long  beginingOfLastStep   = millis();
     
     //attach the axis we want to move
     axis->attach();
     
     while(numberOfStepsTaken < finalNumberOfSteps){
-        
-        //reset the counter 
-        beginingOfLastStep          = millis();
         
         //find the target point for this step
         float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM*direction;
