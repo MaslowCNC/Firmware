@@ -630,11 +630,17 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
     float endingAngle            =  atan2(Y2 - centerY, X2 - centerX);
     
     //compute angle between lines
-    float theta                  =  abs(startingAngle) - abs(endingAngle);
-    
-    //Catch the corner case where the beginning and end of the circle are the same
-    if (startingAngle == endingAngle){
-        theta = direction*2*pi;
+    float theta                  =  endingAngle - startingAngle;
+    if (direction == COUNTERCLOCKWISE){
+        if (theta <= 0){
+            theta += 2*pi;
+        }
+    }
+    else {
+        //CLOCKWISE
+        if (theta >= 0){
+            theta -= 2*pi;
+        }
     }
     
     float arcLengthMM            =  circumference * (theta / (2*pi) );
