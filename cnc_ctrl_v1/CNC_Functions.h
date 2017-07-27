@@ -139,8 +139,9 @@ float _inchesToMMConversion =  1;
 bool  useRelativeUnits      =  false;
 bool  stopFlag              =  false;
 bool  pauseFlag             =  false;
-String readString;                        //command being built one character at a time
 String readyCommandString;                //next command queued up and ready to send
+String gcodeLine;                         //The next individual line of gcode (for example G91 G01 X19 would be run as two lines)
+
 int   lastCommand           =  0;         //Stores the value of the last command run eg: G01 -> 1
 
 //These are used in place of a forward kinematic function at the beginning of each move. They should be replaced
@@ -252,7 +253,6 @@ bool checkForStopCommand(){
     Check to see if the STOP command has been sent to the machine.
     */
     if(stopFlag){
-        readString = "";
         readyCommandString = "";
         ringBuffer.empty();
         stopFlag = false;
@@ -301,7 +301,6 @@ bool checkForProbeTouch(const int& probePin) {
       Check to see if AUX4 has gone LOW
   */
   if (digitalRead(probePin) == LOW) {
-    readString = "";
     readyCommandString = "";
     return 1;
   }
@@ -1231,7 +1230,7 @@ void  interpretCommandString(const String& cmdString){
                 firstG = 0;                     //send the whole line
             }
             
-            String gcodeLine = cmdString.substring(firstG, secondG);
+            gcodeLine = cmdString.substring(firstG, secondG);
             
             if (gcodeLine.length() > 1){
                 Serial.println(gcodeLine);

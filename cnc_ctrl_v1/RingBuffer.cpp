@@ -68,6 +68,7 @@ String RingBuffer::readLine(){
     */
     
     String lineToReturn;
+    lineToReturn.reserve(128);
     
     bool lineDetected = false;
     
