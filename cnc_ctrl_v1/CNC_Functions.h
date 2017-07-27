@@ -22,6 +22,10 @@ libraries*/
 
 #define VERSIONNUMBER 0.82
 
+#include <Avrheap.h>
+
+Avrheap myheap;
+
 bool zAxisAttached = false;
 
 #define FORWARD           1
@@ -173,7 +177,6 @@ void  returnPoz(const float& x, const float& y, const float& z){
     int                  timeout = 200;
     
     if (millis() - lastRan > timeout){
-        
         
         Serial.print(F("<Idle,MPos:"));
         Serial.print(x/_inchesToMMConversion);
@@ -1138,7 +1141,22 @@ void  executeGcodeLine(const String& gcodeLine){
         return;
     }
     
-    //Handle G-Codes
+         if(gcodeLine.substring(0, 3) == "B12"){
+        //show the free list
+        myheap.freeListWalk();
+        return;
+    }
+
+        if(gcodeLine.substring(0, 3) == "B13"){
+        //show a heap dump
+        myheap.freeListWalk();
+        myheap.dumpHeap(80);
+        Serial.println();
+        Serial.println(myheap);
+        return;
+    }
+
+   //Handle G-Codes
    
     int gNumber = extractGcodeValue(gcodeLine,'G', -1);
     

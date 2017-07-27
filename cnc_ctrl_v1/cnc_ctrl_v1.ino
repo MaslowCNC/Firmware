@@ -14,7 +14,7 @@
     
 #include "CNC_Functions.h"
 #include "TimerOne.h"
-#include "MemoryFree.h"
+//#include "MemoryFree.h"
 
 void setup(){
     Serial.begin(57600);
@@ -46,7 +46,7 @@ void runsOnATimer(){
     leftAxis.computePID();
     rightAxis.computePID();
     zAxis.computePID();
-    Serial.println(freeMemory());
+//    Serial.println(freeMemory());
 }
 
 void loop(){
