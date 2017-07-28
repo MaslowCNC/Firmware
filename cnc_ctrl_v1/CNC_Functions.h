@@ -521,7 +521,7 @@ If no number is found, defaultReturn is returned*/
     return numberAsFloat;
 }
 
-int   G1(const String& readString){
+int   G1(const String& readString, int G0orG1){
     
 /*G1() is the function which is called to process the string if it begins with 
 'G01' or 'G00'*/
@@ -529,8 +529,6 @@ int   G1(const String& readString){
     float xgoto;
     float ygoto;
     float zgoto;
-    float gospeed;
-    int   isNotRapid;
         
     float currentXPos = xTarget;
     float currentYPos = yTarget;
@@ -541,7 +539,6 @@ int   G1(const String& readString){
     ygoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
     zgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Z', currentZPos/_inchesToMMConversion);
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
-    isNotRapid = extractGcodeValue(readString, 'G', 1);
     
     if (useRelativeUnits){ //if we are using a relative coordinate system 
         
@@ -563,7 +560,7 @@ int   G1(const String& readString){
         float threshold = .01;
         if (abs(zgoto- currentZPos) > threshold){
             float zfeedrate;
-            if (isNotRapid) {
+            if (G0orG1 == 1) {
                 zfeedrate = constrain(feedrate, 1, MAXZROTMIN * ZDISTPERROT);
             }
             else {
@@ -602,7 +599,7 @@ int   G1(const String& readString){
     }
     
     
-    if (isNotRapid){
+    if (G0orG1 == 1){
         //if this is a regular move
         cordinatedMove(xgoto, ygoto, feedrate); //The XY move is performed
     }
@@ -1151,10 +1148,10 @@ void  executeGcodeLine(const String& gcodeLine){
     
     switch(gNumber){
         case 0:
-            G1(gcodeLine);
+            G1(gcodeLine, gNumber);
             break;
         case 1:
-            G1(gcodeLine);
+            G1(gcodeLine, gNumber);
             break;
         case 2:
             G2(gcodeLine, gNumber);
