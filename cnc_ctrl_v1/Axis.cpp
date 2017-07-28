@@ -31,7 +31,7 @@ Axis::Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2
 motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2)
 {
     
-    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _Ki, _Kd, REVERSE);
+    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, 0, 0, 0, REVERSE);
     
     //initialize variables
     _direction    = FORWARD;
@@ -53,11 +53,6 @@ void   Axis::loadPositionFromMemory(){
         //If a valid position has been stored
         if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
             set(_readFloat(_eepromAdr + SIZEOFFLOAT));
-            
-            Serial.print("Read from memory: ");
-            Serial.print(_axisName);
-            Serial.print(": ");
-            Serial.println(_readFloat(_eepromAdr + SIZEOFFLOAT));
         }
 }
 
@@ -68,19 +63,14 @@ void   Axis::initializePID(){
 }
 
 void    Axis::write(const float& targetPosition){
-    
-    _pidSetpoint   =  targetPosition/_mmPerRotation;
+    if(_mmPerRotation!= 0){
+        _pidSetpoint   =  targetPosition/_mmPerRotation;
+    }
     return;
 }
 
 float  Axis::read(){
     //returns the true axis position
-    
-    //Serial.println("Read scale: ");
-    //Serial.println(_encoderSteps);
-    //Serial.println(_mmPerRotation);
-    //Serial.println(motorGearboxEncoder.encoder.read());
-    //Serial.println((motorGearboxEncoder.encoder.read()/_encoderSteps)*_mmPerRotation);
     
     return (motorGearboxEncoder.encoder.read()/_encoderSteps)*_mmPerRotation;
 }
@@ -95,13 +85,6 @@ float  Axis::setpoint(){
 }
 
 int    Axis::set(const float& newAxisPosition){
-    
-    Serial.print("Set: ");
-    Serial.print(_axisName);
-    Serial.print(" ");
-    Serial.println(newAxisPosition);
-    Serial.println(_encoderSteps);
-    Serial.println(_mmPerRotation);
     
     //reset everything to the new value
     _axisTarget   =  newAxisPosition/_mmPerRotation;
@@ -128,8 +111,13 @@ void   Axis::computePID(){
     motorGearboxEncoder.write(_pidOutput);
     
     /*if(_axisName[0] == 'L'){
+        Serial.println("*");
+        Serial.println(_pidInput);
+        Serial.println(_pidSetpoint);
         Serial.println(_pidOutput);
     }*/
+    
+    
     
     motorGearboxEncoder.computePID();
     

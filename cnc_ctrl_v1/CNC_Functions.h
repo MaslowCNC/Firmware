@@ -972,7 +972,7 @@ void  updateSettings(const String& readString){
     float KdV                = extractGcodeValue(readString, 'X', -1);
     
     //Write the PID values to the axis if new ones have been received
-    if (KpPos != -1 or KiPos != -1 or KdPos != -1){
+    if (KpPos != -1){
         leftAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);
         rightAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);
         zAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);

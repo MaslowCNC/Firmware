@@ -59,7 +59,7 @@ bool PID::Compute()
     //with a consistent sample period
 
     /*Compute all the working error variables*/
-    double input = *myInput;
+    double input = *myInput; 
     double error = *mySetpoint - input;
     ITerm+= (ki * error);
 
@@ -208,7 +208,7 @@ void PID::FlipIntegrator(){
  * functions query the internal state of the PID.  they're here for display
  * purposes.  this are the functions the PID Front-end uses for example
  ******************************************************************************/
-double PID::GetKp(){ return  dispKp; }
+double PID::GetKp(){ return  dispKp;}
 double PID::GetKi(){ return  dispKi;}
 double PID::GetKd(){ return  dispKd;}
 int PID::GetMode(){ return  inAuto ? AUTOMATIC : MANUAL;}

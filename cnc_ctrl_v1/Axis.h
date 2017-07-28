@@ -61,12 +61,14 @@
             int        _currentAngle;
             int        _previousAngle;
             double     _timeLastMoved;
-            double     _pidSetpoint, _pidInput, _pidOutput;
+            double     _pidSetpoint = 0;
+            double     _pidInput = 0;
+            double     _pidOutput = 0;
             double     _Kp=0, _Ki = 0, _Kd=0;
             PID        _pidController;
             int        _eepromAdr;
-            float      _mmPerRotation;
-            float      _encoderSteps;
+            float      _mmPerRotation = 1;
+            float      _encoderSteps = 1000;
             float      _oldSetpoint;
             float      _oldDir;
             bool       _disableAxisForTesting = false;
