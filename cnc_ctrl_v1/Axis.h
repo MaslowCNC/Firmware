@@ -47,7 +47,7 @@
             bool   attached();
             void   wipeEEPROM();
             MotorGearboxEncoder    motorGearboxEncoder;
-            void   setPIDValues(float Kp, float Ki, float Kd);
+            void   setPIDValues(float Kp, float Ki, float Kd, float KpV, float KiV, float KdV);
             
         private:
             int        _PWMread(int pin);

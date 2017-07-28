@@ -973,9 +973,9 @@ void  updateSettings(const String& readString){
     
     //Write the PID values to the axies if new ones have been received
     if (KpPos != 0 or KiPos != 0 or KdPos != 0){
-        leftAxis.setPIDValues(KpPos, KiPos, KdPos);
-        rightAxis.setPIDValues(KpPos, KiPos, KdPos);
-        zAxis.setPIDValues(KpPos, KiPos, KdPos);
+        leftAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);
+        rightAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);
+        zAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);
     }
     
     //Change the motor properties in cnc_funtions

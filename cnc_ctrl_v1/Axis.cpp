@@ -111,17 +111,19 @@ void   Axis::computePID(){
     
 }
 
-void   Axis::setPIDValues(float Kp, float Ki, float Kd){
+void   Axis::setPIDValues(float KpPos, float KiPos, float KdPos, float KpV, float KiV, float KdV){
     /*
     
     Sets the positional PID values for the axis
     
     */
-    _Kp = Kp;
-    _Ki = Ki;
-    _Kd = Kd;
+    _Kp = KpPos;
+    _Ki = KiPos;
+    _Kd = KdPos;
     
     _pidController.SetTunings(_Kp, _Ki, _Kd);
+    
+    motorGearboxEncoder.setPIDValues(KpV, KiV, KdV);
 }
 
 void   Axis::setPIDAggressiveness(float aggressiveness){

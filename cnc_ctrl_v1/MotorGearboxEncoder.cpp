@@ -123,6 +123,21 @@ void  MotorGearboxEncoder::computePID(){
     motor.write(_pidOutput);
 }
 
+void  MotorGearboxEncoder::setPIDValues(float KpV, float KiV, float KdV){
+    /*
+    
+    Set PID tuning values
+    
+    */
+    
+    _Kp = KpV;
+    _Ki = KiV;
+    _Kd = KdV;
+    
+    _posPIDController.SetTunings(_Kp, _Ki, _Kd);
+    _negPIDController.SetTunings(_Kp, _Ki, _Kd);
+}
+
 void MotorGearboxEncoder::setPIDAggressiveness(float aggressiveness){
     /*
     

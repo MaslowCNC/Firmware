@@ -34,6 +34,7 @@
             void       setName(const String& newName);
             void       initializePID();
             void       setPIDAggressiveness(float aggressiveness);
+            void       setPIDValues(float KpV, float KiV, float KdV);
         private:
             double     _targetSpeed;
             double     _currentSpeed;
@@ -44,7 +45,7 @@
             double     _pidOutput;
             PID        _posPIDController;
             PID        _negPIDController;
-            double     _Kp=20, _Ki=1, _Kd=0;
+            double     _Kp=0, _Ki=0, _Kd=0;
             int        _oldValue1;
             int        _oldValue2;
             int        _oldValue3;
