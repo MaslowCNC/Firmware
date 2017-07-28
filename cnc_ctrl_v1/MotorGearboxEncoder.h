@@ -44,7 +44,7 @@
             double     _pidOutput;
             PID        _posPIDController;
             PID        _negPIDController;
-            double     _Kp=20, _Ki=1, _Kd=0;
+            double     _Kp=0, _Ki=0, _Kd=0;
             int        _oldValue1;
             int        _oldValue2;
             int        _oldValue3;

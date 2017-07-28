@@ -964,6 +964,21 @@ void  updateSettings(const String& readString){
     float zDistPerRot        = extractGcodeValue(readString, 'N', ZDISTPERROT);
     int zEncoderSteps        = extractGcodeValue(readString, 'P', ZENCODERSTEPS);
     
+    float KpPos              = extractGcodeValue(readString, 'S', 0);
+    float KiPos              = extractGcodeValue(readString, 'T', 0);
+    float KdPos              = extractGcodeValue(readString, 'U', 0);
+    float KpV                = extractGcodeValue(readString, 'V', 0);
+    float KiV                = extractGcodeValue(readString, 'W', 0);
+    float KdV                = extractGcodeValue(readString, 'X', 0);
+    
+    Serial.println("KValues");
+    Serial.println(KpPos);
+    Serial.println(KiPos);
+    Serial.println(KdPos);
+    Serial.println(KpV);
+    Serial.println(KiV);
+    Serial.println(KdV);
+    
     //Change the motor properties in cnc_funtions
     float distPerRot = gearTeeth*chainPitch; 
     leftAxis.changePitch(distPerRot);
