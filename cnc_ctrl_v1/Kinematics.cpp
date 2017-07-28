@@ -160,7 +160,11 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 }
 
 void  Kinematics::forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos){
-
+    
+    Serial.println("Called with: ");
+    Serial.println(chainALength);
+    Serial.println(chainBLength);
+    
     float xGuess = 0;
     float yGuess = 0;
 

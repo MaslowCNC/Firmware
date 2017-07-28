@@ -26,7 +26,7 @@
 #define SIZEOFFLOAT      4
 #define SIZEOFLINSEG    17
 
-Axis::Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const String& axisName, const int& eepromAdr, const float& mmPerRotation, const float& encoderSteps)
+Axis::Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const String& axisName, const int& eepromAdr)
 :
 motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2)
 {
@@ -38,12 +38,15 @@ motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPi
     _axisName     = axisName;
     _axisTarget   = 0.0;
     _eepromAdr    = eepromAdr;
-    _mmPerRotation= mmPerRotation;
-    _encoderSteps = encoderSteps;
     
     //load position
     if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
         set(_readFloat(_eepromAdr + SIZEOFFLOAT));
+        
+        Serial.print("Read from memory: ");
+        Serial.print(_axisName);
+        Serial.print(": ");
+        Serial.println(_readFloat(_eepromAdr + SIZEOFFLOAT));
     }
     
     initializePID();
@@ -65,6 +68,11 @@ void    Axis::write(const float& targetPosition){
 
 float  Axis::read(){
     //returns the true axis position
+    
+    Serial.println("Read scale: ");
+    Serial.println(_encoderSteps);
+    Serial.println(_mmPerRotation);
+    
     return (motorGearboxEncoder.encoder.read()/_encoderSteps)*_mmPerRotation;
 }
 
@@ -78,6 +86,11 @@ float  Axis::setpoint(){
 }
 
 int    Axis::set(const float& newAxisPosition){
+    
+    Serial.print("Set: ");
+    Serial.print(_axisName);
+    Serial.print(" ");
+    Serial.println(newAxisPosition);
     
     //reset everything to the new value
     _axisTarget   =  newAxisPosition/_mmPerRotation;

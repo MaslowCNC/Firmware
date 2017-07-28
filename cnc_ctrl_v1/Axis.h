@@ -26,8 +26,8 @@
 
     class Axis{
         public:
-            Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const String& axisName, const int& eepromAdr, const float& mmPerRotation, const float& encoderSteps);
-            void    write(const float& targetPosition);
+            Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const String& axisName, const int& eepromAdr);
+            void   write(const float& targetPosition);
             float  read();
             int    set(const float& newAxisPosition);
             int    updatePositionFromEncoder();
