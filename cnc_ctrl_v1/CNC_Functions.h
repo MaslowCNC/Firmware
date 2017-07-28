@@ -951,6 +951,7 @@ void  updateSettings(const String& readString){
 
     float bedWidth           = extractGcodeValue(readString, 'A', -1);
     float bedHeight          = extractGcodeValue(readString, 'C', -1);
+    float distBetweenMotors  = extractGcodeValue(readString, 'Q', -1);
     float motorOffsetY       = extractGcodeValue(readString, 'E', -1);
     float sledWidth          = extractGcodeValue(readString, 'F', -1);
     float sledHeight         = extractGcodeValue(readString, 'R', -1);
@@ -986,13 +987,16 @@ void  updateSettings(const String& readString){
         zAxis.changePitch(zDistPerRot);
     }
     
-    //update the number of encoder steps if new values have been recieved
+    //update the number of encoder steps if new values have been received
     if (encoderSteps != -1){
         leftAxis.changeEncoderResolution(encoderSteps);
         rightAxis.changeEncoderResolution(encoderSteps);
+        leftAxis.loadPositionFromMemory();
+        rightAxis.loadPositionFromMemory();
     }
     if (zEncoderSteps != -1){
         zAxis.changeEncoderResolution(zEncoderSteps);
+        zAxis.loadPositionFromMemory();
     }
     
     //Change the machine dimensions in the kinematics if new values have been received

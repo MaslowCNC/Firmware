@@ -36,22 +36,29 @@ motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPi
     //initialize variables
     _direction    = FORWARD;
     _axisName     = axisName;
-    _axisTarget   = 0.0;
     _eepromAdr    = eepromAdr;
-    
-    //load position
-    if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
-        set(_readFloat(_eepromAdr + SIZEOFFLOAT));
-        
-        Serial.print("Read from memory: ");
-        Serial.print(_axisName);
-        Serial.print(": ");
-        Serial.println(_readFloat(_eepromAdr + SIZEOFFLOAT));
-    }
     
     initializePID();
     
     motorGearboxEncoder.setName(_axisName);
+}
+
+void   Axis::loadPositionFromMemory(){
+        /*
+        
+        Reload the last known position for the axis
+        
+        */
+        
+        //If a valid position has been stored
+        if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
+            set(_readFloat(_eepromAdr + SIZEOFFLOAT));
+            
+            Serial.print("Read from memory: ");
+            Serial.print(_axisName);
+            Serial.print(": ");
+            Serial.println(_readFloat(_eepromAdr + SIZEOFFLOAT));
+        }
 }
 
 void   Axis::initializePID(){
@@ -69,9 +76,11 @@ void    Axis::write(const float& targetPosition){
 float  Axis::read(){
     //returns the true axis position
     
-    Serial.println("Read scale: ");
-    Serial.println(_encoderSteps);
-    Serial.println(_mmPerRotation);
+    //Serial.println("Read scale: ");
+    //Serial.println(_encoderSteps);
+    //Serial.println(_mmPerRotation);
+    //Serial.println(motorGearboxEncoder.encoder.read());
+    //Serial.println((motorGearboxEncoder.encoder.read()/_encoderSteps)*_mmPerRotation);
     
     return (motorGearboxEncoder.encoder.read()/_encoderSteps)*_mmPerRotation;
 }
@@ -91,6 +100,8 @@ int    Axis::set(const float& newAxisPosition){
     Serial.print(_axisName);
     Serial.print(" ");
     Serial.println(newAxisPosition);
+    Serial.println(_encoderSteps);
+    Serial.println(_mmPerRotation);
     
     //reset everything to the new value
     _axisTarget   =  newAxisPosition/_mmPerRotation;

@@ -48,6 +48,7 @@
             void   wipeEEPROM();
             MotorGearboxEncoder    motorGearboxEncoder;
             void   setPIDValues(float Kp, float Ki, float Kd, float KpV, float KiV, float KdV);
+            void   loadPositionFromMemory();
             
         private:
             int        _PWMread(int pin);
