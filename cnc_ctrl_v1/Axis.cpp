@@ -111,6 +111,19 @@ void   Axis::computePID(){
     
 }
 
+void   Axis::setPIDValues(float Kp, float Ki, float Kd){
+    /*
+    
+    Sets the positional PID values for the axis
+    
+    */
+    _Kp = Kp;
+    _Ki = Ki;
+    _Kd = Kd;
+    
+    _pidController.SetTunings(_Kp, _Ki, _Kd);
+}
+
 void   Axis::setPIDAggressiveness(float aggressiveness){
     /*
     

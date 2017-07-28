@@ -47,7 +47,7 @@
             bool   attached();
             void   wipeEEPROM();
             MotorGearboxEncoder    motorGearboxEncoder;
-            String     _axisName;
+            void   setPIDValues(float Kp, float Ki, float Kd);
             
         private:
             int        _PWMread(int pin);
@@ -69,6 +69,7 @@
             float      _oldSetpoint;
             float      _oldDir;
             bool       _disableAxisForTesting = false;
+            String     _axisName;
     };
 
     #endif

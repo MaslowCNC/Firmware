@@ -971,13 +971,12 @@ void  updateSettings(const String& readString){
     float KiV                = extractGcodeValue(readString, 'W', 0);
     float KdV                = extractGcodeValue(readString, 'X', 0);
     
-    Serial.println("KValues");
-    Serial.println(KpPos);
-    Serial.println(KiPos);
-    Serial.println(KdPos);
-    Serial.println(KpV);
-    Serial.println(KiV);
-    Serial.println(KdV);
+    //Write the PID values to the axies if new ones have been received
+    if (KpPos != 0 or KiPos != 0 or KdPos != 0){
+        leftAxis.setPIDValues(KpPos, KiPos, KdPos);
+        rightAxis.setPIDValues(KpPos, KiPos, KdPos);
+        zAxis.setPIDValues(KpPos, KiPos, KdPos);
+    }
     
     //Change the motor properties in cnc_funtions
     float distPerRot = gearTeeth*chainPitch; 
