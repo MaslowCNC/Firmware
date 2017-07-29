@@ -27,9 +27,9 @@
         public:
             Kinematics();
             void  inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
+            void  quadrilateralInverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  recomputeGeometry();
             void  forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos);
-            void  quadrilateralForward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos);
             //geometry
             float l             = 310.0;                               //horizontal distance between sled attach points
             float s             = 139.0;                               //vertical distance between sled attach points and bit
