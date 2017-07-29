@@ -56,7 +56,12 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     
     */
     
-    quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);
+    if(kinematicsType == 1){
+        quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);
+    }
+    else{
+        triangularInverse(xTarget, yTarget, aChainLength, bChainLength);
+    }
     
 }
 
