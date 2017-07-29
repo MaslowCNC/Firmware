@@ -961,6 +961,8 @@ void  updateSettings(const String& readString){
     float KpV                = extractGcodeValue(readString, 'V', -1);
     float KiV                = extractGcodeValue(readString, 'W', -1);
     float KdV                = extractGcodeValue(readString, 'X', -1);
+    float kinematicsType     = extractGcodeValue(readString, 'Y', -1);
+    float rotationDiskRadius = extractGcodeValue(readString, 'Z', -1);
     
     //Write the PID values to the axis if new ones have been received
     if (KpPos != -1){
@@ -1014,6 +1016,12 @@ void  updateSettings(const String& readString){
     }
     if (bedHeight != -1){
         kinematics.machineHeight= bedHeight;
+    }
+    if (kinematicsType != -1){
+        kinematics.kinematicsType = kinematicsType;
+    }
+    if (rotationDiskRadius != -1){
+        kinematics.rotationDiskRadius = rotationDiskRadius;
     }
     
     //propagate the new values

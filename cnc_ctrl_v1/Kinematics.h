@@ -27,6 +27,8 @@
         public:
             Kinematics();
             void  inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
+            void  quadrilateralInverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
+            void  triangularInverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  recomputeGeometry();
             void  forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos);
             //geometry
@@ -36,6 +38,8 @@
             float h3            = 79.0;                                //distance from bit to sled center of mass
             float D             = 2978.4;                              //distance between sprocket centers
             float R             = 10.2;                                //sprocket radius
+            float rotationDiskRadius = 0;                              //distance from the bit to the attachment point
+            int kinematicsType  = 1;                                   //Which version of the kinematics to use. 1 is quadrilateral, 2 is triangular
 
 
             //machine dimensions
@@ -52,8 +56,10 @@
             void  _MyTrig();
             void _verifyValidTarget(float* xTarget,float* yTarget);
             //target router bit coordinates.
-            float x = 2708.4;
-            float y = 270;
+            float x = 0;
+            float y = 0;
+            float _xCordOfMotor = D/2;
+            float _yCordOfMotor = halfHeight + motorOffsetY;
 
 
 

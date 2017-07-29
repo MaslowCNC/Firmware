@@ -49,6 +49,23 @@ void Kinematics::recomputeGeometry(){
 }
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    /*
+    
+    This function works as a switch to call either the quadrilateralInverse kinematic function 
+    or the triangularInverse kinematic function
+    
+    */
+    
+    if(kinematicsType == 1){
+        quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);
+    }
+    else{
+        triangularInverse(xTarget, yTarget, aChainLength, bChainLength);
+    }
+    
+}
+
+void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
 
     //Confirm that the coordinates are on the wood
     _verifyValidTarget(&xTarget, &yTarget);
@@ -157,6 +174,29 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     *aChainLength = Chain1;
     *bChainLength = Chain2;
 
+}
+
+void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    /*
+    
+    The inverse kinematics (relating an xy coordinate pair to the required chain lengths to hit that point)
+    function for a triangular set up where the chains meet at a point, or are arranged so that they simulate 
+    meeting at a point.
+    
+    */
+    
+    //Confirm that the coordinates are on the wood
+    _verifyValidTarget(&xTarget, &yTarget);
+    
+    float Chain1 = sqrt(pow((-1*_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
+    float Chain2 = sqrt(pow((_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
+    
+    //Subtract of the virtual length which is added to the chain by the rotation mechanism
+    Chain1 = Chain1 - rotationDiskRadius;
+    Chain2 = Chain2 - rotationDiskRadius;
+    
+    *aChainLength = Chain1;
+    *bChainLength = Chain2;
 }
 
 void  Kinematics::forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos){
