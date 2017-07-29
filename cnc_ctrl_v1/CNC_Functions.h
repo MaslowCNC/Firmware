@@ -706,19 +706,22 @@ int   G1(const String& readString, int G0orG1){
     }
 }
 
-int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, const float& centerX, const float& centerY, const float& MMPerMin, const float& direction){
+int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, const float& Y2, const float& Z2, const float& centerX, const float& centerY, const float& centerZ, const float& rotations, const float& MMPerMin, const float& direction){
     /*
     
-    Move the machine through an arc from point (X1, Y1) to point (X2, Y2) along the 
-    arc defined by center (centerX, centerY) at speed MMPerMin
+    Move the machine through an arc from point (X1, Y1, Z1) to point (X2, Y2, Z2) along the 
+    arc defined by center (centerX, centerY, centerZ) at speed MMPerMin.  Using the G17thru19
+    code to determine the central axis.  G17 = Z, G18 = Y, G19 = X
     
     */
     
     //compute geometry 
     float pi                     =  3.1415;
-    float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
-    float distanceBetweenPoints  =  sqrt( sq(  X2 - X1   ) + sq(    Y2  - Y1) );
+    float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) + sq(centerZ - Z1)); 
+    float distanceBetweenPoints  =  sqrt( sq(  X2 - X1   ) + sq(    Y2  - Y1) + sq(    Z2  - Z1));
     float circumference          =  2.0*pi*radius;
+    
+    // stopped here
     
     float startingAngle          =  atan2(Y1 - centerY, X1 - centerX);
     float endingAngle            =  atan2(Y2 - centerY, X2 - centerX);
@@ -756,6 +759,8 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
     
     float aChainLength;
     float bChainLength;
+
+    MMPerMin = constrain(MMPerMin, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
 
     float delayTime = calculateDelay(stepSizeMM, MMPerMin);
     
@@ -843,14 +848,15 @@ int   G2(const String& readString, int G2orG3){
     
     float centerX = X1 + I;
     float centerY = Y1 + J;
+    float centerZ = Z1 + K;
     
-    feedrate = constrain(feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
+    // Need to handle R at some point
     
     if (G2orG3 == 2){
-        arc(X1, Y1, X2, Y2, centerX, centerY, feedrate, CLOCKWISE);
+        arc(X1, Y1, Z1, X2, Y2, Z2, centerX, centerY, centerZ, P, feedrate, CLOCKWISE);
     }
     if (G2orG3 == 3){
-        arc(X1, Y1, X2, Y2, centerX, centerY, feedrate, COUNTERCLOCKWISE);
+        arc(X1, Y1, Z1, X2, Y2, Z2, centerX, centerY, centerZ, P, feedrate, COUNTERCLOCKWISE);
     }
 }
 
