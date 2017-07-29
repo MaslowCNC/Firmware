@@ -387,6 +387,20 @@ float calculateDelay(const float& stepSizeMM, const float& feedrateMMPerMin){
     return msPerStep;
 }
 
+float calculateFeedrate(const float& stepSizeMM, const float& msPerStep){
+    /*
+    Calculate the time delay between each step for a given feedrate
+    */
+    
+    #define MINUTEINMS 60000.0
+    
+    // derivation: ms / step = 1 min in ms / dist in one min
+    
+    float feedrate = (stepSizeMM*MINUTEINMS)/msPerStep;
+    
+    return feedrate;
+}
+
 float computeStepSize(const float& MMPerMin){
     /*
     
@@ -398,7 +412,7 @@ float computeStepSize(const float& MMPerMin){
     return .0001575*MMPerMin; //value found empirically by running loop until there were not spare cycles
 }
 
-int   cordinatedMove(const float& xEnd, const float& yEnd, const float& MMPerMin){
+int   cordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, float MMPerMin){
     
     /*The move() function moves the tool in a straight line to the position (xEnd, yEnd) at 
     the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
@@ -407,30 +421,45 @@ int   cordinatedMove(const float& xEnd, const float& yEnd, const float& MMPerMin
     
     float  xStartingLocation = xTarget;
     float  yStartingLocation = yTarget;
-    float  stepSizeMM         = computeStepSize(MMPerMin);
+    float  zStartingLocation = zAxis.read();  // I don't know why we treat the zaxis differently
+    float  zMAXFEED          = MAXZROTMIN * 3.17;
     
     //find the total distances to move
-    float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  );
+    float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  + sq(zEnd - zStartingLocation));
     float  xDistanceToMoveInMM        = xEnd - xStartingLocation;
     float  yDistanceToMoveInMM        = yEnd - yStartingLocation;
+    float  zDistanceToMoveInMM        = zEnd - zStartingLocation;
     
-    //compute the total  number of steps in the move
-    //the argument to abs should only be a variable -- splitting calc into 2 lines
-    long   finalNumberOfSteps         = distanceToMoveInMM/stepSizeMM;
-    finalNumberOfSteps = abs(finalNumberOfSteps);
+    //compute feed details
+    MMPerMin = constrain(MMPerMin, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
+    float  stepSizeMM           = computeStepSize(MMPerMin);
+    long   finalNumberOfSteps   = abs(distanceToMoveInMM/stepSizeMM);
+    float  delayTime            = calculateDelay(stepSizeMM, MMPerMin);
+    float  zFeedrate            = calculateFeedrate((zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
     
-    float delayTime = calculateDelay(stepSizeMM, MMPerMin);
+    //throttle back feedrate if it exceeds zaxis max
+    if (zFeedrate > zMAXFEED){
+      float  zStepSizeMM        = computeStepSize(zMAXFEED);
+      finalNumberOfSteps        = abs(zDistanceToMoveInMM/zStepSizeMM);
+      stepSizeMM                = (distanceToMoveInMM/finalNumberOfSteps);
+      MMPerMin                  = calculateFeedrate(stepSizeMM, delayTime);
+    }
     
     // (fraction of distance in x direction)* size of step toward target
-    float  xStepSize                  = (xDistanceToMoveInMM/distanceToMoveInMM)*stepSizeMM;
-    float  yStepSize                  = (yDistanceToMoveInMM/distanceToMoveInMM)*stepSizeMM;
+    float  xStepSize            = (xDistanceToMoveInMM/finalNumberOfSteps);
+    float  yStepSize            = (yDistanceToMoveInMM/finalNumberOfSteps);
+    float  zStepSize            = (zDistanceToMoveInMM/finalNumberOfSteps);
     
     //attach the axes
     leftAxis.attach();
     rightAxis.attach();
+    if(zAxisAttached){
+      zAxis.attach();
+    }
     
     float aChainLength;
     float bChainLength;
+    float zPosition                   = zStartingLocation;
     long   numberOfStepsTaken         =  0;
     unsigned long beginingOfLastStep = millis() - delayTime;
     
@@ -444,6 +473,7 @@ int   cordinatedMove(const float& xEnd, const float& yEnd, const float& MMPerMin
             //find the target point for this step
             float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
             float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
+            zPosition = zStartingLocation + (numberOfStepsTaken*zStepSize);
             
             //find the chain lengths for this step
             kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
@@ -451,12 +481,15 @@ int   cordinatedMove(const float& xEnd, const float& yEnd, const float& MMPerMin
             //write to each axis
             leftAxis.write(aChainLength);
             rightAxis.write(bChainLength);
+            if(zAxisAttached){
+              zAxis.write(zPosition);
+            }
             
             //increment the number of steps taken
             numberOfStepsTaken++;
             
             //update position on display
-            returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
+            returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zPosition);
             
             //check for new serial commands
             readSerialCommands();
@@ -468,6 +501,9 @@ int   cordinatedMove(const float& xEnd, const float& yEnd, const float& MMPerMin
                 kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
                 leftAxis.endMove(aChainLength);
                 rightAxis.endMove(bChainLength);
+                if(zAxisAttached){
+                  zAxis.endMove(zPosition);
+                }
                 
                 //make sure the positions are displayed correctly after stop
                 xTarget = whereXShouldBeAtThisStep;
@@ -481,6 +517,9 @@ int   cordinatedMove(const float& xEnd, const float& yEnd, const float& MMPerMin
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
     leftAxis.endMove(aChainLength);
     rightAxis.endMove(bChainLength);
+    if(zAxisAttached){
+      zAxis.endMove(zPosition);
+    }
     
     xTarget = xEnd;
     yTarget = yEnd;
@@ -502,7 +541,7 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     float stepSizeMM           = 0.01;                    //step size in mm
 
     //the argument to abs should only be a variable -- splitting calc into 2 lines
-    long finalNumberOfSteps    = moveDist/stepSizeMM;      //number of steps taken in move
+    long finalNumberOfSteps    = abs(moveDist/stepSizeMM);      //number of steps taken in move
     finalNumberOfSteps = abs(finalNumberOfSteps);
 
     float delayTime = calculateDelay(stepSizeMM, MMPerMin);
@@ -658,11 +697,11 @@ int   G1(const String& readString, int G0orG1){
     
     if (G0orG1 == 1){
         //if this is a regular move
-        cordinatedMove(xgoto, ygoto, feedrate); //The XY move is performed
+        cordinatedMove(xgoto, ygoto, zgoto, feedrate); //The XY move is performed
     }
     else{
         //if this is a rapid move
-        cordinatedMove(xgoto, ygoto, 1000); //move the same as a regular move, but go fast
+        cordinatedMove(xgoto, ygoto, zgoto, 1000); //move the same as a regular move, but go fast
     }
 }
 
