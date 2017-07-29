@@ -160,6 +160,17 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 }
 
 void  Kinematics::forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos){
+    /*
+    
+    This function works as a switch to call either the quadrilateralForward kinematic function 
+    or the triangularForward kinematic function
+    
+    */
+    
+    quadrilateralForward(chainALength, chainBLength, xPos, yPos);
+}
+
+void  Kinematics::quadrilateralForward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos){
     
     float xGuess = 0;
     float yGuess = 0;
