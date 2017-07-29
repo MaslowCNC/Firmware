@@ -58,10 +58,11 @@ int ENA;
 int ENB;
 int ENC;
 
-#define DISTPERROT     10*6.35//#teeth*pitch of chain
-#define ZDISTPERROT    3.17//1/8inch in mm
-#define ENCODERSTEPS   8148.0 //7*291*4 --- 7ppr, 291:1 gear ratio, quadrature encoding
-#define ZENCODERSTEPS  7560.0 //7*270*4 --- 7ppr, 270:1 gear ratio, quadrature encoding
+//These are set in Ground Control now
+//#define DISTPERROT     10*6.35//#teeth*pitch of chain
+//#define ZDISTPERROT    3.17//1/8inch in mm
+//#define ENCODERSTEPS   8148.0 //7*291*4 --- 7ppr, 291:1 gear ratio, quadrature encoding
+//#define ZENCODERSTEPS  7560.0 //7*270*4 --- 7ppr, 270:1 gear ratio, quadrature encoding
 
 #define AUX1 17
 #define AUX2 16
@@ -126,9 +127,9 @@ int   setupPins(){
 
 int pinsSetup       = setupPins();
 
-Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "L",  LEFT_EEPROM_ADR, DISTPERROT , ENCODERSTEPS);
-Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, "R", RIGHT_EEPROM_ADR, DISTPERROT , ENCODERSTEPS);
-Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Z",     Z_EEPROM_ADR, ZDISTPERROT, ZENCODERSTEPS);
+Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "L",  LEFT_EEPROM_ADR);
+Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, "R", RIGHT_EEPROM_ADR);
+Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Z",     Z_EEPROM_ADR);
 
 
 Kinematics kinematics;
@@ -561,10 +562,10 @@ int   G1(const String& readString, int G0orG1){
         if (abs(zgoto- currentZPos) > threshold){
             float zfeedrate;
             if (G0orG1 == 1) {
-                zfeedrate = constrain(feedrate, 1, MAXZROTMIN * ZDISTPERROT);
+                zfeedrate = constrain(feedrate, 1, MAXZROTMIN * 3.17);//distance per rotation shouldn't be hard coded here
             }
             else {
-                zfeedrate = MAXZROTMIN * ZDISTPERROT;
+                zfeedrate = MAXZROTMIN * 3.17;
             }
             singleAxisMove(&zAxis, zgoto, zfeedrate);
         }
@@ -784,7 +785,7 @@ void  G38(const String& readString) {
 
       zgoto      = _inchesToMMConversion * extractGcodeValue(readString, 'Z', currentZPos / _inchesToMMConversion);
       feedrate   = _inchesToMMConversion * extractGcodeValue(readString, 'F', feedrate / _inchesToMMConversion);
-      feedrate = constrain(feedrate, 1, MAXZROTMIN * ZDISTPERROT);
+      feedrate = constrain(feedrate, 1, MAXZROTMIN * 3.17);
 
       if (useRelativeUnits) { //if we are using a relative coordinate system
         if (readString.indexOf('Z') >= 0) { //if z has moved
@@ -948,41 +949,83 @@ void  updateSettings(const String& readString){
     
     //Extract the settings values
 
-    float bedWidth           = extractGcodeValue(readString, 'A', kinematics.machineWidth);
-    float bedHeight          = extractGcodeValue(readString, 'C', kinematics.machineHeight);
-    float distBetweenMotors  = extractGcodeValue(readString, 'Q', kinematics.D);
-    float motorOffsetX       = extractGcodeValue(readString, 'D', (distBetweenMotors - bedWidth)/2); //read the motor offset X IF it is sent, if it's not sent, compute it from the spacing between the motors
-    float motorOffsetY       = extractGcodeValue(readString, 'E', motorOffsetY);
-    float sledWidth          = extractGcodeValue(readString, 'F', kinematics.l);
-    float sledHeight         = extractGcodeValue(readString, 'R', kinematics.s);
-    float sledCG             = extractGcodeValue(readString, 'H', kinematics.h3);
-    zAxisAttached            = extractGcodeValue(readString, 'I', zAxisAttached);
-    int encoderSteps         = extractGcodeValue(readString, 'J', ENCODERSTEPS);
-    float gearTeeth          = extractGcodeValue(readString, 'K', 10);
-    float chainPitch         = extractGcodeValue(readString, 'M', 6.35);
+    float bedWidth           = extractGcodeValue(readString, 'A', -1);
+    float bedHeight          = extractGcodeValue(readString, 'C', -1);
+    float distBetweenMotors  = extractGcodeValue(readString, 'Q', -1);
+    float motorOffsetY       = extractGcodeValue(readString, 'E', -1);
+    float sledWidth          = extractGcodeValue(readString, 'F', -1);
+    float sledHeight         = extractGcodeValue(readString, 'R', -1);
+    float sledCG             = extractGcodeValue(readString, 'H', -1);
+    zAxisAttached            = extractGcodeValue(readString, 'I', -1);
+    int encoderSteps         = extractGcodeValue(readString, 'J', -1);
+    float gearTeeth          = extractGcodeValue(readString, 'K', -1);
+    float chainPitch         = extractGcodeValue(readString, 'M', -1);
     
-    float zDistPerRot        = extractGcodeValue(readString, 'N', ZDISTPERROT);
-    int zEncoderSteps        = extractGcodeValue(readString, 'P', ZENCODERSTEPS);
+    float zDistPerRot        = extractGcodeValue(readString, 'N', -1);
+    int zEncoderSteps        = extractGcodeValue(readString, 'P', -1);
     
-    //Change the motor properties in cnc_funtions
-    float distPerRot = gearTeeth*chainPitch; 
-    leftAxis.changePitch(distPerRot);
-    rightAxis.changePitch(distPerRot);
-    zAxis.changePitch(zDistPerRot);
+    float KpPos              = extractGcodeValue(readString, 'S', -1);
+    float KiPos              = extractGcodeValue(readString, 'T', -1);
+    float KdPos              = extractGcodeValue(readString, 'U', -1);
+    float KpV                = extractGcodeValue(readString, 'V', -1);
+    float KiV                = extractGcodeValue(readString, 'W', -1);
+    float KdV                = extractGcodeValue(readString, 'X', -1);
     
-    leftAxis.changeEncoderResolution(encoderSteps);
-    rightAxis.changeEncoderResolution(encoderSteps);
-    zAxis.changeEncoderResolution(zEncoderSteps);
+    //Write the PID values to the axis if new ones have been received
+    if (KpPos != -1){
+        leftAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);
+        rightAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);
+        zAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);
+    }
     
-    //Change the machine dimensions in the kinematics 
-    kinematics.l            = sledWidth;
-    kinematics.s            = sledHeight;
-    kinematics.h3           = sledCG;
-    kinematics.R            = distPerRot / (2.0*3.14159);
-    kinematics.D            = distBetweenMotors;
-    kinematics.motorOffsetY = motorOffsetY;
-    kinematics.machineWidth = bedWidth;
-    kinematics.machineHeight= bedHeight;
+    //Change the motor properties in cnc_funtions if new values have been sent
+    float distPerRot = -1;
+    if (gearTeeth != -1 and chainPitch != -1){
+        float distPerRot = gearTeeth*chainPitch; 
+        leftAxis.changePitch(distPerRot);
+        rightAxis.changePitch(distPerRot);
+        zAxis.changePitch(zDistPerRot);
+    }
+    
+    //update the number of encoder steps if new values have been received
+    if (encoderSteps != -1){
+        leftAxis.changeEncoderResolution(encoderSteps);
+        rightAxis.changeEncoderResolution(encoderSteps);
+        leftAxis.loadPositionFromMemory();
+        rightAxis.loadPositionFromMemory();
+    }
+    if (zEncoderSteps != -1){
+        zAxis.changeEncoderResolution(zEncoderSteps);
+        zAxis.loadPositionFromMemory();
+    }
+    
+    //Change the machine dimensions in the kinematics if new values have been received
+    if (sledWidth != -1){
+        kinematics.l            = sledWidth;
+    }
+    if (sledHeight != -1){
+        kinematics.s            = sledHeight;
+    }
+    if (sledCG != -1){
+        kinematics.h3           = sledCG;
+    }
+    if (distPerRot != -1){
+        kinematics.R            = distPerRot / (2.0*3.14159);
+    }
+    if (distBetweenMotors != -1){
+        kinematics.D            = distBetweenMotors;
+    }
+    if (motorOffsetY != -1){
+        kinematics.motorOffsetY = motorOffsetY;
+    }
+    if (bedWidth != -1){
+        kinematics.machineWidth = bedWidth;
+    }
+    if (bedHeight != -1){
+        kinematics.machineHeight= bedHeight;
+    }
+    
+    //propagate the new values
     kinematics.recomputeGeometry();
     
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);

@@ -26,29 +26,34 @@
 #define SIZEOFFLOAT      4
 #define SIZEOFLINSEG    17
 
-Axis::Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const String& axisName, const int& eepromAdr, const float& mmPerRotation, const float& encoderSteps)
+Axis::Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const String& axisName, const int& eepromAdr)
 :
 motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2)
 {
     
-    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _Ki, _Kd, REVERSE);
+    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, 0, 0, 0, REVERSE);
     
     //initialize variables
     _direction    = FORWARD;
     _axisName     = axisName;
-    _axisTarget   = 0.0;
     _eepromAdr    = eepromAdr;
-    _mmPerRotation= mmPerRotation;
-    _encoderSteps = encoderSteps;
-    
-    //load position
-    if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
-        set(_readFloat(_eepromAdr + SIZEOFFLOAT));
-    }
     
     initializePID();
     
     motorGearboxEncoder.setName(_axisName);
+}
+
+void   Axis::loadPositionFromMemory(){
+        /*
+        
+        Reload the last known position for the axis
+        
+        */
+        
+        //If a valid position has been stored
+        if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
+            set(_readFloat(_eepromAdr + SIZEOFFLOAT));
+        }
 }
 
 void   Axis::initializePID(){
@@ -65,6 +70,7 @@ void    Axis::write(const float& targetPosition){
 
 float  Axis::read(){
     //returns the true axis position
+    
     return (motorGearboxEncoder.encoder.read()/_encoderSteps)*_mmPerRotation;
 }
 
@@ -104,11 +110,31 @@ void   Axis::computePID(){
     motorGearboxEncoder.write(_pidOutput);
     
     /*if(_axisName[0] == 'L'){
+        Serial.println("*");
+        Serial.println(_pidInput);
+        Serial.println(_pidSetpoint);
         Serial.println(_pidOutput);
     }*/
     
+    
+    
     motorGearboxEncoder.computePID();
     
+}
+
+void   Axis::setPIDValues(float KpPos, float KiPos, float KdPos, float KpV, float KiV, float KdV){
+    /*
+    
+    Sets the positional PID values for the axis
+    
+    */
+    _Kp = KpPos;
+    _Ki = KiPos;
+    _Kd = KdPos;
+    
+    _pidController.SetTunings(_Kp, _Ki, _Kd);
+    
+    motorGearboxEncoder.setPIDValues(KpV, KiV, KdV);
 }
 
 void   Axis::setPIDAggressiveness(float aggressiveness){

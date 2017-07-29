@@ -160,7 +160,7 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 }
 
 void  Kinematics::forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos){
-
+    
     float xGuess = 0;
     float yGuess = 0;
 

@@ -26,8 +26,8 @@
 
     class Axis{
         public:
-            Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const String& axisName, const int& eepromAdr, const float& mmPerRotation, const float& encoderSteps);
-            void    write(const float& targetPosition);
+            Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const String& axisName, const int& eepromAdr);
+            void   write(const float& targetPosition);
             float  read();
             int    set(const float& newAxisPosition);
             int    updatePositionFromEncoder();
@@ -47,7 +47,8 @@
             bool   attached();
             void   wipeEEPROM();
             MotorGearboxEncoder    motorGearboxEncoder;
-            String     _axisName;
+            void   setPIDValues(float Kp, float Ki, float Kd, float KpV, float KiV, float KdV);
+            void   loadPositionFromMemory();
             
         private:
             int        _PWMread(int pin);
@@ -61,14 +62,15 @@
             int        _previousAngle;
             double     _timeLastMoved;
             double     _pidSetpoint, _pidInput, _pidOutput;
-            double     _Kp=400, _Ki = 5, _Kd=10;
+            double     _Kp=0, _Ki = 0, _Kd=0;
             PID        _pidController;
             int        _eepromAdr;
-            float      _mmPerRotation;
-            float      _encoderSteps;
+            float      _mmPerRotation = 1;
+            float      _encoderSteps  = 100;
             float      _oldSetpoint;
             float      _oldDir;
             bool       _disableAxisForTesting = false;
+            String     _axisName;
     };
 
     #endif
