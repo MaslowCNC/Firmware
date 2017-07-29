@@ -22,7 +22,7 @@ void setup(){
     gcodeLine.reserve(128);
     
     if(pcbRevisionIndicator == 0){
-    Serial.println(F("PCB v1.1 Detected"));
+        Serial.println(F("PCB v1.1 Detected"));
     } 
     if(pcbRevisionIndicator == 1){
         Serial.println(F("Beta PCB v1.0 Detected"));
