@@ -63,9 +63,8 @@ void   Axis::initializePID(){
 }
 
 void    Axis::write(const float& targetPosition){
-    if(_mmPerRotation!= 0){
-        _pidSetpoint   =  targetPosition/_mmPerRotation;
-    }
+    
+    _pidSetpoint   =  targetPosition/_mmPerRotation;
     return;
 }
 
