@@ -32,11 +32,11 @@
             void  recomputeGeometry();
             void  forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos);
             //geometry
-            float l             = 310.0;                               //horizontal distance between sled attach points
-            float s             = 139.0;                               //vertical distance between sled attach points and bit
+            float l             = 1;                               //horizontal distance between sled attach points
+            float s             = 1;                               //vertical distance between sled attach points and bit
             float h             = sqrt((l/2)*(l/2) + s * s);           //distance between sled attach point and bit
-            float h3            = 79.0;                                //distance from bit to sled center of mass
-            float D             = 2978.4;                              //distance between sprocket centers
+            float h3            = 1;                                //distance from bit to sled center of mass
+            float D             = 1;                              //distance between sprocket centers
             float R             = 10.2;                                //sprocket radius
             float rotationDiskRadius = 0;                              //distance from the bit to the attachment point
             int kinematicsType  = 1;                                   //Which version of the kinematics to use. 1 is quadrilateral, 2 is triangular
@@ -45,7 +45,7 @@
             //machine dimensions
             float machineHeight = 1219.2;                              //this is 4 feet in mm
             float machineWidth  = 2438.4;                              //this is 8 feet in mm
-            float motorOffsetY  = 463.0;                               //vertical distance from the corner of the work area to the sprocket center
+            float motorOffsetY  = 1;                               //vertical distance from the corner of the work area to the sprocket center
             float halfWidth = machineWidth / 2.0;                      //Half the machine width
             float halfHeight = machineHeight / 2.0;                    //Half the machine height
             
