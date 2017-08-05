@@ -947,7 +947,9 @@ void  updateSettings(const String& readString){
     float sledWidth          = extractGcodeValue(readString, 'F', -1);
     float sledHeight         = extractGcodeValue(readString, 'R', -1);
     float sledCG             = extractGcodeValue(readString, 'H', -1);
-    zAxisAttached            = extractGcodeValue(readString, 'I', -1);
+    if (extractGcodeValue(readString, 'I', -1) != -1){
+        zAxisAttached            = extractGcodeValue(readString, 'I', -1);
+    }
     int encoderSteps         = extractGcodeValue(readString, 'J', -1);
     float gearTeeth          = extractGcodeValue(readString, 'K', -1);
     float chainPitch         = extractGcodeValue(readString, 'M', -1);
