@@ -706,7 +706,11 @@ int   G1(const String& readString, int G0orG1){
     }
 }
 
-void  arcStepCoordinates(const float& angleNow, const float& degreeComplete,   const float& radius, const float& X1, const float& Y1, const float& Z1,   const float& X2, const float& Y2, const float& Z2, const float& centerX,   const float& centerY, const float& centerZ, float& whereXShouldBe,   float& whereYShouldBe, float& whereZShouldBe){
+void  arcStepCoordinates(const float& angleNow, const float& degreeComplete, 
+  const float& radius, const float& X1, const float& Y1, const float& Z1,   
+  const float& X2, const float& Y2, const float& Z2, const float& centerX, 
+  const float& centerY, const float& centerZ, float* whereXShouldBe, 
+  float* whereYShouldBe, float* whereZShouldBe){
     if (G17thru19 == 18){
         whereXShouldBe = radius * cos(angleNow) + centerX;
         whereZShouldBe = radius * sin(angleNow) + centerZ;
@@ -738,15 +742,20 @@ int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, co
     float radius;
     float startingAngle;
     float endingAngle;
+    MMPerMin = constrain(MMPerMin, 1, MAXFEED);
     if (G17thru19 == 18){
         radius                 =  sqrt( sq(centerX - X1) + sq(centerZ - Z1));
         startingAngle          =  atan2(Z1 - centerZ, X1 - centerX);
         endingAngle            =  atan2(Z2 - centerZ, X2 - centerX);
+        //moving in zaxis, limit to zaxis feedrate
+        MMPerMin = constrain(MMPerMin, 1, MAXZROTMIN * 3.17);
     }
     else if (G17thru19 == 19){
       radius                 =  sqrt( sq(centerY - Y1) + sq(centerZ - Z1));
       startingAngle          =  atan2(Z1 - centerZ, Y1 - centerY);
       endingAngle            =  atan2(Z2 - centerZ, Y2 - centerY);
+      //moving in zaxis, limit to zaxis feedrate
+      MMPerMin = constrain(MMPerMin, 1, MAXZROTMIN * 3.17);
     }
     else {
         radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1));
@@ -769,19 +778,24 @@ int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, co
     }
     
     float circumference          =  2.0*pi*radius;
-    float arcLengthMM            =  circumference * (theta / (2*pi) );
+    float arcLengthMM            =  abs(circumference * (theta / (2*pi) ));
     
     //set up variables for movement
-    long numberOfStepsTaken       =  0;
-    
-    float stepSizeMM             =  computeStepSize(MMPerMin);
+    long  numberOfStepsTaken = 0;
+    float stepSizeMM         = computeStepSize(MMPerMin);
+    float delayTime          = calculateDelay(stepSizeMM, MMPerMin);
+    long  finalNumberOfSteps = arcLengthMM/stepSizeMM;
 
-    //Need to contrain feedrate based on which axis is moving
-    MMPerMin = constrain(MMPerMin, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
-    float delayTime = calculateDelay(stepSizeMM, MMPerMin);
-    //the argument to abs should only be a variable -- splitting calc into 2 lines
-    long   finalNumberOfSteps     =  arcLengthMM/stepSizeMM;
-    //finalNumberOfSteps = abs(finalNumberOfSteps);
+    if (G17thru19 == 17){
+        float zDist = abs(Z2 - Z1);
+        float zFeedrate = calculateFeedrate((zDist/finalNumberOfSteps), delayTime);
+          
+        //throttle back feedrate if it would exceed zaxis max
+        if (zFeedrate > zMAXFEED){
+          float  zStepSizeMM        = computeStepSize(zMAXFEED);
+          finalNumberOfSteps        = abs(zDist/zStepSizeMM);
+        }
+    }
     
     //Compute the starting position
     float angleNow = startingAngle;
@@ -790,8 +804,8 @@ int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, co
     float whereZShouldBeAtThisStep;
     float degreeComplete = 0.0;
     arcStepCoordinates(angleNow, degreeComplete, radius, X1, Y1, Z1, X2, Y2, Z2,
-      centerX, centerY, centerZ, whereXShouldBeAtThisStep, 
-      whereYShouldBeAtThisStep, whereZShouldBeAtThisStep);
+      centerX, centerY, centerZ, &whereXShouldBeAtThisStep, 
+      &whereYShouldBeAtThisStep, &whereZShouldBeAtThisStep);
     
     float aChainLength;
     float bChainLength;
@@ -816,8 +830,8 @@ int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, co
             angleNow = startingAngle + theta*direction*degreeComplete;
             
             arcStepCoordinates(angleNow, degreeComplete, radius, X1, Y1, Z1, X2, Y2, Z2,
-              centerX, centerY, centerZ, whereXShouldBeAtThisStep, 
-              whereYShouldBeAtThisStep, whereZShouldBeAtThisStep);
+              centerX, centerY, centerZ, &whereXShouldBeAtThisStep, 
+              &whereYShouldBeAtThisStep, &whereZShouldBeAtThisStep);
             
             kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
             
