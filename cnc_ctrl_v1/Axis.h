@@ -61,7 +61,9 @@
             int        _currentAngle;
             int        _previousAngle;
             double     _timeLastMoved;
-            double     _pidSetpoint, _pidInput, _pidOutput;
+            volatile double _pidSetpoint;
+            volatile double _pidInput; 
+            volatile double _pidOutput;
             double     _Kp=0, _Ki = 0, _Kd=0;
             PID        _pidController;
             int        _eepromAdr;
