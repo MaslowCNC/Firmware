@@ -32,8 +32,8 @@ bool zAxisAttached = false;
 #define FORWARD           1
 #define BACKWARD         -1
 
-#define CLOCKWISE        -1
-#define COUNTERCLOCKWISE  1
+#define CLOCKWISE        1
+#define COUNTERCLOCKWISE  -1
 
 #define LEFT_EEPROM_ADR     5
 #define RIGHT_EEPROM_ADR  105
@@ -712,19 +712,19 @@ void  arcStepCoordinates(const float& angleNow, const float& degreeComplete,
   const float& centerY, const float& centerZ, float* whereXShouldBe, 
   float* whereYShouldBe, float* whereZShouldBe){
     if (G17thru19 == 18){
-        whereXShouldBe = radius * cos(angleNow) + centerX;
-        whereZShouldBe = radius * sin(angleNow) + centerZ;
-        whereYShouldBe = Y1 + ((Y2-Y1) * degreeComplete);
+        *whereXShouldBe = radius * cos(angleNow) + centerX;
+        *whereZShouldBe = radius * sin(angleNow) + centerZ;
+        *whereYShouldBe = Y1 + ((Y2-Y1) * degreeComplete);
     }
     else if (G17thru19 == 19){
-        whereYShouldBe = radius * cos(angleNow) + centerY;
-        whereZShouldBe = radius * sin(angleNow) + centerZ;
-        whereXShouldBe = X1 + ((X2-X1) * degreeComplete);      
+        *whereYShouldBe = radius * cos(angleNow) + centerY;
+        *whereZShouldBe = radius * sin(angleNow) + centerZ;
+        *whereXShouldBe = X1 + ((X2-X1) * degreeComplete);      
     }
     else {
-        whereXShouldBe = radius * cos(angleNow) + centerX;
-        whereYShouldBe = radius * sin(angleNow) + centerY;
-        whereZShouldBe = Z1 + ((Z2-Z1) * degreeComplete);
+        *whereXShouldBe = radius * cos(angleNow) + centerX;
+        *whereYShouldBe = radius * sin(angleNow) + centerY;
+        *whereZShouldBe = Z1 + ((Z2-Z1) * degreeComplete);
     }  
 }
 
@@ -789,6 +789,7 @@ int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, co
     if (G17thru19 == 17){
         float zDist = abs(Z2 - Z1);
         float zFeedrate = calculateFeedrate((zDist/finalNumberOfSteps), delayTime);
+        float  zMAXFEED          = MAXZROTMIN * 3.17;
           
         //throttle back feedrate if it would exceed zaxis max
         if (zFeedrate > zMAXFEED){
