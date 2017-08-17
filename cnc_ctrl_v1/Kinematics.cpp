@@ -201,10 +201,6 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
 
 void  Kinematics::forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos){
     
-    Serial.println("Kinematics Begin With:");
-    Serial.println(chainALength);
-    Serial.println(chainBLength);
-    
     float xGuess = 0;
     float yGuess = 0;
 
@@ -212,7 +208,7 @@ void  Kinematics::forward(const float& chainALength, const float& chainBLength, 
     float guessLengthB;
 
     int guessCount = 0;
-    int maxNumberOfGuesses = 100;
+    int maxNumberOfGuesses = 200;
 
     while(1){
 
@@ -228,16 +224,6 @@ void  Kinematics::forward(const float& chainALength, const float& chainBLength, 
         xGuess = xGuess + .1*aChainError - .1*bChainError;
         yGuess = yGuess - .1*aChainError - .1*bChainError;
         
-        /*Serial.println("~~*");
-        Serial.println(xGuess);
-        Serial.println(yGuess);
-        Serial.println(guessLengthA);
-        Serial.println(guessLengthB);
-        Serial.println(chainALength);
-        Serial.println(chainBLength);
-        Serial.println(aChainError);
-        Serial.println(bChainError);*/
-
         guessCount++;
 
         //Prevent the connection from timing out
@@ -257,21 +243,6 @@ void  Kinematics::forward(const float& chainALength, const float& chainBLength, 
                 Serial.print(", ");
                 Serial.print(chainBLength);
                 Serial.println(F(" . Please calibrate chain lengths."));
-                /*inverse(xGuess, yGuess, &guessLengthA, &guessLengthB);
-                Serial.println("**");
-                Serial.println(xGuess);
-                Serial.println(yGuess);
-                Serial.println("--");
-                Serial.println(h);
-                Serial.println(s);
-                Serial.println(D);
-                Serial.println(R);
-                Serial.println(kinematicsType);
-                Serial.println(machineHeight);
-                Serial.println(machineWidth);
-                Serial.println(motorOffsetY);
-                Serial.println(halfWidth);
-                Serial.println(halfHeight);*/
                 *xPos = 0;
                 *yPos = 0;
             }
