@@ -986,12 +986,9 @@ void  updateKinematicsSettings(const String& readString){
     //propagate the new values
     kinematics.recomputeGeometry();
     
-    Serial.println("leftAxis.read:");
-    Serial.println(leftAxis.read());
-    
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
-    Serial.println(F("Kinematics Settings Updated"));
+    Serial.println(F("Kinematics Settings Loaded"));
 }
 
 void updateMotorSettings(const String& readString){
