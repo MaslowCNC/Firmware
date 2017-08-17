@@ -145,8 +145,6 @@ String gcodeLine;                         //The next individual line of gcode (f
 
 int   lastCommand           =  0;         //Stores the value of the last command run eg: G01 -> 1
 
-//These are used in place of a forward kinematic function at the beginning of each move. They should be replaced
-//by a call to the forward kinematic function when it is available.
 float xTarget = 0;
 float yTarget = 0;
 
@@ -933,7 +931,7 @@ void  printBeforeAndAfter(const float& before, const float& after){
     Serial.println(after);
 }
 
-void  updateSettings(const String& readString){
+void  updateKinematicsSettings(const String& readString){
     /*
     Updates the machine dimensions from the Ground Control settings
     */
@@ -947,6 +945,59 @@ void  updateSettings(const String& readString){
     float sledWidth          = extractGcodeValue(readString, 'F', -1);
     float sledHeight         = extractGcodeValue(readString, 'R', -1);
     float sledCG             = extractGcodeValue(readString, 'H', -1);
+
+    float kinematicsType     = extractGcodeValue(readString, 'Y', -1);
+    float rotationDiskRadius = extractGcodeValue(readString, 'Z', -1);
+    
+    
+    
+    //Change the machine dimensions in the kinematics if new values have been received
+    if (sledWidth != -1){
+        kinematics.l            = sledWidth;
+    }
+    if (sledHeight != -1){
+        kinematics.s            = sledHeight;
+    }
+    if (sledCG != -1){
+        kinematics.h3           = sledCG;
+    }
+    //if (distPerRot != -1){
+    //    kinematics.R            = distPerRot / (2.0*3.14159);
+    //}
+    if (distBetweenMotors != -1){
+        kinematics.D            = distBetweenMotors;
+    }
+    if (motorOffsetY != -1){
+        kinematics.motorOffsetY = motorOffsetY;
+    }
+    if (bedWidth != -1){
+        kinematics.machineWidth = bedWidth;
+    }
+    if (bedHeight != -1){
+        kinematics.machineHeight= bedHeight;
+    }
+    if (kinematicsType != -1){
+        kinematics.kinematicsType = kinematicsType;
+    }
+    if (rotationDiskRadius != -1){
+        kinematics.rotationDiskRadius = rotationDiskRadius;
+    }
+    
+    //propagate the new values
+    kinematics.recomputeGeometry();
+    
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+    
+    Serial.println(F("Kinematics Settings Loaded"));
+}
+
+void updateMotorSettings(const String& readString){
+    /*
+    
+    Update settings related to the motor configurations
+    
+    */
+    
     if (extractGcodeValue(readString, 'I', -1) != -1){
         zAxisAttached            = extractGcodeValue(readString, 'I', -1);
     }
@@ -963,8 +1014,6 @@ void  updateSettings(const String& readString){
     float KpV                = extractGcodeValue(readString, 'V', -1);
     float KiV                = extractGcodeValue(readString, 'W', -1);
     float KdV                = extractGcodeValue(readString, 'X', -1);
-    float kinematicsType     = extractGcodeValue(readString, 'Y', -1);
-    float rotationDiskRadius = extractGcodeValue(readString, 'Z', -1);
     
     //Write the PID values to the axis if new ones have been received
     if (KpPos != -1){
@@ -993,45 +1042,6 @@ void  updateSettings(const String& readString){
         zAxis.changeEncoderResolution(zEncoderSteps);
         zAxis.loadPositionFromMemory();
     }
-    
-    //Change the machine dimensions in the kinematics if new values have been received
-    if (sledWidth != -1){
-        kinematics.l            = sledWidth;
-    }
-    if (sledHeight != -1){
-        kinematics.s            = sledHeight;
-    }
-    if (sledCG != -1){
-        kinematics.h3           = sledCG;
-    }
-    if (distPerRot != -1){
-        kinematics.R            = distPerRot / (2.0*3.14159);
-    }
-    if (distBetweenMotors != -1){
-        kinematics.D            = distBetweenMotors;
-    }
-    if (motorOffsetY != -1){
-        kinematics.motorOffsetY = motorOffsetY;
-    }
-    if (bedWidth != -1){
-        kinematics.machineWidth = bedWidth;
-    }
-    if (bedHeight != -1){
-        kinematics.machineHeight= bedHeight;
-    }
-    if (kinematicsType != -1){
-        kinematics.kinematicsType = kinematicsType;
-    }
-    if (rotationDiskRadius != -1){
-        kinematics.rotationDiskRadius = rotationDiskRadius;
-    }
-    
-    //propagate the new values
-    kinematics.recomputeGeometry();
-    
-    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
-    
-    Serial.println(F("Machine Settings Updated"));
 }
 
 void  executeGcodeLine(const String& gcodeLine){
@@ -1057,7 +1067,7 @@ void  executeGcodeLine(const String& gcodeLine){
     }
     
     if(gcodeLine.substring(0, 3) == "B03"){
-        updateSettings(gcodeLine);
+        updateKinematicsSettings(gcodeLine);
         return;
     }
     
@@ -1176,6 +1186,12 @@ void  executeGcodeLine(const String& gcodeLine){
             i++;
         }
         leftAxis.set(leftAxis.read());
+        return;
+    }
+    
+    if(gcodeLine.substring(0, 3) == "B12"){
+        //Update the motor characteristics
+        updateMotorSettings(gcodeLine);
         return;
     }
     
