@@ -145,8 +145,6 @@ String gcodeLine;                         //The next individual line of gcode (f
 
 int   lastCommand           =  0;         //Stores the value of the last command run eg: G01 -> 1
 
-//These are used in place of a forward kinematic function at the beginning of each move. They should be replaced
-//by a call to the forward kinematic function when it is available.
 float xTarget = 0;
 float yTarget = 0;
 
@@ -915,7 +913,7 @@ void  calibrateChainLengths(){
     Serial.print(rightAxis.read());
     Serial.println(F("mm"));
     
-    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+    //kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
     
     leftAxis.setPIDAggressiveness(1);
@@ -987,6 +985,9 @@ void  updateKinematicsSettings(const String& readString){
     
     //propagate the new values
     kinematics.recomputeGeometry();
+    
+    Serial.println("leftAxis.read:");
+    Serial.println(leftAxis.read());
     
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
@@ -1128,7 +1129,7 @@ void  executeGcodeLine(const String& gcodeLine){
         Serial.print(rightAxis.read());
         Serial.println(F("mm"));
         
-        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+        //kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
         
         Serial.println(F("Message: The machine chains have been manually re-calibrated."));
         

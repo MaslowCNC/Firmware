@@ -54,6 +54,10 @@ void   Axis::loadPositionFromMemory(){
         if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
             set(_readFloat(_eepromAdr + SIZEOFFLOAT));
         }
+        
+        Serial.println("Load: ");
+        Serial.println(_axisName);
+        Serial.println(_readFloat(_eepromAdr + SIZEOFFLOAT));
 }
 
 void   Axis::initializePID(){
@@ -71,7 +75,12 @@ void    Axis::write(const float& targetPosition){
 float  Axis::read(){
     //returns the true axis position
     
+    /*Serial.println(_encoderSteps);
+    Serial.println(_mmPerRotation);
+    Serial.println(motorGearboxEncoder.encoder.read());*/
+    
     return (motorGearboxEncoder.encoder.read()/_encoderSteps)*_mmPerRotation;
+    
 }
 
 float  Axis::target(){
@@ -160,6 +169,8 @@ void   Axis::changePitch(const float& newPitch){
     Reassign the distance moved per-rotation for the axis.
     */
     _mmPerRotation = newPitch;
+    Serial.println("Set Pitch");
+    Serial.println(_mmPerRotation);
 }
 
 void   Axis::changeEncoderResolution(const int& newResolution){
@@ -167,6 +178,8 @@ void   Axis::changeEncoderResolution(const int& newResolution){
     Reassign the encoder resolution for the axis.
     */
     _encoderSteps = newResolution;
+    Serial.println("Set Resolution");
+    Serial.println(_encoderSteps);
     
 }
 
@@ -175,6 +188,9 @@ int    Axis::detach(){
     if (motorGearboxEncoder.motor.attached()){
         _writeFloat (_eepromAdr+SIZEOFFLOAT, read());      //Store the axis position
         EEPROM.write(_eepromAdr, EEPROMVALIDDATA);
+        Serial.println("Writing:");
+        Serial.println(_axisName);
+        Serial.println(read());
         
     }
     
