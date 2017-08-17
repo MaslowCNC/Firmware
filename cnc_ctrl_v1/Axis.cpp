@@ -54,6 +54,7 @@ void   Axis::loadPositionFromMemory(){
         if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
             set(_readFloat(_eepromAdr + SIZEOFFLOAT));
         }
+        
 }
 
 void   Axis::initializePID(){
@@ -72,6 +73,7 @@ float  Axis::read(){
     //returns the true axis position
     
     return (motorGearboxEncoder.encoder.read()/_encoderSteps)*_mmPerRotation;
+    
 }
 
 float  Axis::target(){
