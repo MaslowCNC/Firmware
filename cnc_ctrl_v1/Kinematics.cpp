@@ -45,6 +45,9 @@ void Kinematics::recomputeGeometry(){
     Theta = atan(2*s/l);
     Psi1 = Theta - Phi;
     Psi2 = Theta + Phi;
+    
+    _xCordOfMotor = D/2;
+    _yCordOfMotor = halfHeight + motorOffsetY;
 
 }
 
