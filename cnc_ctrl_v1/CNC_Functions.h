@@ -145,7 +145,7 @@ bool  rcvdMotorSettings     =  false;
 bool  encoderStepsChanged   =  false;
 bool  zEncoderStepsChanged  =  false;
 // Commands that can safely be executed before machineReady
-char*  safeCommands[] = {'B01', 'B03', 'B04', 'B05', 'B07', 'B12', 'G20', 'G21', 'G90', 'G91'};
+String safeCommands[] = {"B01", "B03", "B04", "B05", "B07", "B12", "G20", "G21", "G90", "G91"};
 String readyCommandString;                //next command queued up and ready to send
 String gcodeLine;                         //The next individual line of gcode (for example G91 G01 X19 would be run as two lines)
 
@@ -1078,7 +1078,7 @@ void updateMotorSettings(const String& readString){
 
 bool isSafeCommand(const String& readString){
     bool ret = false;
-    char command[4] = readString.substring(0, 3);
+    String command = readString.substring(0, 3);
     for(int i = 0; i < sizeof(safeCommands); i++){
        if(safeCommands[i] == command){
            ret = true;
@@ -1322,8 +1322,12 @@ void  interpretCommandString(const String& cmdString){
     
     int firstG;  
     int secondG;
-    
-    if (cmdString[0] == 'B'){                   //If the command is a B command
+    String cmdStringTrim = cmdString;
+    cmdStringTrim.trim();
+    if (cmdStringTrim.length() <= 0){
+        // Nothing to process, likely a blank startup line
+    }
+    else if (cmdString[0] == 'B'){                   //If the command is a B command
         Serial.print(cmdString);
         executeGcodeLine(cmdString);
     }
