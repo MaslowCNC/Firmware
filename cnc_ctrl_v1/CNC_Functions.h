@@ -140,6 +140,12 @@ float _inchesToMMConversion =  1;
 bool  useRelativeUnits      =  false;
 bool  stopFlag              =  false;
 bool  pauseFlag             =  false;
+bool  rcvdKinematicSettings =  false;
+bool  rcvdMotorSettings     =  false;
+bool  encoderStepsChanged   =  false;
+bool  zEncoderStepsChanged  =  false;
+// Commands that can safely be executed before machineReady
+String safeCommands[] = {"B01", "B03", "B04", "B05", "B07", "B12", "G20", "G21", "G90", "G91"};
 String readyCommandString;                //next command queued up and ready to send
 String gcodeLine;                         //The next individual line of gcode (for example G91 G01 X19 would be run as two lines)
 
@@ -147,6 +153,29 @@ int   lastCommand           =  0;         //Stores the value of the last command
 
 float xTarget = 0;
 float yTarget = 0;
+
+bool machineReady(){
+  bool ret = false;
+  if (rcvdMotorSettings && rcvdKinematicSettings){
+      ret = true;
+  }
+  return ret;
+}
+
+void finalizeMachineSettings(){
+    if(machineReady()){
+        if (encoderStepsChanged){
+            leftAxis.loadPositionFromMemory();
+            rightAxis.loadPositionFromMemory();
+            encoderStepsChanged = false;
+        }
+        if (zEncoderStepsChanged){
+            zAxis.loadPositionFromMemory();
+            zEncoderStepsChanged = false;
+        }
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+    }
+}
 
 void  returnError(){
     /*
@@ -984,9 +1013,9 @@ void  updateKinematicsSettings(const String& readString){
     }
     
     //propagate the new values
+    rcvdKinematicSettings = true;
     kinematics.recomputeGeometry();
-    
-    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+    finalizeMachineSettings();
     
     Serial.println(F("Kinematics Settings Loaded"));
 }
@@ -1014,7 +1043,7 @@ void updateMotorSettings(const String& readString){
     float KpV                = extractGcodeValue(readString, 'V', -1);
     float KiV                = extractGcodeValue(readString, 'W', -1);
     float KdV                = extractGcodeValue(readString, 'X', -1);
-    
+      
     //Write the PID values to the axis if new ones have been received
     if (KpPos != -1){
         leftAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);
@@ -1035,13 +1064,28 @@ void updateMotorSettings(const String& readString){
     if (encoderSteps != -1){
         leftAxis.changeEncoderResolution(encoderSteps);
         rightAxis.changeEncoderResolution(encoderSteps);
-        leftAxis.loadPositionFromMemory();
-        rightAxis.loadPositionFromMemory();
+        encoderStepsChanged = true;
     }
     if (zEncoderSteps != -1){
         zAxis.changeEncoderResolution(zEncoderSteps);
-        zAxis.loadPositionFromMemory();
+        zEncoderStepsChanged = true;
     }
+    
+    rcvdMotorSettings = true;
+    finalizeMachineSettings(); 
+    Serial.println(F("Motor Settings Loaded"));
+}
+
+bool isSafeCommand(const String& readString){
+    bool ret = false;
+    String command = readString.substring(0, 3);
+    for(int i = 0; i < sizeof(safeCommands); i++){
+       if(safeCommands[i] == command){
+           ret = true;
+           break;
+       }
+    }
+    return ret;
 }
 
 void  executeGcodeLine(const String& gcodeLine){
@@ -1051,6 +1095,11 @@ void  executeGcodeLine(const String& gcodeLine){
     included on the front of the line, the code from the prevous line will be added.
     
     */
+    
+    if (!machineReady() && !isSafeCommand(gcodeLine)){
+        Serial.println(F("Unable to execute command, machine settings not yet received"));
+        return;
+    }
     
     //Handle B-codes
     
@@ -1273,8 +1322,12 @@ void  interpretCommandString(const String& cmdString){
     
     int firstG;  
     int secondG;
-    
-    if (cmdString[0] == 'B'){                   //If the command is a B command
+    String cmdStringTrim = cmdString;
+    cmdStringTrim.trim();
+    if (cmdStringTrim.length() <= 0){
+        // Nothing to process, likely a blank startup line
+    }
+    else if (cmdString[0] == 'B'){                   //If the command is a B command
         Serial.print(cmdString);
         executeGcodeLine(cmdString);
     }

@@ -52,7 +52,9 @@ void   Axis::loadPositionFromMemory(){
         
         //If a valid position has been stored
         if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
-            set(_readFloat(_eepromAdr + SIZEOFFLOAT));
+            float f = 0.00f;
+            f = EEPROM.get(_eepromAdr + SIZEOFFLOAT, f );
+            set(f);
         }
         
 }
@@ -175,9 +177,9 @@ void   Axis::changeEncoderResolution(const int& newResolution){
 int    Axis::detach(){
     
     if (motorGearboxEncoder.motor.attached()){
-        _writeFloat (_eepromAdr+SIZEOFFLOAT, read());      //Store the axis position
-        EEPROM.write(_eepromAdr, EEPROMVALIDDATA);
-        
+        float f = read();  //Store the axis position
+        EEPROM.put(_eepromAdr + SIZEOFFLOAT, f);
+        EEPROM.update(_eepromAdr, EEPROMVALIDDATA);
     }
     
     motorGearboxEncoder.motor.detach();
@@ -219,36 +221,6 @@ void   Axis::endMove(const float& finalTarget){
     
 }
 
-float  Axis::_readFloat(const unsigned int& addr){
-
-//readFloat and writeFloat functions courtesy of http://www.alexenglish.info/2014/05/saving-floats-longs-ints-eeprom-arduino-using-unions/
-
-
-    union{
-        byte b[4];
-        float f;
-    } data;
-    for(int i = 0; i < 4; i++)
-    {
-        data.b[i] = EEPROM.read(addr+i);
-    }
-    return data.f;
-}
-
-void   Axis::_writeFloat(const unsigned int& addr, const float& x){
-    
-    //Writes a floating point number into the eeprom memory by splitting it into four one byte chunks and saving them
-    
-    union{
-        byte b[4];
-        float f;
-    } data;
-    data.f = x;
-    for(int i = 0; i < 4; i++){
-        EEPROM.write(addr+i, data.b[i]);
-    }
-}
-
 void   Axis::wipeEEPROM(){
     /*
     
@@ -258,7 +230,7 @@ void   Axis::wipeEEPROM(){
     
     int i = 0;
     while(i < 50){
-        EEPROM.write(_eepromAdr + i, 0);
+        EEPROM.update(_eepromAdr + i, 0);
         i++;
     }
     
