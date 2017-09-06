@@ -237,17 +237,13 @@ void  _watchDog(){
     This fixes the issue where the machine is ready, but Ground Control doesn't know the machine is ready and the system locks up.
     */
     static unsigned long lastRan = millis();
-    int                  timeout = 5000;
+    unsigned long        timeout = 5000;
     
-    if (millis() - lastRan > timeout){
+    if ((millis() - lastRan) > timeout){
         
         if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
             
-            if (ringBuffer.length() > 0){                  //if there is stuff sitting in the buffer, run it
-                ringBuffer.write('\n');
-                Serial.println(F("watch dog catch"));
-            }
-            else{
+            if (ringBuffer.length() == 0) {       // if the buffer is empty
                 _signalReady();                          //request new code
                 returnError();
             }
