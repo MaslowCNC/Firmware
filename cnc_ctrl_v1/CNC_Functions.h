@@ -22,6 +22,8 @@ libraries*/
 
 #define VERSIONNUMBER 0.88
 
+#define verboseDebug 2    // set to 0 for no debug messages, 1 for single-line messages, 2 to also output ring buffer contents
+
 bool zAxisAttached = false;
 
 #define FORWARD           1
@@ -248,6 +250,9 @@ void  _watchDog(){
                 Serial.println(F("watch dog catch"));
             }
             else{
+				#if defined (verboseDebug) && verboseDebug > 0              
+                Serial.println(F("_watchDog requesting new code"));
+                #endif
                 _signalReady();                          //request new code
                 returnError();
             }
@@ -261,18 +266,25 @@ void readSerialCommands(){
     /*
     Check to see if a new character is available from the serial connection, read it if one is.
     */
-    while (Serial.available() > 0) {
-        char c = Serial.read();
-        if (c == '!'){
-            stopFlag = true;
-            pauseFlag = false;
+    if (Serial.available() > 0) {
+        while (Serial.available() > 0) {
+            char c = Serial.read();
+            if (c == '!'){
+                stopFlag = true;
+                pauseFlag = false;
+            }
+            else if (c == '~'){
+                pauseFlag = false;
+            }
+            else{
+                ringBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
+            }
         }
-        else if (c == '~'){
-            pauseFlag = false;
-        }
-        else{
-            ringBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
-        }
+        #if defined (verboseDebug) && verboseDebug > 1              
+        // print ring buffer contents
+        Serial.println(F("rSC added to ring buffer"));
+        ringBuffer.print();        
+        #endif
     }
 }
 
@@ -1328,6 +1340,9 @@ void  interpretCommandString(const String& cmdString){
         // Nothing to process, likely a blank startup line
     }
     else if (cmdString[0] == 'B'){                   //If the command is a B command
+            #if defined (verboseDebug) && verboseDebug > 0
+            Serial.print(F("iCS executing B code line: "));
+            #endif
         Serial.print(cmdString);
         executeGcodeLine(cmdString);
     }
@@ -1343,6 +1358,9 @@ void  interpretCommandString(const String& cmdString){
             gcodeLine = cmdString.substring(firstG, secondG);
             
             if (gcodeLine.length() > 1){
+                        #if defined (verboseDebug) && verboseDebug > 0
+                        Serial.print(F("iCS executing G code: "));
+                        #endif
                 Serial.println(gcodeLine);
                 executeGcodeLine(gcodeLine);
             }
@@ -1351,6 +1369,12 @@ void  interpretCommandString(const String& cmdString){
             
         }
     }
+    
+    #if defined (verboseDebug) && verboseDebug > 1              
+    // print ring buffer contents
+    Serial.println(F("iCS execution complete"));
+    ringBuffer.print();
+    #endif
     
     _signalReady();
     
