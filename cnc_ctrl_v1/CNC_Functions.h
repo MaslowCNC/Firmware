@@ -1434,10 +1434,7 @@ void  executeMcodeLine(const String& gcodeLine){
             if (nextTool > 0) {
                 setSpindlePower(false); // first, turn off spindle
                 Serial.print(F("Tool Change: Please insert tool "));   // prompt user to change tool
-                Serial.print(nextTool);
-                // *** future update - remove the instructions below which are specific to Ground Control,
-                //     and incorporate them into the Ground Control code (see comments in Ground Control)
-                Serial.println(F(" and re-zero the Z-axis if necessary.  Press the CONTINUE button when done."));
+                Serial.println(nextTool);
                 lastTool = nextTool;
                 pause();
             }
