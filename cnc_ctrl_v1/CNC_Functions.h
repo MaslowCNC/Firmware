@@ -239,18 +239,14 @@ void  _watchDog(){
     This fixes the issue where the machine is ready, but Ground Control doesn't know the machine is ready and the system locks up.
     */
     static unsigned long lastRan = millis();
-    int                  timeout = 5000;
+    unsigned long        timeout = 5000;
     
-    if (millis() - lastRan > timeout){
+    if ((millis() - lastRan) > timeout){
         
         if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
             
-            if (ringBuffer.length() > 0){                  //if there is stuff sitting in the buffer, run it
-                ringBuffer.write('\n');
-                Serial.println(F("watch dog catch"));
-            }
-            else{
-				#if defined (verboseDebug) && verboseDebug > 0              
+            if (ringBuffer.length() == 0) {       // if the buffer is empty
+        				#if defined (verboseDebug) && verboseDebug > 0              
                 Serial.println(F("_watchDog requesting new code"));
                 #endif
                 _signalReady();                          //request new code
@@ -1260,25 +1256,20 @@ void  executeGcodeLine(const String& gcodeLine){
    
     int gNumber = extractGcodeValue(gcodeLine,'G', -1);
     
-    if (gNumber != -1){                                     //If the line has a valid G number
-        lastCommand = gNumber;                              //remember it for next time
-    }
-    else{                                                   //If the line does not have a gcommand
-        gNumber = lastCommand;                              //apply the last one
+    if (gNumber == -1){               // If the line does not have a G command
+        gNumber = lastCommand;        // apply the last one
     }
     
     switch(gNumber){
-        case 0:
+        case 0:   // Rapid positioning
+        case 1:   // Linear interpolation
             G1(gcodeLine, gNumber);
+            lastCommand = gNumber;    // remember G number for next time
             break;
-        case 1:
-            G1(gcodeLine, gNumber);
-            break;
-        case 2:
+        case 2:   // Circular interpolation, clockwise
+        case 3:   // Circular interpolation, counterclockwise
             G2(gcodeLine, gNumber);
-            break;
-        case 3:
-            G2(gcodeLine, gNumber);
+            lastCommand = gNumber;    // remember G number for next time
             break;
         case 10:
             G10(gcodeLine);
@@ -1327,6 +1318,10 @@ void  interpretCommandString(const String& cmdString){
     /*
     
     Splits a string into lines of gcode which begin with 'G'
+
+    Assumptions:
+        Leading and trailing white space has already been removed from cmdString
+        cmdString has been converted to upper case
     
     */
     
@@ -1334,39 +1329,46 @@ void  interpretCommandString(const String& cmdString){
     
     int firstG;  
     int secondG;
-    String cmdStringTrim = cmdString;
-    cmdStringTrim.trim();
-    if (cmdStringTrim.length() <= 0){
-        // Nothing to process, likely a blank startup line
-    }
-    else if (cmdString[0] == 'B'){                   //If the command is a B command
+
+    if (cmdString.length() > 0) {
+        if (cmdString[0] == 'B'){                   //If the command is a B command
             #if defined (verboseDebug) && verboseDebug > 0
             Serial.print(F("iCS executing B code line: "));
             #endif
-        Serial.print(cmdString);
-        executeGcodeLine(cmdString);
-    }
-    else{
-        while(cmdString.length() > 0){          //Extract each line of gcode from the string
-            firstG  = findNextG(cmdString, 0);
-            secondG = findNextG(cmdString, firstG + 1);
-            
-            if(firstG == cmdString.length()){   //If the line contains no G letters
-                firstG = 0;                     //send the whole line
+            Serial.println(cmdString);
+            executeGcodeLine(cmdString);
+        }
+        else{
+            while(cmdString.length() > 0){          //Extract each line of gcode from the string
+                firstG  = findNextG(cmdString, 0);
+                secondG = findNextG(cmdString, firstG + 1);
+                
+                if(firstG == cmdString.length()){   //If the line contains no G letters
+                    firstG = 0;                     //send the whole line
+                }
+                
+                if (firstG > 0) {                   //If there is something before the first 'G'
+                    gcodeLine = cmdString.substring(0, firstG);
+                    #if defined (verboseDebug) && verboseDebug > 0
+                    Serial.print(F("iCS executing other code: "));
+                    #endif
+                    Serial.println(gcodeLine);
+                    executeGcodeLine(gcodeLine);  // execute it first
+                }
+                
+                gcodeLine = cmdString.substring(firstG, secondG);
+                
+                if (gcodeLine.length() > 1){
+                    #if defined (verboseDebug) && verboseDebug > 0
+                    Serial.print(F("iCS executing G code: "));
+                    #endif
+                    Serial.println(gcodeLine);
+                    executeGcodeLine(gcodeLine);
+                }
+                
+                cmdString = cmdString.substring(secondG, cmdString.length());
+
             }
-            
-            gcodeLine = cmdString.substring(firstG, secondG);
-            
-            if (gcodeLine.length() > 1){
-                        #if defined (verboseDebug) && verboseDebug > 0
-                        Serial.print(F("iCS executing G code: "));
-                        #endif
-                Serial.println(gcodeLine);
-                executeGcodeLine(gcodeLine);
-            }
-            
-            cmdString = cmdString.substring(secondG, cmdString.length());
-            
         }
     }
     
