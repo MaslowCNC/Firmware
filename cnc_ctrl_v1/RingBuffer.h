@@ -29,6 +29,7 @@
             void  print();
             char  read();
             int   length();
+            int   numberOfLines();
             int   spaceAvailable();
             void  empty();
             String readLine();
