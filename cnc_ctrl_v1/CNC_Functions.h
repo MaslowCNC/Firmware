@@ -1347,6 +1347,11 @@ void  executeGcodeLine(const String& gcodeLine){
     
     */
     
+    if (!machineReady() && !isSafeCommand(gcodeLine)){
+        Serial.println(F("Unable to execute command, machine settings not yet received"));
+        return;
+    }
+    
     //Handle G-Codes
    
     int gNumber = extractGcodeValue(gcodeLine,'G', -1);
