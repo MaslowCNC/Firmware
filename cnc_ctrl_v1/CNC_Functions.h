@@ -1341,6 +1341,12 @@ void  interpretCommandString(const String& cmdString){
                     firstG = 0;                     //send the whole line
                 }
                 
+                if (firstG > 0) {                   //If there is something before the first 'G'
+                    gcodeLine = cmdString.substring(0, firstG);
+                    Serial.println(gcodeLine);
+                    executeGcodeLine(gcodeLine);  // execute it first
+                }
+                
                 gcodeLine = cmdString.substring(firstG, secondG);
                 
                 if (gcodeLine.length() > 1){
