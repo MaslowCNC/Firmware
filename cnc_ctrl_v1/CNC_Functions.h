@@ -1329,7 +1329,7 @@ void  interpretCommandString(const String& cmdString){
 
     if (cmdString.length() > 0) {
         if (cmdString[0] == 'B'){                   //If the command is a B command
-            Serial.print(cmdString);
+            Serial.println(cmdString);
             executeGcodeLine(cmdString);
         }
         else{
