@@ -22,6 +22,11 @@ libraries*/
 
 #define VERSIONNUMBER 0.88
 
+#define verboseDebug 0    // set to 0 for no debug messages, 1 for a normal amount, 2 for more details
+
+#include <Servo.h>
+Servo myservo;  // create servo object to control a servo 
+
 bool zAxisAttached = false;
 
 #define FORWARD           1
@@ -144,6 +149,8 @@ String readyCommandString;                //next command queued up and ready to 
 String gcodeLine;                         //The next individual line of gcode (for example G91 G01 X19 would be run as two lines)
 
 int   lastCommand           =  0;         //Stores the value of the last command run eg: G01 -> 1
+int   lastTool              =  0;         //Stores the value of the last tool number eg: T4 -> 4
+int   nextTool              =  0;         //Stores the value of the next tool number eg: T4 -> 4
 
 float xTarget = 0;
 float yTarget = 0;
@@ -197,7 +204,9 @@ void  _signalReady(){
     
     */
     
-    Serial.println(F("ok"));
+    if (ringBuffer.numberOfLines() < 2) {         // if there are fewer than 2 lines in the buffer
+        Serial.println(F("ok"));                  // request new code
+    }
 }
 
 void  _watchDog(){
@@ -208,18 +217,17 @@ void  _watchDog(){
     This fixes the issue where the machine is ready, but Ground Control doesn't know the machine is ready and the system locks up.
     */
     static unsigned long lastRan = millis();
-    int                  timeout = 5000;
+    unsigned long        timeout = 5000;
     
-    if (millis() - lastRan > timeout){
+    if ((millis() - lastRan) > timeout){
         
         if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
             
-            if (ringBuffer.length() > 0){                  //if there is stuff sitting in the buffer, run it
-                ringBuffer.write('\n');
-                Serial.println(F("watch dog catch"));
-            }
-            else{
-                _signalReady();                          //request new code
+            if (ringBuffer.length() == 0) {       // if the buffer is empty
+                #if defined (verboseDebug) && verboseDebug > 0              
+                Serial.println(F("_watchDog requesting new code"));
+                #endif
+                _signalReady();                   // request new code
                 returnError();
             }
         }
@@ -232,18 +240,25 @@ void readSerialCommands(){
     /*
     Check to see if a new character is available from the serial connection, read it if one is.
     */
-    while (Serial.available() > 0) {
-        char c = Serial.read();
-        if (c == '!'){
-            stopFlag = true;
-            pauseFlag = false;
+    if (Serial.available() > 0) {
+        while (Serial.available() > 0) {
+            char c = Serial.read();
+            if (c == '!'){
+                stopFlag = true;
+                pauseFlag = false;
+            }
+            else if (c == '~'){
+                pauseFlag = false;
+            }
+            else{
+                ringBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
+            }
         }
-        else if (c == '~'){
-            pauseFlag = false;
-        }
-        else{
-            ringBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
-        }
+        #if defined (verboseDebug) && verboseDebug > 1              
+        // print ring buffer contents
+        Serial.println(F("rSC added to ring buffer"));
+        ringBuffer.print();        
+        #endif
     }
 }
 
@@ -293,6 +308,22 @@ void pause(){
             return;
         }
     }    
+}
+
+void maslowDelay(unsigned long waitTimeMs) {
+
+    unsigned long startTime  = millis();
+    
+    while ((millis() - startTime) < waitTimeMs){
+        delay(1);
+
+        holdPosition();
+
+        readSerialCommands();
+    
+        returnPoz(xTarget, yTarget, zAxis.read());
+    } 
+    
 }
 
 bool checkForProbeTouch(const int& probePin) {
@@ -577,14 +608,8 @@ int   G1(const String& readString, int G0orG1){
             pause(); //Wait until the z-axis is adjusted
             
             zAxis.set(zgoto);
-            
-            int    waitTimeMs = 1000;
-            double startTime  = millis();
-            
-            while (millis() - startTime < waitTimeMs){
-                delay(1);
-                holdPosition();
-            } 
+
+            maslowDelay(1000);
         }
     }
     
@@ -1044,11 +1069,79 @@ void updateMotorSettings(const String& readString){
     }
 }
 
-void  executeGcodeLine(const String& gcodeLine){
+void  setSpindlePower(boolean powerState) {
+    /*
+     * Turn spindle on or off depending on powerState
+     */
+  
+    // Need to add settings to choose the method and pin number here
+    // but hard-code these for now
+  
+    int controlPin = AUX1;
+    boolean useServo = true;
+    boolean activeHigh = true;
+    int delayAfterChange = 1000;  // milliseconds
+    int servoIdle =  90;  // degrees
+    int servoOn   = 180;  // degrees
+    int servoOff  =   0;  // degrees
+    int servoDelay = 2000;  // milliseconds
+  
+    // Now for the main code
+    #if defined (verboseDebug) && verboseDebug > 1              
+    Serial.print(F("Spindle control uses pin "));
+    Serial.print(controlPin);
+    #endif
+    if (useServo) {   // use a servo to control a standard wall switch
+        #if defined (verboseDebug) && verboseDebug > 1              
+        Serial.print(F(" with servo (idle="));
+        Serial.print(servoIdle);
+        Serial.print(F(", on="));
+        Serial.print(servoOn);
+        Serial.print(F(", off="));
+        Serial.print(servoOff);
+        Serial.println(F(")"));
+        #endif
+        myservo.attach(controlPin); // start servo control
+        myservo.write(servoIdle);   // move servo to idle position
+        maslowDelay(servoDelay);    // wait for move to complete
+        if (powerState) { // turn on spindle
+            Serial.println(F("Turning Spindle On"));
+            myservo.write(servoOn); // move servo to turn on switch
+        }
+        else {            // turn off spindle
+            Serial.println(F("Turning Spindle Off"));
+            myservo.write(servoOff); // move servo to turn off switch
+        }
+        maslowDelay(servoDelay);    // wait for move to complete
+        myservo.write(servoIdle);   // return servo to idle position
+        maslowDelay(servoDelay);    // wait for move to complete
+        myservo.detach();           // stop servo control
+    }
+    else {            // use a digital I/O pin to control a relay
+        #if defined (verboseDebug) && verboseDebug > 1              
+        Serial.print(F(" as digital output, active "));
+        if (activeHigh) Serial.println(F("high"));
+        else Serial.println(F("low"));
+        #endif
+        pinMode(controlPin, OUTPUT);
+        if (powerState) { // turn on spindle
+            Serial.println(F("Turning Spindle On"));
+            if (activeHigh) digitalWrite(controlPin, HIGH);
+            else digitalWrite(controlPin, LOW);
+        }
+        else {            // turn off spindle
+            Serial.println(F("Turning Spindle Off"));
+            if (activeHigh) digitalWrite(controlPin, LOW);
+            else digitalWrite(controlPin, HIGH);
+        }
+    }
+    maslowDelay(delayAfterChange);
+}
+
+void  executeBcodeLine(const String& gcodeLine){
     /*
     
-    Executes a single line of gcode beginning with the character 'G' or 'B'. If neither code is
-    included on the front of the line, the code from the prevous line will be added.
+    Executes a single line of gcode beginning with the character 'B'.
     
     */
     
@@ -1195,29 +1288,34 @@ void  executeGcodeLine(const String& gcodeLine){
         return;
     }
     
+}
+    
+void  executeGcodeLine(const String& gcodeLine){
+    /*
+    
+    Executes a single line of gcode beginning with the character 'G'.  If the G code is
+    not included on the front of the line, the code from the previous line will be added.
+    
+    */
+    
     //Handle G-Codes
    
     int gNumber = extractGcodeValue(gcodeLine,'G', -1);
     
-    if (gNumber != -1){                                     //If the line has a valid G number
-        lastCommand = gNumber;                              //remember it for next time
-    }
-    else{                                                   //If the line does not have a gcommand
-        gNumber = lastCommand;                              //apply the last one
+    if (gNumber == -1){               // If the line does not have a G command
+        gNumber = lastCommand;        // apply the last one
     }
     
     switch(gNumber){
-        case 0:
+        case 0:   // Rapid positioning
+        case 1:   // Linear interpolation
             G1(gcodeLine, gNumber);
+            lastCommand = gNumber;    // remember G number for next time
             break;
-        case 1:
-            G1(gcodeLine, gNumber);
-            break;
-        case 2:
+        case 2:   // Circular interpolation, clockwise
+        case 3:   // Circular interpolation, counterclockwise
             G2(gcodeLine, gNumber);
-            break;
-        case 3:
-            G2(gcodeLine, gNumber);
+            lastCommand = gNumber;    // remember G number for next time
             break;
         case 10:
             G10(gcodeLine);
@@ -1238,25 +1336,98 @@ void  executeGcodeLine(const String& gcodeLine){
             useRelativeUnits = true;
             break;
         default:
-            if(gcodeLine[0] != 'B'){
-                Serial.print(F("Command G"));
-                Serial.print(gNumber);
-                Serial.println(F(" unsupported and ignored."));
+            Serial.print(F("Command G"));
+            Serial.print(gNumber);
+            Serial.println(F(" unsupported and ignored."));
+    }
+
+}
+    
+void  executeMcodeLine(const String& gcodeLine){
+    /*
+    
+    Executes a single line of gcode beginning with the character 'M'.
+    
+    */
+    
+    //Handle M-Codes
+   
+    int mNumber = extractGcodeValue(gcodeLine,'M', -1);
+    
+    switch(mNumber){
+        case 0:   // Program Pause / Unconditional Halt / Stop
+        case 1:   // Optional Pause / Halt / Sleep
+            pause();
+            break;
+        case 2:   // Program End
+        case 30:  // Program End with return to program top
+        case 5:   // Spindle Off
+            setSpindlePower(false); // turn off spindle
+            break;
+        case 3:   // Spindle On - clockwise
+        case 4:   // Spindle On - counterclockwise
+            // Maslow spindle runs only one direction, but turn spindle on for either code
+            setSpindlePower(true);  // turn on spindle
+            break;
+        case 6:   // Tool Change
+            if (nextTool > 0) {
+                setSpindlePower(false); // first, turn off spindle
+                Serial.print(F("Tool Change: Please insert tool "));   // prompt user to change tool
+                Serial.print(nextTool);
+                Serial.println(F(" and re-zero the Z-axis if necessary.  Press the CONTINUE button when done."));
+                lastTool = nextTool;
+                pause();
             }
+            break;
+        default:
+            Serial.print(F("Command M"));
+            Serial.print(mNumber);
+            Serial.println(F(" unsupported and ignored."));
     }
     
-    if((gcodeLine[0] == 'T' || gcodeLine[0] == 't') && gcodeLine[1] != 'e'){
-        Serial.print(F("Please insert tool "));
-        Serial.println(gcodeLine);
-        gcodeLine = "";
-    }
+}
+
+void  executeOtherCodeLine(const String& gcodeLine){
+    /*
     
+    Executes a single line of gcode beginning with a character other than 'G', 'B', or 'M'.
+    
+    */
+
+    if (gcodeLine.length() > 1) {
+        if (gcodeLine[0] == 'T') {
+            int tNumber = extractGcodeValue(gcodeLine,'T', 0);    // get tool number
+            Serial.print(F("Tool change to tool "));
+            Serial.println(tNumber);
+            if ((tNumber > 0) && (tNumber != lastTool)) {         // if tool number is greater than 0 and not the same as the last tool
+                nextTool = tNumber;                               // remember tool number to prompt user when G06 is received
+            }
+            else {
+                nextTool = 0;                                     // tool is 0 or same as last change - don't prompt user on next G06
+            }
+        }
+        else {  // try it as a 'G' command without the leading 'G' code
+            executeGcodeLine(gcodeLine);
+        }
+    }
+    else {
+        Serial.print(F("Command "));
+        Serial.print(gcodeLine);
+        Serial.println(F(" too short - ignored."));      
+    }
+        
 } 
 
-int   findNextG(const String& readString, const int& startingPoint){
+int   findNextGM(const String& readString, const int& startingPoint){
     int nextGIndex = readString.indexOf('G', startingPoint);
-    if(nextGIndex == -1){
-        nextGIndex = readString.length();
+    int nextMIndex = readString.indexOf('M', startingPoint);
+    if (nextMIndex != -1) {           // if 'M' was found
+        if ((nextGIndex == -1) || (nextMIndex < nextGIndex)) { // and 'G' was not found, or if 'M' is before 'G'
+            nextGIndex = nextMIndex;  // then use 'M'
+        }
+    }
+    if (nextGIndex == -1) {           // if 'G' was not found (and therefore 'M' was not found)
+        nextGIndex = readString.length();   // then use the whole string
     }
     
     return nextGIndex;
@@ -1265,7 +1436,12 @@ int   findNextG(const String& readString, const int& startingPoint){
 void  interpretCommandString(const String& cmdString){
     /*
     
-    Splits a string into lines of gcode which begin with 'G'
+    Splits a string into lines of gcode which begin with 'G' or 'M', executing each in order
+    Also executes full lines for 'B' codes, and handles 'T' at beginning of line
+
+    Assumptions:
+        Leading and trailing white space has already been removed from cmdString
+        cmdString has been converted to upper case
     
     */
     
@@ -1273,31 +1449,63 @@ void  interpretCommandString(const String& cmdString){
     
     int firstG;  
     int secondG;
+
+    if (cmdString.length() > 0) {
+        if (cmdString[0] == 'B'){                   //If the command is a B command
+            #if defined (verboseDebug) && verboseDebug > 0
+            Serial.print(F("iCS executing B code line: "));
+            #endif
+            Serial.println(cmdString);
+            executeBcodeLine(cmdString);
+        }
+        else{
+            while(cmdString.length() > 0){          //Extract each line of gcode from the string
+                firstG  = findNextGM(cmdString, 0);
+                secondG = findNextGM(cmdString, firstG + 1);
+                
+                if(firstG == cmdString.length()){   //If the line contains no G or M letters
+                    firstG = 0;                     //send the whole line
+                }
     
-    if (cmdString[0] == 'B'){                   //If the command is a B command
-        Serial.print(cmdString);
-        executeGcodeLine(cmdString);
-    }
-    else{
-        while(cmdString.length() > 0){          //Extract each line of gcode from the string
-            firstG  = findNextG(cmdString, 0);
-            secondG = findNextG(cmdString, firstG + 1);
-            
-            if(firstG == cmdString.length()){   //If the line contains no G letters
-                firstG = 0;                     //send the whole line
+                if (firstG > 0) {                   //If there is something before the first 'G' or 'M'
+                    gcodeLine = cmdString.substring(0, firstG);
+                    #if defined (verboseDebug) && verboseDebug > 0
+                    Serial.print(F("iCS executing other code: "));
+                    #endif
+                    Serial.println(gcodeLine);
+                    executeOtherCodeLine(gcodeLine);  // execute it first
+                }
+                
+                gcodeLine = cmdString.substring(firstG, secondG);
+                
+                if (gcodeLine.length() > 0){
+                    if (gcodeLine[0] == 'M') {
+                        #if defined (verboseDebug) && verboseDebug > 0
+                        Serial.print(F("iCS executing M code: "));
+                        #endif
+                        Serial.println(gcodeLine);
+                        executeMcodeLine(gcodeLine);
+                    }
+                    else {
+                        #if defined (verboseDebug) && verboseDebug > 0
+                        Serial.print(F("iCS executing G code: "));
+                        #endif
+                        Serial.println(gcodeLine);
+                        executeGcodeLine(gcodeLine);
+                    }
+                }
+                
+                cmdString = cmdString.substring(secondG, cmdString.length());
+                
             }
-            
-            gcodeLine = cmdString.substring(firstG, secondG);
-            
-            if (gcodeLine.length() > 1){
-                Serial.println(gcodeLine);
-                executeGcodeLine(gcodeLine);
-            }
-            
-            cmdString = cmdString.substring(secondG, cmdString.length());
-            
         }
     }
+    
+    #if defined (verboseDebug) && verboseDebug > 1              
+    // print ring buffer contents
+    Serial.println(F("iCS execution complete"));
+    ringBuffer.print();
+    #endif
     
     _signalReady();
     
