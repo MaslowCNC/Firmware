@@ -1311,6 +1311,10 @@ void  interpretCommandString(const String& cmdString){
     /*
     
     Splits a string into lines of gcode which begin with 'G'
+
+    Assumptions:
+        Leading and trailing white space has already been removed from cmdString
+        cmdString has been converted to upper case
     
     */
     
@@ -1318,33 +1322,37 @@ void  interpretCommandString(const String& cmdString){
     
     int firstG;  
     int secondG;
-    String cmdStringTrim = cmdString;
-    cmdStringTrim.trim();
-    if (cmdStringTrim.length() <= 0){
-        // Nothing to process, likely a blank startup line
-    }
-    else if (cmdString[0] == 'B'){                   //If the command is a B command
-        Serial.print(cmdString);
-        executeGcodeLine(cmdString);
-    }
-    else{
-        while(cmdString.length() > 0){          //Extract each line of gcode from the string
-            firstG  = findNextG(cmdString, 0);
-            secondG = findNextG(cmdString, firstG + 1);
-            
-            if(firstG == cmdString.length()){   //If the line contains no G letters
-                firstG = 0;                     //send the whole line
+
+    if (cmdString.length() > 0) {
+        if (cmdString[0] == 'B'){                   //If the command is a B command
+            Serial.println(cmdString);
+            executeGcodeLine(cmdString);
+        }
+        else{
+            while(cmdString.length() > 0){          //Extract each line of gcode from the string
+                firstG  = findNextG(cmdString, 0);
+                secondG = findNextG(cmdString, firstG + 1);
+                
+                if(firstG == cmdString.length()){   //If the line contains no G letters
+                    firstG = 0;                     //send the whole line
+                }
+                
+                if (firstG > 0) {                   //If there is something before the first 'G'
+                    gcodeLine = cmdString.substring(0, firstG);
+                    Serial.println(gcodeLine);
+                    executeGcodeLine(gcodeLine);  // execute it first
+                }
+                
+                gcodeLine = cmdString.substring(firstG, secondG);
+                
+                if (gcodeLine.length() > 1){
+                    Serial.println(gcodeLine);
+                    executeGcodeLine(gcodeLine);
+                }
+                
+                cmdString = cmdString.substring(secondG, cmdString.length());
+
             }
-            
-            gcodeLine = cmdString.substring(firstG, secondG);
-            
-            if (gcodeLine.length() > 1){
-                Serial.println(gcodeLine);
-                executeGcodeLine(gcodeLine);
-            }
-            
-            cmdString = cmdString.substring(secondG, cmdString.length());
-            
         }
     }
     

@@ -50,6 +50,7 @@ void loop(){
     readyCommandString = ringBuffer.readLine();
     
     if (readyCommandString.length() > 0){
+        readyCommandString.trim();  // remove leading and trailing white space
         readyCommandString.toUpperCase();
         interpretCommandString(readyCommandString);
         readyCommandString = "";
