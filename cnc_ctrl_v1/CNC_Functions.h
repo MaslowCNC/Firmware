@@ -1244,25 +1244,20 @@ void  executeGcodeLine(const String& gcodeLine){
    
     int gNumber = extractGcodeValue(gcodeLine,'G', -1);
     
-    if (gNumber != -1){                                     //If the line has a valid G number
-        lastCommand = gNumber;                              //remember it for next time
-    }
-    else{                                                   //If the line does not have a gcommand
-        gNumber = lastCommand;                              //apply the last one
+    if (gNumber == -1){               // If the line does not have a G command
+        gNumber = lastCommand;        // apply the last one
     }
     
     switch(gNumber){
-        case 0:
+        case 0:   // Rapid positioning
+        case 1:   // Linear interpolation
             G1(gcodeLine, gNumber);
+            lastCommand = gNumber;    // remember G number for next time
             break;
-        case 1:
-            G1(gcodeLine, gNumber);
-            break;
-        case 2:
+        case 2:   // Circular interpolation, clockwise
+        case 3:   // Circular interpolation, counterclockwise
             G2(gcodeLine, gNumber);
-            break;
-        case 3:
-            G2(gcodeLine, gNumber);
+            lastCommand = gNumber;    // remember G number for next time
             break;
         case 10:
             G10(gcodeLine);
