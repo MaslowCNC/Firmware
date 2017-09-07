@@ -54,10 +54,30 @@ char RingBuffer::read(){
     else{
         letter = _buffer[_beginningOfString];     //else return first character
         _buffer[_beginningOfString] = '\0';       //set the read character to null so it cannot be read again
+        _incrementBeginning();                    //and increment the pointer
     }
-    _incrementBeginning();
     
     return letter;
+}
+
+int RingBuffer::numberOfLines() {
+    /*
+   
+    Return the number of full lines (as determined by \n terminations) in the buffer
+   
+    */
+
+    int lineCount = 0;
+
+    int  i = _beginningOfString;
+    while (i !=  _endOfString) {    // if we haven't gotten to the end of the buffer yet
+        if(_buffer[i] == '\n'){     // check to see if the buffer contains a complete line terminated with \n
+            lineCount++;            // yes, so increment lineCount
+        }
+        _incrementVariable(&i);     // go to the next character in the buffer
+    }
+    
+    return lineCount;
 }
 
 String RingBuffer::readLine(){
@@ -69,24 +89,16 @@ String RingBuffer::readLine(){
     
     String lineToReturn;
     lineToReturn.reserve(128);
+    lineToReturn = "";            // begin with an empty string
     
-    bool lineDetected = false;
-    
-    int  i = _beginningOfString;
-    while (i !=  _endOfString && !lineDetected){  // if we haven't gotten to the end of the buffer yet
-        if(_buffer[i] == '\n'){                  //Check to see if the buffer contains a complete line terminated with \n
-            lineDetected = true;
-        }
-        _incrementVariable(&i);
-    }
-    
-    if(lineDetected){
+    if (numberOfLines() > 0) {    // there is at least one full line in the buffer
         char lastReadValue = '\0';
-        while(lastReadValue != '\n'){                   //read until the end of the line is found, building the string
+        while(lastReadValue != '\n'){   //read until the end of the line is found, building the string
             lastReadValue = read();
             lineToReturn += lastReadValue;
         }
     }
+    // if there are no full lines in the buffer, an empty string will be returned
     
     return lineToReturn;
     
@@ -95,31 +107,32 @@ String RingBuffer::readLine(){
 void RingBuffer::print(){
     Serial.print(F("Buffer Used: "));
     Serial.println(length());
-    Serial.print(F("Begin: "));
+    Serial.print(F("Buffer Number of Lines: "));
+    Serial.println(numberOfLines());
+    Serial.print(F("Buffer Begin: "));
     Serial.println(_beginningOfString);
-    Serial.print(F("End: "));
+    Serial.print(F("Buffer End: "));
     Serial.println(_endOfString);
-    Serial.print(_buffer[_beginningOfString]);
-    Serial.print(_buffer[_beginningOfString+1]);
-    Serial.print(_buffer[_beginningOfString+2]);
-    Serial.print(_buffer[_beginningOfString+3]);
-    Serial.print(_buffer[_beginningOfString+4]);
-    Serial.println(_buffer[_beginningOfString+5]);
-    Serial.print(_buffer[_endOfString-1]);
-    Serial.print(_buffer[_endOfString-2]);
-    Serial.print(_buffer[_endOfString-3]);
-    Serial.println(_buffer[_endOfString-4]);
     
-    if (_beginningOfString < _endOfString ){  // only if buffer is linear
-        Serial.println(F("Buffer Contents: "));
-        int i = _beginningOfString;
-        while(i < _endOfString){
-            Serial.print(_buffer[i]);
-            i++;
+    Serial.print(F("Buffer Contents: "));
+    int i = _beginningOfString;
+    while(i != _endOfString){
+        if (_buffer[i] == '\n') {
+            Serial.print(F("\\n"));
         }
+        else if (_buffer[i] == '\r') {
+            Serial.print(F("\\r"));          
+        }
+        else if (_buffer[i] == '\t') {
+            Serial.print(F("\\t"));          
+        }
+        else {
+            Serial.print(_buffer[i]);          
+        }
+        _incrementVariable(&i);
     }
     
-    Serial.println(F(" "));
+    Serial.println(F("(End of Buffer)"));
     
 }
 
@@ -143,13 +156,8 @@ void RingBuffer::_incrementEnd(){
     
     */
     if ( spaceAvailable() == 0 ) {
-        Serial.println(F("buffer overflow"));
-        Serial.print(F("Buffer begin: "));
-        Serial.println(_beginningOfString);
-        Serial.print(F("Buffer end: "));
-        Serial.println(_endOfString);
-        Serial.print(F("BufferLength: "));
-        Serial.println(length());
+        Serial.println(F("Buffer overflow!"));
+        print();    // print buffer info and contents
         }
     else
         _endOfString = (_endOfString+1) % BUFFERSIZE;
@@ -164,12 +172,15 @@ void RingBuffer::_incrementVariable(int* variable){
 
 int  RingBuffer::spaceAvailable(){
     /*
-    Returns the number of characters held in the buffer
+    Returns the number of characters available in the buffer
     */
   return  BUFFERSIZE - length() - 1;
 }
 
 int RingBuffer::length(void)
+    /*
+    Returns the number of characters held in the buffer
+    */
 {
   if ( _endOfString >= _beginningOfString ) // Linear
     return _endOfString - _beginningOfString ;
