@@ -135,6 +135,8 @@ Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Z",     Z_EEPROM_ADR);
 Kinematics kinematics;
 RingBuffer ringBuffer;
 
+int expectedMaxLineLength   = 60;   // expected maximum Gcode line length in characters, including line ending character(s)
+
 float feedrate              =  500;
 float _inchesToMMConversion =  1;
 bool  useRelativeUnits      =  false;
@@ -226,8 +228,9 @@ void  _signalReady(){
     
     */
     
-    if (ringBuffer.numberOfLines() < 2) {         // if there are fewer than 2 lines in the buffer
-        Serial.println(F("ok"));                  // request new code
+    if ( (ringBuffer.spaceAvailable() > expectedMaxLineLength)    // if there is space in the buffer to accept the expected maximum line length
+          && (ringBuffer.numberOfLines() < 4) ) {                 // and if there are fewer than 4 lines in the buffer
+        Serial.println(F("ok"));                                  // then request new code
     }
 }
 
