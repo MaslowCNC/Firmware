@@ -320,6 +320,26 @@ void pause(){
     }    
 }
 
+void maslowDelay(unsigned long waitTimeMs) {
+  /*
+   * Provides a time delay while holding the machine position, reading serial commands,
+   * and periodically sending the machine position to Ground Control.  This prevents
+   * Ground Control from thinking that the connection is lost.
+   * 
+   * This is similar to the pause() command above, but provides a time delay rather than
+   * waiting for the user (through Ground Control) to tell the machine to continue.
+   */
+   
+    unsigned long startTime  = millis();
+    
+    while ((millis() - startTime) < waitTimeMs){
+        delay(1);
+        holdPosition();
+        readSerialCommands();
+        returnPoz(xTarget, yTarget, zAxis.read());
+    }
+}
+
 bool checkForProbeTouch(const int& probePin) {
   /*
       Check to see if AUX4 has gone LOW
@@ -602,14 +622,8 @@ int   G1(const String& readString, int G0orG1){
             pause(); //Wait until the z-axis is adjusted
             
             zAxis.set(zgoto);
-            
-            int    waitTimeMs = 1000;
-            double startTime  = millis();
-            
-            while (millis() - startTime < waitTimeMs){
-                delay(1);
-                holdPosition();
-            } 
+
+            maslowDelay(1000);
         }
     }
     
