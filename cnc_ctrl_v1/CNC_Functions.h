@@ -226,7 +226,9 @@ void  _signalReady(){
     
     */
     
-    Serial.println(F("ok"));
+    if (ringBuffer.numberOfLines() < 2) {         // if there are fewer than 2 lines in the buffer
+        Serial.println(F("ok"));                  // request new code
+    }
 }
 
 void  _watchDog(){
