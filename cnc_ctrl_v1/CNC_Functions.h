@@ -22,7 +22,7 @@ libraries*/
 
 #define VERSIONNUMBER 0.90
 
-#define verboseDebug 2    // set to 0 for no debug messages, 1 for single-line messages, 2 to also output ring buffer contents
+#define verboseDebug 0    // set to 0 for no debug messages, 1 for single-line messages, 2 to also output ring buffer contents
 
 #include <Servo.h>
 Servo myservo;  // create servo object to control a servo 
