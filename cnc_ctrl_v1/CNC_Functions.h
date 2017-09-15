@@ -1192,6 +1192,56 @@ void  setSpindlePower(boolean powerState) {
     maslowDelay(delayAfterChange);
 }
 
+void PIDTestVelocity(Axis* axis, const float start, const float stop, const float steps){
+    // Moves the defined Axis at series of speed steps for PID tuning
+    // Start Log
+    Serial.println(F("--PID Velocity Test Start--"));
+    Serial.println("Axis=" + axis->motorGearboxEncoder.name());
+    Serial.println(axis->motorGearboxEncoder.getPIDString());
+
+    double startTime;
+    double print = micros();
+    double current = micros();
+    float lastPosition = axis->motorGearboxEncoder.encoder.read();
+    float error;
+    float distMoved;
+    float reportedSpeed;
+    float span = stop - start;
+    float speed;
+    
+    // Start the steps
+    axis->disablePositionPID();
+    axis->attach();
+    for(int i = 0; i < steps; i++){
+        // 1 step = start, 2 step = start & finish, 3 = start, start + 1/2 span...
+        speed = start;
+        if (i > 0){
+            speed = start + (span * (i/(steps-1)));
+        }
+        startTime = micros();
+        axis->motorGearboxEncoder.write(speed);
+        while (startTime + 2000000 > current){
+          if (current - print > 20000){
+            // Calculate and log error on same frequency as PID interrupt
+            distMoved   =  axis->motorGearboxEncoder.encoder.read() - lastPosition;
+            reportedSpeed= (7364.0*distMoved)/float(current - print);  //6*10^7 us per minute, 8148 steps per revolution
+            lastPosition  = axis->motorGearboxEncoder.encoder.read();
+            error =  (-1.0 * reportedSpeed) - speed;
+            print = current;
+            Serial.println(error);
+          }
+          current = micros();
+        }
+    }
+    axis->motorGearboxEncoder.write(0);
+    
+    // Print end of log, and update axis for use again
+    Serial.println(F("--PID Velocity Test Stop--\n"));
+    axis->write(axis->read());
+    axis->enablePositionPID();
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+}
+
 void  executeBcodeLine(const String& gcodeLine){
     /*
     
@@ -1347,6 +1397,20 @@ void  executeBcodeLine(const String& gcodeLine){
         //Update the motor characteristics
         updateMotorSettings(gcodeLine);
         return;
+    }
+    
+    if(gcodeLine.substring(0, 3) == "B13"){
+        //PID Testing of Velocity
+        float  left       = extractGcodeValue(gcodeLine, 'L', 0);
+        float  useZ       = extractGcodeValue(gcodeLine, 'Z', 0);
+        float  start      = extractGcodeValue(gcodeLine, 'S', 1);
+        float  stop       = extractGcodeValue(gcodeLine, 'F', 1);
+        float  steps      = extractGcodeValue(gcodeLine, 'I', 1);
+        
+        Axis* axis = &rightAxis;
+        if (left > 0) axis = &leftAxis;
+        if (useZ > 0) axis = &zAxis;
+        PIDTestVelocity(axis, start, stop, steps);
     }
     
 }

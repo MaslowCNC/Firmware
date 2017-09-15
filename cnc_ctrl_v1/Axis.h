@@ -40,6 +40,8 @@
             float  error();
             float  setpoint();
             void   computePID();
+            void   disablePositionPID();
+            void   enablePositionPID();
             void   setPIDAggressiveness(float aggressiveness);
             void   test();
             void   changePitch(const float& newPitch);
