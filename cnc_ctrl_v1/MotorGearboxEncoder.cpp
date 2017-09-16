@@ -180,7 +180,7 @@ float MotorGearboxEncoder::computeSpeed(){
     */
     double timeElapsed =  micros() - _lastTimeStamp;
     
-    float    distMoved   =  _runningAverage(encoder.read() - _lastPosition);     //because of quantization noise it helps to average these
+    float    distMoved   =  encoder.read() - _lastPosition; //_runningAverage(encoder.read() - _lastPosition);     //because of quantization noise it helps to average these
     
     //Compute the speed in RPM
     float RPM = (_encoderStepsToRPMScaleFactor*distMoved)/float(timeElapsed);
