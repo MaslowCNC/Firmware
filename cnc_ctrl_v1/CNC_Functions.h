@@ -1238,6 +1238,7 @@ void PIDTestVelocity(Axis* axis, const float start, const float stop, const floa
     // Print end of log, and update axis for use again
     Serial.println(F("--PID Velocity Test Stop--\n"));
     axis->write(axis->read());
+    axis->detach();
     axis->enablePositionPID();
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
 }
