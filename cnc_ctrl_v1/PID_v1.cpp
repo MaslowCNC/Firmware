@@ -1,8 +1,8 @@
 /**********************************************************************************************
- * Arduino PID Library - Version 1.1.1
+ * Arduino PID Library - Version 1.2.1
  * by Brett Beauregard <br3ttb@gmail.com> brettbeauregard.com
  *
- * This Library is licensed under a GPLv3 License
+ * This Library is licensed under the MIT License
  **********************************************************************************************/
 
 #if ARDUINO >= 100
@@ -23,7 +23,7 @@ PID::PID()
 }
 
 void PID::setup(double* Input, double* Output, double* Setpoint,
-        const double& Kp, const double& Ki, const double& Kd, const int& ControllerDirection)
+        const double& Kp, const double& Ki, const double& Kd, const int& POn, const int& ControllerDirection)
 {
 
     myOutput = Output;
@@ -37,7 +37,7 @@ void PID::setup(double* Input, double* Output, double* Setpoint,
     SampleTime = 100;							//default Controller Sample Time is 0.1 seconds
 
     PID::SetControllerDirection(ControllerDirection);
-    PID::SetTunings(Kp, Ki, Kd);
+    PID::SetTunings(Kp, Ki, Kd, POn);
 
     lastTime = millis()-SampleTime;
 }
@@ -57,29 +57,35 @@ bool PID::Compute()
    //{  <--- This if statement has been removed to reduce timing jitter on the interrupt.
     //because we are calling the function from within an interrupt timer it will be called
     //with a consistent sample period
-
+  
     /*Compute all the working error variables*/
-    double input = *myInput; 
+    double input = *myInput;
     double error = *mySetpoint - input;
-    ITerm+= (ki * error);
-
-    //clamp ITerm
-    ITerm = (ITerm > outMax) ? outMax : (ITerm < outMin) ? outMin : ITerm;
-
     double dInput = (input - lastInput);
+    outputSum+= (ki * error);
 
-    /*Compute PID Output*/
-    double output = kp * error + ITerm- kd * dInput;
+    /*Add Proportional on Measurement, if P_ON_M is specified*/
+    if(!pOnE) outputSum-= kp * dInput;
 
-    //clamp myOutput
-    *myOutput = (output > outMax) ? outMax : (output < outMin) ? outMin : output;
+    if(outputSum > outMax) outputSum= outMax;
+    else if(outputSum < outMin) outputSum= outMin;
+
+    /*Add Proportional on Error, if P_ON_E is specified*/
+    double output;
+    if(pOnE) output = kp * error;
+    else output = 0;
+
+    /*Compute Rest of PID Output*/
+    output += outputSum - kd * dInput;
+
+    if(output > outMax) output = outMax;
+    else if(output < outMin) output = outMin;
+    *myOutput = output;
 
     /*Remember some variables for next time*/
     lastInput = input;
     //lastTime = now;
     return true;
-
-
    //}
    //else return false;
 }
@@ -90,9 +96,12 @@ bool PID::Compute()
  * it's called automatically from the constructor, but tunings can also
  * be adjusted on the fly during normal operation
  ******************************************************************************/
-void PID::SetTunings(const double& Kp, const double& Ki, const double& Kd)
+void PID::SetTunings(const double& Kp, const double& Ki, const double& Kd, const int& POn)
 {
    if (Kp<0 || Ki<0 || Kd<0) return;
+
+   pOn = POn;
+   pOnE = POn == P_ON_E;
 
    dispKp = Kp; dispKi = Ki; dispKd = Kd;
 
@@ -144,8 +153,9 @@ void PID::SetOutputLimits(const double& Min, const double& Max)
    //clamp myOutput and ITerm
    *myOutput =
       (*myOutput > outMax) ? outMax : (*myOutput < outMin) ? outMin : *myOutput;
-
-   ITerm = (ITerm > outMax) ? outMax : (ITerm < outMin) ? outMin : ITerm;
+      
+    if(outputSum > outMax) outputSum= outMax;
+    else if(outputSum < outMin) outputSum= outMin;
 
    }
 }
@@ -158,7 +168,7 @@ void PID::SetOutputLimits(const double& Min, const double& Max)
 void PID::SetMode(const int& Mode)
 {
     bool newAuto = (Mode == AUTOMATIC);
-    if(newAuto == !inAuto)
+    if(newAuto && !inAuto)
     {  /*we just went from manual to auto*/
         PID::Initialize();
     }
@@ -171,11 +181,10 @@ void PID::SetMode(const int& Mode)
  ******************************************************************************/
 void PID::Initialize()
 {
-   ITerm = *myOutput;
+   outputSum = *myOutput;
    lastInput = *myInput;
-
-   ITerm = (ITerm > outMax) ? outMax : (ITerm < outMin) ? outMin : ITerm;
-
+   if(outputSum > outMax) outputSum = outMax;
+   else if(outputSum < outMin) outputSum = outMin;
 }
 
 /* SetControllerDirection(...)*************************************************
@@ -196,11 +205,11 @@ void PID::SetControllerDirection(const int& Direction)
 }
 
 void PID::FlushIntegrator(){
-    ITerm = 0;
+    outputSum = 0;
 }
 
 void PID::FlipIntegrator(){
-    ITerm = -.7*ITerm;
+    outputSum = -.7*outputSum;
 }
 
 /* Status Funcions*************************************************************
@@ -213,4 +222,4 @@ double PID::GetKi(){ return  dispKi;}
 double PID::GetKd(){ return  dispKd;}
 int PID::GetMode(){ return  inAuto ? AUTOMATIC : MANUAL;}
 int PID::GetDirection(){ return controllerDirection;}
-double PID::GetIterm(){ return ITerm; }
+double PID::GetIterm(){ return outputSum; }
