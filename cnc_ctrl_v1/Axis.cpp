@@ -144,6 +144,16 @@ void   Axis::setPIDValues(float KpPos, float KiPos, float KdPos, float KpV, floa
     motorGearboxEncoder.setPIDValues(KpV, KiV, KdV);
 }
 
+String  Axis::getPIDString(){
+    /*
+    
+    Get PID tuning values
+    
+    */
+    String PIDString = "Kp=";
+    return PIDString + _Kp + ",Ki=" + _Ki + ",Kd=" + _Kd;
+}
+
 void   Axis::setPIDAggressiveness(float aggressiveness){
     /*
     

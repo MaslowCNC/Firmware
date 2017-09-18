@@ -1243,6 +1243,50 @@ void PIDTestVelocity(Axis* axis, const float start, const float stop, const floa
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
 }
 
+void PIDTestPosition(Axis* axis, float start, float stop, const float steps){
+    // Moves the defined Axis at series of chain distance steps for PID tuning
+    // Start Log
+    Serial.println(F("--PID Position Test Start--"));
+    Serial.println("Axis=" + axis->motorGearboxEncoder.name());
+    Serial.println(axis->getPIDString());
+
+    double startTime;
+    double print = micros();
+    double current = micros();
+    float error;
+    start = axis->read() + start;
+    stop  = axis->read() + stop;
+    float span = stop - start;
+    float location;
+    
+    // Start the steps
+    axis->attach();
+    for(int i = 0; i < steps; i++){
+        // 1 step = start, 2 step = start & finish, 3 = start, start + 1/2 span...
+        location = start;
+        if (i > 0){
+            location = start + (span * (i/(steps-1)));
+        }
+        startTime = micros();
+        axis->write(location);
+        while (startTime + 2000000 > current){
+          if (current - print > 20000){
+            // Calculate and log error on same frequency as PID interrupt
+            error   =  axis->read() - location;
+            print = current;
+            Serial.println(error);
+          }
+          current = micros();
+        }
+    }
+    
+    // Print end of log, and update axis for use again
+    Serial.println(F("--PID Position Test Stop--\n"));
+    axis->write(axis->read());
+    axis->detach();
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+}
+
 void  executeBcodeLine(const String& gcodeLine){
     /*
     
@@ -1414,6 +1458,21 @@ void  executeBcodeLine(const String& gcodeLine){
         PIDTestVelocity(axis, start, stop, steps);
     }
     
+    if(gcodeLine.substring(0, 3) == "B14"){
+        //PID Testing of Position
+        float  left       = extractGcodeValue(gcodeLine, 'L', 0);
+        float  useZ       = extractGcodeValue(gcodeLine, 'Z', 0);
+        float  start      = extractGcodeValue(gcodeLine, 'S', 1);
+        float  stop       = extractGcodeValue(gcodeLine, 'F', 1);
+        float  steps      = extractGcodeValue(gcodeLine, 'I', 1);
+        
+        Axis* axis = &rightAxis;
+        if (left > 0) axis = &leftAxis;
+        if (useZ > 0) axis = &zAxis;
+        PIDTestPosition(axis, start, stop, steps);
+        return;
+    }
+    
 }
     
 void  executeGcodeLine(const String& gcodeLine){
@@ -1430,7 +1489,7 @@ void  executeGcodeLine(const String& gcodeLine){
         Serial.println(F("Unable to execute command, machine settings not yet received"));
         return;
     }
-    
+      
     //Handle G-Codes
    
     int gNumber = extractGcodeValue(gcodeLine,'G', -1);
