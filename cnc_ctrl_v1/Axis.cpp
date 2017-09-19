@@ -172,6 +172,9 @@ void   Axis::changeEncoderResolution(const int& newResolution){
     */
     _encoderSteps = newResolution;
     
+    //push to the gearbox for calculating RPM
+    motorGearboxEncoder.setEncoderResolution(newResolution);
+    
 }
 
 int    Axis::detach(){
