@@ -34,7 +34,6 @@ motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPi
     _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, 0, 0, 0, P_ON_E, REVERSE);
     
     //initialize variables
-    _direction    = FORWARD;
     _axisName     = axisName;
     _eepromAdr    = eepromAdr;
     
@@ -101,10 +100,6 @@ void   Axis::computePID(){
 
     if (_disableAxisForTesting || !motorGearboxEncoder.motor.attached()){
         return;
-    }
-    
-    if (_detectDirectionChange(_pidSetpoint)){ //this determines if the axis has changed direction of movement and flushes the accumulator in the PID if it has
-        _pidController.FlipIntegrator();
     }
     
     _pidInput      =  motorGearboxEncoder.encoder.read()/_encoderSteps;
@@ -253,33 +248,6 @@ void   Axis::wipeEEPROM(){
     
     Serial.print(_axisName);
     Serial.println(F(" EEPROM erased"));
-}
-
-int    Axis::_detectDirectionChange(const float& _pidSetpoint){
-    
-    float difference = _pidSetpoint - _oldSetpoint;
-    
-    if(difference == 0){
-        return 0;
-    }
-    
-    int direction;
-    if(difference > 0){
-        direction = 1;
-    }
-    else{
-        direction = 0;
-    }
-    
-    int retVal = 0;
-    if(direction != _oldDir){
-        retVal = 1;
-    }
-    
-    _oldSetpoint = _pidSetpoint;
-    _oldDir = direction;
-    
-    return retVal;
 }
 
 void   Axis::test(){

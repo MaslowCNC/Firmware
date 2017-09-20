@@ -34,8 +34,7 @@ encoder(encoderPin1,encoderPin2)
     motor.write(0);
     
     //initialize the PID
-    _posPIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, P_ON_E, DIRECT);
-    _negPIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, P_ON_E, DIRECT);
+    _PIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, P_ON_E, DIRECT);
     initializePID();
     
     
@@ -52,14 +51,9 @@ void  MotorGearboxEncoder::write(const float& speed){
 
 void   MotorGearboxEncoder::initializePID(){
     //setup positive PID controller
-    _posPIDController.SetMode(AUTOMATIC);
-    _posPIDController.SetOutputLimits(-255, 255);
-    _posPIDController.SetSampleTime(10);
-    
-    //setup negative PID controller
-    _negPIDController.SetMode(AUTOMATIC);
-    _negPIDController.SetOutputLimits(-255, 255);
-    _negPIDController.SetSampleTime(10);
+    _PIDController.SetMode(AUTOMATIC);
+    _PIDController.SetOutputLimits(-255, 255);
+    _PIDController.SetSampleTime(10);
 }
 
 void  MotorGearboxEncoder::computePID(){
@@ -105,14 +99,8 @@ void  MotorGearboxEncoder::computePID(){
         _targetSpeed = 0;
     }*/
     
-    
-    if(_targetSpeed > 0){
-        _posPIDController.Compute();
-    }
-    else{
-        _negPIDController.Compute();
-    }
-    
+    _PIDController.Compute();
+        
     /*if(_motorName[0] == 'R'){
         //Serial.print(_currentSpeed);
         //Serial.print(" ");
@@ -134,8 +122,7 @@ void  MotorGearboxEncoder::setPIDValues(float KpV, float KiV, float KdV){
     _Ki = KiV;
     _Kd = KdV;
     
-    _posPIDController.SetTunings(_Kp, _Ki, _Kd, P_ON_E);
-    _negPIDController.SetTunings(_Kp, _Ki, _Kd, P_ON_E);
+    _PIDController.SetTunings(_Kp, _Ki, _Kd, P_ON_E);
 }
 
 String  MotorGearboxEncoder::getPIDString(){
@@ -156,8 +143,7 @@ void MotorGearboxEncoder::setPIDAggressiveness(float aggressiveness){
     
     */
     
-    _posPIDController.SetTunings(aggressiveness*_Kp, _Ki, _Kd, P_ON_E);
-    _negPIDController.SetTunings(aggressiveness*_Kp, _Ki, _Kd, P_ON_E);
+    _PIDController.SetTunings(aggressiveness*_Kp, _Ki, _Kd, P_ON_E);
     
 }
 
