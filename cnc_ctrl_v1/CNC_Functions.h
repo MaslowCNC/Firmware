@@ -434,6 +434,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     long   numberOfStepsTaken         =  0;
     
     while(numberOfStepsTaken < finalNumberOfSteps){
+        unsigned long startTime = millis();
             
         //find the target point for this step
         float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
@@ -471,7 +472,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
         }
         
         //wait for the step to be completed
-        delay(delayTime);
+        delay(delayTime - (millis() - startTime));
     }
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
