@@ -1243,7 +1243,7 @@ void PIDTestVelocity(Axis* axis, const float start, const float stop, const floa
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
 }
 
-void PIDTestPosition(Axis* axis, float start, float stop, const float steps){
+void PIDTestPosition(Axis* axis, float start, float stop, const float steps, const float stepTime){
     // Moves the defined Axis at series of chain distance steps for PID tuning
     // Start Log
     Serial.println(F("--PID Position Test Start--"));
@@ -1251,8 +1251,8 @@ void PIDTestPosition(Axis* axis, float start, float stop, const float steps){
     Serial.println(axis->getPIDString());
 
     double startTime;
-    double print = micros();
-    double current = micros();
+    double print = millis();
+    double current = millis();
     float error;
     start = axis->read() + start;
     stop  = axis->read() + stop;
@@ -1267,19 +1267,29 @@ void PIDTestPosition(Axis* axis, float start, float stop, const float steps){
         if (i > 0){
             location = start + (span * (i/(steps-1)));
         }
-        startTime = micros();
+        startTime = millis();
         axis->write(location);
-        while (startTime + 2000000 > current){
-          if (current - print > 20000){
-            // Calculate and log error on same frequency as PID interrupt
+        while (startTime + stepTime > current){
+          if (current - print > (stepTime/10)){
+            // Calculate and log error 100 times per step
             error   =  axis->read() - location;
             print = current;
             Serial.println(error);
           }
-          current = micros();
+          current = millis();
         }
     }
-    
+    startTime = millis();
+    current = millis();
+    while (startTime + 1000 > current){
+      if (current - print > 10){
+        // Calculate and log error 100 times per step
+        error   =  axis->read() - location;
+        print = current;
+        Serial.println(error);
+      }
+      current = millis();
+    }
     // Print end of log, and update axis for use again
     Serial.println(F("--PID Position Test Stop--\n"));
     axis->write(axis->read());
@@ -1456,6 +1466,7 @@ void  executeBcodeLine(const String& gcodeLine){
         if (left > 0) axis = &leftAxis;
         if (useZ > 0) axis = &zAxis;
         PIDTestVelocity(axis, start, stop, steps);
+        return;
     }
     
     if(gcodeLine.substring(0, 3) == "B14"){
@@ -1465,11 +1476,12 @@ void  executeBcodeLine(const String& gcodeLine){
         float  start      = extractGcodeValue(gcodeLine, 'S', 1);
         float  stop       = extractGcodeValue(gcodeLine, 'F', 1);
         float  steps      = extractGcodeValue(gcodeLine, 'I', 1);
+        float  stepTime   = extractGcodeValue(gcodeLine, 'T', 2000);
         
         Axis* axis = &rightAxis;
         if (left > 0) axis = &leftAxis;
         if (useZ > 0) axis = &zAxis;
-        PIDTestPosition(axis, start, stop, steps);
+        PIDTestPosition(axis, start, stop, steps, stepTime);
         return;
     }
     
