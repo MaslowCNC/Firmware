@@ -151,6 +151,17 @@ void MotorGearboxEncoder::setPIDAggressiveness(float aggressiveness){
     
 }
 
+void MotorGearboxEncoder::setEncoderResolution(float resolution){
+    /*
+    
+    Change the encoder resolution
+    
+    */
+    
+    _encoderStepsToRPMScaleFactor = 60000000.0/resolution; //6*10^7 us per minute divided by 8148 steps per revolution
+    
+}
+
 float MotorGearboxEncoder::computeSpeed(){
     /*
     
@@ -162,7 +173,7 @@ float MotorGearboxEncoder::computeSpeed(){
     float    distMoved   =  _runningAverage(encoder.read() - _lastPosition);     //because of quantization noise it helps to average these
     
     //Compute the speed in RPM
-    float RPM = (7364.0*distMoved)/float(timeElapsed);  //6*10^7 us per minute, 8148 steps per revolution
+    float RPM = (_encoderStepsToRPMScaleFactor*distMoved)/float(timeElapsed);
     
     //Store values for next time
     _lastTimeStamp = micros();
