@@ -98,7 +98,8 @@ int    Axis::set(const float& newAxisPosition){
 
 void   Axis::computePID(){
     
-    if (_disableAxisForTesting){
+
+    if (_disableAxisForTesting || !motorGearboxEncoder.motor.attached()){
         return;
     }
     
