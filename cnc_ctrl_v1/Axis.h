@@ -40,6 +40,8 @@
             float  error();
             float  setpoint();
             void   computePID();
+            void   disablePositionPID();
+            void   enablePositionPID();
             void   setPIDAggressiveness(float aggressiveness);
             void   test();
             void   changePitch(const float& newPitch);
@@ -49,6 +51,7 @@
             MotorGearboxEncoder    motorGearboxEncoder;
             void   setPIDValues(float Kp, float Ki, float Kd, float KpV, float KiV, float KdV);
             void   loadPositionFromMemory();
+            String     getPIDString();
             
         private:
             int        _PWMread(int pin);

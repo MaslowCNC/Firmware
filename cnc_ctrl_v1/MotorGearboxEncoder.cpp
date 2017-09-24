@@ -138,6 +138,16 @@ void  MotorGearboxEncoder::setPIDValues(float KpV, float KiV, float KdV){
     _negPIDController.SetTunings(_Kp, _Ki, _Kd);
 }
 
+String  MotorGearboxEncoder::getPIDString(){
+    /*
+    
+    Get PID tuning values
+    
+    */
+    String PIDString = "Kp=";
+    return PIDString + _Kp + ",Ki=" + _Ki + ",Kd=" + _Kd;
+}
+
 void MotorGearboxEncoder::setPIDAggressiveness(float aggressiveness){
     /*
     
@@ -211,4 +221,11 @@ void MotorGearboxEncoder::setName(const String& newName){
     Set the name for the object
     */
     _motorName = newName;
+}
+
+String MotorGearboxEncoder::name(){
+    /*
+    Get the name for the object
+    */
+    return _motorName;
 }
