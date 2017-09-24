@@ -1,6 +1,6 @@
 #ifndef PID_v1_h
 #define PID_v1_h
-#define LIBRARY_VERSION	1.1.1
+#define LIBRARY_VERSION	1.2.1
 
 class PID
 {
@@ -13,13 +13,19 @@ class PID
   #define MANUAL	0
   #define DIRECT  0
   #define REVERSE  1
+  #define P_ON_M 0
+  #define P_ON_E 1
 
   //commonly used functions **************************************************************************
     
     PID();
     
     void setup(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 
-        const double&, const double&, const double&, const int&);     //   Setpoint.  Initial tuning parameters are also set here
+        const double&, const double&, const double&, const int&, const int&);//   Setpoint.  Initial tuning parameters are also set here.
+                                          //   (overload for specifying proportional mode)
+
+    PID(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 
+        double, double, double, int);     //   Setpoint.  Initial tuning parameters are also set here
 	
     void SetMode(const int& Mode);               // * sets PID to either Manual (0) or Auto (non-0)
 
@@ -38,6 +44,9 @@ class PID
     void SetTunings(const double&, const double&,       // * While most users will set the tunings once in the 
                     const double&);         	  //   constructor, this function gives the user the option
                                           //   of changing tunings during runtime for Adaptive control
+    void SetTunings(const double&, const double&,       // * overload for specifying proportional mode
+                    const double&, const int&);         	  
+
 	void SetControllerDirection(const int&);	  // * Sets the Direction, or "Action" of the controller. DIRECT
 										  //   means the output will increase when error is positive. REVERSE
 										  //   means the opposite.  it's very unlikely that this will be needed
@@ -70,6 +79,7 @@ class PID
     double kd;                  // * (D)erivative Tuning Parameter
 
 	int controllerDirection;
+	int pOn;
 
     double *myInput;              // * Pointers to the Input, Output, and Setpoint variables
     double *myOutput;             //   This creates a hard link between the variables and the 
@@ -77,11 +87,11 @@ class PID
                                   //   what these values are.  with pointers we'll just know.
 			  
 	unsigned long lastTime;
-	double ITerm, lastInput;
+	double outputSum, lastInput;
 
 	unsigned long SampleTime;
 	double outMin, outMax;
-	bool inAuto;
+	bool inAuto, pOnE;
 };
 #endif
 

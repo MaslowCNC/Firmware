@@ -31,7 +31,7 @@ Axis::Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2
 motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2)
 {
     
-    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, 0, 0, 0, REVERSE);
+    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, 0, 0, 0, P_ON_E, REVERSE);
     
     //initialize variables
     _direction    = FORWARD;
@@ -139,7 +139,7 @@ void   Axis::setPIDValues(float KpPos, float KiPos, float KdPos, float KpV, floa
     _Ki = KiPos;
     _Kd = KdPos;
     
-    _pidController.SetTunings(_Kp, _Ki, _Kd);
+    _pidController.SetTunings(_Kp, _Ki, _Kd, P_ON_E);
     
     motorGearboxEncoder.setPIDValues(KpV, KiV, KdV);
 }
