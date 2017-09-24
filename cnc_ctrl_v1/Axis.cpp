@@ -31,7 +31,7 @@ Axis::Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2
 motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2)
 {
     
-    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, 0, 0, 0, REVERSE);
+    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, 0, 0, 0, P_ON_E, REVERSE);
     
     //initialize variables
     _direction    = FORWARD;
@@ -98,6 +98,7 @@ int    Axis::set(const float& newAxisPosition){
 
 void   Axis::computePID(){
     
+
     if (_disableAxisForTesting || !motorGearboxEncoder.motor.attached()){
         return;
     }
@@ -108,20 +109,24 @@ void   Axis::computePID(){
     
     _pidInput      =  motorGearboxEncoder.encoder.read()/_encoderSteps;
     
-    _pidController.Compute();
-    
-    motorGearboxEncoder.write(_pidOutput);
-    
-    /*if(_axisName[0] == 'L'){
-        Serial.println("*");
-        Serial.println(_pidInput);
-        Serial.println(_pidSetpoint);
-        Serial.println(_pidOutput);
-    }*/
-    
-    
+    if (_pidController.Compute()){
+        // Only write output if the PID calculation was performed
+        motorGearboxEncoder.write(_pidOutput);
+    }
     
     motorGearboxEncoder.computePID();
+    
+}
+
+void   Axis::disablePositionPID(){
+    
+    _pidController.SetMode(MANUAL);
+    
+}
+
+void   Axis::enablePositionPID(){
+    
+    _pidController.SetMode(AUTOMATIC);
     
 }
 
@@ -135,9 +140,19 @@ void   Axis::setPIDValues(float KpPos, float KiPos, float KdPos, float KpV, floa
     _Ki = KiPos;
     _Kd = KdPos;
     
-    _pidController.SetTunings(_Kp, _Ki, _Kd);
+    _pidController.SetTunings(_Kp, _Ki, _Kd, P_ON_E);
     
     motorGearboxEncoder.setPIDValues(KpV, KiV, KdV);
+}
+
+String  Axis::getPIDString(){
+    /*
+    
+    Get PID tuning values
+    
+    */
+    String PIDString = "Kp=";
+    return PIDString + _Kp + ",Ki=" + _Ki + ",Kd=" + _Kd;
 }
 
 void   Axis::setPIDAggressiveness(float aggressiveness){

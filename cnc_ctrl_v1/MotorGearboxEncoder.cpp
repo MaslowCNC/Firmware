@@ -34,8 +34,8 @@ encoder(encoderPin1,encoderPin2)
     motor.write(0);
     
     //initialize the PID
-    _posPIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, DIRECT);
-    _negPIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, DIRECT);
+    _posPIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, P_ON_E, DIRECT);
+    _negPIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, P_ON_E, DIRECT);
     initializePID();
     
     
@@ -134,8 +134,18 @@ void  MotorGearboxEncoder::setPIDValues(float KpV, float KiV, float KdV){
     _Ki = KiV;
     _Kd = KdV;
     
-    _posPIDController.SetTunings(_Kp, _Ki, _Kd);
-    _negPIDController.SetTunings(_Kp, _Ki, _Kd);
+    _posPIDController.SetTunings(_Kp, _Ki, _Kd, P_ON_E);
+    _negPIDController.SetTunings(_Kp, _Ki, _Kd, P_ON_E);
+}
+
+String  MotorGearboxEncoder::getPIDString(){
+    /*
+    
+    Get PID tuning values
+    
+    */
+    String PIDString = "Kp=";
+    return PIDString + _Kp + ",Ki=" + _Ki + ",Kd=" + _Kd;
 }
 
 void MotorGearboxEncoder::setPIDAggressiveness(float aggressiveness){
@@ -146,8 +156,8 @@ void MotorGearboxEncoder::setPIDAggressiveness(float aggressiveness){
     
     */
     
-    _posPIDController.SetTunings(aggressiveness*_Kp, _Ki, _Kd);
-    _negPIDController.SetTunings(aggressiveness*_Kp, _Ki, _Kd);
+    _posPIDController.SetTunings(aggressiveness*_Kp, _Ki, _Kd, P_ON_E);
+    _negPIDController.SetTunings(aggressiveness*_Kp, _Ki, _Kd, P_ON_E);
     
 }
 
@@ -211,4 +221,11 @@ void MotorGearboxEncoder::setName(const String& newName){
     Set the name for the object
     */
     _motorName = newName;
+}
+
+String MotorGearboxEncoder::name(){
+    /*
+    Get the name for the object
+    */
+    return _motorName;
 }
