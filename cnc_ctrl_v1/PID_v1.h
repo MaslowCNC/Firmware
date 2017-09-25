@@ -15,13 +15,15 @@ class PID
   #define REVERSE  1
   #define P_ON_M 0
   #define P_ON_E 1
+  bool pOnE = true, pOnM = false;
+  double pOnEKp, pOnMKp;
 
   //commonly used functions **************************************************************************
     
     PID();
     
     void setup(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 
-        const double&, const double&, const double&, const int&, const int&);//   Setpoint.  Initial tuning parameters are also set here.
+        const double&, const double&, const double&, const double&, const int&);//   Setpoint.  Initial tuning parameters are also set here.
                                           //   (overload for specifying proportional mode)
 
     PID(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 
@@ -45,7 +47,7 @@ class PID
                     const double&);         	  //   constructor, this function gives the user the option
                                           //   of changing tunings during runtime for Adaptive control
     void SetTunings(const double&, const double&,       // * overload for specifying proportional mode
-                    const double&, const int&);         	  
+                    const double&, const double&);         	  
 
 	void SetControllerDirection(const int&);	  // * Sets the Direction, or "Action" of the controller. DIRECT
 										  //   means the output will increase when error is positive. REVERSE
@@ -91,7 +93,7 @@ class PID
 
 	unsigned long SampleTime;
 	double outMin, outMax;
-	bool inAuto, pOnE;
+	bool inAuto;
 };
 #endif
 
