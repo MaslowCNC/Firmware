@@ -1636,7 +1636,7 @@ int   findNextGM(const String& readString, const int& startingPoint){
     return nextGIndex;
 }
 
-void  interpretCommandString(const String& cmdString){
+void  interpretCommandString(String& cmdString){
     /*
     
     Splits a string into lines of gcode which begin with 'G' or 'M', executing each in order
