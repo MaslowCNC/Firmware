@@ -1069,6 +1069,7 @@ void updateMotorSettings(const String& readString){
     float zDistPerRot        = extractGcodeValue(readString, 'N', -1);
     int zEncoderSteps        = extractGcodeValue(readString, 'P', -1);
     
+    float propWeight         = extractGcodeValue(readString, 'R', -1);
     float KpPos              = extractGcodeValue(readString, 'S', -1);
     float KiPos              = extractGcodeValue(readString, 'T', -1);
     float KdPos              = extractGcodeValue(readString, 'U', -1);
@@ -1078,9 +1079,9 @@ void updateMotorSettings(const String& readString){
       
     //Write the PID values to the axis if new ones have been received
     if (KpPos != -1){
-        leftAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);
-        rightAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);
-        zAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);
+        leftAxis.setPIDValues(KpPos, KiPos, KdPos, propWeight, KpV, KiV, KdV);
+        rightAxis.setPIDValues(KpPos, KiPos, KdPos, propWeight, KpV, KiV, KdV);
+        zAxis.setPIDValues(KpPos, KiPos, KdPos, propWeight, KpV, KiV, KdV);
     }
     
     //Change the motor properties in cnc_funtions if new values have been sent
