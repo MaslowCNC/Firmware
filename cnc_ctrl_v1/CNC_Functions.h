@@ -958,7 +958,6 @@ void  calibrateChainLengths(){
     
     //measure out the left chain
     Serial.println(F("Measuring out left chain"));
-    leftAxis.setPIDAggressiveness(.1);
     singleAxisMove(&leftAxis, ORIGINCHAINLEN, 500);
     
     Serial.print(leftAxis.read());
@@ -968,7 +967,6 @@ void  calibrateChainLengths(){
     
     //measure out the right chain
     Serial.println(F("Measuring out right chain"));
-    rightAxis.setPIDAggressiveness(.1);
     singleAxisMove(&rightAxis, ORIGINCHAINLEN, 500);
     
     Serial.print(rightAxis.read());
@@ -976,9 +974,6 @@ void  calibrateChainLengths(){
     
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
-    
-    leftAxis.setPIDAggressiveness(1);
-    rightAxis.setPIDAggressiveness(1);
 }
 
 void  setInchesToMillimetersConversion(float newConversionFactor){
