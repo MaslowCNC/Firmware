@@ -22,7 +22,7 @@ PID::PID()
 	inAuto = false;
 }
 
-void PID::setup(double* Input, double* Output, double* Setpoint,
+void PID::setup(volatile double* Input, volatile double* Output, volatile double* Setpoint,
         const double& Kp, const double& Ki, const double& Kd, const double& POn, const int& ControllerDirection)
 {
 
