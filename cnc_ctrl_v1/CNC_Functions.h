@@ -400,10 +400,10 @@ float computeStepSize(const float& MMPerMin){
 
 int   cordinatedMove(const float& xEnd, const float& yEnd, const float& MMPerMin){
     
-/*The move() function moves the tool in a straight line to the position (xEnd, yEnd) at 
-the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
-direction, the tool moves to the target in a straight line. This function is used by the G00 
-and G01 commands. The units at this point should all be in mm or mm per minute*/
+    /*The move() function moves the tool in a straight line to the position (xEnd, yEnd) at 
+    the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
+    direction, the tool moves to the target in a straight line. This function is used by the G00 
+    and G01 commands. The units at this point should all be in mm or mm per minute*/
     
     float  xStartingLocation = xTarget;
     float  yStartingLocation = yTarget;
@@ -557,8 +557,8 @@ int   findEndOfNumber(const String& textString, const int& index){
     
 float extractGcodeValue(const String& readString, char target, const float& defaultReturn){
 
-/*Reads a string and returns the value of number following the target character.
-If no number is found, defaultReturn is returned*/
+    /*Reads a string and returns the value of number following the target character.
+    If no number is found, defaultReturn is returned*/
 
     int begin;
     int end;
@@ -580,8 +580,8 @@ If no number is found, defaultReturn is returned*/
 
 int   G1(const String& readString, int G0orG1){
     
-/*G1() is the function which is called to process the string if it begins with 
-'G01' or 'G00'*/
+    /*G1() is the function which is called to process the string if it begins with 
+    'G01' or 'G00'*/
     
     float xgoto;
     float ygoto;
