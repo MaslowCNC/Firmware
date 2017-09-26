@@ -99,6 +99,10 @@ void  MotorGearboxEncoder::computePID(){
         _targetSpeed = 0;
     }*/
     
+    // Between these speeds the motor is incapable of turning and it only
+    // causes the Iterm in the PID calculation to wind up
+    if (abs(_targetSpeed) <= .5) _targetSpeed = 0;
+
     _PIDController.Compute();
         
     /*if(_motorName[0] == 'R'){
