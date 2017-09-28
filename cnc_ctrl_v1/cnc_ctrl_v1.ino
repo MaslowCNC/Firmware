@@ -32,7 +32,7 @@ void setup(){
     _signalReady();
     
     
-    Timer1.initialize(10000);
+    Timer1.initialize(LOOPINTERVAL*1000);
     Timer1.attachInterrupt(runsOnATimer);
     
     Serial.println(F("Grbl v1.00"));
