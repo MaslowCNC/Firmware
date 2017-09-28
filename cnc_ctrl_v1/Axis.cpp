@@ -130,7 +130,7 @@ void   Axis::enablePositionPID(){
     
 }
 
-void   Axis::setPIDValues(float KpPos, float KiPos, float KdPos, float KpV, float KiV, float KdV){
+void   Axis::setPIDValues(float KpPos, float KiPos, float KdPos, float propWeight, float KpV, float KiV, float KdV){
     /*
     
     Sets the positional PID values for the axis
@@ -140,7 +140,7 @@ void   Axis::setPIDValues(float KpPos, float KiPos, float KdPos, float KpV, floa
     _Ki = KiPos;
     _Kd = KdPos;
     
-    _pidController.SetTunings(_Kp, _Ki, _Kd, P_ON_E);
+    _pidController.SetTunings(_Kp, _Ki, _Kd, propWeight);
     
     motorGearboxEncoder.setPIDValues(KpV, KiV, KdV);
 }

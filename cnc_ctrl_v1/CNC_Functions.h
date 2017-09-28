@@ -400,10 +400,10 @@ float computeStepSize(const float& MMPerMin){
 
 int   cordinatedMove(const float& xEnd, const float& yEnd, const float& MMPerMin){
     
-/*The move() function moves the tool in a straight line to the position (xEnd, yEnd) at 
-the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
-direction, the tool moves to the target in a straight line. This function is used by the G00 
-and G01 commands. The units at this point should all be in mm or mm per minute*/
+    /*The move() function moves the tool in a straight line to the position (xEnd, yEnd) at 
+    the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
+    direction, the tool moves to the target in a straight line. This function is used by the G00 
+    and G01 commands. The units at this point should all be in mm or mm per minute*/
     
     float  xStartingLocation = xTarget;
     float  yStartingLocation = yTarget;
@@ -557,8 +557,8 @@ int   findEndOfNumber(const String& textString, const int& index){
     
 float extractGcodeValue(const String& readString, char target, const float& defaultReturn){
 
-/*Reads a string and returns the value of number following the target character.
-If no number is found, defaultReturn is returned*/
+    /*Reads a string and returns the value of number following the target character.
+    If no number is found, defaultReturn is returned*/
 
     int begin;
     int end;
@@ -580,8 +580,8 @@ If no number is found, defaultReturn is returned*/
 
 int   G1(const String& readString, int G0orG1){
     
-/*G1() is the function which is called to process the string if it begins with 
-'G01' or 'G00'*/
+    /*G1() is the function which is called to process the string if it begins with 
+    'G01' or 'G00'*/
     
     float xgoto;
     float ygoto;
@@ -1069,6 +1069,7 @@ void updateMotorSettings(const String& readString){
     float zDistPerRot        = extractGcodeValue(readString, 'N', -1);
     int zEncoderSteps        = extractGcodeValue(readString, 'P', -1);
     
+    float propWeight         = extractGcodeValue(readString, 'R', -1);
     float KpPos              = extractGcodeValue(readString, 'S', -1);
     float KiPos              = extractGcodeValue(readString, 'T', -1);
     float KdPos              = extractGcodeValue(readString, 'U', -1);
@@ -1078,9 +1079,9 @@ void updateMotorSettings(const String& readString){
       
     //Write the PID values to the axis if new ones have been received
     if (KpPos != -1){
-        leftAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);
-        rightAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);
-        zAxis.setPIDValues(KpPos, KiPos, KdPos, KpV, KiV, KdV);
+        leftAxis.setPIDValues(KpPos, KiPos, KdPos, propWeight, KpV, KiV, KdV);
+        rightAxis.setPIDValues(KpPos, KiPos, KdPos, propWeight, KpV, KiV, KdV);
+        zAxis.setPIDValues(KpPos, KiPos, KdPos, propWeight, KpV, KiV, KdV);
     }
     
     //Change the motor properties in cnc_funtions if new values have been sent
@@ -1636,7 +1637,7 @@ int   findNextGM(const String& readString, const int& startingPoint){
     return nextGIndex;
 }
 
-void  interpretCommandString(const String& cmdString){
+void  interpretCommandString(String& cmdString){
     /*
     
     Splits a string into lines of gcode which begin with 'G' or 'M', executing each in order
