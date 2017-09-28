@@ -66,7 +66,12 @@ void   Axis::initializePID(){
 
 void    Axis::write(const float& targetPosition){
     
-    _pidSetpoint   =  targetPosition/_mmPerRotation;
+    // Ensure that _pidSetpoint is equal to whole number of encoder steps
+    float steps = (targetPosition/_mmPerRotation) * _encoderSteps;
+    steps = steps * 2;
+    steps = round(steps);
+    steps = steps /2;
+    _pidSetpoint   =  steps/_encoderSteps;
     return;
 }
 
