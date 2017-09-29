@@ -59,6 +59,7 @@
             int        _oldValue8;
             int        _oldValue9;
             int        _oldValue10;
+            float      _minimumRPM = 0.5;
     };
 
     #endif
