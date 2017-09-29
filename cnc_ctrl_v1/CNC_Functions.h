@@ -432,7 +432,7 @@ and G01 commands. The units at this point should all be in mm or mm per minute*/
     float aChainLength;
     float bChainLength;
     long   numberOfStepsTaken         =  0;
-    unsigned long beginingOfLastStep = millis();
+    unsigned long beginingOfLastStep = millis() - delayTime;
     
     while(numberOfStepsTaken < finalNumberOfSteps){
         //if enough time has passed to take the next step
@@ -512,22 +512,24 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     //attach the axis we want to move
     axis->attach();
     
+    unsigned long beginingOfLastStep = millis() - delayTime;
+    float whereAxisShouldBeAtThisStep;
+    
     while(numberOfStepsTaken < finalNumberOfSteps){
-        
-        //find the target point for this step
-        float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM*direction;
-        
-        //write to axis
-        axis->write(whereAxisShouldBeAtThisStep);
-        
-        //update position on display
-        returnPoz(xTarget, yTarget, zAxis.read());
-        
-        //calculate the correct delay between steps to set feedrate
-        delay(delayTime);
-        
-        //increment the number of steps taken
-        numberOfStepsTaken++;
+        if (millis() - beginingOfLastStep > delayTime){
+          beginingOfLastStep = millis();
+          //find the target point for this step
+          whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM*direction;
+          
+          //write to axis
+          axis->write(whereAxisShouldBeAtThisStep);
+          
+          //update position on display
+          returnPoz(xTarget, yTarget, zAxis.read());
+          
+          //increment the number of steps taken
+          numberOfStepsTaken++;
+        }
         
         //check for new serial commands
         readSerialCommands();
@@ -721,7 +723,7 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
     leftAxis.attach();
     rightAxis.attach();
     
-    long  beginingOfLastStep          = millis();
+    unsigned long  beginingOfLastStep  = millis() - delayTime;
     
     while(numberOfStepsTaken < abs(finalNumberOfSteps)){
         
@@ -887,30 +889,29 @@ void  G38(const String& readString) {
         float delayTime = calculateDelay(stepSizeMM, MMPerMin);
 
         long numberOfStepsTaken    = 0;
-        long  beginingOfLastStep   = millis();
+        unsigned long  beginingOfLastStep = millis() - delayTime;
+        float whereAxisShouldBeAtThisStep;
   
         axis->attach();
         //  zAxis->attach();
 
         while (numberOfStepsTaken < finalNumberOfSteps) {
+          if (millis() - beginingOfLastStep > delayTime){
+              //reset the counter
+              beginingOfLastStep          = millis();
 
-          //reset the counter
-          beginingOfLastStep          = millis();
+              //find the target point for this step
+              whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken * stepSizeMM * direction;
 
-          //find the target point for this step
-          float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken * stepSizeMM * direction;
+              //write to each axis
+              axis->write(whereAxisShouldBeAtThisStep);
 
-          //write to each axis
-          axis->write(whereAxisShouldBeAtThisStep);
+              //update position on display
+              returnPoz(xTarget, yTarget, zAxis.read());
 
-          //update position on display
-          returnPoz(xTarget, yTarget, zAxis.read());
-
-          //calculate the correct delay between steps to set feedrate
-          delay(delayTime);
-
-          //increment the number of steps taken
-          numberOfStepsTaken++;
+              //increment the number of steps taken
+              numberOfStepsTaken++;
+          }
 
           //check for new serial commands
           readSerialCommands();
