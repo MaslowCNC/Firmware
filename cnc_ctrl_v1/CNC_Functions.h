@@ -963,7 +963,7 @@ void  calibrateChainLengths(){
     
     //measure out the left chain
     Serial.println(F("Measuring out left chain"));
-    singleAxisMove(&leftAxis, ORIGINCHAINLEN, 500);
+    singleAxisMove(&leftAxis, ORIGINCHAINLEN, 800);
     
     Serial.print(leftAxis.read());
     Serial.println(F("mm"));
@@ -972,7 +972,7 @@ void  calibrateChainLengths(){
     
     //measure out the right chain
     Serial.println(F("Measuring out right chain"));
-    singleAxisMove(&rightAxis, ORIGINCHAINLEN, 500);
+    singleAxisMove(&rightAxis, ORIGINCHAINLEN, 800);
     
     Serial.print(rightAxis.read());
     Serial.println(F("mm"));
@@ -1397,10 +1397,7 @@ void  executeBcodeLine(const String& gcodeLine){
         //Directly command each axis to move to a given distance
         float lDist = extractGcodeValue(gcodeLine, 'L', 0);
         float rDist = extractGcodeValue(gcodeLine, 'R', 0);
-		float speed = extractGcodeValue(gcodeLine, 'F', 500);
-        
-        leftAxis.setPIDAggressiveness(.1);
-        rightAxis.setPIDAggressiveness(.1);
+		    float speed = extractGcodeValue(gcodeLine, 'F', 800);
         
         if(useRelativeUnits){
             if(abs(lDist) > 0){
@@ -1414,9 +1411,6 @@ void  executeBcodeLine(const String& gcodeLine){
             singleAxisMove(&leftAxis,  lDist, speed);
             singleAxisMove(&rightAxis, rDist, speed);
         }
-        
-        leftAxis.setPIDAggressiveness(1);
-        rightAxis.setPIDAggressiveness(1);
         
         return;
     }
