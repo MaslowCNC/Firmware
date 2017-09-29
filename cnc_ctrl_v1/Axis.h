@@ -57,8 +57,6 @@
             int        _PWMread(int pin);
             void       _writeFloat(const unsigned int& addr, const float& x);
             float      _readFloat(const unsigned int& addr);
-            int        _detectDirectionChange(const float& _pidSetpoint);
-            int        _direction;
             int        _encoderPin;
             float      _axisTarget;
             int        _currentAngle;
@@ -73,7 +71,6 @@
             float      _mmPerRotation = 1;
             float      _encoderSteps  = 100;
             float      _oldSetpoint;
-            float      _oldDir;
             bool       _disableAxisForTesting = false;
             String     _axisName;
     };

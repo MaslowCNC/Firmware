@@ -432,46 +432,50 @@ int   cordinatedMove(const float& xEnd, const float& yEnd, const float& MMPerMin
     float aChainLength;
     float bChainLength;
     long   numberOfStepsTaken         =  0;
+    unsigned long beginingOfLastStep = millis() - delayTime;
     
     while(numberOfStepsTaken < finalNumberOfSteps){
+        //if enough time has passed to take the next step
+        if (millis() - beginingOfLastStep > delayTime){
+          
+            //reset the counter 
+            beginingOfLastStep          = millis();
+              
+            //find the target point for this step
+            float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
+            float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
             
-        //find the target point for this step
-        float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
-        float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
-        
-        //find the chain lengths for this step
-        kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
-        
-        //write to each axis
-        leftAxis.write(aChainLength);
-        rightAxis.write(bChainLength);
-        
-        //increment the number of steps taken
-        numberOfStepsTaken++;
-        
-        //update position on display
-        returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
-        
-        //check for new serial commands
-        readSerialCommands();
-        
-        //check for a STOP command
-        if(checkForStopCommand()){
-            
-            //set the axis positions to save
+            //find the chain lengths for this step
             kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
-            leftAxis.endMove(aChainLength);
-            rightAxis.endMove(bChainLength);
             
-            //make sure the positions are displayed correctly after stop
-            xTarget = whereXShouldBeAtThisStep;
-            yTarget = whereYShouldBeAtThisStep;
+            //write to each axis
+            leftAxis.write(aChainLength);
+            rightAxis.write(bChainLength);
             
-            return 1;
+            //increment the number of steps taken
+            numberOfStepsTaken++;
+            
+            //update position on display
+            returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
+            
+            //check for new serial commands
+            readSerialCommands();
+            
+            //check for a STOP command
+            if(checkForStopCommand()){
+                
+                //set the axis positions to save
+                kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+                leftAxis.endMove(aChainLength);
+                rightAxis.endMove(bChainLength);
+                
+                //make sure the positions are displayed correctly after stop
+                xTarget = whereXShouldBeAtThisStep;
+                yTarget = whereYShouldBeAtThisStep;
+                
+                return 1;
+            }
         }
-        
-        //wait for the step to be completed
-        delay(delayTime);
     }
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
@@ -508,22 +512,24 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     //attach the axis we want to move
     axis->attach();
     
+    unsigned long beginingOfLastStep = millis() - delayTime;
+    float whereAxisShouldBeAtThisStep;
+    
     while(numberOfStepsTaken < finalNumberOfSteps){
-        
-        //find the target point for this step
-        float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM*direction;
-        
-        //write to axis
-        axis->write(whereAxisShouldBeAtThisStep);
-        
-        //update position on display
-        returnPoz(xTarget, yTarget, zAxis.read());
-        
-        //calculate the correct delay between steps to set feedrate
-        delay(delayTime);
-        
-        //increment the number of steps taken
-        numberOfStepsTaken++;
+        if (millis() - beginingOfLastStep > delayTime){
+          beginingOfLastStep = millis();
+          //find the target point for this step
+          whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM*direction;
+          
+          //write to axis
+          axis->write(whereAxisShouldBeAtThisStep);
+          
+          //update position on display
+          returnPoz(xTarget, yTarget, zAxis.read());
+          
+          //increment the number of steps taken
+          numberOfStepsTaken++;
+        }
         
         //check for new serial commands
         readSerialCommands();
@@ -717,7 +723,7 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
     leftAxis.attach();
     rightAxis.attach();
     
-    long  beginingOfLastStep          = millis();
+    unsigned long  beginingOfLastStep  = millis() - delayTime;
     
     while(numberOfStepsTaken < abs(finalNumberOfSteps)){
         
@@ -883,30 +889,29 @@ void  G38(const String& readString) {
         float delayTime = calculateDelay(stepSizeMM, MMPerMin);
 
         long numberOfStepsTaken    = 0;
-        long  beginingOfLastStep   = millis();
+        unsigned long  beginingOfLastStep = millis() - delayTime;
+        float whereAxisShouldBeAtThisStep;
   
         axis->attach();
         //  zAxis->attach();
 
         while (numberOfStepsTaken < finalNumberOfSteps) {
+          if (millis() - beginingOfLastStep > delayTime){
+              //reset the counter
+              beginingOfLastStep          = millis();
 
-          //reset the counter
-          beginingOfLastStep          = millis();
+              //find the target point for this step
+              whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken * stepSizeMM * direction;
 
-          //find the target point for this step
-          float whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken * stepSizeMM * direction;
+              //write to each axis
+              axis->write(whereAxisShouldBeAtThisStep);
 
-          //write to each axis
-          axis->write(whereAxisShouldBeAtThisStep);
+              //update position on display
+              returnPoz(xTarget, yTarget, zAxis.read());
 
-          //update position on display
-          returnPoz(xTarget, yTarget, zAxis.read());
-
-          //calculate the correct delay between steps to set feedrate
-          delay(delayTime);
-
-          //increment the number of steps taken
-          numberOfStepsTaken++;
+              //increment the number of steps taken
+              numberOfStepsTaken++;
+          }
 
           //check for new serial commands
           readSerialCommands();
@@ -958,8 +963,7 @@ void  calibrateChainLengths(){
     
     //measure out the left chain
     Serial.println(F("Measuring out left chain"));
-    leftAxis.setPIDAggressiveness(.1);
-    singleAxisMove(&leftAxis, ORIGINCHAINLEN, 500);
+    singleAxisMove(&leftAxis, ORIGINCHAINLEN, 800);
     
     Serial.print(leftAxis.read());
     Serial.println(F("mm"));
@@ -968,17 +972,13 @@ void  calibrateChainLengths(){
     
     //measure out the right chain
     Serial.println(F("Measuring out right chain"));
-    rightAxis.setPIDAggressiveness(.1);
-    singleAxisMove(&rightAxis, ORIGINCHAINLEN, 500);
+    singleAxisMove(&rightAxis, ORIGINCHAINLEN, 800);
     
     Serial.print(rightAxis.read());
     Serial.println(F("mm"));
     
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
     
-    
-    leftAxis.setPIDAggressiveness(1);
-    rightAxis.setPIDAggressiveness(1);
 }
 
 void  setInchesToMillimetersConversion(float newConversionFactor){
@@ -1397,10 +1397,7 @@ void  executeBcodeLine(const String& gcodeLine){
         //Directly command each axis to move to a given distance
         float lDist = extractGcodeValue(gcodeLine, 'L', 0);
         float rDist = extractGcodeValue(gcodeLine, 'R', 0);
-		float speed = extractGcodeValue(gcodeLine, 'F', 500);
-        
-        leftAxis.setPIDAggressiveness(.1);
-        rightAxis.setPIDAggressiveness(.1);
+		    float speed = extractGcodeValue(gcodeLine, 'F', 800);
         
         if(useRelativeUnits){
             if(abs(lDist) > 0){
@@ -1414,9 +1411,6 @@ void  executeBcodeLine(const String& gcodeLine){
             singleAxisMove(&leftAxis,  lDist, speed);
             singleAxisMove(&rightAxis, rDist, speed);
         }
-        
-        leftAxis.setPIDAggressiveness(1);
-        rightAxis.setPIDAggressiveness(1);
         
         return;
     }

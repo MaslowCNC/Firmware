@@ -46,8 +46,7 @@
             float      _runningAverage(const int& newValue);
             String     _motorName;
             double     _pidOutput;
-            PID        _posPIDController;
-            PID        _negPIDController;
+            PID        _PIDController;
             double     _Kp=0, _Ki=0, _Kd=0;
             float      _encoderStepsToRPMScaleFactor = 7364.0;   //6*10^7 us per minute divided by 8148 steps per revolution
             int        _oldValue1;
@@ -60,6 +59,7 @@
             int        _oldValue8;
             int        _oldValue9;
             int        _oldValue10;
+            float      _minimumRPM = 0.5;
     };
 
     #endif
