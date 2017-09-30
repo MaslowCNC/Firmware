@@ -453,7 +453,7 @@ int   cordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, fl
     float bChainLength;
     float zPosition                   = zStartingLocation;
     long   numberOfStepsTaken         =  0;
-    unsigned long beginingOfLastStep = millis() - delayTime;
+    unsigned long beginingOfLoop = millis();
     
     while(numberOfStepsTaken < finalNumberOfSteps){
         //if enough time has passed to take the next step
@@ -527,24 +527,22 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     
     float direction            = moveDist/abs(moveDist); //determine the direction of the move
     
-    float stepSizeMM           = 0.01;                    //step size in mm
+    float stepSizeMM           = computeStepSize(MMPerMin);                    //step size in mm
 
     //the argument to abs should only be a variable -- splitting calc into 2 lines
     long finalNumberOfSteps    = abs(moveDist/stepSizeMM);      //number of steps taken in move
     finalNumberOfSteps = abs(finalNumberOfSteps);
-
-    float delayTime = calculateDelay(stepSizeMM, MMPerMin);
     
     long numberOfStepsTaken    = 0;
     
     //attach the axis we want to move
     axis->attach();
     
-    unsigned long beginingOfLastStep = millis() - delayTime;
+    unsigned long beginingOfLastStep = millis() - LOOPINTERVAL;
     float whereAxisShouldBeAtThisStep;
     
     while(numberOfStepsTaken < finalNumberOfSteps){
-        if (millis() - beginingOfLastStep > delayTime){
+        if (millis() - beginingOfLastStep > LOOPINTERVAL){
           beginingOfLastStep = millis();
           //find the target point for this step
           whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM*direction;
@@ -748,7 +746,7 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
     leftAxis.attach();
     rightAxis.attach();
     
-    unsigned long  beginingOfLastStep  = millis() - delayTime;
+    unsigned long  beginingOfLoop  = millis();
     
     while(numberOfStepsTaken < abs(finalNumberOfSteps)){
         
@@ -902,17 +900,15 @@ void  G38(const String& readString) {
         long finalNumberOfSteps    = moveDist / stepSizeMM;    //number of steps taken in move
         finalNumberOfSteps = abs(finalNumberOfSteps);
 
-        float delayTime = calculateDelay(stepSizeMM, MMPerMin);
-
         long numberOfStepsTaken    = 0;
-        unsigned long  beginingOfLastStep = millis() - delayTime;
+        unsigned long  beginingOfLastStep = millis() - LOOPINTERVAL;
         float whereAxisShouldBeAtThisStep;
   
         axis->attach();
         //  zAxis->attach();
 
         while (numberOfStepsTaken < finalNumberOfSteps) {
-          if (millis() - beginingOfLastStep > delayTime){
+          if (millis() - beginingOfLastStep > LOOPINTERVAL){
               //reset the counter
               beginingOfLastStep          = millis();
 
