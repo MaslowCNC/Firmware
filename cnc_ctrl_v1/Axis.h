@@ -45,6 +45,7 @@
             void   setPIDAggressiveness(float aggressiveness);
             void   test();
             void   changePitch(const float& newPitch);
+            float  getPitch();
             void   changeEncoderResolution(const int& newResolution);
             bool   attached();
             void   wipeEEPROM();
