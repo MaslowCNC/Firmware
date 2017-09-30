@@ -31,8 +31,8 @@
             float      computeSpeed();
             void       write(const float& speed);
             void       computePID();
-            void       setName(const String& newName);
-            String     name();
+            void       setName(const char& newName);
+            char       name();
             void       initializePID();
             void       setPIDAggressiveness(float aggressiveness);
             void       setPIDValues(float KpV, float KiV, float KdV);
@@ -43,22 +43,11 @@
             double     _currentSpeed;
             double     _lastPosition;
             double     _lastTimeStamp;
-            float      _runningAverage(const int& newValue);
-            String     _motorName;
+            char       _motorName;
             double     _pidOutput;
             PID        _PIDController;
             double     _Kp=0, _Ki=0, _Kd=0;
             float      _encoderStepsToRPMScaleFactor = 7364.0;   //6*10^7 us per minute divided by 8148 steps per revolution
-            int        _oldValue1;
-            int        _oldValue2;
-            int        _oldValue3;
-            int        _oldValue4;
-            int        _oldValue5;
-            int        _oldValue6;
-            int        _oldValue7;
-            int        _oldValue8;
-            int        _oldValue9;
-            int        _oldValue10;
             float      _minimumRPM = 0.5;
     };
 
