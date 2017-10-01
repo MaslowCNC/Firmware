@@ -23,6 +23,9 @@ libraries*/
 #define VERSIONNUMBER 0.94
 
 #define verboseDebug 0    // set to 0 for no debug messages, 1 for single-line messages, 2 to also output ring buffer contents
+#define misloopDebug 0    // set to 1 for a arning evertime the movement loop fails 
+                          // to complete before being interrupted, helpful for loop
+                          // LOOPINTERVAL tuning
 
 #include <Servo.h>
 Servo myservo;  // create servo object to control a servo 
@@ -151,6 +154,12 @@ bool  rcvdMotorSettings     =  false;
 bool  encoderStepsChanged   =  false;
 bool  zEncoderStepsChanged  =  false;
 volatile bool  movementUpdated  =  false;
+
+// Global variables for misloop tracking
+#if misloopDebug > 1              
+volatile bool  inMovementLoop   =  false;
+volatile bool  movementFail     =  false;
+#endif
 
 // Commands that can safely be executed before machineReady
 String safeCommands[] = {"B01", "B03", "B04", "B05", "B07", "B12", "G20", "G21", "G90", "G91"};
@@ -407,6 +416,12 @@ float computeStepSize(const float& MMPerMin){
 }
  
 void movementUpdate(){
+  #if misloopDebug > 1  
+  if (movementFail){
+    Serial.println("Movement loop failed to complete before interrupt.");
+    movementFail = false;
+  }
+  #endif
   movementUpdated = true;
 }
 
@@ -464,6 +479,9 @@ int   cordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, fl
     
     while(numberOfStepsTaken < finalNumberOfSteps){
       
+        #if misloopDebug > 1   
+        inMovementLoop = true;
+        #endif
         //if last movment was performed start the next
         if (!movementUpdated) {
             //find the target point for this step
@@ -515,6 +533,9 @@ int   cordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, fl
             }
         }
     }
+    #if misloopDebug > 1 
+    inMovementLoop = false;
+    #endif
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
     leftAxis.endMove(aChainLength);
@@ -554,6 +575,9 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     
     float whereAxisShouldBeAtThisStep = startingPos;
     
+    #if misloopDebug > 1 
+    inMovementLoop = true;
+    #endif
     while(numberOfStepsTaken < finalNumberOfSteps){
         if (!movementUpdated) {
           //find the target point for this step
@@ -579,6 +603,9 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
             return;
         }
     }
+    #if misloopDebug > 1 
+    inMovementLoop = false;
+    #endif
     
     axis->endMove(endPos);
     
@@ -760,6 +787,9 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
     rightAxis.attach();
     
     while(numberOfStepsTaken < abs(finalNumberOfSteps)){
+        #if misloopDebug > 1 
+        inMovementLoop = true;
+        #endif
         
         //if last movement was performed start the next one
         if (!movementUpdated){
@@ -799,6 +829,9 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
             }
         }
     }
+    #if misloopDebug > 1 
+    inMovementLoop = false;
+    #endif
     
     kinematics.inverse(X2,Y2,&aChainLength,&bChainLength);
     leftAxis.endMove(aChainLength);

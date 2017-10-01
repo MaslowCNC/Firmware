@@ -39,6 +39,12 @@ void setup(){
 }
 
 void runsOnATimer(){
+    #if misloopDebug > 1 
+    if (inMovementLoop && !movementUpdated){
+        movementFail = true;
+    }
+    #endif
+    movementUpdated = false;
     leftAxis.computePID();
     rightAxis.computePID();
     zAxis.computePID();
