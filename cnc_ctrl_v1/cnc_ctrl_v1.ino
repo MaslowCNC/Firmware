@@ -39,7 +39,7 @@ void setup(){
 }
 
 void runsOnATimer(){
-    #if misloopDebug > 1 
+    #if misloopDebug > 0
     if (inMovementLoop && !movementUpdated){
         movementFail = true;
     }
