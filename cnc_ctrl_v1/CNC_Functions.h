@@ -623,10 +623,10 @@ int   G1(const String& readString, int G0orG1){
         if (abs(zgoto- currentZPos) > threshold){
             float zfeedrate;
             if (G0orG1 == 1) {
-                zfeedrate = constrain(feedrate, 1, MAXZROTMIN * zAxis.getPitch());
+                zfeedrate = constrain(feedrate, 1, MAXZROTMIN * abs(zAxis.getPitch()));
             }
             else {
-                zfeedrate = MAXZROTMIN * zAxis.getPitch();
+                zfeedrate = MAXZROTMIN * abs(zAxis.getPitch());
             }
             singleAxisMove(&zAxis, zgoto, zfeedrate);
         }
@@ -840,7 +840,7 @@ void  G38(const String& readString) {
 
       zgoto      = _inchesToMMConversion * extractGcodeValue(readString, 'Z', currentZPos / _inchesToMMConversion);
       feedrate   = _inchesToMMConversion * extractGcodeValue(readString, 'F', feedrate / _inchesToMMConversion);
-      feedrate = constrain(feedrate, 1, MAXZROTMIN * zAxis.getPitch());
+      feedrate = constrain(feedrate, 1, MAXZROTMIN * abs(zAxis.getPitch()));
 
       if (useRelativeUnits) { //if we are using a relative coordinate system
         if (readString.indexOf('Z') >= 0) { //if z has moved
