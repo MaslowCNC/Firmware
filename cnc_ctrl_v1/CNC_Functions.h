@@ -421,7 +421,7 @@ int   cordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, fl
     float  xStartingLocation = xTarget;
     float  yStartingLocation = yTarget;
     float  zStartingLocation = zAxis.read();  // I don't know why we treat the zaxis differently
-    float  zMAXFEED          = MAXZROTMIN * 3.17;
+    float  zMAXFEED          = MAXZROTMIN * abs(zAxis.getPitch());
     
     //find the total distances to move
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  + sq(zEnd - zStartingLocation));
