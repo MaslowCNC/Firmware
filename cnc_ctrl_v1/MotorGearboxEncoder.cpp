@@ -182,38 +182,14 @@ float MotorGearboxEncoder::computeSpeed(){
     return -1.0*RPM;
 }
 
-float MotorGearboxEncoder::_runningAverage(const int& newValue){
-    /*
-    
-    Compute a running average from the number passed in.
-    
-    */
-    
-    int sum = newValue + _oldValue1 + _oldValue2 + _oldValue3 + _oldValue4 + _oldValue5 + _oldValue6 + _oldValue7 + _oldValue8 + _oldValue9 + _oldValue10;
-    float runningAverage = (float(sum))/11.0;
-    
-    _oldValue10 = _oldValue9;
-    _oldValue9 = _oldValue8;
-    _oldValue8 = _oldValue7;
-    _oldValue7 = _oldValue6;
-    _oldValue6 = _oldValue5;
-    _oldValue5 = _oldValue4;
-    _oldValue4 = _oldValue3;
-    _oldValue3 = _oldValue2;
-    _oldValue2 = _oldValue1;
-    _oldValue1 = newValue;
-    
-    return runningAverage;
-}
-
-void MotorGearboxEncoder::setName(const String& newName){
+void MotorGearboxEncoder::setName(const char& newName){
     /*
     Set the name for the object
     */
     _motorName = newName;
 }
 
-String MotorGearboxEncoder::name(){
+char MotorGearboxEncoder::name(){
     /*
     Get the name for the object
     */

@@ -65,8 +65,6 @@
 
 
             //utility variables
-            float DegPerRad = 360/(4 * atan(1));
-            unsigned long Time;
             boolean Mirror;
 
             //Calculation tolerances

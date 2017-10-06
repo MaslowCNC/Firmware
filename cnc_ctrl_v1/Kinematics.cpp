@@ -311,18 +311,12 @@ void  Kinematics::_MatSolv(){
 }
 
 float Kinematics::_moment(const float& Y1Plus, const float& Y2Plus, const float& Phi, const float& MSinPhi, const float& MSinPsi1, const float& MCosPsi1, const float& MSinPsi2, const float& MCosPsi2){   //computes net moment about center of mass
-    float Temp;
     float Offsetx1;
     float Offsetx2;
     float Offsety1;
     float Offsety2;
-    float Psi1;
-    float Psi2;
     float TanGamma;
     float TanLambda;
-
-    Psi1 = Theta - Phi;
-    Psi2 = Theta + Phi;
 
     Offsetx1 = h * MCosPsi1;
     Offsetx2 = h * MCosPsi2;
