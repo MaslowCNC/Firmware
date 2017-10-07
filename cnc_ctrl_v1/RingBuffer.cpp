@@ -27,7 +27,6 @@ serial data.
 RingBuffer::RingBuffer(){
     
 }
-String temps;
 void RingBuffer::write(char letter){
     /*
     

@@ -131,9 +131,9 @@ int   setupPins(){
 
 int pinsSetup       = setupPins();
 
-Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, "L",  LEFT_EEPROM_ADR);
-Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, "R", RIGHT_EEPROM_ADR);
-Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, "Z",     Z_EEPROM_ADR);
+Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, 'L',  LEFT_EEPROM_ADR);
+Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, 'R', RIGHT_EEPROM_ADR);
+Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, 'Z',     Z_EEPROM_ADR);
 
 
 Kinematics kinematics;
@@ -206,7 +206,7 @@ void  returnPoz(const float& x, const float& y, const float& z){
     */
     
     static unsigned long lastRan = millis();
-    int                  timeout = 200;
+    unsigned int         timeout = 200;
     
     if (millis() - lastRan > timeout){
         
@@ -326,7 +326,6 @@ void pause(){
     pauseFlag = true;
     Serial.println(F("Maslow Paused"));
     
-    long timeLastPrinted = 0;
     while(1){
         
         holdPosition();
@@ -585,7 +584,7 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     
 int   findEndOfNumber(const String& textString, const int& index){
     //Return the index of the last digit of the number beginning at the index passed in
-    int i = index;
+    unsigned int i = index;
     
     while (i < textString.length()){
         
@@ -715,7 +714,6 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
     //compute geometry 
     float pi                     =  3.1415;
     float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
-    float distanceBetweenPoints  =  sqrt( sq(  X2 - X1   ) + sq(    Y2  - Y1) );
     float circumference          =  2.0*pi*radius;
     
     float startingAngle          =  atan2(Y1 - centerY, X1 - centerX);
@@ -840,22 +838,16 @@ int   G2(const String& readString, int G2orG3){
     feedrate = constrain(feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     
     if (G2orG3 == 2){
-        arc(X1, Y1, X2, Y2, centerX, centerY, feedrate, CLOCKWISE);
+        return arc(X1, Y1, X2, Y2, centerX, centerY, feedrate, CLOCKWISE);
     }
-    if (G2orG3 == 3){
-        arc(X1, Y1, X2, Y2, centerX, centerY, feedrate, COUNTERCLOCKWISE);
+    else {
+        return arc(X1, Y1, X2, Y2, centerX, centerY, feedrate, COUNTERCLOCKWISE);
     }
 }
 
 void  G10(const String& readString){
     /*The G10() function handles the G10 gcode which re-zeros one or all of the machine's axes.*/
-    
-    float currentXPos = xTarget;
-    float currentYPos = yTarget;
     float currentZPos = zAxis.read();
-    
-    float xgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/_inchesToMMConversion);
-    float ygoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/_inchesToMMConversion);
     float zgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Z', currentZPos/_inchesToMMConversion);
     
     zAxis.set(zgoto);
@@ -1123,7 +1115,6 @@ void updateMotorSettings(const String& readString){
     }
     
     //Change the motor properties in cnc_funtions if new values have been sent
-    float distPerRot = -1;
     if (gearTeeth != -1 and chainPitch != -1){
         float distPerRot = gearTeeth*chainPitch; 
         leftAxis.changePitch(distPerRot);
@@ -1153,7 +1144,7 @@ void updateMotorSettings(const String& readString){
 bool isSafeCommand(const String& readString){
     bool ret = false;
     String command = readString.substring(0, 3);
-    for(int i = 0; i < sizeof(safeCommands); i++){
+    for(byte i = 0; i < sizeof(safeCommands); i++){
        if(safeCommands[i] == command){
            ret = true;
            break;
