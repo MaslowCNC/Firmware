@@ -177,6 +177,13 @@ void   Axis::changePitch(const float& newPitch){
     _mmPerRotation = newPitch;
 }
 
+float  Axis::getPitch(){
+    /*
+    Returns the distance moved per-rotation for the axis.
+    */  
+    return _mmPerRotation;
+}
+
 void   Axis::changeEncoderResolution(const int& newResolution){
     /*
     Reassign the encoder resolution for the axis.
