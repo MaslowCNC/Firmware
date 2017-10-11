@@ -26,10 +26,10 @@
 
     class Axis{
         public:
-            Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const String& axisName, const int& eepromAdr);
+            Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const int& eepromAdr);
             void   write(const float& targetPosition);
             float  read();
-            int    set(const float& newAxisPosition);
+            void   set(const float& newAxisPosition);
             int    updatePositionFromEncoder();
             void   initializePID();
             int    detach();
@@ -45,6 +45,7 @@
             void   setPIDAggressiveness(float aggressiveness);
             void   test();
             void   changePitch(const float& newPitch);
+            float  getPitch();
             void   changeEncoderResolution(const int& newResolution);
             bool   attached();
             void   wipeEEPROM();
@@ -57,10 +58,7 @@
             int        _PWMread(int pin);
             void       _writeFloat(const unsigned int& addr, const float& x);
             float      _readFloat(const unsigned int& addr);
-            int        _encoderPin;
             float      _axisTarget;
-            int        _currentAngle;
-            int        _previousAngle;
             double     _timeLastMoved;
             volatile double _pidSetpoint;
             volatile double _pidInput; 
@@ -70,9 +68,8 @@
             int        _eepromAdr;
             float      _mmPerRotation = 1;
             float      _encoderSteps  = 100;
-            float      _oldSetpoint;
             bool       _disableAxisForTesting = false;
-            String     _axisName;
+            char       _axisName;
     };
 
     #endif

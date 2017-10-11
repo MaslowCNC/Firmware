@@ -19,14 +19,11 @@
 #include "Arduino.h"
 #include "Axis.h"
 
-#define FORWARD 1
-#define BACKWARD -1
-
 #define EEPROMVALIDDATA 56
 #define SIZEOFFLOAT      4
 #define SIZEOFLINSEG    17
 
-Axis::Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const String& axisName, const int& eepromAdr)
+Axis::Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const int& eepromAdr)
 :
 motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2)
 {
@@ -91,7 +88,7 @@ float  Axis::setpoint(){
     return _pidSetpoint*_mmPerRotation;
 }
 
-int    Axis::set(const float& newAxisPosition){
+void   Axis::set(const float& newAxisPosition){
     
     //reset everything to the new value
     _axisTarget   =  newAxisPosition/_mmPerRotation;
@@ -178,6 +175,13 @@ void   Axis::changePitch(const float& newPitch){
     Reassign the distance moved per-rotation for the axis.
     */
     _mmPerRotation = newPitch;
+}
+
+float  Axis::getPitch(){
+    /*
+    Returns the distance moved per-rotation for the axis.
+    */  
+    return _mmPerRotation;
 }
 
 void   Axis::changeEncoderResolution(const int& newResolution){
