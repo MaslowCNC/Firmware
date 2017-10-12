@@ -173,8 +173,15 @@ float MotorGearboxEncoder::computeSpeed(){
     
     float distMoved   =  currentPosition - _lastPosition;
     float RPM = 0;
-    if (distMoved > 3 || distMoved < -3){ 
-    
+    if (distMoved > 3 || distMoved < -3){
+      
+        // This dampens some of the effects of quantization without having 
+        // a big effect on other changes
+        float saveDistMoved = distMoved;
+        if (distMoved - _lastDistMoved <= -1){ distMoved + .5;}
+        else if (distMoved - _lastDistMoved >= 1){distMoved - .5;}
+        _lastDistMoved = saveDistMoved;
+        
         unsigned long timeElapsed =  currentMicros - _lastTimeStamp;
         //Compute the speed in RPM
         RPM = (_encoderStepsToRPMScaleFactor*distMoved)/float(timeElapsed);
@@ -193,12 +200,6 @@ float MotorGearboxEncoder::computeSpeed(){
     //Store values for next time
     _lastTimeStamp = currentMicros;
     _lastPosition  = currentPosition;
-    _lastRPM = RPM;
-    
-     // This dampens some of the effects of quantization without having 
-     // a big effect on other changes 
-     if (RPM - _lastRPM < -1){ RPM + .5;}
-     else if (RPM - _lastRPM > 1){RPM - .5;}
     
     return RPM;
 }

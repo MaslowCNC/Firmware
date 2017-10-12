@@ -43,7 +43,7 @@
             double     _currentSpeed;
             volatile double     _lastPosition;
             volatile double     _lastTimeStamp;
-            float               _lastRPM;
+            float               _lastDistMoved;
             char       _motorName;
             double     _pidOutput;
             PID        _PIDController;
