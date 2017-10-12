@@ -64,6 +64,8 @@ typedef struct {
 	IO_REG_TYPE            pin2_bitmask;
 	uint8_t                state;
 	int32_t                position;
+	int32_t						     elapsedTime;
+	int32_t							   lastTime;
 } Encoder_internal_state_t;
 
 class Encoder
@@ -109,6 +111,17 @@ public:
 			noInterrupts();
 		}
 		int32_t ret = encoder.position;
+		interrupts();
+		return ret;
+	}
+	inline int32_t elapsedTime() {
+		if (interrupts_in_use < 2) {
+			noInterrupts();
+			update(&encoder);
+		} else {
+			noInterrupts();
+		}
+		int32_t ret = encoder.elapsedTime;
 		interrupts();
 		return ret;
 	}
@@ -183,7 +196,11 @@ public:
 
 private:
 	static void update(Encoder_internal_state_t *arg) {
-#if defined(__AVR__)
+#if defined(__AVR_DISABLED__)  
+		// Changed from __AVR__ to force C code below, until someone has 
+		// the chance to write the elapsedTime feature into assembly
+		// code.  The time difference between the two options is 
+		// minimal at best. 
 		// The compiler believes this is just 1 line of code, so
 		// it will inline this function into each interrupt
 		// handler.  That's a tiny bit faster, but grows the code.
@@ -277,15 +294,23 @@ private:
 		switch (state) {
 			case 1: case 7: case 8: case 14:
 				arg->position++;
+				arg->elapsedTime = (micros() - arg->lastTime);
+				arg->lastTime = micros();
 				return;
 			case 2: case 4: case 11: case 13:
 				arg->position--;
+				arg->elapsedTime = (arg->lastTime - micros());
+				arg->lastTime = micros();
 				return;
 			case 3: case 12:
 				arg->position += 2;
+				arg->elapsedTime = (micros() - arg->lastTime) >> 1;
+				arg->lastTime = micros();
 				return;
 			case 6: case 9:
 				arg->position -= 2;
+				arg->elapsedTime = (arg->lastTime - micros()) >> 1;
+				arg->lastTime = micros();
 				return;
 		}
 #endif

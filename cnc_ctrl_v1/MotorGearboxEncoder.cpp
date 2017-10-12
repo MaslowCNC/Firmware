@@ -60,58 +60,10 @@ void  MotorGearboxEncoder::computePID(){
     /*
     Recompute the speed control PID loop and command the motor to move.
     */
-    _currentSpeed = computeSpeed();
-    
-    /*if (millis() < 8000){
-        _targetSpeed = 0;
-    }
-    else if (millis() < 12000){
-        _targetSpeed = 10;
-    }
-    else if (millis() < 18000){
-         _targetSpeed = 0;
-    }
-    else if(millis() < 24000){
-        _targetSpeed = float((millis() - 18000))/400.0;
-    }
-    else if (millis() < 32000){
-        _targetSpeed = 0;
-    }
-    else if (millis() < 40000){
-        _targetSpeed = 10;
-    }
-    else if (millis() < 48000){
-        _targetSpeed = 0;
-    }
-    else if (millis() < 56000){
-        _targetSpeed = -10;
-    }
-    else if (millis() < 64000){
-        _targetSpeed = 0;
-    }
-    else if (millis() < 72000){
-        _targetSpeed = 10;
-    }
-    else if (millis() < 80000){
-        _targetSpeed = 0;
-    }
-    else{
-        _targetSpeed = 0;
-    }*/
-    
-    // Between these speeds the motor is incapable of turning and it only
-    // causes the Iterm in the PID calculation to wind up
-    if (abs(_targetSpeed) <= _minimumRPM) _targetSpeed = 0;
+    _currentSpeed = _computeSpeed();
 
     _PIDController.Compute();
-        
-    /*if(_motorName[0] == 'R'){
-        //Serial.print(_currentSpeed);
-        //Serial.print(" ");
-        Serial.println(_targetSpeed);
-    }*/
-    
-    //motor.attach();
+
     motor.write(_pidOutput);
 }
 
@@ -162,24 +114,55 @@ void MotorGearboxEncoder::setEncoderResolution(float resolution){
     
 }
 
-float MotorGearboxEncoder::computeSpeed(){
+float MotorGearboxEncoder::_computeSpeed(){
     /*
     
     Returns the motors speed in RPM since the last time this function was called
+    should only be called by the PID process otherwise we are calculating the
+    distance moved over a varying amount of time.
     
     */
-    double timeElapsed =  micros() - _lastTimeStamp;
     
-    float    distMoved   =  encoder.read() - _lastPosition; //_runningAverage(encoder.read() - _lastPosition);     //because of quantization noise it helps to average these
+    float currentPosition = encoder.read();
+    float currentMicros = micros();
     
-    //Compute the speed in RPM
-    float RPM = (_encoderStepsToRPMScaleFactor*distMoved)/float(timeElapsed);
+    float distMoved   =  currentPosition - _lastPosition;
+    if (distMoved > 3 || distMoved < -3){
+      
+        // This dampens some of the effects of quantization without having 
+        // a big effect on other changes
+        float saveDistMoved = distMoved;
+        if (distMoved - _lastDistMoved <= -1){ distMoved + .5;}
+        else if (distMoved - _lastDistMoved >= 1){distMoved - .5;}
+        _lastDistMoved = saveDistMoved;
+        
+        unsigned long timeElapsed =  currentMicros - _lastTimeStamp;
+        //Compute the speed in RPM
+        _RPM = (_encoderStepsToRPMScaleFactor*distMoved)/float(timeElapsed);
+    
+    }
+    else {
+        float elapsedTime = encoder.elapsedTime();
+
+        _RPM = 0 ;
+        if (elapsedTime != 0){
+          _RPM = _encoderStepsToRPMScaleFactor / elapsedTime;
+        }
+    }
+    _RPM = _RPM * -1.0;
     
     //Store values for next time
-    _lastTimeStamp = micros();
-    _lastPosition  = encoder.read();
+    _lastTimeStamp = currentMicros;
+    _lastPosition  = currentPosition;
     
-    return -1.0*RPM;
+    return _RPM;
+}
+
+float MotorGearboxEncoder::cachedSpeed(){
+    /*
+    Returns the last result of computeSpeed
+    */
+    return _RPM;
 }
 
 void MotorGearboxEncoder::setName(const char& newName){

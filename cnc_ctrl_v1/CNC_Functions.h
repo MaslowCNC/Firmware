@@ -1232,9 +1232,7 @@ void PIDTestVelocity(Axis* axis, const float start, const float stop, const floa
     double startTime;
     double print = micros();
     double current = micros();
-    float lastPosition = axis->motorGearboxEncoder.encoder.read();
     float error;
-    float distMoved;
     float reportedSpeed;
     float span = stop - start;
     float speed;
@@ -1253,10 +1251,8 @@ void PIDTestVelocity(Axis* axis, const float start, const float stop, const floa
         while (startTime + 2000000 > current){
           if (current - print > 20000){
             // Calculate and log error on same frequency as PID interrupt
-            distMoved   =  axis->motorGearboxEncoder.encoder.read() - lastPosition;
-            reportedSpeed= (7364.0*distMoved)/float(current - print);  //6*10^7 us per minute, 8148 steps per revolution
-            lastPosition  = axis->motorGearboxEncoder.encoder.read();
-            error =  (-1.0 * reportedSpeed) - speed;
+            reportedSpeed= axis->motorGearboxEncoder.cachedSpeed();
+            error =  reportedSpeed - speed;
             print = current;
             Serial.println(error);
           }
