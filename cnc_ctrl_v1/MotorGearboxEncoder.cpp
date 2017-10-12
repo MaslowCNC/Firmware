@@ -188,12 +188,19 @@ float MotorGearboxEncoder::computeSpeed(){
           RPM = _encoderStepsToRPMScaleFactor / elapsedTime;
         }
     }
+    RPM = RPM * -1.0;
     
     //Store values for next time
     _lastTimeStamp = currentMicros;
     _lastPosition  = currentPosition;
+    _lastRPM = RPM;
     
-    return -1.0*RPM;
+     // This dampens some of the effects of quantization without having 
+     // a big effect on other changes 
+     if (RPM - _lastRPM < -1){ RPM + .5;}
+     else if (RPM - _lastRPM > 1){RPM - .5;}
+    
+    return RPM;
 }
 
 void MotorGearboxEncoder::setName(const char& newName){
