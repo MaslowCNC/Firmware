@@ -29,6 +29,7 @@
             Encoder    encoder;
             Motor      motor;
             float      computeSpeed();
+            float      cachedSpeed();
             void       write(const float& speed);
             void       computePID();
             void       setName(const char& newName);
@@ -44,6 +45,7 @@
             volatile double     _lastPosition;
             volatile double     _lastTimeStamp;
             float               _lastDistMoved;
+            float               _RPM;
             char       _motorName;
             double     _pidOutput;
             PID        _PIDController;
