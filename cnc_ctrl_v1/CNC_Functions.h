@@ -1252,7 +1252,7 @@ void PIDTestVelocity(Axis* axis, const float start, const float stop, const floa
           if (current - print > 20000){
             // Calculate and log error on same frequency as PID interrupt
             reportedSpeed= axis->motorGearboxEncoder.cachedSpeed();
-            error =  (-1.0 * reportedSpeed) - speed;
+            error =  reportedSpeed - speed;
             print = current;
             Serial.println(error);
           }
