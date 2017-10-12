@@ -41,14 +41,13 @@
         private:
             double     _targetSpeed;
             double     _currentSpeed;
-            double     _lastPosition;
-            double     _lastTimeStamp;
-            char       _motorName;
+            volatile double     _lastPosition;
+            volatile double     _lastTimeStamp;
+            char     _motorName;
             double     _pidOutput;
             PID        _PIDController;
             double     _Kp=0, _Ki=0, _Kd=0;
             float      _encoderStepsToRPMScaleFactor = 7364.0;   //6*10^7 us per minute divided by 8148 steps per revolution
-            float      _minimumRPM = 0.5;
     };
 
     #endif

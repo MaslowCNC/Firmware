@@ -101,7 +101,6 @@ void  MotorGearboxEncoder::computePID(){
     
     // Between these speeds the motor is incapable of turning and it only
     // causes the Iterm in the PID calculation to wind up
-    if (abs(_targetSpeed) <= _minimumRPM) _targetSpeed = 0;
 
     _PIDController.Compute();
         
@@ -168,16 +167,31 @@ float MotorGearboxEncoder::computeSpeed(){
     Returns the motors speed in RPM since the last time this function was called
     
     */
-    double timeElapsed =  micros() - _lastTimeStamp;
     
-    float    distMoved   =  encoder.read() - _lastPosition; //_runningAverage(encoder.read() - _lastPosition);     //because of quantization noise it helps to average these
+    float currentPosition = encoder.read();
+    float currentMicros = micros();
     
-    //Compute the speed in RPM
-    float RPM = (_encoderStepsToRPMScaleFactor*distMoved)/float(timeElapsed);
+    float distMoved   =  currentPosition - _lastPosition;
+    float RPM = 0;
+    if (distMoved > 3 || distMoved < -3){ 
+    
+        unsigned long timeElapsed =  currentMicros - _lastTimeStamp;
+        //Compute the speed in RPM
+        RPM = (_encoderStepsToRPMScaleFactor*distMoved)/float(timeElapsed);
+    
+    }
+    else {
+        float elapsedTime = encoder.elapsedTime();
+
+        RPM = 0 ;
+        if (elapsedTime != 0){
+          RPM = _encoderStepsToRPMScaleFactor / elapsedTime;
+        }
+    }
     
     //Store values for next time
-    _lastTimeStamp = micros();
-    _lastPosition  = encoder.read();
+    _lastTimeStamp = currentMicros;
+    _lastPosition  = currentPosition;
     
     return -1.0*RPM;
 }
