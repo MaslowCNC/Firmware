@@ -28,7 +28,6 @@
             MotorGearboxEncoder(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2);
             Encoder    encoder;
             Motor      motor;
-            float      computeSpeed();
             float      cachedSpeed();
             void       write(const float& speed);
             void       computePID();
@@ -51,6 +50,7 @@
             PID        _PIDController;
             double     _Kp=0, _Ki=0, _Kd=0;
             float      _encoderStepsToRPMScaleFactor = 7364.0;   //6*10^7 us per minute divided by 8148 steps per revolution
+            float      _computeSpeed();
     };
 
     #endif
