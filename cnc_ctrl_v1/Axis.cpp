@@ -58,7 +58,7 @@ void   Axis::loadPositionFromMemory(){
 void   Axis::initializePID(){
     _pidController.SetMode(AUTOMATIC);
     _pidController.SetOutputLimits(-20, 20);
-    _pidController.SetSampleTime(10);
+    _pidController.SetSampleTime(LOOPINTERVAL / 1000);
 }
 
 void    Axis::write(const float& targetPosition){

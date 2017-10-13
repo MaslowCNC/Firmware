@@ -53,7 +53,7 @@ void   MotorGearboxEncoder::initializePID(){
     //setup positive PID controller
     _PIDController.SetMode(AUTOMATIC);
     _PIDController.SetOutputLimits(-255, 255);
-    _PIDController.SetSampleTime(10);
+    _PIDController.SetSampleTime(LOOPINTERVAL / 1000);
 }
 
 void  MotorGearboxEncoder::computePID(){
