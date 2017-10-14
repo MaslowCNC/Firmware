@@ -23,9 +23,9 @@
 #define SIZEOFFLOAT      4
 #define SIZEOFLINSEG    17
 
-Axis::Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const int& eepromAdr)
+Axis::Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const int& eepromAdr, const unsigned long& loopInterval)
 :
-motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2)
+motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2, loopInterval)
 {
     
     _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, 0, 0, 0, P_ON_E, REVERSE);
@@ -34,7 +34,7 @@ motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPi
     _axisName     = axisName;
     _eepromAdr    = eepromAdr;
     
-    initializePID();
+    initializePID(loopInterval);
     
     motorGearboxEncoder.setName(_axisName);
 }
@@ -55,10 +55,10 @@ void   Axis::loadPositionFromMemory(){
         
 }
 
-void   Axis::initializePID(){
+void   Axis::initializePID(const unsigned long& loopInterval){
     _pidController.SetMode(AUTOMATIC);
     _pidController.SetOutputLimits(-20, 20);
-    _pidController.SetSampleTime(LOOPINTERVAL / 1000);
+    _pidController.SetSampleTime( loopInterval / 1000);
 }
 
 void    Axis::write(const float& targetPosition){

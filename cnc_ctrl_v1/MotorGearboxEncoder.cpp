@@ -24,7 +24,7 @@ to be a drop in replacement for a continuous rotation servo.
 #include "Arduino.h"
 #include "MotorGearboxEncoder.h"
 
-MotorGearboxEncoder::MotorGearboxEncoder(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2)
+MotorGearboxEncoder::MotorGearboxEncoder(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const unsigned long& loopInterval)
 :
 encoder(encoderPin1,encoderPin2)
 {
@@ -35,7 +35,7 @@ encoder(encoderPin1,encoderPin2)
     
     //initialize the PID
     _PIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, P_ON_E, DIRECT);
-    initializePID();
+    initializePID(loopInterval);
     
     
 }
@@ -49,11 +49,11 @@ void  MotorGearboxEncoder::write(const float& speed){
     
 }
 
-void   MotorGearboxEncoder::initializePID(){
+void   MotorGearboxEncoder::initializePID(const unsigned long& loopInterval){
     //setup positive PID controller
     _PIDController.SetMode(AUTOMATIC);
     _PIDController.SetOutputLimits(-255, 255);
-    _PIDController.SetSampleTime(LOOPINTERVAL / 1000);
+    _PIDController.SetSampleTime(loopInterval / 1000);
 }
 
 void  MotorGearboxEncoder::computePID(){
