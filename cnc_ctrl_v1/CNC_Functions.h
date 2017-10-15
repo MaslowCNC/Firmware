@@ -1376,6 +1376,38 @@ void PIDTestPosition(Axis* axis, float start, float stop, const float steps, con
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
 }
 
+void voltageTest(Axis* axis, int start, int stop){
+    // Moves the defined Axis at a series of voltages and reports the resulting
+    // RPM
+    Serial.println(F("--Voltage Test Start--"));
+    int direction = 1;
+    if (stop < start){ direction = -1;}
+    int steps = abs(start - stop);
+    unsigned long startTime = millis() + 200;
+    unsigned long currentTime = millis();
+    unsigned long printTime = 0;
+    
+    for (int i = 0; i <= steps; i++){
+        axis->motorGearboxEncoder.motor.directWrite((start + (i*direction)));
+        while (startTime > currentTime - (i * 200)){
+            currentTime = millis();
+            if ((printTime + 50) <= currentTime){
+                Serial.print((start + (i*direction)));
+                Serial.print(F(","));
+                Serial.print(axis->motorGearboxEncoder.computeSpeed(),4);
+                Serial.print(F("\n"));
+                printTime = millis();
+            }
+        }
+    }
+    
+    // Print end of log, and update axis for use again
+    axis->motorGearboxEncoder.motor.directWrite(0);
+    Serial.println(F("--Voltage Test Stop--\n"));
+    axis->write(axis->read());
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+}
+
 void  executeBcodeLine(const String& gcodeLine){
     /*
     
@@ -1557,6 +1589,20 @@ void  executeBcodeLine(const String& gcodeLine){
         if (left > 0) axis = &leftAxis;
         if (useZ > 0) axis = &zAxis;
         PIDTestPosition(axis, start, stop, steps, stepTime, version);
+        return;
+    }
+    
+    if(gcodeLine.substring(0, 3) == "B15"){
+        //Incrementally tests voltages to see what RPMs they produce
+        float  left       = extractGcodeValue(gcodeLine, 'L', 0);
+        float  useZ       = extractGcodeValue(gcodeLine, 'Z', 0);
+        float  start      = extractGcodeValue(gcodeLine, 'S', 1);
+        float  stop       = extractGcodeValue(gcodeLine, 'F', 1);
+        
+        Axis* axis = &rightAxis;
+        if (left > 0) axis = &leftAxis;
+        if (useZ > 0) axis = &zAxis;
+        voltageTest(axis, start, stop);
         return;
     }
     
