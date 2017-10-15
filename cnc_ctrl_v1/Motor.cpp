@@ -66,6 +66,13 @@ void Motor::detach(){
     digitalWrite(_pwmPin,  LOW);
 }
 
+int Motor::lastSpeed(){
+    /*
+    Returns the last speed(voltage) value sent to the pwm
+    */
+    return _lastSpeed;
+}
+
 void Motor::write(int speed){
     /*
     Sets motor speed from input. Speed = 0 is stopped, -255 is full reverse, 255 is full ahead.
@@ -92,6 +99,8 @@ void Motor::write(int speed){
         
         //enforce range
         speed = constrain(speed, -255, 255);
+        
+        _lastSpeed = speed; //saves speed for use in additive write
         
         speed = abs(speed); //remove sign from input because direction is set by control pins on H-bridge
         

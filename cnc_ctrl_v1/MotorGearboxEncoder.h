@@ -38,6 +38,7 @@
             void       setPIDValues(float KpV, float KiV, float KdV);
             void       setEncoderResolution(float resolution);
             String     getPIDString();
+            String     pidState();
         private:
             double     _targetSpeed;
             double     _currentSpeed;

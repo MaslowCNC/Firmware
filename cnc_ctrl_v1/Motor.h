@@ -38,6 +38,7 @@
             int  setupMotor(const int& pwmPin, const int& pin1, const int& pin2);
             void detach();
             void write(int speed);
+            int  lastSpeed();
             int  attached();
             int  _convolve(const int& input);
             void setSegment(const int& index, const float& slope, const float& intercept, const int& negativeBound, const int& positiveBound);
@@ -49,6 +50,7 @@
             int _pin2;
             bool _attachedState = false;
             LinSegment _linSegments[4];
+            int _lastSpeed  = 0;
             
     };
 

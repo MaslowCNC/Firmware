@@ -313,3 +313,6 @@ void   Axis::test(){
     motorGearboxEncoder.motor.directWrite(0);
     Serial.print(F("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>"));
 }
+
+double  Axis::pidInput(){ return _pidInput*_mmPerRotation;}
+double  Axis::pidOutput(){ return _pidOutput;}

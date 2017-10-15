@@ -52,6 +52,8 @@
             void   setPIDValues(float Kp, float Ki, float Kd, float propWeight, float KpV, float KiV, float KdV);
             void   loadPositionFromMemory();
             String     getPIDString();
+            double     pidInput();
+            double     pidOutput();
             
         private:
             int        _PWMread(int pin);

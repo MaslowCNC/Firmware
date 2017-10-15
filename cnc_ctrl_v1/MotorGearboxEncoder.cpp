@@ -91,6 +91,15 @@ String  MotorGearboxEncoder::getPIDString(){
     return PIDString + _Kp + ",Ki=" + _Ki + ",Kd=" + _Kd;
 }
 
+String  MotorGearboxEncoder::pidState(){
+    /*
+    
+    Get current value of PID variables, setpoint, input, output
+    
+    */
+    return _PIDController.pidState();
+}
+
 void MotorGearboxEncoder::setPIDAggressiveness(float aggressiveness){
     /*
     
