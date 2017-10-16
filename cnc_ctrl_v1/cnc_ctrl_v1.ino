@@ -31,8 +31,7 @@ void setup(){
     Serial.println(F("ready"));
     _signalReady();
     
-    
-    Timer1.initialize(10000);
+    Timer1.initialize(LOOPINTERVAL);
     Timer1.attachInterrupt(runsOnATimer);
     
     Serial.println(F("Grbl v1.00"));
@@ -40,6 +39,12 @@ void setup(){
 }
 
 void runsOnATimer(){
+    #if misloopDebug > 0
+    if (inMovementLoop && !movementUpdated){
+        movementFail = true;
+    }
+    #endif
+    movementUpdated = false;
     leftAxis.computePID();
     rightAxis.computePID();
     zAxis.computePID();

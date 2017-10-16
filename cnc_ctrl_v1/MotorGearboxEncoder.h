@@ -25,7 +25,7 @@
     
     class MotorGearboxEncoder{
         public:
-            MotorGearboxEncoder(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2);
+            MotorGearboxEncoder(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const unsigned long& loopInterval);
             Encoder    encoder;
             Motor      motor;
             float      cachedSpeed();
@@ -33,7 +33,7 @@
             void       computePID();
             void       setName(const char& newName);
             char       name();
-            void       initializePID();
+            void       initializePID(const unsigned long& loopInterval);
             void       setPIDAggressiveness(float aggressiveness);
             void       setPIDValues(float KpV, float KiV, float KdV);
             void       setEncoderResolution(float resolution);

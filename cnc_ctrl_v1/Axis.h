@@ -22,16 +22,15 @@
     #include "PID_v1.h"
     #include <EEPROM.h>
     #include "MotorGearboxEncoder.h"
-    
 
     class Axis{
         public:
-            Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const int& eepromAdr);
+            Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const int& eepromAdr, const unsigned long& loopInterval);
             void   write(const float& targetPosition);
             float  read();
             void   set(const float& newAxisPosition);
             int    updatePositionFromEncoder();
-            void   initializePID();
+            void   initializePID(const unsigned long& loopInterval);
             int    detach();
             int    attach();
             void   hold();

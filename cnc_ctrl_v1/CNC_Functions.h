@@ -23,6 +23,9 @@ libraries*/
 #define VERSIONNUMBER 0.94
 
 #define verboseDebug 0    // set to 0 for no debug messages, 1 for single-line messages, 2 to also output ring buffer contents
+#define misloopDebug 0    // set to 1 for a arning evertime the movement loop fails 
+                          // to complete before being interrupted, helpful for loop
+                          // LOOPINTERVAL tuning
 
 #include <Servo.h>
 Servo myservo;  // create servo object to control a servo 
@@ -43,7 +46,7 @@ bool zAxisAttached = false;
 #define INCHES      25.4
 #define MAXFEED     900      //The maximum allowable feedrate in mm/min
 #define MAXZROTMIN  12.60    // the maximum z rotations per minute
-
+#define LOOPINTERVAL 10000     // What is the frequency of the PID loop in microseconds
 
 int ENCODER1A;
 int ENCODER1B;
@@ -131,9 +134,9 @@ int   setupPins(){
 
 int pinsSetup       = setupPins();
 
-Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, 'L',  LEFT_EEPROM_ADR);
-Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, 'R', RIGHT_EEPROM_ADR);
-Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, 'Z',     Z_EEPROM_ADR);
+Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, 'L',  LEFT_EEPROM_ADR, LOOPINTERVAL);
+Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, 'R', RIGHT_EEPROM_ADR, LOOPINTERVAL);
+Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, 'Z',     Z_EEPROM_ADR, LOOPINTERVAL);
 
 
 Kinematics kinematics;
@@ -150,6 +153,14 @@ bool  rcvdKinematicSettings =  false;
 bool  rcvdMotorSettings     =  false;
 bool  encoderStepsChanged   =  false;
 bool  zEncoderStepsChanged  =  false;
+volatile bool  movementUpdated  =  false;
+
+// Global variables for misloop tracking
+#if misloopDebug > 0
+volatile bool  inMovementLoop   =  false;
+volatile bool  movementFail     =  false;
+#endif
+
 // Commands that can safely be executed before machineReady
 String safeCommands[] = {"B01", "B03", "B04", "B05", "B07", "B12", "G20", "G21", "G90", "G91"};
 String readyCommandString;                //next command queued up and ready to send
@@ -373,16 +384,10 @@ bool checkForProbeTouch(const int& probePin) {
 
 float calculateDelay(const float& stepSizeMM, const float& feedrateMMPerMin){
     /*
-    Calculate the time delay between each step for a given feedrate
+    Calculate the time delay in microseconds between each step for a given feedrate
     */
     
-    #define MINUTEINMS 60000.0
-    
-    // derivation: ms / step = 1 min in ms / dist in one min
-    
-    float msPerStep = (stepSizeMM*MINUTEINMS)/feedrateMMPerMin;
-    
-    return msPerStep;
+    return LOOPINTERVAL;
 }
 
 float calculateFeedrate(const float& stepSizeMM, const float& msPerStep){
@@ -403,11 +408,21 @@ float computeStepSize(const float& MMPerMin){
     /*
     
     Determines the minimum step size which can be taken for the given feed-rate
-    and still have there be enough time for the kinematics to run
+    based on the loop interval frequency.  Converts to MM per microsecond first,
+    then mutiplies by the number of microseconds in each loop interval
     
     */
-    
-    return .0001575*MMPerMin; //value found empirically by running loop until there were not spare cycles
+    return LOOPINTERVAL*(MMPerMin/(60 * 1000000));
+}
+ 
+void movementUpdate(){
+  #if misloopDebug > 0
+  if (movementFail){
+    Serial.println("Movement loop failed to complete before interrupt.");
+    movementFail = false;
+  }
+  #endif
+  movementUpdated = true;
 }
 
 int   cordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, float MMPerMin){
@@ -458,30 +473,36 @@ int   cordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, fl
     float aChainLength;
     float bChainLength;
     float zPosition                   = zStartingLocation;
+    float whereXShouldBeAtThisStep    = xStartingLocation;
+    float whereYShouldBeAtThisStep    = yStartingLocation;
     long   numberOfStepsTaken         =  0;
-    unsigned long beginingOfLastStep = millis() - delayTime;
     
     while(numberOfStepsTaken < finalNumberOfSteps){
-        //if enough time has passed to take the next step
-        if (millis() - beginingOfLastStep > delayTime){
-          
-            //reset the counter 
-            beginingOfLastStep          = millis();
-              
+      
+        #if misloopDebug > 0
+        inMovementLoop = true;
+        #endif
+        //if last movment was performed start the next
+        if (!movementUpdated) {
             //find the target point for this step
-            float whereXShouldBeAtThisStep = xStartingLocation + (numberOfStepsTaken*xStepSize);
-            float whereYShouldBeAtThisStep = yStartingLocation + (numberOfStepsTaken*yStepSize);
-            zPosition = zStartingLocation + (numberOfStepsTaken*zStepSize);
+            // This section ~20us
+            whereXShouldBeAtThisStep +=  xStepSize;
+            whereYShouldBeAtThisStep +=  yStepSize;
+            zPosition += zStepSize;
             
             //find the chain lengths for this step
+            // This section ~180us
             kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
             
             //write to each axis
+            // This section ~180us
             leftAxis.write(aChainLength);
             rightAxis.write(bChainLength);
             if(zAxisAttached){
               zAxis.write(zPosition);
             }
+            
+            movementUpdate();
             
             //increment the number of steps taken
             numberOfStepsTaken++;
@@ -489,6 +510,7 @@ int   cordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, fl
             //update position on display
             returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zPosition);
             
+            // This section ~10us
             //check for new serial commands
             readSerialCommands();
             
@@ -511,6 +533,9 @@ int   cordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, fl
             }
         }
     }
+    #if misloopDebug > 0
+    inMovementLoop = false;
+    #endif
     
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
     leftAxis.endMove(aChainLength);
@@ -536,30 +561,30 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     
     float direction            = moveDist/abs(moveDist); //determine the direction of the move
     
-    float stepSizeMM           = 0.01;                    //step size in mm
+    float stepSizeMM           = computeStepSize(MMPerMin);                    //step size in mm
 
     //the argument to abs should only be a variable -- splitting calc into 2 lines
     long finalNumberOfSteps    = abs(moveDist/stepSizeMM);      //number of steps taken in move
     finalNumberOfSteps = abs(finalNumberOfSteps);
-
-    float delayTime = calculateDelay(stepSizeMM, MMPerMin);
+    stepSizeMM = stepSizeMM*direction;
     
     long numberOfStepsTaken    = 0;
     
     //attach the axis we want to move
     axis->attach();
     
-    unsigned long beginingOfLastStep = millis() - delayTime;
-    float whereAxisShouldBeAtThisStep;
-    
+    float whereAxisShouldBeAtThisStep = startingPos;
+    #if misloopDebug > 0
+    inMovementLoop = true;
+    #endif
     while(numberOfStepsTaken < finalNumberOfSteps){
-        if (millis() - beginingOfLastStep > delayTime){
-          beginingOfLastStep = millis();
+        if (!movementUpdated) {
           //find the target point for this step
-          whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken*stepSizeMM*direction;
+          whereAxisShouldBeAtThisStep += stepSizeMM;
           
           //write to axis
           axis->write(whereAxisShouldBeAtThisStep);
+          movementUpdate();
           
           //update position on display
           returnPoz(xTarget, yTarget, zAxis.read());
@@ -577,6 +602,9 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
             return;
         }
     }
+    #if misloopDebug > 0
+    inMovementLoop = false;
+    #endif
     
     axis->endMove(endPos);
     
@@ -752,22 +780,18 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
     
     float aChainLength;
     float bChainLength;
-
-    float delayTime = calculateDelay(stepSizeMM, MMPerMin);
     
     //attach the axes
     leftAxis.attach();
     rightAxis.attach();
     
-    unsigned long  beginingOfLastStep  = millis() - delayTime;
-    
     while(numberOfStepsTaken < abs(finalNumberOfSteps)){
+        #if misloopDebug > 0
+        inMovementLoop = true;
+        #endif
         
-        //if enough time has passed to take the next step
-        if (millis() - beginingOfLastStep > delayTime){
-            
-            //reset the counter 
-            beginingOfLastStep          = millis();
+        //if last movement was performed start the next one
+        if (!movementUpdated){
             
             degreeComplete = float(numberOfStepsTaken)/float(finalNumberOfSteps);
             
@@ -779,7 +803,8 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
             kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
             
             leftAxis.write(aChainLength);
-            rightAxis.write(bChainLength);
+            rightAxis.write(bChainLength); 
+            movementUpdate();
             
             returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
             
@@ -803,6 +828,9 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
             }
         }
     }
+    #if misloopDebug > 0
+    inMovementLoop = false;
+    #endif
     
     kinematics.inverse(X2,Y2,&aChainLength,&bChainLength);
     leftAxis.endMove(aChainLength);
@@ -916,25 +944,20 @@ void  G38(const String& readString) {
         long finalNumberOfSteps    = moveDist / stepSizeMM;    //number of steps taken in move
         finalNumberOfSteps = abs(finalNumberOfSteps);
 
-        float delayTime = calculateDelay(stepSizeMM, MMPerMin);
-
         long numberOfStepsTaken    = 0;
-        unsigned long  beginingOfLastStep = millis() - delayTime;
-        float whereAxisShouldBeAtThisStep;
+        float whereAxisShouldBeAtThisStep = startingPos;
   
         axis->attach();
         //  zAxis->attach();
 
         while (numberOfStepsTaken < finalNumberOfSteps) {
-          if (millis() - beginingOfLastStep > delayTime){
-              //reset the counter
-              beginingOfLastStep          = millis();
-
+          if (!movementUpdated){
               //find the target point for this step
-              whereAxisShouldBeAtThisStep = startingPos + numberOfStepsTaken * stepSizeMM * direction;
+              whereAxisShouldBeAtThisStep += stepSizeMM * direction;
 
               //write to each axis
               axis->write(whereAxisShouldBeAtThisStep);
+              movementUpdate();
 
               //update position on display
               returnPoz(xTarget, yTarget, zAxis.read());
