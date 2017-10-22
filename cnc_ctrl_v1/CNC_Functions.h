@@ -425,7 +425,7 @@ void movementUpdate(){
   movementUpdated = true;
 }
 
-int   cordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, float MMPerMin){
+int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, float MMPerMin){
     
     /*The move() function moves the tool in a straight line to the position (xEnd, yEnd) at 
     the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
@@ -723,11 +723,11 @@ int   G1(const String& readString, int G0orG1){
     
     if (G0orG1 == 1){
         //if this is a regular move
-        cordinatedMove(xgoto, ygoto, zgoto, feedrate); //The XY move is performed
+        coordinatedMove(xgoto, ygoto, zgoto, feedrate); //The XY move is performed
     }
     else{
         //if this is a rapid move
-        cordinatedMove(xgoto, ygoto, zgoto, 1000); //move the same as a regular move, but go fast
+        coordinatedMove(xgoto, ygoto, zgoto, 1000); //move the same as a regular move, but go fast
     }
 }
 
