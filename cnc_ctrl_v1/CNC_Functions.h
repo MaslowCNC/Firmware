@@ -446,7 +446,7 @@ int   cordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, fl
     //compute feed details
     MMPerMin = constrain(MMPerMin, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     float  stepSizeMM           = computeStepSize(MMPerMin);
-    long   finalNumberOfSteps   = abs(distanceToMoveInMM/stepSizeMM);
+    float   finalNumberOfSteps  = abs(distanceToMoveInMM/stepSizeMM);
     float  delayTime            = calculateDelay(stepSizeMM, MMPerMin);
     float  zFeedrate            = calculateFeedrate((zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
     
