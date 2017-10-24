@@ -23,7 +23,7 @@ libraries*/
 #define VERSIONNUMBER 0.95
 
 #define verboseDebug 0    // set to 0 for no debug messages, 1 for single-line messages, 2 to also output ring buffer contents
-#define misloopDebug 0    // set to 1 for a arning evertime the movement loop fails 
+#define misloopDebug 0    // set to 1 for a warning every time the movement loop fails 
                           // to complete before being interrupted, helpful for loop
                           // LOOPINTERVAL tuning
 
