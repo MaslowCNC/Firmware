@@ -450,7 +450,7 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
     float  delayTime            = calculateDelay(stepSizeMM, MMPerMin);
     float  zFeedrate            = calculateFeedrate((zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
     
-    //throttle back feedrate if it exceeds zaxis max
+    //throttle back federate if it exceeds zaxis max
     if (zFeedrate > zMAXFEED){
       float  zStepSizeMM        = computeStepSize(zMAXFEED);
       finalNumberOfSteps        = abs(zDistanceToMoveInMM/zStepSizeMM);
@@ -1445,7 +1445,7 @@ void  executeBcodeLine(const String& gcodeLine){
         //Directly command each axis to move to a given distance
         float lDist = extractGcodeValue(gcodeLine, 'L', 0);
         float rDist = extractGcodeValue(gcodeLine, 'R', 0);
-		    float speed = extractGcodeValue(gcodeLine, 'F', 800);
+        float speed = extractGcodeValue(gcodeLine, 'F', 800);
         
         if(useRelativeUnits){
             if(abs(lDist) > 0){
@@ -1528,6 +1528,22 @@ void  executeBcodeLine(const String& gcodeLine){
         return;
     }
     
+    if(gcodeLine.substring(0, 3) == "B15"){
+        //The B15 command moves the chains to the length which will put the sled in the center of the sheet
+        
+        //Compute chain length for position 0,0
+        float chainLengthAtMiddle;
+        kinematics.inverse(0,0,&chainLengthAtMiddle,&chainLengthAtMiddle);
+        
+        //Adjust left chain length
+        singleAxisMove(&leftAxis,  chainLengthAtMiddle, 800);
+        
+        //Adjust right chain length
+        singleAxisMove(&rightAxis, chainLengthAtMiddle, 800);
+        
+        //Reload the position
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+    }
 }
     
 void  executeGcodeLine(const String& gcodeLine){
