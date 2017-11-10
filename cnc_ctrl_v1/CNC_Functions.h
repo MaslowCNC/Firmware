@@ -44,7 +44,7 @@ bool zAxisAttached = false;
 
 #define MILLIMETERS 1
 #define INCHES      25.4
-#define MAXFEED     1000      //The maximum allowable feedrate in mm/min
+#define MAXFEED     900      //The maximum allowable feedrate in mm/min
 #define MAXZROTMIN  12.60    // the maximum z rotations per minute
 #define LOOPINTERVAL 10000     // What is the frequency of the PID loop in microseconds
 
