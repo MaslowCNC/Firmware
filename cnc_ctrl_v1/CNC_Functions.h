@@ -20,10 +20,10 @@ libraries*/
 #include "Kinematics.h"
 #include "RingBuffer.h"
 
-#define VERSIONNUMBER 0.94
+#define VERSIONNUMBER 0.97
 
 #define verboseDebug 0    // set to 0 for no debug messages, 1 for single-line messages, 2 to also output ring buffer contents
-#define misloopDebug 0    // set to 1 for a arning evertime the movement loop fails 
+#define misloopDebug 0    // set to 1 for a warning every time the movement loop fails 
                           // to complete before being interrupted, helpful for loop
                           // LOOPINTERVAL tuning
 
@@ -44,7 +44,7 @@ bool zAxisAttached = false;
 
 #define MILLIMETERS 1
 #define INCHES      25.4
-#define MAXFEED     900      //The maximum allowable feedrate in mm/min
+#define MAXFEED     1000      //The maximum allowable feedrate in mm/min
 #define MAXZROTMIN  12.60    // the maximum z rotations per minute
 #define LOOPINTERVAL 10000     // What is the frequency of the PID loop in microseconds
 
@@ -77,16 +77,22 @@ int ENC;
 #define AUX4 14
 #define Probe AUX4 // use this input for zeroing zAxis with G38.2 gcode
 
-int pcbRevisionIndicator = digitalRead(22);
+int pcbVersion = -1;
+
 
 int   setupPins(){
     /*
     
-    Detect the version of the Arduino shield connected, and use the aproprate pins
+    Detect the version of the Arduino shield connected, and use the appropriate pins
+    
+    This function runs before the serial port is open so the version is not printed here
     
     */
     
-    if(pcbRevisionIndicator == 1){
+    //read the pins which indicate the PCB version
+    pcbVersion = (8*digitalRead(53) + 4*digitalRead(52) + 2*digitalRead(23) + 1*digitalRead(22)) - 1;
+    
+    if(pcbVersion == 0){
         //Beta PCB v1.0 Detected
         ENCODER1A = 18;
         ENCODER1B = 19;
@@ -108,7 +114,7 @@ int   setupPins(){
         
         return 1;
     }
-    else{
+    else if(pcbVersion == 1){
         //PCB v1.1 Detected
         ENCODER1A = 20;
         ENCODER1B = 21;
@@ -127,6 +133,32 @@ int   setupPins(){
         ENA = 5;
         ENB = 8;
         ENC = 12;
+        
+        return 0;
+    }
+    else if(pcbVersion == 2){
+        //PCB v1.2 Detected
+        
+        //MP1 - Right Motor
+        ENCODER1A = 20;
+        ENCODER1B = 21;
+        IN1 = 4;
+        IN2 = 6;
+        ENA = 5;
+        
+        //MP2 - Z-axis
+        ENCODER2A = 19;
+        ENCODER2B = 18;
+        IN3 = 7;
+        IN4 = 9;
+        ENB = 8;
+        
+        //MP3 - Left Motor
+        ENCODER3A = 2;
+        ENCODER3B = 3;
+        IN5 = 11;
+        IN6 = 12;
+        ENC = 10;
         
         return 0;
     }
@@ -425,7 +457,7 @@ void movementUpdate(){
   movementUpdated = true;
 }
 
-int   cordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, float MMPerMin){
+int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, float MMPerMin){
     
     /*The move() function moves the tool in a straight line to the position (xEnd, yEnd) at 
     the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
@@ -446,11 +478,11 @@ int   cordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, fl
     //compute feed details
     MMPerMin = constrain(MMPerMin, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     float  stepSizeMM           = computeStepSize(MMPerMin);
-    long   finalNumberOfSteps   = abs(distanceToMoveInMM/stepSizeMM);
+    float   finalNumberOfSteps  = abs(distanceToMoveInMM/stepSizeMM);
     float  delayTime            = calculateDelay(stepSizeMM, MMPerMin);
     float  zFeedrate            = calculateFeedrate((zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
     
-    //throttle back feedrate if it exceeds zaxis max
+    //throttle back federate if it exceeds zaxis max
     if (zFeedrate > zMAXFEED){
       float  zStepSizeMM        = computeStepSize(zMAXFEED);
       finalNumberOfSteps        = abs(zDistanceToMoveInMM/zStepSizeMM);
@@ -723,11 +755,11 @@ int   G1(const String& readString, int G0orG1){
     
     if (G0orG1 == 1){
         //if this is a regular move
-        cordinatedMove(xgoto, ygoto, zgoto, feedrate); //The XY move is performed
+        coordinatedMove(xgoto, ygoto, zgoto, feedrate); //The XY move is performed
     }
     else{
         //if this is a rapid move
-        cordinatedMove(xgoto, ygoto, zgoto, 1000); //move the same as a regular move, but go fast
+        coordinatedMove(xgoto, ygoto, zgoto, 1000); //move the same as a regular move, but go fast
     }
 }
 
@@ -1507,7 +1539,7 @@ void  executeBcodeLine(const String& gcodeLine){
         //Directly command each axis to move to a given distance
         float lDist = extractGcodeValue(gcodeLine, 'L', 0);
         float rDist = extractGcodeValue(gcodeLine, 'R', 0);
-		    float speed = extractGcodeValue(gcodeLine, 'F', 800);
+        float speed = extractGcodeValue(gcodeLine, 'F', 800);
         
         if(useRelativeUnits){
             if(abs(lDist) > 0){
@@ -1606,6 +1638,22 @@ void  executeBcodeLine(const String& gcodeLine){
         return;
     }
     
+    if(gcodeLine.substring(0, 3) == "B15"){
+        //The B15 command moves the chains to the length which will put the sled in the center of the sheet
+        
+        //Compute chain length for position 0,0
+        float chainLengthAtMiddle;
+        kinematics.inverse(0,0,&chainLengthAtMiddle,&chainLengthAtMiddle);
+        
+        //Adjust left chain length
+        singleAxisMove(&leftAxis,  chainLengthAtMiddle, 800);
+        
+        //Adjust right chain length
+        singleAxisMove(&rightAxis, chainLengthAtMiddle, 800);
+        
+        //Reload the position
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+    }
 }
     
 void  executeGcodeLine(const String& gcodeLine){

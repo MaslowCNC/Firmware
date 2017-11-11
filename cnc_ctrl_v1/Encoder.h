@@ -125,6 +125,17 @@ public:
 		interrupts();
 		return ret;
 	}
+	inline int32_t lastStepTime() {
+		if (interrupts_in_use < 2) {
+			noInterrupts();
+			update(&encoder);
+		} else {
+			noInterrupts();
+		}
+		int32_t ret = encoder.lastTime;
+		interrupts();
+		return ret;
+	}
 	inline void write(int32_t p) {
 		noInterrupts();
 		encoder.position = p;

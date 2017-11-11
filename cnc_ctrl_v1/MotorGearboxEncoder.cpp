@@ -142,8 +142,8 @@ float MotorGearboxEncoder::computeSpeed(){
         // This dampens some of the effects of quantization without having 
         // a big effect on other changes
         float saveDistMoved = distMoved;
-        if (distMoved - _lastDistMoved <= -1){ distMoved + .5;}
-        else if (distMoved - _lastDistMoved >= 1){distMoved - .5;}
+        if (distMoved - _lastDistMoved <= -1){ distMoved += .5;}
+        else if (distMoved - _lastDistMoved >= 1){distMoved -= .5;}
         _lastDistMoved = saveDistMoved;
         
         unsigned long timeElapsed =  currentMicros - _lastTimeStamp;
@@ -153,6 +153,16 @@ float MotorGearboxEncoder::computeSpeed(){
     }
     else {
         float elapsedTime = encoder.elapsedTime();
+        float lastTime = micros() - encoder.lastStepTime();  // no direction associated with this
+        if (lastTime > abs(elapsedTime)) {
+            // This allows the RPM to approach 0
+            if (elapsedTime < 0){
+                elapsedTime = -lastTime;
+            }
+            else {
+                elapsedTime = lastTime;
+            }
+        };
 
         _RPM = 0 ;
         if (elapsedTime != 0){
