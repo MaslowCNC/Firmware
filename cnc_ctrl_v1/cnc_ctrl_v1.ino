@@ -21,12 +21,9 @@ void setup(){
     readyCommandString.reserve(128);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
     gcodeLine.reserve(128);
     
-    if(pcbRevisionIndicator == 0){
-        Serial.println(F("PCB v1.1 Detected"));
-    } 
-    if(pcbRevisionIndicator == 1){
-        Serial.println(F("Beta PCB v1.0 Detected"));
-    }
+    Serial.print(F("PCB v1."));
+    Serial.print(pcbVersion);
+    Serial.println(F(" Detected"));
     
     Serial.println(F("ready"));
     _signalReady();
