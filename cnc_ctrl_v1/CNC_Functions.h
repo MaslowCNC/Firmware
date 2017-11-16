@@ -94,45 +94,51 @@ int   setupPins(){
     
     if(pcbVersion == 0){
         //Beta PCB v1.0 Detected
-        ENCODER1A = 18;
-        ENCODER1B = 19;
-        ENCODER2A = 2;
-        ENCODER2B = 3;
-        ENCODER3A = 21;
-        ENCODER3B = 20;
-
-        IN1 = 9;
-        IN2 = 8;
-        IN3 = 11;
-        IN4 = 10;
-        IN5 = 12;
-        IN6 = 13;
-
-        ENA = 6;
-        ENB = 7;
-        ENC = 5;
+        //MP1 - Right Motor
+        ENCODER1A = 18; // INPUT
+        ENCODER1B = 19; // INPUT
+        IN1 = 9;        // OUTPUT
+        IN2 = 8;        // OUTPUT
+        ENA = 6;        // PWM
+        
+        //MP2 - Z-axis
+        ENCODER2A = 2;  // INPUT
+        ENCODER2B = 3;  // INPUT
+        IN3 = 11;       // OUTPUT
+        IN4 = 10;       // OUTPUT
+        ENB = 7;        // PWM
+        
+        //MP3 - Left Motor
+        ENCODER3A = 21; // INPUT
+        ENCODER3B = 20; // INPUT
+        IN5 = 12;       // OUTPUT
+        IN6 = 13;       // OUTPUT
+        ENC = 5;        // PWM
         
         return 1;
     }
     else if(pcbVersion == 1){
         //PCB v1.1 Detected
-        ENCODER1A = 20;
-        ENCODER1B = 21;
-        ENCODER2A = 19;
-        ENCODER2B = 18;
-        ENCODER3A = 2;
-        ENCODER3B = 3;
-
-        IN1 = 6;
-        IN2 = 4;
-        IN3 = 9;
-        IN4 = 7;
-        IN5 = 10;
-        IN6 = 11;
-
-        ENA = 5;
-        ENB = 8;
-        ENC = 12;
+        //MP1 - Right Motor
+        ENCODER1A = 20; // INPUT
+        ENCODER1B = 21; // INPUT
+        IN1 = 6;        // OUTPUT
+        IN2 = 4;        // OUTPUT
+        ENA = 5;        // PWM
+        
+        //MP2 - Z-axis
+        ENCODER2A = 19; // INPUT
+        ENCODER2B = 18; // INPUT
+        IN3 = 9;        // OUTPUT
+        IN4 = 7;        // OUTPUT
+        ENB = 8;        // PWM
+        
+        //MP3 - Left Motor
+        ENCODER3A = 2;   // INPUT
+        ENCODER3B = 3;   // INPUT
+        IN5 = 10;        // OUTPUT
+        IN6 = 11;        // OUTPUT
+        ENC = 12;        // PWM
         
         return 0;
     }
@@ -140,25 +146,25 @@ int   setupPins(){
         //PCB v1.2 Detected
         
         //MP1 - Right Motor
-        ENCODER1A = 20;
-        ENCODER1B = 21;
-        IN1 = 4;
-        IN2 = 6;
-        ENA = 5;
+        ENCODER1A = 20;  // INPUT
+        ENCODER1B = 21;  // INPUT
+        IN1 = 4;         // OUTPUT
+        IN2 = 6;         // OUTPUT
+        ENA = 5;         // PWM
         
         //MP2 - Z-axis
-        ENCODER2A = 19;
-        ENCODER2B = 18;
-        IN3 = 7;
-        IN4 = 9;
-        ENB = 8;
+        ENCODER2A = 19;  // INPUT
+        ENCODER2B = 18;  // INPUT
+        IN3 = 7;         // OUTPUT
+        IN4 = 9;         // OUTPUT
+        ENB = 8;         // PWM
         
         //MP3 - Left Motor
-        ENCODER3A = 2;
-        ENCODER3B = 3;
-        IN5 = 11;
-        IN6 = 12;
-        ENC = 10;
+        ENCODER3A = 2;   // INPUT
+        ENCODER3B = 3;   // INPUT
+        IN5 = 11;        // OUTPUT
+        IN6 = 12;        // OUTPUT
+        ENC = 10;        // PWM
         
         return 0;
     }
