@@ -31,6 +31,7 @@ libraries*/
 Servo myservo;  // create servo object to control a servo 
 
 bool zAxisAttached = false;
+bool zAxisAuto = false;
 
 #define FORWARD           1
 #define BACKWARD         -1
@@ -1167,6 +1168,9 @@ void updateMotorSettings(const String& readString){
     float KpV                = extractGcodeValue(readString, 'V', -1);
     float KiV                = extractGcodeValue(readString, 'W', -1);
     float KdV                = extractGcodeValue(readString, 'X', -1);
+    if (extractGcodeValue(readString, 'Y', -1) != -1) {
+	zAxisAuto            = extractGcodeValue(readString, 'Y', -1);
+    }
       
     //Write the PID values to the axis if new ones have been received
     if (KpPos != -1){
@@ -1223,7 +1227,7 @@ void  setSpindlePower(boolean powerState) {
     // but hard-code these for now
   
     int controlPin = AUX1;
-    boolean useServo = true;
+    boolean useServo = !zAxisAuto;
     boolean activeHigh = true;
     int delayAfterChange = 1000;  // milliseconds
     int servoIdle =  90;  // degrees
