@@ -31,6 +31,7 @@ libraries*/
 Servo myservo;  // create servo object to control a servo 
 
 bool zAxisAttached = false;
+bool zAxisAuto = false;
 
 #define FORWARD           1
 #define BACKWARD         -1
@@ -75,7 +76,8 @@ int ENC;
 #define AUX2 16
 #define AUX3 15
 #define AUX4 14
-#define Probe AUX4 // use this input for zeroing zAxis with G38.2 gcode
+#define SpindlePowerControlPin AUX1 // output for controlling spindle power
+#define ProbePin AUX4 // use this input for zeroing zAxis with G38.2 gcode
 
 int pcbVersion = -1;
 
@@ -411,7 +413,7 @@ void maslowDelay(unsigned long waitTimeMs) {
 
 bool checkForProbeTouch(const int& probePin) {
   /*
-      Check to see if AUX4 has gone LOW
+      Check to see if ProbePin has gone LOW
   */
   if (digitalRead(probePin) == LOW) {
     readyCommandString = "";
@@ -954,8 +956,8 @@ void  G38(const String& readString) {
 
 
       //set Probe to input with pullup
-      pinMode(Probe, INPUT_PULLUP);
-      digitalWrite(Probe,   HIGH);
+      pinMode(ProbePin, INPUT_PULLUP);
+      digitalWrite(ProbePin, HIGH);
 
       if (zgoto != currentZPos / _inchesToMMConversion) {
         //        now move z to the Z destination;
@@ -1014,7 +1016,7 @@ void  G38(const String& readString) {
           }
 
           //check for Probe touchdown
-          if (checkForProbeTouch(Probe)) {
+          if (checkForProbeTouch(ProbePin)) {
             zAxis.set(0);
             zAxis.endMove(0);
             zAxis.attach();
@@ -1024,7 +1026,7 @@ void  G38(const String& readString) {
         }
 
         /*
-           If wen get here, the probe failed to touch down
+           If we get here, the probe failed to touch down
             - print error
             - STOP execution
         */
@@ -1167,6 +1169,9 @@ void updateMotorSettings(const String& readString){
     float KpV                = extractGcodeValue(readString, 'V', -1);
     float KiV                = extractGcodeValue(readString, 'W', -1);
     float KdV                = extractGcodeValue(readString, 'X', -1);
+    if (extractGcodeValue(readString, 'Y', -1) != -1) {
+	zAxisAuto            = extractGcodeValue(readString, 'Y', -1);
+    }
       
     //Write the PID values to the axis if new ones have been received
     if (KpPos != -1){
@@ -1217,13 +1222,8 @@ bool isSafeCommand(const String& readString){
 void  setSpindlePower(boolean powerState) {
     /*
      * Turn spindle on or off depending on powerState
-     */
-  
-    // Need to add settings to choose the method and pin number here
-    // but hard-code these for now
-  
-    int controlPin = AUX1;
-    boolean useServo = true;
+     */ 
+    boolean useServo = !zAxisAuto;
     boolean activeHigh = true;
     int delayAfterChange = 1000;  // milliseconds
     int servoIdle =  90;  // degrees
@@ -1234,7 +1234,7 @@ void  setSpindlePower(boolean powerState) {
     // Now for the main code
     #if defined (verboseDebug) && verboseDebug > 1              
     Serial.print(F("Spindle control uses pin "));
-    Serial.print(controlPin);
+    Serial.print(SpindlePowerControlPin);
     #endif
     if (useServo) {   // use a servo to control a standard wall switch
         #if defined (verboseDebug) && verboseDebug > 1              
@@ -1246,7 +1246,7 @@ void  setSpindlePower(boolean powerState) {
         Serial.print(servoOff);
         Serial.println(F(")"));
         #endif
-        myservo.attach(controlPin); // start servo control
+        myservo.attach(SpindlePowerControlPin); // start servo control
         myservo.write(servoIdle);   // move servo to idle position
         maslowDelay(servoDelay);    // wait for move to complete
         if (powerState) { // turn on spindle
@@ -1268,16 +1268,16 @@ void  setSpindlePower(boolean powerState) {
         if (activeHigh) Serial.println(F("high"));
         else Serial.println(F("low"));
         #endif
-        pinMode(controlPin, OUTPUT);
+        pinMode(SpindlePowerControlPin, OUTPUT);
         if (powerState) { // turn on spindle
             Serial.println(F("Turning Spindle On"));
-            if (activeHigh) digitalWrite(controlPin, HIGH);
-            else digitalWrite(controlPin, LOW);
+            if (activeHigh) digitalWrite(SpindlePowerControlPin, HIGH);
+            else digitalWrite(SpindlePowerControlPin, LOW);
         }
         else {            // turn off spindle
             Serial.println(F("Turning Spindle Off"));
-            if (activeHigh) digitalWrite(controlPin, LOW);
-            else digitalWrite(controlPin, HIGH);
+            if (activeHigh) digitalWrite(SpindlePowerControlPin, LOW);
+            else digitalWrite(SpindlePowerControlPin, HIGH);
         }
     }
     maslowDelay(delayAfterChange);
