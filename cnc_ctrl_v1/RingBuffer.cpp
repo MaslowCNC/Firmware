@@ -27,15 +27,18 @@ serial data.
 RingBuffer::RingBuffer(){
     
 }
-void RingBuffer::write(char letter){
+int RingBuffer::write(char letter){
     /*
     
     Write one character into the ring buffer.
+    Return 0 on success
+    Return 1 on buffer overflow
     
     */
     if (letter != '?'){                    //ignore question marks because grbl sends them all the time
         _buffer[_endOfString] = letter;
-        _incrementEnd();
+        int bufferOverflow = _incrementEnd();
+        return bufferOverflow;
     }
 }
 
@@ -148,7 +151,7 @@ void RingBuffer::_incrementBeginning(){
         _beginningOfString = (_beginningOfString + 1) % BUFFERSIZE;    //move the beginning up one and wrap to zero based upon BUFFERSIZE
 }
 
-void RingBuffer::_incrementEnd(){
+int RingBuffer::_incrementEnd(){
     /*
     
     Increment the pointer to the end of the ring buffer by one.
@@ -157,9 +160,11 @@ void RingBuffer::_incrementEnd(){
     if ( spaceAvailable() == 0 ) {
         Serial.println(F("Buffer overflow!"));
         print();    // print buffer info and contents
+        return 1;
         }
     else
         _endOfString = (_endOfString+1) % BUFFERSIZE;
+        return 0;
  }
 
 void RingBuffer::_incrementVariable(int* variable){

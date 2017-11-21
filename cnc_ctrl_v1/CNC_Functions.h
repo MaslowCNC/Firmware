@@ -213,6 +213,9 @@ int   nextTool              =  0;         //Stores the value of the next tool nu
 float xTarget = 0;
 float yTarget = 0;
 
+
+bool checkForStopCommand();
+
 bool machineReady(){
   bool ret = false;
   if (rcvdMotorSettings && rcvdKinematicSettings){
@@ -333,7 +336,11 @@ void readSerialCommands(){
                 pauseFlag = false;
             }
             else{
-                ringBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
+                int bufferOverflow = ringBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
+                if (bufferOverflow != 0) {
+                  stopFlag = true;
+                  checkForStopCommand();
+                }
             }
         }
         #if defined (verboseDebug) && verboseDebug > 1              
