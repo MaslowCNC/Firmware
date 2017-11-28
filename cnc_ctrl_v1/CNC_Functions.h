@@ -20,7 +20,7 @@ libraries*/
 #include "Kinematics.h"
 #include "RingBuffer.h"
 
-#define VERSIONNUMBER 0.97
+#define VERSIONNUMBER 0.99
 
 #define verboseDebug 0    // set to 0 for no debug messages, 1 for single-line messages, 2 to also output ring buffer contents
 #define misloopDebug 0    // set to 1 for a warning every time the movement loop fails 
@@ -31,6 +31,7 @@ libraries*/
 Servo myservo;  // create servo object to control a servo 
 
 bool zAxisAttached = false;
+bool zAxisAuto = false;
 
 #define FORWARD           1
 #define BACKWARD         -1
@@ -75,7 +76,8 @@ int ENC;
 #define AUX2 16
 #define AUX3 15
 #define AUX4 14
-#define Probe AUX4 // use this input for zeroing zAxis with G38.2 gcode
+#define SpindlePowerControlPin AUX1 // output for controlling spindle power
+#define ProbePin AUX4 // use this input for zeroing zAxis with G38.2 gcode
 
 int pcbVersion = -1;
 
@@ -94,45 +96,51 @@ int   setupPins(){
     
     if(pcbVersion == 0){
         //Beta PCB v1.0 Detected
-        ENCODER1A = 18;
-        ENCODER1B = 19;
-        ENCODER2A = 2;
-        ENCODER2B = 3;
-        ENCODER3A = 21;
-        ENCODER3B = 20;
-
-        IN1 = 9;
-        IN2 = 8;
-        IN3 = 11;
-        IN4 = 10;
-        IN5 = 12;
-        IN6 = 13;
-
-        ENA = 6;
-        ENB = 7;
-        ENC = 5;
+        //MP1 - Right Motor
+        ENCODER1A = 18; // INPUT
+        ENCODER1B = 19; // INPUT
+        IN1 = 9;        // OUTPUT
+        IN2 = 8;        // OUTPUT
+        ENA = 6;        // PWM
+        
+        //MP2 - Z-axis
+        ENCODER2A = 2;  // INPUT
+        ENCODER2B = 3;  // INPUT
+        IN3 = 11;       // OUTPUT
+        IN4 = 10;       // OUTPUT
+        ENB = 7;        // PWM
+        
+        //MP3 - Left Motor
+        ENCODER3A = 21; // INPUT
+        ENCODER3B = 20; // INPUT
+        IN5 = 12;       // OUTPUT
+        IN6 = 13;       // OUTPUT
+        ENC = 5;        // PWM
         
         return 1;
     }
     else if(pcbVersion == 1){
         //PCB v1.1 Detected
-        ENCODER1A = 20;
-        ENCODER1B = 21;
-        ENCODER2A = 19;
-        ENCODER2B = 18;
-        ENCODER3A = 2;
-        ENCODER3B = 3;
-
-        IN1 = 6;
-        IN2 = 4;
-        IN3 = 9;
-        IN4 = 7;
-        IN5 = 10;
-        IN6 = 11;
-
-        ENA = 5;
-        ENB = 8;
-        ENC = 12;
+        //MP1 - Right Motor
+        ENCODER1A = 20; // INPUT
+        ENCODER1B = 21; // INPUT
+        IN1 = 6;        // OUTPUT
+        IN2 = 4;        // OUTPUT
+        ENA = 5;        // PWM
+        
+        //MP2 - Z-axis
+        ENCODER2A = 19; // INPUT
+        ENCODER2B = 18; // INPUT
+        IN3 = 9;        // OUTPUT
+        IN4 = 7;        // OUTPUT
+        ENB = 8;        // PWM
+        
+        //MP3 - Left Motor
+        ENCODER3A = 2;   // INPUT
+        ENCODER3B = 3;   // INPUT
+        IN5 = 10;        // OUTPUT
+        IN6 = 11;        // OUTPUT
+        ENC = 12;        // PWM
         
         return 0;
     }
@@ -140,25 +148,25 @@ int   setupPins(){
         //PCB v1.2 Detected
         
         //MP1 - Right Motor
-        ENCODER1A = 20;
-        ENCODER1B = 21;
-        IN1 = 4;
-        IN2 = 6;
-        ENA = 5;
+        ENCODER1A = 20;  // INPUT
+        ENCODER1B = 21;  // INPUT
+        IN1 = 4;         // OUTPUT
+        IN2 = 6;         // OUTPUT
+        ENA = 5;         // PWM
         
         //MP2 - Z-axis
-        ENCODER2A = 19;
-        ENCODER2B = 18;
-        IN3 = 7;
-        IN4 = 9;
-        ENB = 8;
+        ENCODER2A = 19;  // INPUT
+        ENCODER2B = 18;  // INPUT
+        IN3 = 7;         // OUTPUT
+        IN4 = 9;         // OUTPUT
+        ENB = 8;         // PWM
         
         //MP3 - Left Motor
-        ENCODER3A = 2;
-        ENCODER3B = 3;
-        IN5 = 11;
-        IN6 = 12;
-        ENC = 10;
+        ENCODER3A = 2;   // INPUT
+        ENCODER3B = 3;   // INPUT
+        IN5 = 11;        // OUTPUT
+        IN6 = 12;        // OUTPUT
+        ENC = 10;        // PWM
         
         return 0;
     }
@@ -204,6 +212,9 @@ int   nextTool              =  0;         //Stores the value of the next tool nu
 
 float xTarget = 0;
 float yTarget = 0;
+
+
+bool checkForStopCommand();
 
 bool machineReady(){
   bool ret = false;
@@ -325,7 +336,11 @@ void readSerialCommands(){
                 pauseFlag = false;
             }
             else{
-                ringBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
+                int bufferOverflow = ringBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
+                if (bufferOverflow != 0) {
+                  stopFlag = true;
+                  checkForStopCommand();
+                }
             }
         }
         #if defined (verboseDebug) && verboseDebug > 1              
@@ -405,7 +420,7 @@ void maslowDelay(unsigned long waitTimeMs) {
 
 bool checkForProbeTouch(const int& probePin) {
   /*
-      Check to see if AUX4 has gone LOW
+      Check to see if ProbePin has gone LOW
   */
   if (digitalRead(probePin) == LOW) {
     readyCommandString = "";
@@ -948,8 +963,8 @@ void  G38(const String& readString) {
 
 
       //set Probe to input with pullup
-      pinMode(Probe, INPUT_PULLUP);
-      digitalWrite(Probe,   HIGH);
+      pinMode(ProbePin, INPUT_PULLUP);
+      digitalWrite(ProbePin, HIGH);
 
       if (zgoto != currentZPos / _inchesToMMConversion) {
         //        now move z to the Z destination;
@@ -1008,7 +1023,7 @@ void  G38(const String& readString) {
           }
 
           //check for Probe touchdown
-          if (checkForProbeTouch(Probe)) {
+          if (checkForProbeTouch(ProbePin)) {
             zAxis.set(0);
             zAxis.endMove(0);
             zAxis.attach();
@@ -1018,7 +1033,7 @@ void  G38(const String& readString) {
         }
 
         /*
-           If wen get here, the probe failed to touch down
+           If we get here, the probe failed to touch down
             - print error
             - STOP execution
         */
@@ -1161,6 +1176,9 @@ void updateMotorSettings(const String& readString){
     float KpV                = extractGcodeValue(readString, 'V', -1);
     float KiV                = extractGcodeValue(readString, 'W', -1);
     float KdV                = extractGcodeValue(readString, 'X', -1);
+    if (extractGcodeValue(readString, 'Y', -1) != -1) {
+	zAxisAuto            = extractGcodeValue(readString, 'Y', -1);
+    }
       
     //Write the PID values to the axis if new ones have been received
     if (KpPos != -1){
@@ -1211,13 +1229,8 @@ bool isSafeCommand(const String& readString){
 void  setSpindlePower(boolean powerState) {
     /*
      * Turn spindle on or off depending on powerState
-     */
-  
-    // Need to add settings to choose the method and pin number here
-    // but hard-code these for now
-  
-    int controlPin = AUX1;
-    boolean useServo = true;
+     */ 
+    boolean useServo = !zAxisAuto;
     boolean activeHigh = true;
     int delayAfterChange = 1000;  // milliseconds
     int servoIdle =  90;  // degrees
@@ -1228,7 +1241,7 @@ void  setSpindlePower(boolean powerState) {
     // Now for the main code
     #if defined (verboseDebug) && verboseDebug > 1              
     Serial.print(F("Spindle control uses pin "));
-    Serial.print(controlPin);
+    Serial.print(SpindlePowerControlPin);
     #endif
     if (useServo) {   // use a servo to control a standard wall switch
         #if defined (verboseDebug) && verboseDebug > 1              
@@ -1240,7 +1253,7 @@ void  setSpindlePower(boolean powerState) {
         Serial.print(servoOff);
         Serial.println(F(")"));
         #endif
-        myservo.attach(controlPin); // start servo control
+        myservo.attach(SpindlePowerControlPin); // start servo control
         myservo.write(servoIdle);   // move servo to idle position
         maslowDelay(servoDelay);    // wait for move to complete
         if (powerState) { // turn on spindle
@@ -1262,16 +1275,16 @@ void  setSpindlePower(boolean powerState) {
         if (activeHigh) Serial.println(F("high"));
         else Serial.println(F("low"));
         #endif
-        pinMode(controlPin, OUTPUT);
+        pinMode(SpindlePowerControlPin, OUTPUT);
         if (powerState) { // turn on spindle
             Serial.println(F("Turning Spindle On"));
-            if (activeHigh) digitalWrite(controlPin, HIGH);
-            else digitalWrite(controlPin, LOW);
+            if (activeHigh) digitalWrite(SpindlePowerControlPin, HIGH);
+            else digitalWrite(SpindlePowerControlPin, LOW);
         }
         else {            // turn off spindle
             Serial.println(F("Turning Spindle Off"));
-            if (activeHigh) digitalWrite(controlPin, LOW);
-            else digitalWrite(controlPin, HIGH);
+            if (activeHigh) digitalWrite(SpindlePowerControlPin, LOW);
+            else digitalWrite(SpindlePowerControlPin, HIGH);
         }
     }
     maslowDelay(delayAfterChange);

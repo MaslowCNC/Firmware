@@ -25,7 +25,7 @@
     class RingBuffer{
         public:
             RingBuffer();
-            void  write(char letter);
+            int   write(char letter);
             void  print();
             char  read();
             int   length();
@@ -36,7 +36,7 @@
             
         private:
             void _incrementBeginning();
-            void _incrementEnd();
+            int  _incrementEnd();
             void _incrementVariable(int* variable);
             int  _beginningOfString = 0;             //points to the first valid character which can be read
             int  _endOfString       = 0;             //points to the first open space which can be written
