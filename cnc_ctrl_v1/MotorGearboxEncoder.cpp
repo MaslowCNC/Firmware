@@ -64,8 +64,7 @@ void  MotorGearboxEncoder::computePID(){
 
     _PIDController.Compute();
 
-    // motor.additiveWrite(_pidOutput);
-    motor.write(_pidOutput);
+    motor.additiveWrite(_pidOutput);
 }
 
 void  MotorGearboxEncoder::setPIDValues(float KpV, float KiV, float KdV){

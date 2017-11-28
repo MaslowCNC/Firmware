@@ -1370,6 +1370,7 @@ void PIDTestPosition(Axis* axis, float start, float stop, const float steps, con
             location = start + (span * (i/(steps-1)));
         }
         startTime = micros();
+        current = micros();
         axis->write(location);
         while (startTime + (stepTime * 1000) > current){
           if (current - print > LOOPINTERVAL){
@@ -1378,9 +1379,9 @@ void PIDTestPosition(Axis* axis, float start, float stop, const float steps, con
             }
             else {
               error   =  axis->read() - location;
-              print = current;
               Serial.println(error);
             }
+            print = current;
           }
           current = micros();
         }
@@ -1395,9 +1396,9 @@ void PIDTestPosition(Axis* axis, float start, float stop, const float steps, con
         }            
         else {
           error   =  axis->read() - location;
-          print = current;
           Serial.println(error);
         }
+        print = current;
       }
       current = micros();
     }

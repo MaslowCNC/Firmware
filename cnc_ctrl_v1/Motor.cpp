@@ -73,6 +73,13 @@ int Motor::lastSpeed(){
     return _lastSpeed;
 }
 
+void Motor::additiveWrite(int speed){
+    /*
+    Increases/decreases the motor speed by the passed speed amount
+    */
+    write(_lastSpeed + speed);
+}
+
 void Motor::write(int speed){
     /*
     Sets motor speed from input. Speed = 0 is stopped, -255 is full reverse, 255 is full ahead.

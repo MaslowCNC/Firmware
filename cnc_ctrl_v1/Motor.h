@@ -39,6 +39,7 @@
             void detach();
             void write(int speed);
             int  lastSpeed();
+            void additiveWrite(int speed);
             int  attached();
             int  _convolve(const int& input);
             void setSegment(const int& index, const float& slope, const float& intercept, const int& negativeBound, const int& positiveBound);
