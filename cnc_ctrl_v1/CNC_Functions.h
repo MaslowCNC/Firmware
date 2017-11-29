@@ -354,14 +354,22 @@ void readSerialCommands(){
 bool checkForStopCommand(){
     /*
     Check to see if the STOP command has been sent to the machine.
+    If it has, empty the buffer, stop all axes, set target position to current 
+    position and return true.
     */
     if(stopFlag){
         readyCommandString = "";
         ringBuffer.empty();
+        leftAxis.stop();
+        rightAxis.stop();
+        if(zAxisAttached){
+          zAxis.stop();
+        }
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
         stopFlag = false;
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 
 void  holdPosition(){
@@ -563,19 +571,6 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
             
             //check for a STOP command
             if(checkForStopCommand()){
-                
-                //set the axis positions to save
-                kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
-                leftAxis.endMove(aChainLength);
-                rightAxis.endMove(bChainLength);
-                if(zAxisAttached){
-                  zAxis.endMove(zPosition);
-                }
-                
-                //make sure the positions are displayed correctly after stop
-                xTarget = whereXShouldBeAtThisStep;
-                yTarget = whereYShouldBeAtThisStep;
-                
                 return 1;
             }
         }
@@ -645,7 +640,6 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
         
         //check for a STOP command
         if(checkForStopCommand()){
-            axis->endMove(whereAxisShouldBeAtThisStep);
             return;
         }
     }
@@ -862,15 +856,6 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
             
             //check for a STOP command
             if(checkForStopCommand()){
-                //set the axis positions to save
-                kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
-                leftAxis.endMove(aChainLength);
-                rightAxis.endMove(bChainLength);
-                
-                //make sure the positions are displayed correctly after stop
-                xTarget = whereXShouldBeAtThisStep;
-                yTarget = whereYShouldBeAtThisStep;
-                
                 return 1;
             }
         }
@@ -1018,7 +1003,6 @@ void  G38(const String& readString) {
 
           //check for a STOP command
           if (checkForStopCommand()) {
-            axis->endMove(whereAxisShouldBeAtThisStep);
             return;
           }
 

@@ -242,6 +242,19 @@ void   Axis::endMove(const float& finalTarget){
     
 }
 
+void   Axis::stop(){
+    /*
+
+    Immediately stop and detach the axis, no matter where it is
+
+    */
+
+    _timeLastMoved = millis();
+    _axisTarget    = read();
+    detach();
+
+}
+
 void   Axis::wipeEEPROM(){
     /*
     
