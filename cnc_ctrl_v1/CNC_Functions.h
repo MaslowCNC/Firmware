@@ -1054,30 +1054,32 @@ void  G38(const String& readString) {
   }
 }
 
-void  calibrateChainLengths(){
+void  calibrateChainLengths(String gcodeLine){
     /*
     The calibrateChainLengths function lets the machine know that the chains are set to a given length where each chain is ORIGINCHAINLEN
     in length
     */
     
-    
-    //measure out the left chain
-    Serial.println(F("Measuring out left chain"));
-    singleAxisMove(&leftAxis, ORIGINCHAINLEN, 800);
-    
-    Serial.print(leftAxis.read());
-    Serial.println(F("mm"));
-    
-    leftAxis.detach();
-    
-    //measure out the right chain
-    Serial.println(F("Measuring out right chain"));
-    singleAxisMove(&rightAxis, ORIGINCHAINLEN, 800);
-    
-    Serial.print(rightAxis.read());
-    Serial.println(F("mm"));
-    
-    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+    if (gcodeLine.indexOf('L') != -1){
+        //measure out the left chain
+        Serial.println(F("Measuring out left chain"));
+        singleAxisMove(&leftAxis, ORIGINCHAINLEN, 800);
+        
+        Serial.print(leftAxis.read());
+        Serial.println(F("mm"));
+        
+        leftAxis.detach();
+    }
+    else{
+        //measure out the right chain
+        Serial.println(F("Measuring out right chain"));
+        singleAxisMove(&rightAxis, ORIGINCHAINLEN, 800);
+        
+        Serial.print(rightAxis.read());
+        Serial.println(F("mm"));
+        
+        rightAxis.detach();
+    }
     
 }
 
@@ -1415,7 +1417,7 @@ void  executeBcodeLine(const String& gcodeLine){
     }
     
     if(gcodeLine.substring(0, 3) == "B02"){
-        calibrateChainLengths();
+        calibrateChainLengths(gcodeLine);
         return;
     }
     
