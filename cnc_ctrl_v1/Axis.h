@@ -35,6 +35,7 @@
             int    attach();
             void   hold();
             void   endMove(const float& finalTarget);
+            void   stop();
             float  target();
             float  error();
             float  setpoint();
