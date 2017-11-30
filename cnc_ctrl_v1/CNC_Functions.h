@@ -437,16 +437,16 @@ float calculateDelay(const float& stepSizeMM, const float& feedrateMMPerMin){
     return LOOPINTERVAL;
 }
 
-float calculateFeedrate(const float& stepSizeMM, const float& msPerStep){
+float calculateFeedrate(const float& stepSizeMM, const float& usPerStep){
     /*
     Calculate the time delay between each step for a given feedrate
     */
     
-    #define MINUTEINMS 60000.0
+    #define MINUTEINUS 60000000.0
     
     // derivation: ms / step = 1 min in ms / dist in one min
     
-    float feedrate = (stepSizeMM*MINUTEINMS)/msPerStep;
+    float feedrate = (stepSizeMM*MINUTEINUS)/usPerStep;
     
     return feedrate;
 }
@@ -493,9 +493,9 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
     //compute feed details
     MMPerMin = constrain(MMPerMin, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     float  stepSizeMM           = computeStepSize(MMPerMin);
-    float   finalNumberOfSteps  = abs(distanceToMoveInMM/stepSizeMM);
+    float  finalNumberOfSteps   = abs(distanceToMoveInMM/stepSizeMM);
     float  delayTime            = calculateDelay(stepSizeMM, MMPerMin);
-    float  zFeedrate            = calculateFeedrate((zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
+    float  zFeedrate            = calculateFeedrate(abs(zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
     
     //throttle back federate if it exceeds zaxis max
     if (zFeedrate > zMAXFEED){
@@ -731,20 +731,7 @@ int   G1(const String& readString, int G0orG1){
     feedrate = constrain(feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     
     //if the zaxis is attached
-    if(zAxisAttached){
-        float threshold = .01;
-        if (abs(zgoto- currentZPos) > threshold){
-            float zfeedrate;
-            if (G0orG1 == 1) {
-                zfeedrate = constrain(feedrate, 1, MAXZROTMIN * abs(zAxis.getPitch()));
-            }
-            else {
-                zfeedrate = MAXZROTMIN * abs(zAxis.getPitch());
-            }
-            singleAxisMove(&zAxis, zgoto, zfeedrate);
-        }
-    }
-    else{
+    if(!zAxisAttached){
         float threshold = .1; //units of mm
         if (abs(currentZPos - zgoto) > threshold){
             Serial.print(F("Message: Please adjust Z-Axis to a depth of "));
