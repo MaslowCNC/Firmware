@@ -1611,7 +1611,7 @@ void  executeBcodeLine(const String& gcodeLine){
         return;
     }
     
-    if(gcodeLine.substring(0, 3) == "B15"){
+    if(gcodeLine.substring(0, 3) == "B16"){
         //Incrementally tests voltages to see what RPMs they produce
         float  left       = extractGcodeValue(gcodeLine, 'L', 0);
         float  useZ       = extractGcodeValue(gcodeLine, 'Z', 0);
