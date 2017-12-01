@@ -242,6 +242,19 @@ void   Axis::endMove(const float& finalTarget){
     
 }
 
+void   Axis::stop(){
+    /*
+
+    Immediately stop the axis where it is, not where it should be
+
+    */
+
+    _timeLastMoved = millis();
+    _axisTarget    = read()/_mmPerRotation;
+    _pidSetpoint   = read()/_mmPerRotation;
+
+}
+
 void   Axis::wipeEEPROM(){
     /*
     

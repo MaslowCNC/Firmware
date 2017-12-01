@@ -354,14 +354,22 @@ void readSerialCommands(){
 bool checkForStopCommand(){
     /*
     Check to see if the STOP command has been sent to the machine.
+    If it has, empty the buffer, stop all axes, set target position to current 
+    position and return true.
     */
     if(stopFlag){
         readyCommandString = "";
         ringBuffer.empty();
+        leftAxis.stop();
+        rightAxis.stop();
+        if(zAxisAttached){
+          zAxis.stop();
+        }
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
         stopFlag = false;
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 
 void  holdPosition(){
@@ -437,16 +445,16 @@ float calculateDelay(const float& stepSizeMM, const float& feedrateMMPerMin){
     return LOOPINTERVAL;
 }
 
-float calculateFeedrate(const float& stepSizeMM, const float& msPerStep){
+float calculateFeedrate(const float& stepSizeMM, const float& usPerStep){
     /*
     Calculate the time delay between each step for a given feedrate
     */
     
-    #define MINUTEINMS 60000.0
+    #define MINUTEINUS 60000000.0
     
     // derivation: ms / step = 1 min in ms / dist in one min
     
-    float feedrate = (stepSizeMM*MINUTEINMS)/msPerStep;
+    float feedrate = (stepSizeMM*MINUTEINUS)/usPerStep;
     
     return feedrate;
 }
@@ -493,9 +501,9 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
     //compute feed details
     MMPerMin = constrain(MMPerMin, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     float  stepSizeMM           = computeStepSize(MMPerMin);
-    float   finalNumberOfSteps  = abs(distanceToMoveInMM/stepSizeMM);
+    float  finalNumberOfSteps   = abs(distanceToMoveInMM/stepSizeMM);
     float  delayTime            = calculateDelay(stepSizeMM, MMPerMin);
-    float  zFeedrate            = calculateFeedrate((zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
+    float  zFeedrate            = calculateFeedrate(abs(zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
     
     //throttle back federate if it exceeds zaxis max
     if (zFeedrate > zMAXFEED){
@@ -563,19 +571,6 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
             
             //check for a STOP command
             if(checkForStopCommand()){
-                
-                //set the axis positions to save
-                kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
-                leftAxis.endMove(aChainLength);
-                rightAxis.endMove(bChainLength);
-                if(zAxisAttached){
-                  zAxis.endMove(zPosition);
-                }
-                
-                //make sure the positions are displayed correctly after stop
-                xTarget = whereXShouldBeAtThisStep;
-                yTarget = whereYShouldBeAtThisStep;
-                
                 return 1;
             }
         }
@@ -645,7 +640,6 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
         
         //check for a STOP command
         if(checkForStopCommand()){
-            axis->endMove(whereAxisShouldBeAtThisStep);
             return;
         }
     }
@@ -731,20 +725,7 @@ int   G1(const String& readString, int G0orG1){
     feedrate = constrain(feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     
     //if the zaxis is attached
-    if(zAxisAttached){
-        float threshold = .01;
-        if (abs(zgoto- currentZPos) > threshold){
-            float zfeedrate;
-            if (G0orG1 == 1) {
-                zfeedrate = constrain(feedrate, 1, MAXZROTMIN * abs(zAxis.getPitch()));
-            }
-            else {
-                zfeedrate = MAXZROTMIN * abs(zAxis.getPitch());
-            }
-            singleAxisMove(&zAxis, zgoto, zfeedrate);
-        }
-    }
-    else{
+    if(!zAxisAttached){
         float threshold = .1; //units of mm
         if (abs(currentZPos - zgoto) > threshold){
             Serial.print(F("Message: Please adjust Z-Axis to a depth of "));
@@ -862,15 +843,6 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
             
             //check for a STOP command
             if(checkForStopCommand()){
-                //set the axis positions to save
-                kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
-                leftAxis.endMove(aChainLength);
-                rightAxis.endMove(bChainLength);
-                
-                //make sure the positions are displayed correctly after stop
-                xTarget = whereXShouldBeAtThisStep;
-                yTarget = whereYShouldBeAtThisStep;
-                
                 return 1;
             }
         }
@@ -1018,7 +990,6 @@ void  G38(const String& readString) {
 
           //check for a STOP command
           if (checkForStopCommand()) {
-            axis->endMove(whereAxisShouldBeAtThisStep);
             return;
           }
 
@@ -1054,30 +1025,32 @@ void  G38(const String& readString) {
   }
 }
 
-void  calibrateChainLengths(){
+void  calibrateChainLengths(String gcodeLine){
     /*
     The calibrateChainLengths function lets the machine know that the chains are set to a given length where each chain is ORIGINCHAINLEN
     in length
     */
     
-    
-    //measure out the left chain
-    Serial.println(F("Measuring out left chain"));
-    singleAxisMove(&leftAxis, ORIGINCHAINLEN, 800);
-    
-    Serial.print(leftAxis.read());
-    Serial.println(F("mm"));
-    
-    leftAxis.detach();
-    
-    //measure out the right chain
-    Serial.println(F("Measuring out right chain"));
-    singleAxisMove(&rightAxis, ORIGINCHAINLEN, 800);
-    
-    Serial.print(rightAxis.read());
-    Serial.println(F("mm"));
-    
-    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+    if (gcodeLine.indexOf('L') != -1){
+        //measure out the left chain
+        Serial.println(F("Measuring out left chain"));
+        singleAxisMove(&leftAxis, ORIGINCHAINLEN, 800);
+        
+        Serial.print(leftAxis.read());
+        Serial.println(F("mm"));
+        
+        leftAxis.detach();
+    }
+    else{
+        //measure out the right chain
+        Serial.println(F("Measuring out right chain"));
+        singleAxisMove(&rightAxis, ORIGINCHAINLEN, 800);
+        
+        Serial.print(rightAxis.read());
+        Serial.println(F("mm"));
+        
+        rightAxis.detach();
+    }
     
 }
 
@@ -1478,7 +1451,7 @@ void  executeBcodeLine(const String& gcodeLine){
     }
     
     if(gcodeLine.substring(0, 3) == "B02"){
-        calibrateChainLengths();
+        calibrateChainLengths(gcodeLine);
         return;
     }
     
