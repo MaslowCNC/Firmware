@@ -217,3 +217,20 @@ double PID::GetKd(){ return  dispKd;}
 int PID::GetMode(){ return  inAuto ? AUTOMATIC : MANUAL;}
 int PID::GetDirection(){ return controllerDirection;}
 double PID::GetIterm(){ return outputSum; }
+String PID::pidState() {
+    /*
+    Returns a comma seperated string of the PID setpoint, input, & output
+    useful for debugging
+    */
+    double input = *myInput;
+    double setpoint = *mySetpoint;
+    double output = *myOutput;
+    String ret = "";
+    ret.concat((double)setpoint);
+    ret.concat(",");
+    ret.concat((double)input);
+    ret.concat(",");
+    ret.concat((double)output);
+    return ret;
+}
+

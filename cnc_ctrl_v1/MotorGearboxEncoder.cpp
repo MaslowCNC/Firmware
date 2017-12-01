@@ -60,11 +60,11 @@ void  MotorGearboxEncoder::computePID(){
     /*
     Recompute the speed control PID loop and command the motor to move.
     */
-    _currentSpeed = _computeSpeed();
+    _currentSpeed = computeSpeed();
 
     _PIDController.Compute();
 
-    motor.write(_pidOutput);
+    motor.additiveWrite(_pidOutput);
 }
 
 void  MotorGearboxEncoder::setPIDValues(float KpV, float KiV, float KdV){
@@ -91,6 +91,15 @@ String  MotorGearboxEncoder::getPIDString(){
     return PIDString + _Kp + ",Ki=" + _Ki + ",Kd=" + _Kd;
 }
 
+String  MotorGearboxEncoder::pidState(){
+    /*
+    
+    Get current value of PID variables, setpoint, input, output
+    
+    */
+    return _PIDController.pidState();
+}
+
 void MotorGearboxEncoder::setPIDAggressiveness(float aggressiveness){
     /*
     
@@ -114,7 +123,7 @@ void MotorGearboxEncoder::setEncoderResolution(float resolution){
     
 }
 
-float MotorGearboxEncoder::_computeSpeed(){
+float MotorGearboxEncoder::computeSpeed(){
     /*
     
     Returns the motors speed in RPM since the last time this function was called

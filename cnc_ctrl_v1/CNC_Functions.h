@@ -1263,12 +1263,14 @@ void  setSpindlePower(boolean powerState) {
     maslowDelay(delayAfterChange);
 }
 
-void PIDTestVelocity(Axis* axis, const float start, const float stop, const float steps){
+void PIDTestVelocity(Axis* axis, const float start, const float stop, const float steps, const float version){
     // Moves the defined Axis at series of speed steps for PID tuning
     // Start Log
     Serial.println(F("--PID Velocity Test Start--"));
-    Serial.println("Axis=" + axis->motorGearboxEncoder.name());
     Serial.println(axis->motorGearboxEncoder.getPIDString());
+    if (version == 2) {
+      Serial.println(F("setpoint,input,output"));
+    }
 
     double startTime;
     double print = micros();
@@ -1290,12 +1292,16 @@ void PIDTestVelocity(Axis* axis, const float start, const float stop, const floa
         startTime = micros();
         axis->motorGearboxEncoder.write(speed);
         while (startTime + 2000000 > current){
-          if (current - print > 20000){
-            // Calculate and log error on same frequency as PID interrupt
-            reportedSpeed= axis->motorGearboxEncoder.cachedSpeed();
-            error =  reportedSpeed - speed;
-            print = current;
-            Serial.println(error);
+          if (current - print > LOOPINTERVAL){
+            if (version == 2) {
+              Serial.println(axis->motorGearboxEncoder.pidState());
+            }
+            else {
+              reportedSpeed= axis->motorGearboxEncoder.cachedSpeed();
+              error =  reportedSpeed - speed;
+              print = current;
+              Serial.println(error);
+            }
           }
           current = micros();
         }
@@ -1310,19 +1316,34 @@ void PIDTestVelocity(Axis* axis, const float start, const float stop, const floa
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
 }
 
-void PIDTestPosition(Axis* axis, float start, float stop, const float steps, const float stepTime){
+void positionPIDOutput (Axis* axis, float setpoint, float startingPoint){
+  Serial.print((setpoint - startingPoint), 4);
+  Serial.print(F(","));
+  Serial.print((axis->pidInput() - startingPoint),4);
+  Serial.print(F(","));  
+  Serial.print(axis->pidOutput(),4);
+  Serial.print(F(","));
+  Serial.print(axis->motorGearboxEncoder.cachedSpeed(), 4);
+  Serial.print(F(","));
+  Serial.println(axis->motorGearboxEncoder.motor.lastSpeed());
+}
+
+void PIDTestPosition(Axis* axis, float start, float stop, const float steps, const float stepTime, const float version){
     // Moves the defined Axis at series of chain distance steps for PID tuning
     // Start Log
     Serial.println(F("--PID Position Test Start--"));
-    Serial.println("Axis=" + axis->motorGearboxEncoder.name());
     Serial.println(axis->getPIDString());
+    if (version == 2) {
+      Serial.println(F("setpoint,input,output,rpminput,voltage"));
+    }
 
-    double startTime;
-    double print = millis();
-    double current = millis();
+    unsigned long startTime;
+    unsigned long print = micros();
+    unsigned long current = micros();
     float error;
-    start = axis->read() + start;
-    stop  = axis->read() + stop;
+    float startingPoint = axis->read();
+    start = startingPoint + start;
+    stop  = startingPoint + stop;
     float span = stop - start;
     float location;
     
@@ -1334,33 +1355,75 @@ void PIDTestPosition(Axis* axis, float start, float stop, const float steps, con
         if (i > 0){
             location = start + (span * (i/(steps-1)));
         }
-        startTime = millis();
+        startTime = micros();
+        current = micros();
         axis->write(location);
-        while (startTime + stepTime > current){
-          if (current - print > (stepTime/10)){
-            // Calculate and log error 100 times per step
-            error   =  axis->read() - location;
+        while (startTime + (stepTime * 1000) > current){
+          if (current - print > LOOPINTERVAL){
+            if (version == 2) {
+              positionPIDOutput(axis, location, startingPoint);
+            }
+            else {
+              error   =  axis->read() - location;
+              Serial.println(error);
+            }
             print = current;
-            Serial.println(error);
           }
-          current = millis();
+          current = micros();
         }
     }
-    startTime = millis();
-    current = millis();
-    while (startTime + 1000 > current){
-      if (current - print > 10){
-        // Calculate and log error 100 times per step
-        error   =  axis->read() - location;
+    startTime = micros();
+    current = micros();
+    //Allow 1 seccond to settle out
+    while (startTime + 1000000 > current){
+      if (current - print > LOOPINTERVAL){
+        if (version == 2) {
+          positionPIDOutput(axis, location, startingPoint);
+        }            
+        else {
+          error   =  axis->read() - location;
+          Serial.println(error);
+        }
         print = current;
-        Serial.println(error);
       }
-      current = millis();
+      current = micros();
     }
     // Print end of log, and update axis for use again
     Serial.println(F("--PID Position Test Stop--\n"));
     axis->write(axis->read());
     axis->detach();
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+}
+
+void voltageTest(Axis* axis, int start, int stop){
+    // Moves the defined Axis at a series of voltages and reports the resulting
+    // RPM
+    Serial.println(F("--Voltage Test Start--"));
+    int direction = 1;
+    if (stop < start){ direction = -1;}
+    int steps = abs(start - stop);
+    unsigned long startTime = millis() + 200;
+    unsigned long currentTime = millis();
+    unsigned long printTime = 0;
+    
+    for (int i = 0; i <= steps; i++){
+        axis->motorGearboxEncoder.motor.directWrite((start + (i*direction)));
+        while (startTime > currentTime - (i * 200)){
+            currentTime = millis();
+            if ((printTime + 50) <= currentTime){
+                Serial.print((start + (i*direction)));
+                Serial.print(F(","));
+                Serial.print(axis->motorGearboxEncoder.computeSpeed(),4);
+                Serial.print(F("\n"));
+                printTime = millis();
+            }
+        }
+    }
+    
+    // Print end of log, and update axis for use again
+    axis->motorGearboxEncoder.motor.directWrite(0);
+    Serial.println(F("--Voltage Test Stop--\n"));
+    axis->write(axis->read());
     kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
 }
 
@@ -1522,11 +1585,12 @@ void  executeBcodeLine(const String& gcodeLine){
         float  start      = extractGcodeValue(gcodeLine, 'S', 1);
         float  stop       = extractGcodeValue(gcodeLine, 'F', 1);
         float  steps      = extractGcodeValue(gcodeLine, 'I', 1);
+        float  version    = extractGcodeValue(gcodeLine, 'V', 1);
         
         Axis* axis = &rightAxis;
         if (left > 0) axis = &leftAxis;
         if (useZ > 0) axis = &zAxis;
-        PIDTestVelocity(axis, start, stop, steps);
+        PIDTestVelocity(axis, start, stop, steps, version);
         return;
     }
     
@@ -1538,11 +1602,26 @@ void  executeBcodeLine(const String& gcodeLine){
         float  stop       = extractGcodeValue(gcodeLine, 'F', 1);
         float  steps      = extractGcodeValue(gcodeLine, 'I', 1);
         float  stepTime   = extractGcodeValue(gcodeLine, 'T', 2000);
+        float  version    = extractGcodeValue(gcodeLine, 'V', 1);
         
         Axis* axis = &rightAxis;
         if (left > 0) axis = &leftAxis;
         if (useZ > 0) axis = &zAxis;
-        PIDTestPosition(axis, start, stop, steps, stepTime);
+        PIDTestPosition(axis, start, stop, steps, stepTime, version);
+        return;
+    }
+    
+    if(gcodeLine.substring(0, 3) == "B16"){
+        //Incrementally tests voltages to see what RPMs they produce
+        float  left       = extractGcodeValue(gcodeLine, 'L', 0);
+        float  useZ       = extractGcodeValue(gcodeLine, 'Z', 0);
+        float  start      = extractGcodeValue(gcodeLine, 'S', 1);
+        float  stop       = extractGcodeValue(gcodeLine, 'F', 1);
+        
+        Axis* axis = &rightAxis;
+        if (left > 0) axis = &leftAxis;
+        if (useZ > 0) axis = &zAxis;
+        voltageTest(axis, start, stop);
         return;
     }
     

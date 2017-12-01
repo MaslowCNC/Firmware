@@ -37,7 +37,9 @@
             void       setPIDAggressiveness(float aggressiveness);
             void       setPIDValues(float KpV, float KiV, float KdV);
             void       setEncoderResolution(float resolution);
+            float      computeSpeed();
             String     getPIDString();
+            String     pidState();
         private:
             double     _targetSpeed;
             double     _currentSpeed;
@@ -50,7 +52,6 @@
             PID        _PIDController;
             double     _Kp=0, _Ki=0, _Kd=0;
             float      _encoderStepsToRPMScaleFactor = 7364.0;   //6*10^7 us per minute divided by 8148 steps per revolution
-            float      _computeSpeed();
     };
 
     #endif
