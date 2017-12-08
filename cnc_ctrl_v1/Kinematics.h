@@ -20,9 +20,6 @@
     
     #define ORIGINCHAINLEN   1650
     
-    #include "Arduino.h"
-    #include "FormatDouble.h"
-
     class Kinematics{
         public:
             Kinematics();

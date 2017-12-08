@@ -20,9 +20,7 @@ The RingBuffer module creates a circular character buffer used for storing incom
 serial data.
 */
 
-#include "Arduino.h"
-#include "RingBuffer.h"
-
+#include "maslow.h"
 
 RingBuffer::RingBuffer(){
     

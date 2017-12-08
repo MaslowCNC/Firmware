@@ -18,8 +18,6 @@
     #ifndef RingBuffer_h
     #define RingBuffer_h
     
-    #include "Arduino.h"
-    
     #define BUFFERSIZE 128
 
     class RingBuffer{

@@ -17,11 +17,6 @@
     
     #ifndef MotorGearboxEncoder_h
     #define MotorGearboxEncoder_h
-
-    #include "Arduino.h"
-    #include "Encoder.h"
-    #include "Motor.h"
-    #include "PID_v1.h"
     
     class MotorGearboxEncoder{
         public:

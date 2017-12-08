@@ -38,8 +38,6 @@
 #include "pins_arduino.h"
 #endif
 
-#include "utility/direct_pin_read.h"
-
 #if defined(ENCODER_USE_INTERRUPTS) || !defined(ENCODER_DO_NOT_USE_INTERRUPTS)
 #define ENCODER_USE_INTERRUPTS
 #define ENCODER_ARGLIST_SIZE CORE_NUM_INTERRUPT

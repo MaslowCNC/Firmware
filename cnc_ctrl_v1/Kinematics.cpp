@@ -20,8 +20,7 @@ The Kinematics module relates the lengths of the chains to the position of the c
 in X-Y space.
 */
 
-#include "Arduino.h"
-#include "Kinematics.h"
+#include "maslow.h"
 
 
 Kinematics::Kinematics(){

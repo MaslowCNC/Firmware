@@ -21,8 +21,7 @@ to be a drop in replacement for a continuous rotation servo.
 
 */
 
-#include "Arduino.h"
-#include "MotorGearboxEncoder.h"
+#include "maslow.h"
 
 MotorGearboxEncoder::MotorGearboxEncoder(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const unsigned long& loopInterval)
 :

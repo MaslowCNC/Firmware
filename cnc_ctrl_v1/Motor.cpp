@@ -21,9 +21,7 @@ to be a drop in replacement for a continuous rotation servo.
 
 */
 
-#include "Arduino.h"
-#include "Motor.h"
-#include "TimerOne.h"
+#include "maslow.h"
 
 Motor::Motor(){
   

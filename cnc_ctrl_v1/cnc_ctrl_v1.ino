@@ -12,8 +12,8 @@
     
     Copyright 2014-2017 Bar Smith*/
     
+#include "maslow.h"
 #include "CNC_Functions.h"
-#include "TimerOne.h"
 
 void setup(){
     Serial.begin(57600);

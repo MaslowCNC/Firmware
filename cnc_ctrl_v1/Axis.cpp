@@ -16,8 +16,7 @@
     Copyright 2014-2017 Bar Smith*/ 
 
 
-#include "Arduino.h"
-#include "Axis.h"
+#include "maslow.h"
 
 #define EEPROMVALIDDATA 56
 #define SIZEOFFLOAT      4

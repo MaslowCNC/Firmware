@@ -36,9 +36,6 @@
 #ifndef TIMERONE_h
 #define TIMERONE_h
 
-#include <avr/io.h>
-#include <avr/interrupt.h>
-
 #define RESOLUTION 65536    // Timer1 is 16 bit
 
 class TimerOne
