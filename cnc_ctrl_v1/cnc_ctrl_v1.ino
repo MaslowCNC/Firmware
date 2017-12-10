@@ -15,9 +15,11 @@
 #include "maslow.h"
 #include "CNC_Functions.h"
 
+// Declare system global state structure
+system_t sys;
+
 void setup(){
     Serial.begin(57600);
-    
     readyCommandString.reserve(128);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
     gcodeLine.reserve(128);
     
@@ -49,7 +51,7 @@ void runsOnATimer(){
 
 void loop(){
     
-    readyCommandString = ringBuffer.readLine();
+    readyCommandString = gcodeBufferReadline();
     
     if (readyCommandString.length() > 0){
         readyCommandString.trim();  // remove leading and trailing white space

@@ -169,15 +169,10 @@ Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, 'Z',     Z_EEPROM_ADR, LOOPI
 
 
 Kinematics kinematics;
-RingBuffer ringBuffer;
-
-int expectedMaxLineLength   = 60;   // expected maximum Gcode line length in characters, including line ending character(s)
 
 float feedrate              =  500;
 float _inchesToMMConversion =  1;
 bool  useRelativeUnits      =  false;
-bool  stopFlag              =  false;
-bool  pauseFlag             =  false;
 bool  rcvdKinematicSettings =  false;
 bool  rcvdMotorSettings     =  false;
 bool  encoderStepsChanged   =  false;
@@ -238,7 +233,7 @@ void  returnError(){
         Serial.print(',');
         Serial.print(rightAxis.error());
         Serial.print(',');
-        Serial.print(ringBuffer.spaceAvailable());
+        Serial.print(gcodeSpaceAvailable());
         Serial.println(F("]"));
 }
 
@@ -269,20 +264,6 @@ void  returnPoz(const float& x, const float& y, const float& z){
     
 }
 
-void  _signalReady(){
-    /*
-    
-    Signal to the controlling software that the machine has executed the last
-    gcode line successfully.
-    
-    */
-    
-    if ( (ringBuffer.spaceAvailable() > expectedMaxLineLength)    // if there is space in the buffer to accept the expected maximum line length
-          && (ringBuffer.numberOfLines() < 4) ) {                 // and if there are fewer than 4 lines in the buffer
-        Serial.println(F("ok"));                                  // then request new code
-    }
-}
-
 void  _watchDog(){
     /*
     Watchdog tells ground control that the machine is ready every second. _watchDog() should only be called when 
@@ -297,7 +278,7 @@ void  _watchDog(){
         
         if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
             
-            if (ringBuffer.length() == 0) {       // if the buffer is empty
+            if (gcodeIsBufferEmpty()) {       // if the buffer is empty
                 #if defined (verboseDebug) && verboseDebug > 0              
                 Serial.println(F("_watchDog requesting new code"));
                 #endif
@@ -310,52 +291,22 @@ void  _watchDog(){
     }
 }
 
-void readSerialCommands(){
-    /*
-    Check to see if a new character is available from the serial connection, read it if one is.
-    */
-    if (Serial.available() > 0) {
-        while (Serial.available() > 0) {
-            char c = Serial.read();
-            if (c == '!'){
-                stopFlag = true;
-                pauseFlag = false;
-            }
-            else if (c == '~'){
-                pauseFlag = false;
-            }
-            else{
-                int bufferOverflow = ringBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
-                if (bufferOverflow != 0) {
-                  stopFlag = true;
-                  checkForStopCommand();
-                }
-            }
-        }
-        #if defined (verboseDebug) && verboseDebug > 1              
-        // print ring buffer contents
-        Serial.println(F("rSC added to ring buffer"));
-        ringBuffer.print();        
-        #endif
-    }
-}
-
 bool checkForStopCommand(){
     /*
     Check to see if the STOP command has been sent to the machine.
     If it has, empty the buffer, stop all axes, set target position to current 
     position and return true.
     */
-    if(stopFlag){
+    if(sys.stop){
         readyCommandString = "";
-        ringBuffer.empty();
+        gcodeClearBuffer();
         leftAxis.stop();
         rightAxis.stop();
         if(zAxisAttached){
           zAxis.stop();
         }
         kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
-        stopFlag = false;
+        sys.stop = false;
         return true;
     }
     return false;
@@ -386,7 +337,7 @@ void pause(){
     
     */
     
-    pauseFlag = true;
+    sys.pause = true;
     Serial.println(F("Maslow Paused"));
     
     while(1){
@@ -397,7 +348,7 @@ void pause(){
     
         returnPoz(xTarget, yTarget, zAxis.read());
         
-        if (!pauseFlag){
+        if (!sys.pause){
             return;
         }
     }    
@@ -1007,7 +958,7 @@ void  G38(const String& readString) {
         */
         axis->endMove(endPos);
         Serial.println(F("error: probe did not connect\nprogram stopped\nz axis not set\n"));
-        stopFlag = true;
+        sys.stop = true;
         checkForStopCommand();
 
       } // end if zgoto != currentZPos / _inchesToMMConversion
@@ -1860,7 +1811,7 @@ void  interpretCommandString(String& cmdString){
     #if defined (verboseDebug) && verboseDebug > 1              
     // print ring buffer contents
     Serial.println(F("iCS execution complete"));
-    ringBuffer.print();
+    gcodePrintBuffer();
     #endif
     
     _signalReady();
