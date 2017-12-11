@@ -31,7 +31,7 @@
             int   spaceAvailable();
             void  empty();
             String readLine();
-            
+            String prettyReadLine();
         private:
             void _incrementBeginning();
             int  _incrementEnd();

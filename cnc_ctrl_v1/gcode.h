@@ -22,17 +22,16 @@ extern String readyCommandString; //next command queued up and ready to send
 
 void gcodeExecuteLoop();
 void readSerialCommands();
-int gcodeSpaceAvailable();
 void  _signalReady();
-bool gcodeIsBufferEmpty();
-void gcodeClearBuffer();
-void gcodePrintBuffer();
 String gcodeBufferReadline();
+int   findEndOfNumber(const String&, const int&);
+float extractGcodeValue(const String&, char, const float&);
 void  executeBcodeLine(const String&);
 void  executeGcodeLine(const String&);
 void  executeMcodeLine(const String&);
 void  executeOtherCodeLine(const String&);
 int   findNextGM(const String&, const int&);
+bool isSafeCommand(const String&);
 void  interpretCommandString(String&);
 
 #endif

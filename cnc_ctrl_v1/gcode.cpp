@@ -18,18 +18,18 @@ Copyright 2014-2017 Bar Smith*/
 // This file contains all the functions used to receive and parse the gcode
 // commands
 
-#include <Arduino.h>
-#include "system.h"
-#include "RingBuffer.h"
+#include "maslow.h"
 
-RingBuffer ringBuffer;
+RingBuffer incSerialBuffer;
 int expectedMaxLineLength   = 60;   // expected maximum Gcode line length in characters, including line ending character(s)
 String readyCommandString = "";  //KRK why is this a global?
+// Commands that can safely be executed before machineReady
+String safeCommands[] = {"B01", "B03", "B04", "B05", "B07", "B12", "G20", "G21", "G90", "G91"};
 
 void readSerialCommands(){
     /*
     Check to see if a new character is available from the serial connection, 
-    if this is a necessary character write to the ringBuffer otherwise discard
+    if this is a necessary character write to the incSerialBuffer otherwise discard
     it.
     */
     if (Serial.available() > 0) {
@@ -43,7 +43,7 @@ void readSerialCommands(){
                 sys.pause = false;
             }
             else{
-                int bufferOverflow = ringBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
+                int bufferOverflow = incSerialBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
                 if (bufferOverflow != 0) {
                   sys.stop = true;
                 }
@@ -52,42 +52,12 @@ void readSerialCommands(){
         #if defined (verboseDebug) && verboseDebug > 1              
         // print ring buffer contents
         Serial.println(F("rSC added to ring buffer"));
-        ringBuffer.print();        
+        incSerialBuffer.print();        
         #endif
     }
 }
 
-int gcodeSpaceAvailable(){
-    return ringBuffer.spaceAvailable();
-}
-
-bool gcodeIsBufferEmpty(){
-    if (ringBuffer.length() == 0){
-        return true;
-    }
-    else {
-        return false;
-        
-        
-        
-    }
-}
-
-void gcodeClearBuffer(){
-    ringBuffer.empty();
-}
-
-void gcodePrintBuffer(){
-    ringBuffer.print();
-}
-
-String gcodeBufferReadline(){
-    String gcodeline = ringBuffer.readLine();
-    gcodeline.trim();  // remove leading and trailing white space
-    gcodeline.toUpperCase();
-    return gcodeline;
-}
-
+// This should probably be in a reporting file, doesn't fit here
 void  _signalReady(){
     /*
     
@@ -96,10 +66,64 @@ void  _signalReady(){
     
     */
     
-    if ( (gcodeSpaceAvailable() > expectedMaxLineLength)    // if there is space in the buffer to accept the expected maximum line length
-          && (ringBuffer.numberOfLines() < 4) ) {                 // and if there are fewer than 4 lines in the buffer
+    if ( (incSerialBuffer.spaceAvailable() > expectedMaxLineLength)    // if there is space in the buffer to accept the expected maximum line length
+          && (incSerialBuffer.numberOfLines() < 4) ) {                 // and if there are fewer than 4 lines in the buffer
         Serial.println(F("ok"));                                  // then request new code
     }
+}
+
+// *** There is a more elegant way to do this - put the machineReady check at the beginning of each non-safe code!
+//     This will reduce the overhead of looking through safeCommands[] using isSafeCommand()
+//     and eliminate the 76 bytes of dynamic memory consumed by the safeCommands[] array in global variables!
+bool isSafeCommand(const String& readString){
+    bool ret = false;
+    String command = readString.substring(0, 3);
+    for(byte i = 0; i < sizeof(safeCommands); i++){
+       if(safeCommands[i] == command){
+           ret = true;
+           break;
+       }
+    }
+    return ret;
+}
+
+int   findEndOfNumber(const String& textString, const int& index){
+    //Return the index of the last digit of the number beginning at the index passed in
+    unsigned int i = index;
+    
+    while (i < textString.length()){
+        
+        if(isDigit(textString[i]) or isPunct(textString[i])){ //If we're still looking at a number, keep goin
+            i++;
+        }
+        else{
+            return i;                                         //If we've reached the end of the number, return the last index
+        }
+    }
+    return i;                                                 //If we've reached the end of the string, return the last number
+}
+
+float extractGcodeValue(const String& readString, char target, const float& defaultReturn){
+
+    /*Reads a string and returns the value of number following the target character.
+    If no number is found, defaultReturn is returned*/
+
+    int begin;
+    int end;
+    String numberAsString;
+    float numberAsFloat;
+    
+    begin           =  readString.indexOf(target);
+    end             =  findEndOfNumber(readString,begin+1);
+    numberAsString  =  readString.substring(begin+1,end);
+    
+    numberAsFloat   =  numberAsString.toFloat();
+    
+    if (begin == -1){ //if the character was not found, return error
+        return defaultReturn;
+    }
+    
+    return numberAsFloat;
 }
 
 void  executeBcodeLine(const String& gcodeLine){
@@ -538,7 +562,7 @@ void  interpretCommandString(String& cmdString){
     #if defined (verboseDebug) && verboseDebug > 1              
     // print ring buffer contents
     Serial.println(F("iCS execution complete"));
-    gcodePrintBuffer();
+    incSerialBuffer.print();
     #endif
     
     _signalReady();
@@ -546,7 +570,7 @@ void  interpretCommandString(String& cmdString){
 }
 
 void gcodeExecuteLoop(){
-  readyCommandString = gcodeBufferReadline();
+  readyCommandString = incSerialBuffer.prettyReadLine();
   
   if (readyCommandString.length() > 0){
       interpretCommandString(readyCommandString);

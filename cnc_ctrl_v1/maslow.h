@@ -40,5 +40,7 @@
 #include "FormatDouble.h"
 #include "Kinematics.h"
 #include "RingBuffer.h"
+#include "gcode.h"
+#include "system.h"
 
 #endif

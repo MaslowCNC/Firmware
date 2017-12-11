@@ -20,7 +20,7 @@
     
     class MotorGearboxEncoder{
         public:
-            MotorGearboxEncoder(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const unsigned long& loopInterval);
+            void setup(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const unsigned long& loopInterval);
             Encoder    encoder;
             Motor      motor;
             float      cachedSpeed();

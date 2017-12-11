@@ -15,8 +15,13 @@
 #include "maslow.h"
 #include "CNC_Functions.h"
 
-// Declare system global state structure
+// Define system global state structure
 system_t sys;
+
+// Define axes, it might be tighter to define these within the sys struct
+Axis leftAxis;
+Axis rightAxis;
+Axis zAxis;
 
 void setup(){
     Serial.begin(57600);
@@ -24,7 +29,7 @@ void setup(){
     gcodeLine.reserve(128);
     
     Serial.print(F("PCB v1."));
-    Serial.print(pcbVersion);
+    Serial.print(getPCBVersion());
     Serial.println(F(" Detected"));
     
     Serial.println(F("ready"));

@@ -29,32 +29,10 @@ bool zAxisAuto = false;
 #define CLOCKWISE        -1
 #define COUNTERCLOCKWISE  1
 
-#define LEFT_EEPROM_ADR     5
-#define RIGHT_EEPROM_ADR  105
-#define Z_EEPROM_ADR      205
-
 #define MILLIMETERS 1
 #define INCHES      25.4
 #define MAXFEED     1000      //The maximum allowable feedrate in mm/min
 #define MAXZROTMIN  12.60    // the maximum z rotations per minute
-
-int ENCODER1A;
-int ENCODER1B;
-int ENCODER2A;
-int ENCODER2B;
-int ENCODER3A;
-int ENCODER3B;
-
-int IN1;
-int IN2;
-int IN3;
-int IN4;
-int IN5;
-int IN6;
-
-int ENA;
-int ENB;
-int ENC;
 
 //These are set in Ground Control now
 //#define DISTPERROT     10*6.35//#teeth*pitch of chain
@@ -68,113 +46,11 @@ int ENC;
 #define SpindlePowerControlPin AUX1 // output for controlling spindle power
 #define ProbePin AUX4 // use this input for zeroing zAxis with G38.2 gcode
 
-int pcbVersion = -1;
-
-
-int   setupPins(){
-    /*
-    
-    Detect the version of the Arduino shield connected, and use the appropriate pins
-    
-    This function runs before the serial port is open so the version is not printed here
-    
-    */
-    
-    //read the pins which indicate the PCB version
-    pcbVersion = (8*digitalRead(53) + 4*digitalRead(52) + 2*digitalRead(23) + 1*digitalRead(22)) - 1;
-    
-    if(pcbVersion == 0){
-        //Beta PCB v1.0 Detected
-        //MP1 - Right Motor
-        ENCODER1A = 18; // INPUT
-        ENCODER1B = 19; // INPUT
-        IN1 = 9;        // OUTPUT
-        IN2 = 8;        // OUTPUT
-        ENA = 6;        // PWM
-        
-        //MP2 - Z-axis
-        ENCODER2A = 2;  // INPUT
-        ENCODER2B = 3;  // INPUT
-        IN3 = 11;       // OUTPUT
-        IN4 = 10;       // OUTPUT
-        ENB = 7;        // PWM
-        
-        //MP3 - Left Motor
-        ENCODER3A = 21; // INPUT
-        ENCODER3B = 20; // INPUT
-        IN5 = 12;       // OUTPUT
-        IN6 = 13;       // OUTPUT
-        ENC = 5;        // PWM
-        
-        return 1;
-    }
-    else if(pcbVersion == 1){
-        //PCB v1.1 Detected
-        //MP1 - Right Motor
-        ENCODER1A = 20; // INPUT
-        ENCODER1B = 21; // INPUT
-        IN1 = 6;        // OUTPUT
-        IN2 = 4;        // OUTPUT
-        ENA = 5;        // PWM
-        
-        //MP2 - Z-axis
-        ENCODER2A = 19; // INPUT
-        ENCODER2B = 18; // INPUT
-        IN3 = 9;        // OUTPUT
-        IN4 = 7;        // OUTPUT
-        ENB = 8;        // PWM
-        
-        //MP3 - Left Motor
-        ENCODER3A = 2;   // INPUT
-        ENCODER3B = 3;   // INPUT
-        IN5 = 10;        // OUTPUT
-        IN6 = 11;        // OUTPUT
-        ENC = 12;        // PWM
-        
-        return 0;
-    }
-    else if(pcbVersion == 2){
-        //PCB v1.2 Detected
-        
-        //MP1 - Right Motor
-        ENCODER1A = 20;  // INPUT
-        ENCODER1B = 21;  // INPUT
-        IN1 = 4;         // OUTPUT
-        IN2 = 6;         // OUTPUT
-        ENA = 5;         // PWM
-        
-        //MP2 - Z-axis
-        ENCODER2A = 19;  // INPUT
-        ENCODER2B = 18;  // INPUT
-        IN3 = 7;         // OUTPUT
-        IN4 = 9;         // OUTPUT
-        ENB = 8;         // PWM
-        
-        //MP3 - Left Motor
-        ENCODER3A = 2;   // INPUT
-        ENCODER3B = 3;   // INPUT
-        IN5 = 11;        // OUTPUT
-        IN6 = 12;        // OUTPUT
-        ENC = 10;        // PWM
-        
-        return 0;
-    }
-}
-
-int pinsSetup       = setupPins();
-
-Axis leftAxis (ENC, IN6, IN5, ENCODER3B, ENCODER3A, 'L',  LEFT_EEPROM_ADR, LOOPINTERVAL);
-Axis rightAxis(ENA, IN1, IN2, ENCODER1A, ENCODER1B, 'R', RIGHT_EEPROM_ADR, LOOPINTERVAL);
-Axis zAxis    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, 'Z',     Z_EEPROM_ADR, LOOPINTERVAL);
-
-
 Kinematics kinematics;
 
 float feedrate              =  500;
 float _inchesToMMConversion =  1;
 bool  useRelativeUnits      =  false;
-bool  rcvdKinematicSettings =  false;
-bool  rcvdMotorSettings     =  false;
 bool  encoderStepsChanged   =  false;
 bool  zEncoderStepsChanged  =  false;
 volatile bool  movementUpdated  =  false;
@@ -185,8 +61,6 @@ volatile bool  inMovementLoop   =  false;
 volatile bool  movementFail     =  false;
 #endif
 
-// Commands that can safely be executed before machineReady
-String safeCommands[] = {"B01", "B03", "B04", "B05", "B07", "B12", "G20", "G21", "G90", "G91"};
 String gcodeLine;                         //The next individual line of gcode (for example G91 G01 X19 would be run as two lines)
 
 int   lastCommand           =  0;         //Stores the value of the last command run eg: G01 -> 1
@@ -199,29 +73,6 @@ float yTarget = 0;
 
 bool checkForStopCommand();
 
-bool machineReady(){
-  bool ret = false;
-  if (rcvdMotorSettings && rcvdKinematicSettings){
-      ret = true;
-  }
-  return ret;
-}
-
-void finalizeMachineSettings(){
-    if(machineReady()){
-        if (encoderStepsChanged){
-            leftAxis.loadPositionFromMemory();
-            rightAxis.loadPositionFromMemory();
-            encoderStepsChanged = false;
-        }
-        if (zEncoderStepsChanged){
-            zAxis.loadPositionFromMemory();
-            zEncoderStepsChanged = false;
-        }
-        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
-    }
-}
-
 void  returnError(){
     /*
     Prints the machine's positional error and the amount of space available in the 
@@ -232,7 +83,7 @@ void  returnError(){
         Serial.print(',');
         Serial.print(rightAxis.error());
         Serial.print(',');
-        Serial.print(gcodeSpaceAvailable());
+        Serial.print(incSerialBuffer.spaceAvailable());
         Serial.println(F("]"));
 }
 
@@ -277,7 +128,7 @@ void  _watchDog(){
         
         if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
             
-            if (gcodeIsBufferEmpty()) {       // if the buffer is empty
+            if (incSerialBuffer.length() == 0) {       // if the buffer is empty
                 #if defined (verboseDebug) && verboseDebug > 0              
                 Serial.println(F("_watchDog requesting new code"));
                 #endif
@@ -298,7 +149,7 @@ bool checkForStopCommand(){
     */
     if(sys.stop){
         readyCommandString = "";
-        gcodeClearBuffer();
+        incSerialBuffer.empty();
         leftAxis.stop();
         rightAxis.stop();
         if(zAxisAttached){
@@ -598,45 +449,6 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     
 }
     
-int   findEndOfNumber(const String& textString, const int& index){
-    //Return the index of the last digit of the number beginning at the index passed in
-    unsigned int i = index;
-    
-    while (i < textString.length()){
-        
-        if(isDigit(textString[i]) or isPunct(textString[i])){ //If we're still looking at a number, keep goin
-            i++;
-        }
-        else{
-            return i;                                         //If we've reached the end of the number, return the last index
-        }
-    }
-    return i;                                                 //If we've reached the end of the string, return the last number
-}
-    
-float extractGcodeValue(const String& readString, char target, const float& defaultReturn){
-
-    /*Reads a string and returns the value of number following the target character.
-    If no number is found, defaultReturn is returned*/
-
-    int begin;
-    int end;
-    String numberAsString;
-    float numberAsFloat;
-    
-    begin           =  readString.indexOf(target);
-    end             =  findEndOfNumber(readString,begin+1);
-    numberAsString  =  readString.substring(begin+1,end);
-    
-    numberAsFloat   =  numberAsString.toFloat();
-    
-    if (begin == -1){ //if the character was not found, return error
-        return defaultReturn;
-    }
-    
-    return numberAsFloat;
-}
-
 int   G1(const String& readString, int G0orG1){
     
     /*G1() is the function which is called to process the string if it begins with 
@@ -972,35 +784,6 @@ void  G38(const String& readString) {
   }
 }
 
-void  calibrateChainLengths(String gcodeLine){
-    /*
-    The calibrateChainLengths function lets the machine know that the chains are set to a given length where each chain is ORIGINCHAINLEN
-    in length
-    */
-    
-    if (extractGcodeValue(gcodeLine, 'L', 0)){
-        //measure out the left chain
-        Serial.println(F("Measuring out left chain"));
-        singleAxisMove(&leftAxis, ORIGINCHAINLEN, 800);
-        
-        Serial.print(leftAxis.read());
-        Serial.println(F("mm"));
-        
-        leftAxis.detach();
-    }
-    else if(extractGcodeValue(gcodeLine, 'R', 0)){
-        //measure out the right chain
-        Serial.println(F("Measuring out right chain"));
-        singleAxisMove(&rightAxis, ORIGINCHAINLEN, 800);
-        
-        Serial.print(rightAxis.read());
-        Serial.println(F("mm"));
-        
-        rightAxis.detach();
-    }
-    
-}
-
 void  setInchesToMillimetersConversion(float newConversionFactor){
     _inchesToMMConversion = newConversionFactor;
 }
@@ -1010,66 +793,6 @@ void  printBeforeAndAfter(const float& before, const float& after){
     Serial.print(before);
     Serial.print(F(" After: "));
     Serial.println(after);
-}
-
-void  updateKinematicsSettings(const String& readString){
-    /*
-    Updates the machine dimensions from the Ground Control settings
-    */
-    
-    //Extract the settings values
-
-    float bedWidth           = extractGcodeValue(readString, 'A', -1);
-    float bedHeight          = extractGcodeValue(readString, 'C', -1);
-    float distBetweenMotors  = extractGcodeValue(readString, 'Q', -1);
-    float motorOffsetY       = extractGcodeValue(readString, 'E', -1);
-    float sledWidth          = extractGcodeValue(readString, 'F', -1);
-    float sledHeight         = extractGcodeValue(readString, 'R', -1);
-    float sledCG             = extractGcodeValue(readString, 'H', -1);
-
-    float kinematicsType     = extractGcodeValue(readString, 'Y', -1);
-    float rotationDiskRadius = extractGcodeValue(readString, 'Z', -1);
-    
-    
-    
-    //Change the machine dimensions in the kinematics if new values have been received
-    if (sledWidth != -1){
-        kinematics.l            = sledWidth;
-    }
-    if (sledHeight != -1){
-        kinematics.s            = sledHeight;
-    }
-    if (sledCG != -1){
-        kinematics.h3           = sledCG;
-    }
-    //if (distPerRot != -1){
-    //    kinematics.R            = distPerRot / (2.0*3.14159);
-    //}
-    if (distBetweenMotors != -1){
-        kinematics.D            = distBetweenMotors;
-    }
-    if (motorOffsetY != -1){
-        kinematics.motorOffsetY = motorOffsetY;
-    }
-    if (bedWidth != -1){
-        kinematics.machineWidth = bedWidth;
-    }
-    if (bedHeight != -1){
-        kinematics.machineHeight= bedHeight;
-    }
-    if (kinematicsType != -1){
-        kinematics.kinematicsType = kinematicsType;
-    }
-    if (rotationDiskRadius != -1){
-        kinematics.rotationDiskRadius = rotationDiskRadius;
-    }
-    
-    //propagate the new values
-    rcvdKinematicSettings = true;
-    kinematics.recomputeGeometry();
-    finalizeMachineSettings();
-    
-    Serial.println(F("Kinematics Settings Loaded"));
 }
 
 void updateMotorSettings(const String& readString){
@@ -1126,24 +849,9 @@ void updateMotorSettings(const String& readString){
         zEncoderStepsChanged = true;
     }
     
-    rcvdMotorSettings = true;
+    sys.rcvdMotorSettings = 1;
     finalizeMachineSettings(); 
     Serial.println(F("Motor Settings Loaded"));
-}
-
-// *** There is a more elegant way to do this - put the machineReady check at the beginning of each non-safe code!
-//     This will reduce the overhead of looking through safeCommands[] using isSafeCommand()
-//     and eliminate the 76 bytes of dynamic memory consumed by the safeCommands[] array in global variables!
-bool isSafeCommand(const String& readString){
-    bool ret = false;
-    String command = readString.substring(0, 3);
-    for(byte i = 0; i < sizeof(safeCommands); i++){
-       if(safeCommands[i] == command){
-           ret = true;
-           break;
-       }
-    }
-    return ret;
 }
 
 void  setSpindlePower(boolean powerState) {

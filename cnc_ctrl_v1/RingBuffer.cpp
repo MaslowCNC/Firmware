@@ -104,6 +104,19 @@ String RingBuffer::readLine(){
     
 }
 
+String RingBuffer::prettyReadLine(){
+    /*
+   
+    Return one line (terminated with \n) from the buffer, but in all uppercase
+    with no leading or trailing whitespaces
+   
+    */
+    String line = readLine();
+    line.trim();  // remove leading and trailing white space
+    line.toUpperCase();
+    return line;
+}
+
 void RingBuffer::print(){
     Serial.print(F("Buffer Used: "));
     Serial.println(length());
