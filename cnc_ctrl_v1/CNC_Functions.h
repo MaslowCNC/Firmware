@@ -46,8 +46,8 @@ bool zAxisAuto = false;
 #define MILLIMETERS 1
 #define INCHES      25.4
 #define MAXFEED     1000      //The maximum allowable feedrate in mm/min
-#define MAXZROTMIN  12.60    // the maximum z rotations per minute
-#define LOOPINTERVAL 10000     // What is the frequency of the PID loop in microseconds
+#define MAXZROTMIN  12.60     // the maximum z rotations per minute
+#define LOOPINTERVAL 10000    // What is the frequency of the PID loop in microseconds
 
 int ENCODER1A;
 int ENCODER1B;
@@ -373,6 +373,14 @@ bool checkForStopCommand(){
 }
 
 void  holdPosition(){
+    /*
+    
+    This function is called every time the main loop runs. When the machine is executing a move it is not called, but when the machine is
+    not executing a line it is called regularly and causes the motors to hold their positions.
+    
+    */
+    checkForStopCommand();
+    
     leftAxis.hold();
     rightAxis.hold();
     zAxis.hold();
