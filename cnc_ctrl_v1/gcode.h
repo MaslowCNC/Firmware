@@ -18,7 +18,9 @@ Copyright 2014-2017 Bar Smith*/
 #ifndef gcode_h
 #define gcode_h
 
+extern String readyCommandString; //next command queued up and ready to send
 
+void gcodeExecuteLoop();
 void readSerialCommands();
 int gcodeSpaceAvailable();
 void  _signalReady();
@@ -26,5 +28,11 @@ bool gcodeIsBufferEmpty();
 void gcodeClearBuffer();
 void gcodePrintBuffer();
 String gcodeBufferReadline();
+void  executeBcodeLine(const String&);
+void  executeGcodeLine(const String&);
+void  executeMcodeLine(const String&);
+void  executeOtherCodeLine(const String&);
+int   findNextGM(const String&, const int&);
+void  interpretCommandString(String&);
 
 #endif

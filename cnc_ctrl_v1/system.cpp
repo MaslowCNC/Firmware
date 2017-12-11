@@ -16,5 +16,3 @@ along with the Maslow Control Software.  If not, see <http://www.gnu.org/license
 Copyright 2014-2017 Bar Smith*/
 
 // This file contains system level functions and states
-
-// Define global system variables

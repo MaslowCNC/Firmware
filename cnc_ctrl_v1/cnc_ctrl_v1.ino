@@ -51,14 +51,7 @@ void runsOnATimer(){
 
 void loop(){
     
-    readyCommandString = gcodeBufferReadline();
-    
-    if (readyCommandString.length() > 0){
-        readyCommandString.trim();  // remove leading and trailing white space
-        readyCommandString.toUpperCase();
-        interpretCommandString(readyCommandString);
-        readyCommandString = "";
-    }
+    gcodeExecuteLoop();
     
     holdPosition();
     
