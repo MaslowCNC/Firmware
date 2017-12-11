@@ -193,8 +193,13 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     //Confirm that the coordinates are on the wood
     _verifyValidTarget(&xTarget, &yTarget);
     
-    float Chain1 = sqrt(pow((-1*_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
-    float Chain2 = sqrt(pow((_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
+    //Calculate motor axes length to the bit
+    float Motor1Distance = sqrt(pow((-1*_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
+    float Motor2Distance = sqrt(pow((_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
+    
+    //Calculate chain lengths accounting for sprocket geometry
+    float Chain1 = (R * (3.14159 - acos(R/Motor1Distance) - acos((_yCordOfMotor - yTarget)/Motor1Distance))) + sqrt(pow(Motor1Distance,2)-pow(R,2));
+    float Chain2 = (R * (3.14159 - acos(R/Motor2Distance) - acos((_yCordOfMotor - yTarget)/Motor2Distance))) + sqrt(pow(Motor2Distance,2)-pow(R,2));
     
     //Subtract of the virtual length which is added to the chain by the rotation mechanism
     Chain1 = Chain1 - rotationDiskRadius;
