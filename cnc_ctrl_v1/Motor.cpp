@@ -21,7 +21,7 @@ to be a drop in replacement for a continuous rotation servo.
 
 */
 
-#include "maslow.h"
+#include "Maslow.h"
 
 Motor::Motor(){
   

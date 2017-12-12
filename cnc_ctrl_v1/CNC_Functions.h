@@ -16,7 +16,7 @@
 libraries*/
     
     
-#include "maslow.h"
+#include "Maslow.h"
 
 Servo myservo;  // create servo object to control a servo 
 

@@ -21,7 +21,7 @@ to be a drop in replacement for a continuous rotation servo.
 
 */
 
-#include "maslow.h"
+#include "Maslow.h"
 
 void MotorGearboxEncoder::setup(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const unsigned long& loopInterval)
 {

@@ -11,7 +11,7 @@
   #include "WProgram.h"
 #endif
 
-#include "maslow.h"
+#include "Maslow.h"
 
 /*Constructor (...)*********************************************************
  *    The parameters specified here are those for for which we can't set up

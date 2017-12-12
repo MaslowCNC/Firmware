@@ -16,7 +16,7 @@
     Copyright 2014-2017 Bar Smith*/ 
 
 
-#include "maslow.h"
+#include "Maslow.h"
 
 #define EEPROMVALIDDATA 56
 #define SIZEOFFLOAT      4

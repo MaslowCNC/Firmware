@@ -29,7 +29,7 @@
 
 // Define the maslow system include files. This ensures that dependencies are 
 // loaded in the proper order.  Be careful moving these around.
-#include "config.h"
+#include "Config.h"
 #include "TimerOne.h"
 #include "Motor.h"
 #include "PID_v1.h"
@@ -40,7 +40,7 @@
 #include "FormatDouble.h"
 #include "Kinematics.h"
 #include "RingBuffer.h"
-#include "gcode.h"
-#include "system.h"
+#include "GCode.h"
+#include "System.h"
 
 #endif

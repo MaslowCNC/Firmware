@@ -18,7 +18,7 @@ Copyright 2014-2017 Bar Smith*/
 // This file contains all the functions used to receive and parse the gcode
 // commands
 
-#include "maslow.h"
+#include "Maslow.h"
 
 RingBuffer incSerialBuffer;
 int expectedMaxLineLength   = 60;   // expected maximum Gcode line length in characters, including line ending character(s)
