@@ -26,6 +26,10 @@ typedef struct {
   float xPosition;            // Cartessian position of XY axes
   float yPosition;            // Cached because calculating position is intensive
   float steps[3];             // Encoder position of axes
+  bool  useRelativeUnits;     // 
+  int   lastGCommand;         //Stores the value of the last command run eg: G01 -> 1
+  int   lastTool;             //Stores the value of the last tool number eg: T4 -> 4
+  int   nextTool;             //Stores the value of the next tool number eg: T4 -> 4
 } system_t;
 extern system_t sys;
 extern Axis leftAxis;

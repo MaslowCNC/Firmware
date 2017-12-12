@@ -227,7 +227,7 @@ void  executeBcodeLine(const String& gcodeLine){
         float rDist = extractGcodeValue(gcodeLine, 'R', 0);
         float speed = extractGcodeValue(gcodeLine, 'F', 800);
         
-        if(useRelativeUnits){
+        if(sys.useRelativeUnits){
             if(abs(lDist) > 0){
                 singleAxisMove(&leftAxis,  leftAxis.read()  + lDist, speed);
             }
@@ -362,19 +362,19 @@ void  executeGcodeLine(const String& gcodeLine){
     int gNumber = extractGcodeValue(gcodeLine,'G', -1);
     
     if (gNumber == -1){               // If the line does not have a G command
-        gNumber = lastCommand;        // apply the last one
+        gNumber = sys.lastGCommand;        // apply the last one
     }
     
     switch(gNumber){
         case 0:   // Rapid positioning
         case 1:   // Linear interpolation
             G1(gcodeLine, gNumber);
-            lastCommand = gNumber;    // remember G number for next time
+            sys.lastGCommand = gNumber;    // remember G number for next time
             break;
         case 2:   // Circular interpolation, clockwise
         case 3:   // Circular interpolation, counterclockwise
             G2(gcodeLine, gNumber);
-            lastCommand = gNumber;    // remember G number for next time
+            sys.lastGCommand = gNumber;    // remember G number for next time
             break;
         case 10:
             G10(gcodeLine);
@@ -389,10 +389,10 @@ void  executeGcodeLine(const String& gcodeLine){
             G38(gcodeLine);
             break;
         case 90:
-            useRelativeUnits = false;
+            sys.useRelativeUnits = false;
             break;
         case 91:
-            useRelativeUnits = true;
+            sys.useRelativeUnits = true;
             break;
         default:
             Serial.print(F("Command G"));
@@ -429,11 +429,11 @@ void  executeMcodeLine(const String& gcodeLine){
             setSpindlePower(true);  // turn on spindle
             break;
         case 6:   // Tool Change
-            if (nextTool > 0) {
+            if (sys.nextTool > 0) {
                 setSpindlePower(false); // first, turn off spindle
                 Serial.print(F("Tool Change: Please insert tool "));   // prompt user to change tool
-                Serial.println(nextTool);
-                lastTool = nextTool;
+                Serial.println(sys.nextTool);
+                sys.lastTool = sys.nextTool;
                 pause();
             }
             break;
@@ -457,11 +457,11 @@ void  executeOtherCodeLine(const String& gcodeLine){
             int tNumber = extractGcodeValue(gcodeLine,'T', 0);    // get tool number
             Serial.print(F("Tool change to tool "));
             Serial.println(tNumber);
-            if ((tNumber > 0) && (tNumber != lastTool)) {         // if tool number is greater than 0 and not the same as the last tool
-                nextTool = tNumber;                               // remember tool number to prompt user when G06 is received
+            if ((tNumber > 0) && (tNumber != sys.lastTool)) {         // if tool number is greater than 0 and not the same as the last tool
+                sys.nextTool = tNumber;                               // remember tool number to prompt user when G06 is received
             }
             else {
-                nextTool = 0;                                     // tool is 0 or same as last change - don't prompt user on next G06
+                sys.nextTool = 0;                                     // tool is 0 or same as last change - don't prompt user on next G06
             }
         }
         else {  // try it as a 'G' command without the leading 'G' code

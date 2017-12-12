@@ -48,7 +48,6 @@ bool zAxisAuto = false;
 
 float feedrate              =  500;
 float _inchesToMMConversion =  1;
-bool  useRelativeUnits      =  false;
 bool  encoderStepsChanged   =  false;
 bool  zEncoderStepsChanged  =  false;
 volatile bool  movementUpdated  =  false;
@@ -60,10 +59,6 @@ volatile bool  movementFail     =  false;
 #endif
 
 String gcodeLine;                         //The next individual line of gcode (for example G91 G01 X19 would be run as two lines)
-
-int   lastCommand           =  0;         //Stores the value of the last command run eg: G01 -> 1
-int   lastTool              =  0;         //Stores the value of the last tool number eg: T4 -> 4
-int   nextTool              =  0;         //Stores the value of the next tool number eg: T4 -> 4
 
 bool checkForStopCommand();
 
@@ -462,7 +457,7 @@ int   G1(const String& readString, int G0orG1){
     zgoto      = _inchesToMMConversion*extractGcodeValue(readString, 'Z', currentZPos/_inchesToMMConversion);
     feedrate   = _inchesToMMConversion*extractGcodeValue(readString, 'F', feedrate/_inchesToMMConversion);
     
-    if (useRelativeUnits){ //if we are using a relative coordinate system 
+    if (sys.useRelativeUnits){ //if we are using a relative coordinate system 
         
         if(readString.indexOf('X') >= 0){ //if there is an X command
             xgoto = currentXPos + xgoto;
@@ -673,7 +668,7 @@ void  G38(const String& readString) {
       feedrate   = _inchesToMMConversion * extractGcodeValue(readString, 'F', feedrate / _inchesToMMConversion);
       feedrate = constrain(feedrate, 1, MAXZROTMIN * abs(zAxis.getPitch()));
 
-      if (useRelativeUnits) { //if we are using a relative coordinate system
+      if (sys.useRelativeUnits) { //if we are using a relative coordinate system
         if (readString.indexOf('Z') >= 0) { //if z has moved
           zgoto = currentZPos + zgoto;
         }
