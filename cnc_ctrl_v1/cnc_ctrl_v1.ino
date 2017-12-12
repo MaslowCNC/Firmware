@@ -23,6 +23,10 @@ Axis leftAxis;
 Axis rightAxis;
 Axis zAxis;
 
+// Define kinematics, is it necessary for this to be a class?  Is this really
+// going to be reused?
+Kinematics kinematics;
+
 void setup(){
     Serial.begin(57600);
     readyCommandString.reserve(128);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
@@ -62,7 +66,7 @@ void loop(){
     
     readSerialCommands();
     
-    returnPoz(xTarget, yTarget, zAxis.read());
+    returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
     
     _watchDog();
 }

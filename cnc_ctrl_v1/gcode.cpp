@@ -214,7 +214,7 @@ void  executeBcodeLine(const String& gcodeLine){
         Serial.print(rightAxis.read());
         Serial.println(F("mm"));
         
-        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
         
         Serial.println(F("Message: The machine chains have been manually re-calibrated."));
         
@@ -338,7 +338,7 @@ void  executeBcodeLine(const String& gcodeLine){
         singleAxisMove(&rightAxis, chainLengthAtMiddle, 800);
         
         //Reload the position
-        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
     }
 }
     

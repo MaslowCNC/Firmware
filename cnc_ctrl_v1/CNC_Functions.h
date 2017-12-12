@@ -46,8 +46,6 @@ bool zAxisAuto = false;
 #define SpindlePowerControlPin AUX1 // output for controlling spindle power
 #define ProbePin AUX4 // use this input for zeroing zAxis with G38.2 gcode
 
-Kinematics kinematics;
-
 float feedrate              =  500;
 float _inchesToMMConversion =  1;
 bool  useRelativeUnits      =  false;
@@ -66,10 +64,6 @@ String gcodeLine;                         //The next individual line of gcode (f
 int   lastCommand           =  0;         //Stores the value of the last command run eg: G01 -> 1
 int   lastTool              =  0;         //Stores the value of the last tool number eg: T4 -> 4
 int   nextTool              =  0;         //Stores the value of the next tool number eg: T4 -> 4
-
-float xTarget = 0;
-float yTarget = 0;
-
 
 bool checkForStopCommand();
 
@@ -155,7 +149,7 @@ bool checkForStopCommand(){
         if(zAxisAttached){
           zAxis.stop();
         }
-        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
         sys.stop = false;
         return true;
     }
@@ -196,7 +190,7 @@ void pause(){
     
         readSerialCommands();
     
-        returnPoz(xTarget, yTarget, zAxis.read());
+        returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
         
         if (!sys.pause){
             return;
@@ -220,7 +214,7 @@ void maslowDelay(unsigned long waitTimeMs) {
         delay(1);
         holdPosition();
         readSerialCommands();
-        returnPoz(xTarget, yTarget, zAxis.read());
+        returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
     }
 }
 
@@ -285,8 +279,8 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
     direction, the tool moves to the target in a straight line. This function is used by the G00 
     and G01 commands. The units at this point should all be in mm or mm per minute*/
     
-    float  xStartingLocation = xTarget;
-    float  yStartingLocation = yTarget;
+    float  xStartingLocation = sys.xPosition;
+    float  yStartingLocation = sys.yPosition;
     float  zStartingLocation = zAxis.read();  // I don't know why we treat the zaxis differently
     float  zMAXFEED          = MAXZROTMIN * abs(zAxis.getPitch());
     
@@ -384,8 +378,8 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
       zAxis.endMove(zPosition);
     }
     
-    xTarget = xEnd;
-    yTarget = yEnd;
+    sys.xPosition = xEnd;
+    sys.yPosition = yEnd;
     
     return 1;
     
@@ -427,7 +421,7 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
           movementUpdate();
           
           //update position on display
-          returnPoz(xTarget, yTarget, zAxis.read());
+          returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
           
           //increment the number of steps taken
           numberOfStepsTaken++;
@@ -458,8 +452,8 @@ int   G1(const String& readString, int G0orG1){
     float ygoto;
     float zgoto;
         
-    float currentXPos = xTarget;
-    float currentYPos = yTarget;
+    float currentXPos = sys.xPosition;
+    float currentYPos = sys.yPosition;
     
     float currentZPos = zAxis.target();
     
@@ -614,8 +608,8 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
     leftAxis.endMove(aChainLength);
     rightAxis.endMove(bChainLength);
     
-    xTarget = X2;
-    yTarget = Y2;
+    sys.xPosition = X2;
+    sys.yPosition = Y2;
     
     return 1;
 }
@@ -629,8 +623,8 @@ int   G2(const String& readString, int G2orG3){
     */
     
     
-    float X1 = xTarget; //does this work if units are inches? (It seems to)
-    float Y1 = yTarget;
+    float X1 = sys.xPosition; //does this work if units are inches? (It seems to)
+    float Y1 = sys.yPosition;
     
     float X2      = _inchesToMMConversion*extractGcodeValue(readString, 'X', X1/_inchesToMMConversion);
     float Y2      = _inchesToMMConversion*extractGcodeValue(readString, 'Y', Y1/_inchesToMMConversion);
@@ -738,7 +732,7 @@ void  G38(const String& readString) {
               movementUpdate();
 
               //update position on display
-              returnPoz(xTarget, yTarget, zAxis.read());
+              returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
 
               //increment the number of steps taken
               numberOfStepsTaken++;
@@ -968,7 +962,7 @@ void PIDTestVelocity(Axis* axis, const float start, const float stop, const floa
     axis->write(axis->read());
     axis->detach();
     axis->enablePositionPID();
-    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
 }
 
 void positionPIDOutput (Axis* axis, float setpoint, float startingPoint){
@@ -1047,7 +1041,7 @@ void PIDTestPosition(Axis* axis, float start, float stop, const float steps, con
     Serial.println(F("--PID Position Test Stop--\n"));
     axis->write(axis->read());
     axis->detach();
-    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
 }
 
 void voltageTest(Axis* axis, int start, int stop){
@@ -1079,5 +1073,5 @@ void voltageTest(Axis* axis, int start, int stop){
     axis->motorGearboxEncoder.motor.directWrite(0);
     Serial.println(F("--Voltage Test Stop--\n"));
     axis->write(axis->read());
-    kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
 }

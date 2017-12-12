@@ -23,19 +23,22 @@ typedef struct {
   byte pause;                 // Pause flag.
   byte rcvdMotorSettings;     // Motor Settings Status Flag
   byte rcvdKinematicSettings; // Kinematics Settings Status Flag
-  float position[3];          // Cartessian position of axes
-  float steps[3];             // Encoder position of axes                     
+  float xPosition;            // Cartessian position of XY axes
+  float yPosition;            // Cached because calculating position is intensive
+  float steps[3];             // Encoder position of axes
 } system_t;
 extern system_t sys;
 extern Axis leftAxis;
 extern Axis rightAxis;
 extern Axis zAxis;
 extern RingBuffer incSerialBuffer;
+extern Kinematics kinematics;
 
 bool machineReady();
 void finalizeMachineSettings();
 void  calibrateChainLengths(String);
 void  updateKinematicsSettings(const String&);
+void  updateMotorSettings(const String&);
 void  setupAxes();
 int   getPCBVersion();
 
