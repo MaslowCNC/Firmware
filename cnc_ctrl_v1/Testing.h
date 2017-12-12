@@ -12,36 +12,14 @@
     
     Copyright 2014-2017 Bar Smith*/
 
-// This is the main maslow include file
+// This file contains various testing provisions
 
-#ifndef maslow_h
-#define maslow_h
+#ifndef testing_h
+#define testing_h
 
-// Maslow Firmware Version tracking
-#define VERSIONNUMBER 1.00
-
-// Define standard libraries used by maslow.
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include <EEPROM.h>
-#include <Arduino.h>
-#include <Servo.h>
-
-// Define the maslow system include files. This ensures that dependencies are 
-// loaded in the proper order.  Be careful moving these around.
-#include "Config.h"
-#include "TimerOne.h"
-#include "Motor.h"
-#include "PID_v1.h"
-#include "utility/direct_pin_read.h"
-#include "Encoder.h"
-#include "MotorGearboxEncoder.h"
-#include "Axis.h"
-#include "FormatDouble.h"
-#include "Kinematics.h"
-#include "RingBuffer.h"
-#include "GCode.h"
-#include "Testing.h"
-#include "System.h"
+void PIDTestVelocity(Axis*, const float, const float, const float, const float);
+void positionPIDOutput (Axis*, float, float);
+void PIDTestPosition(Axis*, float, float, const float, const float, const float);
+void voltageTest(Axis*, int, int);
 
 #endif
