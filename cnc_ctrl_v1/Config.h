@@ -15,6 +15,8 @@
 // This file contains precompile configuration settings that apply to the 
 // whole system
 
+#ifndef config_h
+#define config_h
 
 #define verboseDebug 0     // set to 0 for no debug messages, 1 for single-line messages, 2 to also output ring buffer contents
 #define misloopDebug 0     // set to 1 for a warning every time the movement loop fails 
@@ -26,3 +28,17 @@
 #define LEFT_EEPROM_ADR     5
 #define RIGHT_EEPROM_ADR  105
 #define Z_EEPROM_ADR      205
+
+// Machine specific settings
+#define MAXFEED     1000      //The maximum allowable feedrate in mm/min
+#define MAXZROTMIN  12.60    // the maximum z rotations per minute
+
+// Define extra pins
+#define AUX1 17
+#define AUX2 16
+#define AUX3 15
+#define AUX4 14
+#define SpindlePowerControlPin AUX1 // output for controlling spindle power
+#define ProbePin AUX4 // use this input for zeroing zAxis with G38.2 gcode
+
+#endif

@@ -18,6 +18,16 @@ Copyright 2014-2017 Bar Smith*/
 #ifndef system_h
 #define system_h
 
+// Convenience Defines - Maybe move into a nuts and bolts file?
+#define FORWARD           1
+#define BACKWARD         -1
+#define CLOCKWISE        -1
+#define COUNTERCLOCKWISE  1
+#define MILLIMETERS 1
+#define INCHES      25.4
+
+// Storage for global system states
+// Some of this could be more appropiately moved to the gcode parser
 typedef struct {
   byte stop;                  // Stop flag.
   byte pause;                 // Pause flag.
@@ -30,6 +40,11 @@ typedef struct {
   int   lastGCommand;         //Stores the value of the last command run eg: G01 -> 1
   int   lastTool;             //Stores the value of the last tool number eg: T4 -> 4
   int   nextTool;             //Stores the value of the next tool number eg: T4 -> 4
+  bool  zAxisAttached;        //Whether the zAxis is controllable
+  float inchesToMMConversion; //Used to track whether to convert from inches, can probably be done in a way that doesn't require RAM
+  float feedrate;             //The feedrate of the machine in mm/min
+  bool  encoderStepsChanged;  //These are used to determine 
+  bool  zEncoderStepsChanged; //These are used to determine
 } system_t;
 extern system_t sys;
 extern Axis leftAxis;
@@ -45,5 +60,8 @@ void  updateKinematicsSettings(const String&);
 void  updateMotorSettings(const String&);
 void  setupAxes();
 int   getPCBVersion();
+void pause();
+void maslowDelay(unsigned long);
+void  _watchDog();
 
 #endif

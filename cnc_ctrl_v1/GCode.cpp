@@ -21,10 +21,35 @@ Copyright 2014-2017 Bar Smith*/
 #include "Maslow.h"
 
 RingBuffer incSerialBuffer;
-int expectedMaxLineLength   = 60;   // expected maximum Gcode line length in characters, including line ending character(s)
+int expectedMaxLineLength = 60;  // expected maximum Gcode line length in characters, including line ending character(s)
 String readyCommandString = "";  //KRK why is this a global?
+String gcodeLine          = "";  //Our use of this is a bit sloppy, at times,
+                                 //we pass references to this global and then 
+                                 //name them the same thing.
 // Commands that can safely be executed before machineReady
 String safeCommands[] = {"B01", "B03", "B04", "B05", "B07", "B12", "G20", "G21", "G90", "G91"};
+
+bool checkForStopCommand(){
+    /*
+    Check to see if the STOP command has been sent to the machine.
+    If it has, empty the buffer, stop all axes, set target position to current 
+    position and return true.
+    */
+    if(sys.stop){
+        readyCommandString = "";
+        incSerialBuffer.empty();
+        leftAxis.stop();
+        rightAxis.stop();
+        if(sys.zAxisAttached){
+          zAxis.stop();
+        }
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
+        sys.stop = false;
+        return true;
+    }
+    return false;
+}
+
 
 void readSerialCommands(){
     /*
@@ -578,3 +603,239 @@ void gcodeExecuteLoop(){
   }
 }
 
+int   G1(const String& readString, int G0orG1){
+    
+    /*G1() is the function which is called to process the string if it begins with 
+    'G01' or 'G00'*/
+    
+    float xgoto;
+    float ygoto;
+    float zgoto;
+        
+    float currentXPos = sys.xPosition;
+    float currentYPos = sys.yPosition;
+    
+    float currentZPos = zAxis.target();
+    
+    xgoto      = sys.inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/sys.inchesToMMConversion);
+    ygoto      = sys.inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/sys.inchesToMMConversion);
+    zgoto      = sys.inchesToMMConversion*extractGcodeValue(readString, 'Z', currentZPos/sys.inchesToMMConversion);
+    sys.feedrate   = sys.inchesToMMConversion*extractGcodeValue(readString, 'F', sys.feedrate/sys.inchesToMMConversion);
+    
+    if (sys.useRelativeUnits){ //if we are using a relative coordinate system 
+        
+        if(readString.indexOf('X') >= 0){ //if there is an X command
+            xgoto = currentXPos + xgoto;
+        }
+        if(readString.indexOf('Y') >= 0){ //if y has moved
+            ygoto = currentYPos + ygoto;
+        }
+        if(readString.indexOf('Z') >= 0){ //if y has moved
+            zgoto = currentZPos + zgoto;
+        }
+    }
+    
+    sys.feedrate = constrain(sys.feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
+    
+    //if the zaxis is attached
+    if(!sys.zAxisAttached){
+        float threshold = .1; //units of mm
+        if (abs(currentZPos - zgoto) > threshold){
+            Serial.print(F("Message: Please adjust Z-Axis to a depth of "));
+            if (zgoto > 0){
+                Serial.print(F("+"));
+            }
+            Serial.print(zgoto/sys.inchesToMMConversion);
+            if (sys.inchesToMMConversion == INCHES){
+                Serial.println(F(" in"));
+            }
+            else{
+                Serial.println(F(" mm"));
+            }
+            
+            pause(); //Wait until the z-axis is adjusted
+            
+            zAxis.set(zgoto);
+
+            maslowDelay(1000);
+        }
+    }
+    
+    
+    if (G0orG1 == 1){
+        //if this is a regular move
+        coordinatedMove(xgoto, ygoto, zgoto, sys.feedrate); //The XY move is performed
+    }
+    else{
+        //if this is a rapid move
+        coordinatedMove(xgoto, ygoto, zgoto, 1000); //move the same as a regular move, but go fast
+    }
+}
+
+int   G2(const String& readString, int G2orG3){
+    /*
+    
+    The G2 function handles the processing of the gcode line for both the command G2 and the
+    command G3 which cut arcs.
+    
+    */
+    
+    
+    float X1 = sys.xPosition; //does this work if units are inches? (It seems to)
+    float Y1 = sys.yPosition;
+    
+    float X2      = sys.inchesToMMConversion*extractGcodeValue(readString, 'X', X1/sys.inchesToMMConversion);
+    float Y2      = sys.inchesToMMConversion*extractGcodeValue(readString, 'Y', Y1/sys.inchesToMMConversion);
+    float I       = sys.inchesToMMConversion*extractGcodeValue(readString, 'I', 0.0);
+    float J       = sys.inchesToMMConversion*extractGcodeValue(readString, 'J', 0.0);
+    sys.feedrate      = sys.inchesToMMConversion*extractGcodeValue(readString, 'F', sys.feedrate/sys.inchesToMMConversion);
+    
+    float centerX = X1 + I;
+    float centerY = Y1 + J;
+    
+    sys.feedrate = constrain(sys.feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
+    
+    if (G2orG3 == 2){
+        return arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, CLOCKWISE);
+    }
+    else {
+        return arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, COUNTERCLOCKWISE);
+    }
+}
+
+void  G10(const String& readString){
+    /*The G10() function handles the G10 gcode which re-zeros one or all of the machine's axes.*/
+    float currentZPos = zAxis.read();
+    float zgoto      = sys.inchesToMMConversion*extractGcodeValue(readString, 'Z', currentZPos/sys.inchesToMMConversion);
+    
+    zAxis.set(zgoto);
+    zAxis.endMove(zgoto);
+    zAxis.attach();
+}
+
+void  G38(const String& readString) {
+  //if the zaxis is attached
+  if (sys.zAxisAttached) {
+    /*
+       The G38() function handles the G38 gcode which zeros the machine's z axis.
+       Currently ignores X and Y options
+    */
+    if (readString.substring(3, 5) == ".2") {
+      Serial.println(F("probing for z axis zero"));
+      float zgoto;
+
+
+      float currentZPos = zAxis.target();
+
+      zgoto      = sys.inchesToMMConversion * extractGcodeValue(readString, 'Z', currentZPos / sys.inchesToMMConversion);
+      sys.feedrate   = sys.inchesToMMConversion * extractGcodeValue(readString, 'F', sys.feedrate / sys.inchesToMMConversion);
+      sys.feedrate = constrain(sys.feedrate, 1, MAXZROTMIN * abs(zAxis.getPitch()));
+
+      if (sys.useRelativeUnits) { //if we are using a relative coordinate system
+        if (readString.indexOf('Z') >= 0) { //if z has moved
+          zgoto = currentZPos + zgoto;
+        }
+      }
+
+      Serial.print(F("max depth "));
+      Serial.print(zgoto);
+      Serial.println(F(" mm."));
+      Serial.print(F("feedrate "));
+      Serial.print(sys.feedrate);
+      Serial.println(F(" mm per min."));
+
+
+      //set Probe to input with pullup
+      pinMode(ProbePin, INPUT_PULLUP);
+      digitalWrite(ProbePin, HIGH);
+
+      if (zgoto != currentZPos / sys.inchesToMMConversion) {
+        //        now move z to the Z destination;
+        //        Currently ignores X and Y options
+        //          we need a version of singleAxisMove that quits if the AUXn input changes (goes LOW)
+        //          which will act the same as the checkForStopCommand() found in singleAxisMove (need both?)
+        //        singleAxisMove(&zAxis, zgoto, feedrate);
+
+        /*
+           Takes a pointer to an axis object and mo ves that axis to endPos at speed MMPerMin
+        */
+
+        Axis* axis = &zAxis;
+        float MMPerMin             = sys.feedrate;
+        float startingPos          = axis->target();
+        float endPos               = zgoto;
+        float moveDist             = endPos - currentZPos; //total distance to move
+
+        float direction            = moveDist / abs(moveDist); //determine the direction of the move
+
+        float stepSizeMM           = 0.01;                    //step size in mm
+
+        //the argument to abs should only be a variable -- splitting calc into 2 lines
+        long finalNumberOfSteps    = moveDist / stepSizeMM;    //number of steps taken in move
+        finalNumberOfSteps = abs(finalNumberOfSteps);
+
+        long numberOfStepsTaken    = 0;
+        float whereAxisShouldBeAtThisStep = startingPos;
+  
+        axis->attach();
+        //  zAxis->attach();
+
+        while (numberOfStepsTaken < finalNumberOfSteps) {
+          if (!movementUpdated){
+              //find the target point for this step
+              whereAxisShouldBeAtThisStep += stepSizeMM * direction;
+
+              //write to each axis
+              axis->write(whereAxisShouldBeAtThisStep);
+              movementUpdate();
+
+              //update position on display
+              returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
+
+              //increment the number of steps taken
+              numberOfStepsTaken++;
+          }
+
+          //check for new serial commands
+          readSerialCommands();
+
+          //check for a STOP command
+          if (checkForStopCommand()) {
+            return;
+          }
+
+          //check for Probe touchdown
+          if (checkForProbeTouch(ProbePin)) {
+            zAxis.set(0);
+            zAxis.endMove(0);
+            zAxis.attach();
+            Serial.println(F("z axis zeroed"));
+            return;
+          }
+        }
+
+        /*
+           If we get here, the probe failed to touch down
+            - print error
+            - STOP execution
+        */
+        axis->endMove(endPos);
+        Serial.println(F("error: probe did not connect\nprogram stopped\nz axis not set\n"));
+        sys.stop = true;
+        checkForStopCommand();
+
+      } // end if zgoto != currentZPos / sys.inchesToMMConversion
+
+    } else {
+      Serial.print(F("G38"));
+      Serial.print(readString.substring(3, 5));
+      Serial.println(F(" is invalid. Only G38.2 recognized."));
+    }
+  } else {
+    Serial.println(F("G38.2 gcode only valid with z-axis attached"));
+  }
+}
+
+void  setInchesToMillimetersConversion(float newConversionFactor){
+    sys.inchesToMMConversion = newConversionFactor;
+}

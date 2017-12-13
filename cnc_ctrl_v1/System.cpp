@@ -116,20 +116,79 @@ void  updateKinematicsSettings(const String& readString){
     Serial.println(F("Kinematics Settings Loaded"));
 }
 
+void updateMotorSettings(const String& readString){
+    /*
+    
+    Update settings related to the motor configurations
+    
+    */
+    
+    if (extractGcodeValue(readString, 'I', -1) != -1){
+        sys.zAxisAttached            = extractGcodeValue(readString, 'I', -1);
+    }
+    int encoderSteps         = extractGcodeValue(readString, 'J', -1);
+    float gearTeeth          = extractGcodeValue(readString, 'K', -1);
+    float chainPitch         = extractGcodeValue(readString, 'M', -1);
+    
+    float zDistPerRot        = extractGcodeValue(readString, 'N', -1);
+    int zEncoderSteps        = extractGcodeValue(readString, 'P', -1);
+    
+    float propWeight         = extractGcodeValue(readString, 'R', -1);
+    float KpPos              = extractGcodeValue(readString, 'S', -1);
+    float KiPos              = extractGcodeValue(readString, 'T', -1);
+    float KdPos              = extractGcodeValue(readString, 'U', -1);
+    float KpV                = extractGcodeValue(readString, 'V', -1);
+    float KiV                = extractGcodeValue(readString, 'W', -1);
+    float KdV                = extractGcodeValue(readString, 'X', -1);
+    if (extractGcodeValue(readString, 'Y', -1) != -1) {
+	zAxisAuto            = extractGcodeValue(readString, 'Y', -1);
+    }
+      
+    //Write the PID values to the axis if new ones have been received
+    if (KpPos != -1){
+        leftAxis.setPIDValues(KpPos, KiPos, KdPos, propWeight, KpV, KiV, KdV);
+        rightAxis.setPIDValues(KpPos, KiPos, KdPos, propWeight, KpV, KiV, KdV);
+        zAxis.setPIDValues(KpPos, KiPos, KdPos, propWeight, KpV, KiV, KdV);
+    }
+    
+    //Change the motor properties in cnc_funtions if new values have been sent
+    if (gearTeeth != -1 and chainPitch != -1){
+        float distPerRot = gearTeeth*chainPitch; 
+        leftAxis.changePitch(distPerRot);
+        rightAxis.changePitch(distPerRot);
+        zAxis.changePitch(zDistPerRot);
+    }
+    
+    //update the number of encoder steps if new values have been received
+    if (encoderSteps != -1){
+        leftAxis.changeEncoderResolution(encoderSteps);
+        rightAxis.changeEncoderResolution(encoderSteps);
+        sys.encoderStepsChanged = true;
+    }
+    if (zEncoderSteps != -1){
+        zAxis.changeEncoderResolution(zEncoderSteps);
+        sys.zEncoderStepsChanged = true;
+    }
+    
+    sys.rcvdMotorSettings = 1;
+    finalizeMachineSettings(); 
+    Serial.println(F("Motor Settings Loaded"));
+}
+
 void finalizeMachineSettings(){
     if(machineReady()){
-        if (encoderStepsChanged){
+        if (sys.encoderStepsChanged){
             leftAxis.loadPositionFromMemory();
             rightAxis.loadPositionFromMemory();
             
             
-            encoderStepsChanged = false;
+            sys.encoderStepsChanged = false;
         }
-        if (zEncoderStepsChanged){
+        if (sys.zEncoderStepsChanged){
             zAxis.loadPositionFromMemory();
-            zEncoderStepsChanged = false;
+            sys.zEncoderStepsChanged = false;
         }
-        kinematics.forward(leftAxis.read(), rightAxis.read(), &xTarget, &yTarget);
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
     }
 }
 
@@ -143,24 +202,6 @@ void   setupAxes(){
     */
     
     // These shouldn't be CAPS, they are not precompile defines
-    int ENCODER1A;
-    int ENCODER1B;
-    int ENCODER2A;
-    int ENCODER2B;
-    int ENCODER3A;
-    int ENCODER3B;
-    
-    int IN1;
-    int IN2;
-    int IN3;
-    int IN4;
-    int IN5;
-    int IN6;
-    
-    int ENA;
-    int ENB;
-    int ENC;
-    
     int ENCODER1A;
     int ENCODER1B;
     int ENCODER2A;
@@ -261,4 +302,86 @@ void   setupAxes(){
 
 int getPCBVersion(){
     return (8*digitalRead(53) + 4*digitalRead(52) + 2*digitalRead(23) + 1*digitalRead(22)) - 1;
+}
+
+void pause(){
+    /*
+    
+    The pause command pauses the machine in place without flushing the lines stored in the machine's
+    buffer.
+    
+    When paused the machine enters a while() loop and doesn't exit until the '~' cycle resume command 
+    is issued from Ground Control.
+    
+    */
+    
+    sys.pause = true;
+    Serial.println(F("Maslow Paused"));
+    
+    while(1){
+        
+        holdPosition();
+    
+        readSerialCommands();
+    
+        returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
+        
+        if (!sys.pause){
+            return;
+        }
+    }    
+}
+
+
+// This is an important concept.  I think maybe this should be expanded and Used
+// whenever we have a delay.  This should be all of the 'realtime' operations
+// and should probably include check for stop command.  Although, the holdPosition
+// would have to be moved out of here, but I think that is probably correct
+void maslowDelay(unsigned long waitTimeMs) {
+  /*
+   * Provides a time delay while holding the machine position, reading serial commands,
+   * and periodically sending the machine position to Ground Control.  This prevents
+   * Ground Control from thinking that the connection is lost.
+   * 
+   * This is similar to the pause() command above, but provides a time delay rather than
+   * waiting for the user (through Ground Control) to tell the machine to continue.
+   */
+   
+    unsigned long startTime  = millis();
+    
+    while ((millis() - startTime) < waitTimeMs){
+        delay(1);
+        holdPosition();
+        readSerialCommands();
+        returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
+    }
+}
+
+// This should be the ultimate fallback, it would be best if we didn't even need 
+// something like this at all
+void  _watchDog(){
+    /*
+    Watchdog tells ground control that the machine is ready every second. _watchDog() should only be called when 
+    the machine is actually ready.
+    
+    This fixes the issue where the machine is ready, but Ground Control doesn't know the machine is ready and the system locks up.
+    */
+    static unsigned long lastRan = millis();
+    unsigned long        timeout = 5000;
+    
+    if ((millis() - lastRan) > timeout){
+        
+        if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
+            
+            if (incSerialBuffer.length() == 0) {       // if the buffer is empty
+                #if defined (verboseDebug) && verboseDebug > 0              
+                Serial.println(F("_watchDog requesting new code"));
+                #endif
+                _signalReady();                   // request new code
+                returnError();
+            }
+        }
+        
+        lastRan = millis();
+    }
 }

@@ -19,7 +19,9 @@ Copyright 2014-2017 Bar Smith*/
 #define gcode_h
 
 extern String readyCommandString; //next command queued up and ready to send
+extern String gcodeLine; //The next individual line of gcode (for example G91 G01 X19 would be run as two lines)
 
+bool checkForStopCommand();
 void gcodeExecuteLoop();
 void readSerialCommands();
 void  _signalReady();
@@ -33,5 +35,10 @@ void  executeOtherCodeLine(const String&);
 int   findNextGM(const String&, const int&);
 bool isSafeCommand(const String&);
 void  interpretCommandString(String&);
+int   G1(const String&, int);
+int   G2(const String&, int);
+void  G10(const String&);
+void  G38(const String&);
+void  setInchesToMillimetersConversion(float);
 
 #endif

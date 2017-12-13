@@ -42,6 +42,10 @@
 #include "RingBuffer.h"
 #include "GCode.h"
 #include "Testing.h"
+#include "Motion.h"
+#include "Report.h"
+#include "Spindle.h"
+#include "Probe.h"
 #include "System.h"
 
 #endif

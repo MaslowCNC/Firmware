@@ -13,7 +13,6 @@
     Copyright 2014-2017 Bar Smith*/
     
 #include "Maslow.h"
-#include "CNC_Functions.h"
 
 // Define system global state structure
 system_t sys;
@@ -28,6 +27,7 @@ Axis zAxis;
 Kinematics kinematics;
 
 void setup(){
+    sys.inchesToMMConversion = 1;
     Serial.begin(57600);
     readyCommandString.reserve(128);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
     gcodeLine.reserve(128);
