@@ -454,7 +454,7 @@ void  executeMcodeLine(const String& gcodeLine){
             setSpindlePower(true);  // turn on spindle
             break;
         case 6:   // Tool Change
-            if (sys.nextTool != lastTool) {
+            if (sys.nextTool != sys.lastTool) {
                 setSpindlePower(false); // first, turn off spindle
                 Serial.print(F("Tool Change: Please insert tool "));   // prompt user to change tool
                 Serial.println(sys.nextTool);
