@@ -16,18 +16,15 @@
     Copyright 2014-2017 Bar Smith*/ 
 
 
-#include "Arduino.h"
-#include "Axis.h"
+#include "Maslow.h"
 
 #define EEPROMVALIDDATA 56
 #define SIZEOFFLOAT      4
 #define SIZEOFLINSEG    17
 
-Axis::Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const int& eepromAdr, const unsigned long& loopInterval)
-:
-motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2, loopInterval)
+void Axis::setup(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const int& eepromAdr, const unsigned long& loopInterval)
 {
-    
+    motorGearboxEncoder.setup(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2, loopInterval);
     _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, 0, 0, 0, P_ON_E, REVERSE);
     
     //initialize variables

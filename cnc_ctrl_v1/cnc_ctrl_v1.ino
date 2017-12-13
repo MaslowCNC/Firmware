@@ -12,17 +12,29 @@
     
     Copyright 2014-2017 Bar Smith*/
     
-#include "CNC_Functions.h"
-#include "TimerOne.h"
+#include "Maslow.h"
+
+// Define system global state structure
+system_t sys;
+
+// Define axes, it might be tighter to define these within the sys struct
+Axis leftAxis;
+Axis rightAxis;
+Axis zAxis;
+
+// Define kinematics, is it necessary for this to be a class?  Is this really
+// going to be reused?
+Kinematics kinematics;
 
 void setup(){
+    sys.inchesToMMConversion = 1;
+    setupAxes();
     Serial.begin(57600);
-    
     readyCommandString.reserve(128);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
     gcodeLine.reserve(128);
     
     Serial.print(F("PCB v1."));
-    Serial.print(pcbVersion);
+    Serial.print(getPCBVersion());
     Serial.println(F(" Detected"));
     
     Serial.println(F("ready"));
@@ -49,20 +61,13 @@ void runsOnATimer(){
 
 void loop(){
     
-    readyCommandString = ringBuffer.readLine();
-    
-    if (readyCommandString.length() > 0){
-        readyCommandString.trim();  // remove leading and trailing white space
-        readyCommandString.toUpperCase();
-        interpretCommandString(readyCommandString);
-        readyCommandString = "";
-    }
+    gcodeExecuteLoop();
     
     holdPosition();
     
     readSerialCommands();
     
-    returnPoz(xTarget, yTarget, zAxis.read());
+    returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
     
     _watchDog();
 }
