@@ -595,11 +595,16 @@ void  interpretCommandString(String& cmdString){
 }
 
 void gcodeExecuteLoop(){
-  readyCommandString = incSerialBuffer.prettyReadLine();
-  
-  if (readyCommandString.length() > 0){
-      interpretCommandString(readyCommandString);
-      readyCommandString = "";
+  if (incSerialBuffer.numberOfLines() > 0){
+      readyCommandString = incSerialBuffer.prettyReadLine();
+      if (readyCommandString.length() > 0){
+          interpretCommandString(readyCommandString);
+          readyCommandString = "";
+      }
+      else {
+          // This was a blank line, maybe a comment, get the next line
+          _signalReady();
+      }
   }
 }
 

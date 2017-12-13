@@ -28,6 +28,7 @@ Kinematics kinematics;
 
 void setup(){
     sys.inchesToMMConversion = 1;
+    setupAxes();
     Serial.begin(57600);
     readyCommandString.reserve(128);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
     gcodeLine.reserve(128);

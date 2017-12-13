@@ -17,7 +17,7 @@ Copyright 2014-2017 Bar Smith*/
 
 // This file contains functions related to the probe
 
-#include "maslow.h"
+#include "Maslow.h"
 
 bool checkForProbeTouch(const int& probePin) {
   /*
