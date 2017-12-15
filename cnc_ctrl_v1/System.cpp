@@ -157,6 +157,8 @@ void updateMotorSettings(const String& readString){
         leftAxis.changePitch(distPerRot);
         rightAxis.changePitch(distPerRot);
         zAxis.changePitch(zDistPerRot);
+        
+        kinematics.R = (gearTeeth * chainPitch)/(2.0 * 3.14159);
     }
     
     //update the number of encoder steps if new values have been received
