@@ -24,6 +24,7 @@ extern volatile bool movementUpdated;
   extern volatile bool  movementFail;
 #endif
 
+void initMotion();
 int   coordinatedMove(const float&, const float&, const float&, float);
 void  singleAxisMove(Axis*, const float&, const float&);
 int   arc(const float&, const float&, const float&, const float&, const float&, const float&, const float&, const float&);

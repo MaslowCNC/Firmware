@@ -304,6 +304,10 @@ int getPCBVersion(){
     return (8*digitalRead(53) + 4*digitalRead(52) + 2*digitalRead(23) + 1*digitalRead(22)) - 1;
 }
 
+
+// This should likely go away and be handled by setting the pause flag and then
+// pausing in the execSystemRealtime function
+// Need to check if all returns from this subsequently look to sys.stop
 void pause(){
     /*
     
@@ -320,11 +324,9 @@ void pause(){
     
     while(1){
         
-        holdPosition();
-    
-        readSerialCommands();
-    
-        returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
+        // Run realtime commands
+        execSystemRealtime();
+        if (sys.stop){return;}
         
         if (!sys.pause){
             return;
@@ -337,6 +339,8 @@ void pause(){
 // whenever we have a delay.  This should be all of the 'realtime' operations
 // and should probably include check for stop command.  Although, the holdPosition
 // would have to be moved out of here, but I think that is probably correct
+
+// need to check if all returns from here check for sys.stop
 void maslowDelay(unsigned long waitTimeMs) {
   /*
    * Provides a time delay while holding the machine position, reading serial commands,
@@ -350,11 +354,20 @@ void maslowDelay(unsigned long waitTimeMs) {
     unsigned long startTime  = millis();
     
     while ((millis() - startTime) < waitTimeMs){
-        delay(1);
-        holdPosition();
-        readSerialCommands();
-        returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
+        execSystemRealtime();
+        if (sys.stop){return;}
     }
+}
+
+// This executes all of the actions that we want to happen in 'realtime'.  This
+// should be called whenever there is a delay in the code or when it may have
+// been a long time since this command was called.  Everything that is executed
+// by this command should be relatively fast.  Should always check for sys.stop
+// after returning from this function
+void execSystemRealtime(){
+    readSerialCommands();
+    holdPosition();  // bad name, also shouldn't write positions just detach
+    returnPoz();
 }
 
 // This should be the ultimate fallback, it would be best if we didn't even need 
@@ -377,8 +390,7 @@ void  _watchDog(){
                 #if defined (verboseDebug) && verboseDebug > 0              
                 Serial.println(F("_watchDog requesting new code"));
                 #endif
-                _signalReady();                   // request new code
-                returnError();
+                _signalReady();
             }
         }
         

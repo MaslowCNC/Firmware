@@ -50,6 +50,7 @@ void  setSpindlePower(bool powerState) {
         myservo.attach(SpindlePowerControlPin); // start servo control
         myservo.write(servoIdle);   // move servo to idle position
         maslowDelay(servoDelay);    // wait for move to complete
+        if(sys.stop){return;}
         if (powerState) { // turn on spindle
             Serial.println(F("Turning Spindle On"));
             myservo.write(servoOn); // move servo to turn on switch
@@ -59,8 +60,10 @@ void  setSpindlePower(bool powerState) {
             myservo.write(servoOff); // move servo to turn off switch
         }
         maslowDelay(servoDelay);    // wait for move to complete
+        if(sys.stop){return;}
         myservo.write(servoIdle);   // return servo to idle position
         maslowDelay(servoDelay);    // wait for move to complete
+        if(sys.stop){return;}
         myservo.detach();           // stop servo control
     }
     else {            // use a digital I/O pin to control a relay

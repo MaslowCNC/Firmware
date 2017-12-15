@@ -63,5 +63,6 @@ int   getPCBVersion();
 void pause();
 void maslowDelay(unsigned long);
 void  _watchDog();
+void execSystemRealtime();
 
 #endif

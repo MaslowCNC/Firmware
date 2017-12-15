@@ -21,13 +21,18 @@ Copyright 2014-2017 Bar Smith*/
 #include "Maslow.h"
 
 RingBuffer incSerialBuffer;
-int expectedMaxLineLength = 60;  // expected maximum Gcode line length in characters, including line ending character(s)
 String readyCommandString = "";  //KRK why is this a global?
 String gcodeLine          = "";  //Our use of this is a bit sloppy, at times,
                                  //we pass references to this global and then 
                                  //name them the same thing.
 // Commands that can safely be executed before machineReady
 String safeCommands[] = {"B01", "B03", "B04", "B05", "B07", "B12", "G20", "G21", "G90", "G91"};
+
+void initGCode(){
+    // Called on startup or after a stop command
+    readyCommandString = "";
+    incSerialBuffer.empty();
+}
 
 bool checkForStopCommand(){
     /*
@@ -36,14 +41,6 @@ bool checkForStopCommand(){
     position and return true.
     */
     if(sys.stop){
-        readyCommandString = "";
-        incSerialBuffer.empty();
-        leftAxis.stop();
-        rightAxis.stop();
-        if(sys.zAxisAttached){
-          zAxis.stop();
-        }
-        kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
         sys.stop = false;
         return true;
     }
@@ -73,27 +70,13 @@ void readSerialCommands(){
                   sys.stop = true;
                 }
             }
+            if (sys.stop){return;}
         }
         #if defined (verboseDebug) && verboseDebug > 1              
         // print ring buffer contents
         Serial.println(F("rSC added to ring buffer"));
         incSerialBuffer.print();        
         #endif
-    }
-}
-
-// This should probably be in a reporting file, doesn't fit here
-void  _signalReady(){
-    /*
-    
-    Signal to the controlling software that the machine has executed the last
-    gcode line successfully.
-    
-    */
-    
-    if ( (incSerialBuffer.spaceAvailable() > expectedMaxLineLength)    // if there is space in the buffer to accept the expected maximum line length
-          && (incSerialBuffer.numberOfLines() < 4) ) {                 // and if there are fewer than 4 lines in the buffer
-        Serial.println(F("ok"));                                  // then request new code
     }
 }
 
@@ -186,11 +169,14 @@ void  executeBcodeLine(const String& gcodeLine){
     
     if(gcodeLine.substring(0, 3) == "B04"){
         //Test each of the axis
-        delay(500);
+        maslowDelay(500);
+        if(sys.stop){return;}
         leftAxis.test();
-        delay(500);
+        maslowDelay(500);
+        if(sys.stop){return;}
         rightAxis.test();
-        delay(500);
+        maslowDelay(500);
+        if(sys.stop){return;}
         zAxis.test();
         Serial.println(F("Tests complete."));
         return;
@@ -291,6 +277,8 @@ void  executeBcodeLine(const String& gcodeLine){
                 Serial.println(F("pulling"));                              //Keep the connection from timing out
             }
             i++;
+            execSystemRealtime();
+            if (sys.stop){return;}
         }
         leftAxis.set(leftAxis.read());
         return;
@@ -528,8 +516,6 @@ void  interpretCommandString(String& cmdString){
     
     */
     
-    returnError();  //Cue up sending the next line
-    
     int firstG;  
     int secondG;
 
@@ -589,22 +575,16 @@ void  interpretCommandString(String& cmdString){
     Serial.println(F("iCS execution complete"));
     incSerialBuffer.print();
     #endif
-    
-    _signalReady();
-    
 }
 
 void gcodeExecuteLoop(){
   if (incSerialBuffer.numberOfLines() > 0){
-      readyCommandString = incSerialBuffer.prettyReadLine();
-      if (readyCommandString.length() > 0){
-          interpretCommandString(readyCommandString);
-          readyCommandString = "";
-      }
-      else {
-          // This was a blank line, maybe a comment, get the next line
-          _signalReady();
-      }
+      incSerialBuffer.prettyReadLine(readyCommandString);
+      interpretCommandString(readyCommandString);
+      readyCommandString = "";
+
+      // Get next line of GCode
+      if (!sys.stop){_signalReady();}
   }
 }
 
@@ -794,8 +774,9 @@ void  G38(const String& readString) {
               axis->write(whereAxisShouldBeAtThisStep);
               movementUpdate();
 
-              //update position on display
-              returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
+              // Run realtime commands
+              execSystemRealtime();
+              if (sys.stop){return;}
 
               //increment the number of steps taken
               numberOfStepsTaken++;

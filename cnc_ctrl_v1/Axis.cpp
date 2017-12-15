@@ -288,7 +288,8 @@ void   Axis::test(){
     while (i < 1000){
         motorGearboxEncoder.motor.directWrite(255);
         i++;
-        delay(1);
+        maslowDelay(1);
+        if (sys.stop){return;}
     }
     
     //check to see if it moved
@@ -308,7 +309,8 @@ void   Axis::test(){
     while (i < 1000){
         motorGearboxEncoder.motor.directWrite(-255);
         i++;
-        delay(1);
+        maslowDelay(1);
+        if (sys.stop){return;}
     }
     
     //check to see if it moved

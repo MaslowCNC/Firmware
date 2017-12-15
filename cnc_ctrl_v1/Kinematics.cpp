@@ -27,6 +27,10 @@ Kinematics::Kinematics(){
 
 }
 
+void Kinematics::init(){
+    forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
+}
+
 void Kinematics::_verifyValidTarget(float* xTarget,float* yTarget){
     //If the target point is beyond one of the edges of the board, the machine stops at the edge
 
@@ -235,14 +239,18 @@ void  Kinematics::forward(const float& chainALength, const float& chainBLength, 
         
         guessCount++;
 
-        //Prevent the connection from timing out
-        Serial.print(F("[PEk:"));
-        Serial.print(aChainError);
-        Serial.print(',');
-        Serial.print(bChainError);
-        Serial.print(',');
-        Serial.print('0');
-        Serial.println(F("]"));
+        #if defined (KINEMATICSDBG) && KINEMATICSDBG > 0 
+          Serial.print(F("[PEk:"));
+          Serial.print(aChainError);
+          Serial.print(',');
+          Serial.print(bChainError);
+          Serial.print(',');
+          Serial.print('0');
+          Serial.println(F("]"));
+        #endif
+
+        execSystemRealtime();
+        // No need for sys.stop check here
 
         //if we've converged on the point...or it's time to give up, exit the loop
         if((abs(aChainError) < .1 && abs(bChainError) < .1) or guessCount > maxNumberOfGuesses){
