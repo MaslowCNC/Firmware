@@ -46,7 +46,7 @@
             double     _pidOutput;
             PID        _PIDController;
             double     _Kp=0, _Ki=0, _Kd=0;
-            float      _encoderStepsToRPMScaleFactor = 7364.0;   //6*10^7 us per minute divided by 8148 steps per revolution
+            float      _encoderStepsToRPMScaleFactor = 7394.9;   //6*10^7 us per minute divided by 8113.7 steps per revolution
     };
 
     #endif

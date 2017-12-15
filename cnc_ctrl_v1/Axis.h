@@ -63,8 +63,8 @@
             double     _Kp=0, _Ki = 0, _Kd=0;
             PID        _pidController;
             int        _eepromAdr;
-            float      _mmPerRotation = 1;
-            float      _encoderSteps  = 100;
+            float      _mmPerRotation = 63.5;
+            float      _encoderSteps  = 8113.7;
             bool       _disableAxisForTesting = false;
             char       _axisName;
     };
