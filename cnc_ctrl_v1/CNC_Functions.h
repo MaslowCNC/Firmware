@@ -1135,12 +1135,12 @@ void updateMotorSettings(const String& readString){
     if (extractGcodeValue(readString, 'I', -1) != -1){
         zAxisAttached            = extractGcodeValue(readString, 'I', -1);
     }
-    int encoderSteps         = extractGcodeValue(readString, 'J', -1);
+    float encoderSteps         = extractGcodeValue(readString, 'J', -1);
     float gearTeeth          = extractGcodeValue(readString, 'K', -1);
     float chainPitch         = extractGcodeValue(readString, 'M', -1);
     
     float zDistPerRot        = extractGcodeValue(readString, 'N', -1);
-    int zEncoderSteps        = extractGcodeValue(readString, 'P', -1);
+    float zEncoderSteps        = extractGcodeValue(readString, 'P', -1);
     
     float propWeight         = extractGcodeValue(readString, 'R', -1);
     float KpPos              = extractGcodeValue(readString, 'S', -1);

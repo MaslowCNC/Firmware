@@ -184,7 +184,7 @@ float  Axis::getPitch(){
     return _mmPerRotation;
 }
 
-void   Axis::changeEncoderResolution(const int& newResolution){
+void   Axis::changeEncoderResolution(const float& newResolution){
     /*
     Reassign the encoder resolution for the axis.
     */

@@ -46,7 +46,7 @@
             void   test();
             void   changePitch(const float& newPitch);
             float  getPitch();
-            void   changeEncoderResolution(const int& newResolution);
+            void   changeEncoderResolution(const float& newResolution);
             bool   attached();
             void   wipeEEPROM();
             MotorGearboxEncoder    motorGearboxEncoder;
