@@ -18,14 +18,9 @@
     #ifndef Axis_h
     #define Axis_h
 
-    #include "Arduino.h"
-    #include "PID_v1.h"
-    #include <EEPROM.h>
-    #include "MotorGearboxEncoder.h"
-
     class Axis{
         public:
-            Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const int& eepromAdr, const unsigned long& loopInterval);
+            void   setup(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const int& eepromAdr, const unsigned long& loopInterval);
             void   write(const float& targetPosition);
             float  read();
             void   set(const float& newAxisPosition);
