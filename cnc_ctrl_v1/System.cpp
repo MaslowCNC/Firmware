@@ -126,12 +126,12 @@ void updateMotorSettings(const String& readString){
     if (extractGcodeValue(readString, 'I', -1) != -1){
         sys.zAxisAttached            = extractGcodeValue(readString, 'I', -1);
     }
-    int encoderSteps         = extractGcodeValue(readString, 'J', -1);
+    float encoderSteps       = extractGcodeValue(readString, 'J', -1);
     float gearTeeth          = extractGcodeValue(readString, 'K', -1);
     float chainPitch         = extractGcodeValue(readString, 'M', -1);
     
     float zDistPerRot        = extractGcodeValue(readString, 'N', -1);
-    int zEncoderSteps        = extractGcodeValue(readString, 'P', -1);
+    float zEncoderSteps      = extractGcodeValue(readString, 'P', -1);
     
     float propWeight         = extractGcodeValue(readString, 'R', -1);
     float KpPos              = extractGcodeValue(readString, 'S', -1);
@@ -157,6 +157,8 @@ void updateMotorSettings(const String& readString){
         leftAxis.changePitch(distPerRot);
         rightAxis.changePitch(distPerRot);
         zAxis.changePitch(zDistPerRot);
+        
+        kinematics.R = (gearTeeth * chainPitch)/(2.0 * 3.14159);
     }
     
     //update the number of encoder steps if new values have been received

@@ -35,7 +35,7 @@
             float h             = sqrt((l/2)*(l/2) + s * s);           //distance between sled attach point and bit
             float h3            = 1;                                //distance from bit to sled center of mass
             float D             = 1;                              //distance between sprocket centers
-            float R             = 10.2;                                //sprocket radius
+            float R             = 10.1;                                //sprocket radius
             float rotationDiskRadius = 0;                              //distance from the bit to the attachment point
             int kinematicsType  = 1;                                   //Which version of the kinematics to use. 1 is quadrilateral, 2 is triangular
 
