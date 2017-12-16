@@ -509,8 +509,8 @@ void  sanitizeCommandString(String& cmdString){
             }
         }
         else {
-            if (cmdString[pos] <= ' ') {
-                // Throw away whitepace and control characters
+            if (cmdString[pos] < ' ') {
+                // Throw away control characters
                 cmdString.remove(pos, 1);
             }
             else if (cmdString[pos] == '/') {
