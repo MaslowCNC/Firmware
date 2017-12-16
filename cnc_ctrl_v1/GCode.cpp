@@ -504,6 +504,59 @@ int   findNextGM(const String& readString, const int& startingPoint){
     return nextGIndex;
 }
 
+void  sanitizeCommandString(String& cmdString){
+    /*
+    Primarily removes comments and some other non supported characters or functions.  
+    This is taken heavily from the GRBL project at https://github.com/gnea/grbl
+    */
+    
+    byte line_flags = 0;
+    short pos = 0;
+    
+    while (cmdString.length() > pos){
+        if (line_flags) {
+            // Throw away all (except EOL) comment characters and overflow characters.
+            if (cmdString[pos] == ')') {
+                // End of '()' comment. Resume line allowed.
+                cmdString.remove(pos, 1);
+                if (line_flags & LINE_FLAG_COMMENT_PARENTHESES) { line_flags &= ~(LINE_FLAG_COMMENT_PARENTHESES); }
+            }
+        }
+        else {
+            if (cmdString[pos] <= ' ') {
+                // Throw away whitepace and control characters
+                cmdString.remove(pos, 1);
+            }
+            else if (cmdString[pos] == '/') {
+                // Block delete NOT SUPPORTED. Ignore character.
+                // NOTE: If supported, would simply need to check the system if block delete is enabled.
+                cmdString.remove(pos, 1);
+            } else if (cmdString[pos] == '(') {
+                // Enable comments flag and ignore all characters until ')' or EOL.
+                // NOTE: This doesn't follow the NIST definition exactly, but is good enough for now.
+                // In the future, we could simply remove the items within the comments, but retain the
+                // comment control characters, so that the g-code parser can error-check it.
+                cmdString.remove(pos, 1);
+                line_flags |= LINE_FLAG_COMMENT_PARENTHESES;
+            } else if (cmdString[pos] == ';') {
+                // NOTE: ';' comment to EOL is a LinuxCNC definition. Not NIST.
+                cmdString.remove(pos, 1);
+                line_flags |= LINE_FLAG_COMMENT_SEMICOLON;
+            } else if (cmdString[pos] == '%') {
+              // Program start-end percent sign NOT SUPPORTED.
+              cmdString.remove(pos, 1);
+            } else {
+                pos++;
+            }
+        }
+    }
+    #if defined (verboseDebug) && verboseDebug > 1              
+      // print results
+      Serial.println(F("sCS execution complete"));
+      Serial.println(cmdString);
+    #endif
+}
+
 void  interpretCommandString(String& cmdString){
     /*
     
@@ -580,6 +633,7 @@ void  interpretCommandString(String& cmdString){
 void gcodeExecuteLoop(){
   if (incSerialBuffer.numberOfLines() > 0){
       incSerialBuffer.prettyReadLine(readyCommandString);
+      sanitizeCommandString(readyCommandString);
       interpretCommandString(readyCommandString);
       readyCommandString = "";
 
