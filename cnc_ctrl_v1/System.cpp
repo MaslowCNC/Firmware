@@ -366,7 +366,6 @@ void maslowDelay(unsigned long waitTimeMs) {
 // after returning from this function
 void execSystemRealtime(){
     readSerialCommands();
-    holdPosition();  // bad name, also shouldn't write positions just detach
     returnPoz();
 }
 

@@ -59,6 +59,7 @@ void   Axis::initializePID(const unsigned long& loopInterval){
 }
 
 void    Axis::write(const float& targetPosition){
+    _timeLastMoved = millis();
     
     // Ensure that _pidSetpoint is equal to whole number of encoder steps
     float steps = (targetPosition/_mmPerRotation) * _encoderSteps;
@@ -224,7 +225,7 @@ void   Axis::hold(){
     int timeout   = 2000;
     
     if (millis() - _timeLastMoved < timeout){
-        write(_axisTarget*_mmPerRotation);
+        //write(_axisTarget*_mmPerRotation);
     }
     else{
         detach();

@@ -34,20 +34,6 @@ void initGCode(){
     incSerialBuffer.empty();
 }
 
-bool checkForStopCommand(){
-    /*
-    Check to see if the STOP command has been sent to the machine.
-    If it has, empty the buffer, stop all axes, set target position to current 
-    position and return true.
-    */
-    if(sys.stop){
-        sys.stop = false;
-        return true;
-    }
-    return false;
-}
-
-
 void readSerialCommands(){
     /*
     Check to see if a new character is available from the serial connection, 
@@ -792,7 +778,7 @@ void  G38(const String& readString) {
         //        now move z to the Z destination;
         //        Currently ignores X and Y options
         //          we need a version of singleAxisMove that quits if the AUXn input changes (goes LOW)
-        //          which will act the same as the checkForStopCommand() found in singleAxisMove (need both?)
+        //          which will act the same as the stop found in singleAxisMove (need both?)
         //        singleAxisMove(&zAxis, zgoto, feedrate);
 
         /*
@@ -836,14 +822,6 @@ void  G38(const String& readString) {
               numberOfStepsTaken++;
           }
 
-          //check for new serial commands
-          readSerialCommands();
-
-          //check for a STOP command
-          if (checkForStopCommand()) {
-            return;
-          }
-
           //check for Probe touchdown
           if (checkForProbeTouch(ProbePin)) {
             zAxis.set(0);
@@ -862,8 +840,6 @@ void  G38(const String& readString) {
         axis->endMove(endPos);
         Serial.println(F("error: probe did not connect\nprogram stopped\nz axis not set\n"));
         sys.stop = true;
-        checkForStopCommand();
-
       } // end if zgoto != currentZPos / sys.inchesToMMConversion
 
     } else {

@@ -334,7 +334,6 @@ void  holdPosition(){
     not executing a line it is called regularly and causes the motors to hold their positions.
     
     */
-    checkForStopCommand();
     
     leftAxis.hold();
     rightAxis.hold();

@@ -62,7 +62,9 @@ void loop(){
         setSpindlePower(false);  // this restriction for safety if we are 
     }                            // comfortable that USB disconnects are
                                  // not a common occurence anymore
-    kinematics.init();
+    if (sys.rcvdKinematicSettings && sys.rcvdMotorSettings){
+        kinematics.init();
+    }
     
     // Let's go!
     _signalReady();
@@ -71,6 +73,8 @@ void loop(){
                                  // limit
     while (sys.stop != true){
         gcodeExecuteLoop();
+        
+        holdPosition();  // bad name, also shouldn't write positions just detach
     
         execSystemRealtime();
     

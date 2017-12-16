@@ -26,7 +26,6 @@ extern String readyCommandString; //next command queued up and ready to send
 extern String gcodeLine; //The next individual line of gcode (for example G91 G01 X19 would be run as two lines)
 
 void initGCode();
-bool checkForStopCommand();
 void gcodeExecuteLoop();
 void readSerialCommands();
 String gcodeBufferReadline();

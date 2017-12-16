@@ -213,6 +213,8 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
 }
 
 void  Kinematics::forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos){
+  
+    Serial.println(F("[Forward Calculating Position]"));
     
     float xGuess = 0;
     float yGuess = 0;
