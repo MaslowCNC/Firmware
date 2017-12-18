@@ -23,6 +23,7 @@
     class Kinematics{
         public:
             Kinematics();
+            void init  ();
             void  inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  quadrilateralInverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  triangularInverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);

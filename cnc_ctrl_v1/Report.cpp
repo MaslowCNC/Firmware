@@ -19,6 +19,21 @@ Copyright 2014-2017 Bar Smith*/
 
 #include "Maslow.h"
 
+void  _signalReady(){
+    /*
+    
+    Signal to the controlling software that the machine has executed the last
+    gcode line successfully.
+    
+    */
+    // if there is space in the buffer to accept the expected maximum line length
+    // and if there are fewer than max allowed lines in the buffer, request new code
+    if ( (incSerialBuffer.spaceAvailable() > EXPGCODELINE)    
+          && (incSerialBuffer.numberOfLines() < MAXBUFFERLINES) ) {  
+        Serial.println(F("ok"));
+    }
+}
+
 void  returnError(){
     /*
     Prints the machine's positional error and the amount of space available in the 
@@ -33,24 +48,24 @@ void  returnError(){
         Serial.println(F("]"));
 }
 
-void  returnPoz(const float& x, const float& y, const float& z){
+void  returnPoz(){
     /*
     Causes the machine's position (x,y) to be sent over the serial connection updated on the UI
-    in Ground Control. Only executes if hasn't been called in at least timeout ms.
+    in Ground Control. Also causes the error report to be sent. Only executes 
+    if hasn't been called in at least POSITIONTIMEOUT ms.
     */
     
     static unsigned long lastRan = millis();
-    unsigned int         timeout = 200;
     
-    if (millis() - lastRan > timeout){
+    if (millis() - lastRan > POSITIONTIMEOUT){
         
         
         Serial.print(F("<Idle,MPos:"));
-        Serial.print(x/sys.inchesToMMConversion);
+        Serial.print(sys.xPosition/sys.inchesToMMConversion);
         Serial.print(F(","));
-        Serial.print(y/sys.inchesToMMConversion);
+        Serial.print(sys.yPosition/sys.inchesToMMConversion);
         Serial.print(F(","));
-        Serial.print(z/sys.inchesToMMConversion);
+        Serial.print(zAxis.read()/sys.inchesToMMConversion);
         Serial.println(F(",WPos:0.000,0.000,0.000>"));
         
         returnError();

@@ -59,6 +59,7 @@ void   Axis::initializePID(const unsigned long& loopInterval){
 }
 
 void    Axis::write(const float& targetPosition){
+    _timeLastMoved = millis();
     _pidSetpoint   =  targetPosition/_mmPerRotation;
     return;
 }
@@ -218,7 +219,7 @@ void   Axis::hold(){
     int timeout   = 2000;
     
     if (millis() - _timeLastMoved < timeout){
-        write(_axisTarget*_mmPerRotation);
+        //write(_axisTarget*_mmPerRotation);
     }
     else{
         detach();
@@ -282,7 +283,8 @@ void   Axis::test(){
     while (i < 1000){
         motorGearboxEncoder.motor.directWrite(255);
         i++;
-        delay(1);
+        maslowDelay(1);
+        if (sys.stop){return;}
     }
     
     //check to see if it moved
@@ -302,7 +304,8 @@ void   Axis::test(){
     while (i < 1000){
         motorGearboxEncoder.motor.directWrite(-255);
         i++;
-        delay(1);
+        maslowDelay(1);
+        if (sys.stop){return;}
     }
     
     //check to see if it moved

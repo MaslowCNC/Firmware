@@ -20,7 +20,8 @@ Copyright 2014-2017 Bar Smith*/
 #ifndef report_h
 #define report_h
 
+void  _signalReady();
 void  returnError();
-void  returnPoz(const float&, const float&, const float&);
+void  returnPoz();
 
 #endif

@@ -18,10 +18,14 @@
 #ifndef config_h
 #define config_h
 
+// Debugging Options
 #define verboseDebug 0     // set to 0 for no debug messages, 1 for single-line messages, 2 to also output ring buffer contents
 #define misloopDebug 0     // set to 1 for a warning every time the movement loop fails 
                            // to complete before being interrupted, helpful for loop
                            // LOOPINTERVAL tuning
+#define KINEMATICSDBG 0    // set to 1 for additional kinematics debug messaging
+
+
 #define LOOPINTERVAL 10000 // What is the frequency of the PID loop in microseconds
 
 // The EEPROM locations for each axis data
@@ -40,5 +44,23 @@
 #define AUX4 14
 #define SpindlePowerControlPin AUX1 // output for controlling spindle power
 #define ProbePin AUX4 // use this input for zeroing zAxis with G38.2 gcode
+
+// Serial variables
+#define INCBUFFERLENGTH 128 // The number of bytes(characters) allocated to the
+                            // incoming buffer.
+#define EXPGCODELINE 60     // Maximum expected Gcode line length in characters 
+                            // including line ending character(s).  Assumes 
+                            // client will not send more than this.  Ground 
+                            // Control is currently set to 60.  NIST spec allows
+                            // 256. This value must be <= INCBUFFERLENGTH
+#define MAXBUFFERLINES 4    // The maximum number of lines allowed in the buffer
+#define POSITIONTIMEOUT 200 // The minimum number of milliseconds between 
+                            // position reports sent to Ground Control.  This 
+                            // cannot be larger than the connection timout in 
+                            // Ground Control which is 2000, a smaller number
+                            // takes more processing time for sending data
+                            // a larger number make position updates in GC less
+                            // smooth.  This is only a minimum, and the actual
+                            // timeout could be significantly larger. 
 
 #endif

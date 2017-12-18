@@ -18,13 +18,16 @@ Copyright 2014-2017 Bar Smith*/
 #ifndef gcode_h
 #define gcode_h
 
+// Define line flags. Includes comment type tracking and line overflow detection.
+#define LINE_FLAG_COMMENT_PARENTHESES bit(0)
+#define LINE_FLAG_COMMENT_SEMICOLON bit(1)
+
 extern String readyCommandString; //next command queued up and ready to send
 extern String gcodeLine; //The next individual line of gcode (for example G91 G01 X19 would be run as two lines)
 
-bool checkForStopCommand();
+void initGCode();
 void gcodeExecuteLoop();
 void readSerialCommands();
-void  _signalReady();
 String gcodeBufferReadline();
 int   findEndOfNumber(const String&, const int&);
 float extractGcodeValue(const String&, char, const float&);
@@ -34,6 +37,7 @@ void  executeMcodeLine(const String&);
 void  executeOtherCodeLine(const String&);
 int   findNextGM(const String&, const int&);
 bool isSafeCommand(const String&);
+void  sanitizeCommandString(String&);
 void  interpretCommandString(String&);
 int   G1(const String&, int);
 int   G2(const String&, int);
