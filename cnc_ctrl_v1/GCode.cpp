@@ -456,12 +456,7 @@ void  executeOtherCodeLine(const String& gcodeLine){
             int tNumber = extractGcodeValue(gcodeLine,'T', 0);    // get tool number
             Serial.print(F("Tool change to tool "));
             Serial.println(tNumber);
-            if ((tNumber > 0) && (tNumber != sys.lastTool)) {         // if tool number is greater than 0 and not the same as the last tool
-                sys.nextTool = tNumber;                               // remember tool number to prompt user when G06 is received
-            }
-            else {
-                sys.nextTool = 0;                                     // tool is 0 or same as last change - don't prompt user on next G06
-            }
+            sys.nextTool = tNumber;                               // remember tool number to prompt user when G06 is received
         }
         else {  // try it as a 'G' command without the leading 'G' code
             executeGcodeLine(gcodeLine);
