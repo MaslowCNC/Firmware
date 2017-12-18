@@ -59,13 +59,8 @@ void   Axis::initializePID(const unsigned long& loopInterval){
 }
 
 void    Axis::write(const float& targetPosition){
-    
-    // Ensure that _pidSetpoint is equal to whole number of encoder steps
-    float steps = (targetPosition/_mmPerRotation) * _encoderSteps;
-    steps = steps * 2;
-    steps = round(steps);
-    steps = steps /2;
-    _pidSetpoint   =  steps/_encoderSteps;
+    _timeLastMoved = millis();
+    _pidSetpoint   =  targetPosition/_mmPerRotation;
     return;
 }
 
@@ -181,7 +176,7 @@ float  Axis::getPitch(){
     return _mmPerRotation;
 }
 
-void   Axis::changeEncoderResolution(const int& newResolution){
+void   Axis::changeEncoderResolution(const float& newResolution){
     /*
     Reassign the encoder resolution for the axis.
     */
@@ -224,7 +219,7 @@ void   Axis::hold(){
     int timeout   = 2000;
     
     if (millis() - _timeLastMoved < timeout){
-        write(_axisTarget*_mmPerRotation);
+        //write(_axisTarget*_mmPerRotation);
     }
     else{
         detach();
@@ -288,7 +283,8 @@ void   Axis::test(){
     while (i < 1000){
         motorGearboxEncoder.motor.directWrite(255);
         i++;
-        delay(1);
+        maslowDelay(1);
+        if (sys.stop){return;}
     }
     
     //check to see if it moved
@@ -308,7 +304,8 @@ void   Axis::test(){
     while (i < 1000){
         motorGearboxEncoder.motor.directWrite(-255);
         i++;
-        delay(1);
+        maslowDelay(1);
+        if (sys.stop){return;}
     }
     
     //check to see if it moved

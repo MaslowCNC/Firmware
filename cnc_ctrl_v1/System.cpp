@@ -126,12 +126,12 @@ void updateMotorSettings(const String& readString){
     if (extractGcodeValue(readString, 'I', -1) != -1){
         sys.zAxisAttached            = extractGcodeValue(readString, 'I', -1);
     }
-    int encoderSteps         = extractGcodeValue(readString, 'J', -1);
+    float encoderSteps       = extractGcodeValue(readString, 'J', -1);
     float gearTeeth          = extractGcodeValue(readString, 'K', -1);
     float chainPitch         = extractGcodeValue(readString, 'M', -1);
     
     float zDistPerRot        = extractGcodeValue(readString, 'N', -1);
-    int zEncoderSteps        = extractGcodeValue(readString, 'P', -1);
+    float zEncoderSteps      = extractGcodeValue(readString, 'P', -1);
     
     float propWeight         = extractGcodeValue(readString, 'R', -1);
     float KpPos              = extractGcodeValue(readString, 'S', -1);
@@ -157,6 +157,8 @@ void updateMotorSettings(const String& readString){
         leftAxis.changePitch(distPerRot);
         rightAxis.changePitch(distPerRot);
         zAxis.changePitch(zDistPerRot);
+        
+        kinematics.R = (gearTeeth * chainPitch)/(2.0 * 3.14159);
     }
     
     //update the number of encoder steps if new values have been received
@@ -304,6 +306,10 @@ int getPCBVersion(){
     return (8*digitalRead(53) + 4*digitalRead(52) + 2*digitalRead(23) + 1*digitalRead(22)) - 1;
 }
 
+
+// This should likely go away and be handled by setting the pause flag and then
+// pausing in the execSystemRealtime function
+// Need to check if all returns from this subsequently look to sys.stop
 void pause(){
     /*
     
@@ -320,11 +326,9 @@ void pause(){
     
     while(1){
         
-        holdPosition();
-    
-        readSerialCommands();
-    
-        returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
+        // Run realtime commands
+        execSystemRealtime();
+        if (sys.stop){return;}
         
         if (!sys.pause){
             return;
@@ -337,6 +341,8 @@ void pause(){
 // whenever we have a delay.  This should be all of the 'realtime' operations
 // and should probably include check for stop command.  Although, the holdPosition
 // would have to be moved out of here, but I think that is probably correct
+
+// need to check if all returns from here check for sys.stop
 void maslowDelay(unsigned long waitTimeMs) {
   /*
    * Provides a time delay while holding the machine position, reading serial commands,
@@ -350,11 +356,19 @@ void maslowDelay(unsigned long waitTimeMs) {
     unsigned long startTime  = millis();
     
     while ((millis() - startTime) < waitTimeMs){
-        delay(1);
-        holdPosition();
-        readSerialCommands();
-        returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
+        execSystemRealtime();
+        if (sys.stop){return;}
     }
+}
+
+// This executes all of the actions that we want to happen in 'realtime'.  This
+// should be called whenever there is a delay in the code or when it may have
+// been a long time since this command was called.  Everything that is executed
+// by this command should be relatively fast.  Should always check for sys.stop
+// after returning from this function
+void execSystemRealtime(){
+    readSerialCommands();
+    returnPoz();
 }
 
 // This should be the ultimate fallback, it would be best if we didn't even need 
@@ -377,8 +391,7 @@ void  _watchDog(){
                 #if defined (verboseDebug) && verboseDebug > 0              
                 Serial.println(F("_watchDog requesting new code"));
                 #endif
-                _signalReady();                   // request new code
-                returnError();
+                _signalReady();
             }
         }
         

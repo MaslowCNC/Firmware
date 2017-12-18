@@ -24,6 +24,15 @@ volatile bool  movementUpdated  =  false;
   volatile bool  movementFail     =  false;
 #endif
 
+void initMotion(){
+    // Called on startup or after a stop command
+    leftAxis.stop();
+    rightAxis.stop();
+    if(sys.zAxisAttached){
+      zAxis.stop();
+    }
+}
+
 float calculateDelay(const float& stepSizeMM, const float& feedrateMMPerMin){
     /*
     Calculate the time delay in microseconds between each step for a given feedrate
@@ -67,6 +76,8 @@ void movementUpdate(){
   movementUpdated = true;
 }
 
+
+// why does this return anything
 int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, float MMPerMin){
     
     /*The move() function moves the tool in a straight line to the position (xEnd, yEnd) at 
@@ -115,8 +126,6 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
     float aChainLength;
     float bChainLength;
     float zPosition                   = zStartingLocation;
-    float whereXShouldBeAtThisStep    = xStartingLocation;
-    float whereYShouldBeAtThisStep    = yStartingLocation;
     long   numberOfStepsTaken         =  0;
     
     while(numberOfStepsTaken < finalNumberOfSteps){
@@ -128,13 +137,13 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
         if (!movementUpdated) {
             //find the target point for this step
             // This section ~20us
-            whereXShouldBeAtThisStep +=  xStepSize;
-            whereYShouldBeAtThisStep +=  yStepSize;
+            sys.xPosition +=  xStepSize;
+            sys.yPosition +=  yStepSize;
             zPosition += zStepSize;
             
             //find the chain lengths for this step
             // This section ~180us
-            kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+            kinematics.inverse(sys.xPosition,sys.yPosition,&aChainLength,&bChainLength);
             
             //write to each axis
             // This section ~180us
@@ -149,17 +158,9 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
             //increment the number of steps taken
             numberOfStepsTaken++;
             
-            //update position on display
-            returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zPosition);
-            
-            // This section ~10us
-            //check for new serial commands
-            readSerialCommands();
-            
-            //check for a STOP command
-            if(checkForStopCommand()){
-                return 1;
-            }
+            // Run realtime commands
+            execSystemRealtime();
+            if (sys.stop){return 1;}
         }
     }
     #if misloopDebug > 0
@@ -215,19 +216,12 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
           axis->write(whereAxisShouldBeAtThisStep);
           movementUpdate();
           
-          //update position on display
-          returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
+          // Run realtime commands
+          execSystemRealtime();
+          if (sys.stop){return;}
           
           //increment the number of steps taken
           numberOfStepsTaken++;
-        }
-        
-        //check for new serial commands
-        readSerialCommands();
-        
-        //check for a STOP command
-        if(checkForStopCommand()){
-            return;
         }
     }
     #if misloopDebug > 0
@@ -238,6 +232,7 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     
 }
 
+// why does this return anything
 int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, const float& centerX, const float& centerY, const float& MMPerMin, const float& direction){
     /*
     
@@ -281,8 +276,6 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
     
     //Compute the starting position
     float angleNow = startingAngle;
-    float whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
-    float whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
     float degreeComplete = 0.0;
     
     float aChainLength;
@@ -304,26 +297,20 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
             
             angleNow = startingAngle + theta*direction*degreeComplete;
             
-            whereXShouldBeAtThisStep = radius * cos(angleNow) + centerX;
-            whereYShouldBeAtThisStep = radius * sin(angleNow) + centerY;
+            sys.xPosition = radius * cos(angleNow) + centerX;
+            sys.yPosition = radius * sin(angleNow) + centerY;
             
-            kinematics.inverse(whereXShouldBeAtThisStep,whereYShouldBeAtThisStep,&aChainLength,&bChainLength);
+            kinematics.inverse(sys.xPosition,sys.yPosition,&aChainLength,&bChainLength);
             
             leftAxis.write(aChainLength);
             rightAxis.write(bChainLength); 
             movementUpdate();
             
-            returnPoz(whereXShouldBeAtThisStep, whereYShouldBeAtThisStep, zAxis.read());
-            
+            // Run realtime commands
+            execSystemRealtime();
+            if (sys.stop){return 1;}
+
             numberOfStepsTaken++;
-            
-            //check for new serial commands
-            readSerialCommands();
-            
-            //check for a STOP command
-            if(checkForStopCommand()){
-                return 1;
-            }
         }
     }
     #if misloopDebug > 0
@@ -347,7 +334,6 @@ void  holdPosition(){
     not executing a line it is called regularly and causes the motors to hold their positions.
     
     */
-    checkForStopCommand();
     
     leftAxis.hold();
     rightAxis.hold();

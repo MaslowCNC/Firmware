@@ -21,7 +21,6 @@ Copyright 2014-2017 Bar Smith*/
 #include "Maslow.h"
 
 RingBuffer incSerialBuffer;
-int expectedMaxLineLength = 60;  // expected maximum Gcode line length in characters, including line ending character(s)
 String readyCommandString = "";  //KRK why is this a global?
 String gcodeLine          = "";  //Our use of this is a bit sloppy, at times,
                                  //we pass references to this global and then 
@@ -29,27 +28,11 @@ String gcodeLine          = "";  //Our use of this is a bit sloppy, at times,
 // Commands that can safely be executed before machineReady
 String safeCommands[] = {"B01", "B03", "B04", "B05", "B07", "B12", "G20", "G21", "G90", "G91"};
 
-bool checkForStopCommand(){
-    /*
-    Check to see if the STOP command has been sent to the machine.
-    If it has, empty the buffer, stop all axes, set target position to current 
-    position and return true.
-    */
-    if(sys.stop){
-        readyCommandString = "";
-        incSerialBuffer.empty();
-        leftAxis.stop();
-        rightAxis.stop();
-        if(sys.zAxisAttached){
-          zAxis.stop();
-        }
-        kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
-        sys.stop = false;
-        return true;
-    }
-    return false;
+void initGCode(){
+    // Called on startup or after a stop command
+    readyCommandString = "";
+    incSerialBuffer.empty();
 }
-
 
 void readSerialCommands(){
     /*
@@ -73,27 +56,13 @@ void readSerialCommands(){
                   sys.stop = true;
                 }
             }
+            if (sys.stop){return;}
         }
         #if defined (verboseDebug) && verboseDebug > 1              
         // print ring buffer contents
         Serial.println(F("rSC added to ring buffer"));
         incSerialBuffer.print();        
         #endif
-    }
-}
-
-// This should probably be in a reporting file, doesn't fit here
-void  _signalReady(){
-    /*
-    
-    Signal to the controlling software that the machine has executed the last
-    gcode line successfully.
-    
-    */
-    
-    if ( (incSerialBuffer.spaceAvailable() > expectedMaxLineLength)    // if there is space in the buffer to accept the expected maximum line length
-          && (incSerialBuffer.numberOfLines() < 4) ) {                 // and if there are fewer than 4 lines in the buffer
-        Serial.println(F("ok"));                                  // then request new code
     }
 }
 
@@ -186,11 +155,14 @@ void  executeBcodeLine(const String& gcodeLine){
     
     if(gcodeLine.substring(0, 3) == "B04"){
         //Test each of the axis
-        delay(500);
+        maslowDelay(500);
+        if(sys.stop){return;}
         leftAxis.test();
-        delay(500);
+        maslowDelay(500);
+        if(sys.stop){return;}
         rightAxis.test();
-        delay(500);
+        maslowDelay(500);
+        if(sys.stop){return;}
         zAxis.test();
         Serial.println(F("Tests complete."));
         return;
@@ -291,6 +263,8 @@ void  executeBcodeLine(const String& gcodeLine){
                 Serial.println(F("pulling"));                              //Keep the connection from timing out
             }
             i++;
+            execSystemRealtime();
+            if (sys.stop){return;}
         }
         leftAxis.set(leftAxis.read());
         return;
@@ -482,12 +456,7 @@ void  executeOtherCodeLine(const String& gcodeLine){
             int tNumber = extractGcodeValue(gcodeLine,'T', 0);    // get tool number
             Serial.print(F("Tool change to tool "));
             Serial.println(tNumber);
-            if ((tNumber > 0) && (tNumber != sys.lastTool)) {         // if tool number is greater than 0 and not the same as the last tool
-                sys.nextTool = tNumber;                               // remember tool number to prompt user when G06 is received
-            }
-            else {
-                sys.nextTool = 0;                                     // tool is 0 or same as last change - don't prompt user on next G06
-            }
+            sys.nextTool = tNumber;                               // remember tool number to prompt user when G06 is received
         }
         else {  // try it as a 'G' command without the leading 'G' code
             executeGcodeLine(gcodeLine);
@@ -516,6 +485,59 @@ int   findNextGM(const String& readString, const int& startingPoint){
     return nextGIndex;
 }
 
+void  sanitizeCommandString(String& cmdString){
+    /*
+    Primarily removes comments and some other non supported characters or functions.  
+    This is taken heavily from the GRBL project at https://github.com/gnea/grbl
+    */
+    
+    byte line_flags = 0;
+    short pos = 0;
+    
+    while (cmdString.length() > pos){
+        if (line_flags) {
+            // Throw away all (except EOL) comment characters and overflow characters.
+            if (cmdString[pos] == ')') {
+                // End of '()' comment. Resume line allowed.
+                cmdString.remove(pos, 1);
+                if (line_flags & LINE_FLAG_COMMENT_PARENTHESES) { line_flags &= ~(LINE_FLAG_COMMENT_PARENTHESES); }
+            }
+        }
+        else {
+            if (cmdString[pos] < ' ') {
+                // Throw away control characters
+                cmdString.remove(pos, 1);
+            }
+            else if (cmdString[pos] == '/') {
+                // Block delete NOT SUPPORTED. Ignore character.
+                // NOTE: If supported, would simply need to check the system if block delete is enabled.
+                cmdString.remove(pos, 1);
+            } else if (cmdString[pos] == '(') {
+                // Enable comments flag and ignore all characters until ')' or EOL.
+                // NOTE: This doesn't follow the NIST definition exactly, but is good enough for now.
+                // In the future, we could simply remove the items within the comments, but retain the
+                // comment control characters, so that the g-code parser can error-check it.
+                cmdString.remove(pos, 1);
+                line_flags |= LINE_FLAG_COMMENT_PARENTHESES;
+            } else if (cmdString[pos] == ';') {
+                // NOTE: ';' comment to EOL is a LinuxCNC definition. Not NIST.
+                cmdString.remove(pos, 1);
+                line_flags |= LINE_FLAG_COMMENT_SEMICOLON;
+            } else if (cmdString[pos] == '%') {
+              // Program start-end percent sign NOT SUPPORTED.
+              cmdString.remove(pos, 1);
+            } else {
+                pos++;
+            }
+        }
+    }
+    #if defined (verboseDebug) && verboseDebug > 1              
+      // print results
+      Serial.println(F("sCS execution complete"));
+      Serial.println(cmdString);
+    #endif
+}
+
 void  interpretCommandString(String& cmdString){
     /*
     
@@ -527,8 +549,6 @@ void  interpretCommandString(String& cmdString){
         cmdString has been converted to upper case
     
     */
-    
-    returnError();  //Cue up sending the next line
     
     int firstG;  
     int secondG;
@@ -589,22 +609,17 @@ void  interpretCommandString(String& cmdString){
     Serial.println(F("iCS execution complete"));
     incSerialBuffer.print();
     #endif
-    
-    _signalReady();
-    
 }
 
 void gcodeExecuteLoop(){
   if (incSerialBuffer.numberOfLines() > 0){
-      readyCommandString = incSerialBuffer.prettyReadLine();
-      if (readyCommandString.length() > 0){
-          interpretCommandString(readyCommandString);
-          readyCommandString = "";
-      }
-      else {
-          // This was a blank line, maybe a comment, get the next line
-          _signalReady();
-      }
+      incSerialBuffer.prettyReadLine(readyCommandString);
+      sanitizeCommandString(readyCommandString);
+      interpretCommandString(readyCommandString);
+      readyCommandString = "";
+
+      // Get next line of GCode
+      if (!sys.stop){_signalReady();}
   }
 }
 
@@ -758,7 +773,7 @@ void  G38(const String& readString) {
         //        now move z to the Z destination;
         //        Currently ignores X and Y options
         //          we need a version of singleAxisMove that quits if the AUXn input changes (goes LOW)
-        //          which will act the same as the checkForStopCommand() found in singleAxisMove (need both?)
+        //          which will act the same as the stop found in singleAxisMove (need both?)
         //        singleAxisMove(&zAxis, zgoto, feedrate);
 
         /*
@@ -794,19 +809,12 @@ void  G38(const String& readString) {
               axis->write(whereAxisShouldBeAtThisStep);
               movementUpdate();
 
-              //update position on display
-              returnPoz(sys.xPosition, sys.yPosition, zAxis.read());
+              // Run realtime commands
+              execSystemRealtime();
+              if (sys.stop){return;}
 
               //increment the number of steps taken
               numberOfStepsTaken++;
-          }
-
-          //check for new serial commands
-          readSerialCommands();
-
-          //check for a STOP command
-          if (checkForStopCommand()) {
-            return;
           }
 
           //check for Probe touchdown
@@ -827,8 +835,6 @@ void  G38(const String& readString) {
         axis->endMove(endPos);
         Serial.println(F("error: probe did not connect\nprogram stopped\nz axis not set\n"));
         sys.stop = true;
-        checkForStopCommand();
-
       } // end if zgoto != currentZPos / sys.inchesToMMConversion
 
     } else {
