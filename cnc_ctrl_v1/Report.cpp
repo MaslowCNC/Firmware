@@ -37,10 +37,9 @@ void  reportStatusMessage(byte status_code){
         Serial.println(status_code);
       #else
         switch(status_code) {
-          // case STATUS_EXPECTED_COMMAND_LETTER:
-          // Serial.println(F("Expected command letter")); break;
-          // case STATUS_BAD_NUMBER_FORMAT:
-          // Serial.println(F("Bad number format")); break;
+          // case STATUS_EXPECTED_COMMAND_LETTER=")); Serial.println(  // Serial.println(F("Expected command letter")); break;
+          case STATUS_BAD_NUMBER_FORMAT:
+          Serial.println(F("Bad number format")); break;
           case STATUS_INVALID_STATEMENT:
           Serial.println(F("Invalid statement")); break;
           // case STATUS_NEGATIVE_VALUE:
@@ -80,8 +79,7 @@ void  reportStatusMessage(byte status_code){
 }
 
 // Prints alarm messages.
-void  reportAlarmMessage(byte alarm_code)
-{
+void  reportAlarmMessage(byte alarm_code) {
   Serial.print(F("ALARM: "));
   #ifdef REPORT_GUI_MODE
     Serial.println(alarm_code);
@@ -99,46 +97,81 @@ void reportMaslowSettings() {
   // Print Maslow settings.
   // Taken from Grbl. http://github.com/grbl/grbl
   #ifdef REPORT_GUI_MODE
-    Serial.print(F("$1=")); Serial.println(sysSettings.machineWidth);
+    Serial.print(F("$0=")); Serial.println(sysSettings.machineWidth);
+    Serial.print(F("$1=")); Serial.println(sysSettings.machineHeight);
+    Serial.print(F("$2=")); Serial.println(sysSettings.distBetweenMotors);
+    Serial.print(F("$3=")); Serial.println(sysSettings.motorOffsetY);
+    Serial.print(F("$4=")); Serial.println(sysSettings.sledWidth);
+    Serial.print(F("$5=")); Serial.println(sysSettings.sledHeight);
+    Serial.print(F("$6=")); Serial.println(sysSettings.sledCG);
+    Serial.print(F("$7=")); Serial.println(sysSettings.kinematicsType);
+    Serial.print(F("$8=")); Serial.println(sysSettings.rotationDiskRadius);
+    Serial.print(F("$9=")); Serial.println(sysSettings.axisHoldTime);
+    Serial.print(F("$10=")); Serial.println(sysSettings.kinematicsMaxGuess);
+    Serial.print(F("$11=")); Serial.println(sysSettings.originalChainLength);
+    Serial.print(F("$12=")); Serial.println(sysSettings.encoderSteps);
+    Serial.print(F("$13=")); Serial.println(sysSettings.gearTeeth);
+    Serial.print(F("$14=")); Serial.println(sysSettings.chainPitch);
+    Serial.print(F("$15=")); Serial.println(sysSettings.maxFeed);
+    Serial.print(F("$16=")); Serial.println(sysSettings.zAxisAuto);
+    Serial.print(F("$17=")); Serial.println(sysSettings.maxZRPM);
+    Serial.print(F("$18=")); Serial.println(sysSettings.zDistPerRot);
+    Serial.print(F("$19=")); Serial.println(sysSettings.zEncoderSteps);
+    Serial.print(F("$20=")); Serial.println(sysSettings.KpPos);
+    Serial.print(F("$21=")); Serial.println(sysSettings.KiPos);
+    Serial.print(F("$22=")); Serial.println(sysSettings.KdPos);
+    Serial.print(F("$23=")); Serial.println(sysSettings.propWeightPos);
+    Serial.print(F("$24=")); Serial.println(sysSettings.KpV);
+    Serial.print(F("$25=")); Serial.println(sysSettings.KiV);
+    Serial.print(F("$26=")); Serial.println(sysSettings.KdV);
+    Serial.print(F("$27=")); Serial.println(sysSettings.propWeightV);
+    Serial.print(F("$28=")); Serial.println(sysSettings.zKpPos);
+    Serial.print(F("$29=")); Serial.println(sysSettings.zKiPos);
+    Serial.print(F("$30=")); Serial.println(sysSettings.zKdPos);
+    Serial.print(F("$31=")); Serial.println(sysSettings.zPropWeightPos);
+    Serial.print(F("$32=")); Serial.println(sysSettings.zKpV);
+    Serial.print(F("$33=")); Serial.println(sysSettings.zKiV);
+    Serial.print(F("$34=")); Serial.println(sysSettings.zKdV);
+    Serial.print(F("$35=")); Serial.println(sysSettings.zPropWeightV);
   #else
-    Serial.print(PSTR("$0=")); Serial.print(sysSettings.machineWidth);
-    Serial.print(PSTR(" (units for prior line)\r\n$1=")); Serial.print(sysSettings.machineWidth);
+    Serial.print(F("$0=")); Serial.print(sysSettings.machineWidth);
+    Serial.print(F(" (machine width, mm)\r\n$1=")); Serial.print(sysSettings.machineHeight);
+    Serial.print(F(" (machine height, mm)\r\n$2=")); Serial.print(sysSettings.distBetweenMotors);
+    Serial.print(F(" (motor distance, mm)\r\n$3=")); Serial.print(sysSettings.motorOffsetY);
+    Serial.print(F(" (motor height, mm)\r\n$4=")); Serial.print(sysSettings.sledWidth);
+    Serial.print(F(" (sled width, mm)\r\n$5=")); Serial.print(sysSettings.sledHeight);
+    Serial.print(F(" (sled height, mm)\r\n$6=")); Serial.print(sysSettings.sledCG);
+    Serial.print(F(" (sled cg, mm)\r\n$7=")); Serial.print(sysSettings.kinematicsType);
+    Serial.print(F(" (Kinematics Type 1=Quadrilateral, 2=Triangular)\r\n$8=")); Serial.print(sysSettings.rotationDiskRadius);
+    Serial.print(F(" (rotation radius, mm)\r\n$9=")); Serial.print(sysSettings.axisHoldTime);
+    Serial.print(F(" (axis hold time, ms)\r\n$10=")); Serial.print(sysSettings.kinematicsMaxGuess);
+    Serial.print(F(" (kinematics max guess)\r\n$11=")); Serial.print(sysSettings.originalChainLength);
+    Serial.print(F(" (original chain length, mm)\r\n$12=")); Serial.print(sysSettings.encoderSteps);
+    Serial.print(F(" (main steps per revolution)\r\n$13=")); Serial.print(sysSettings.gearTeeth);
+    Serial.print(F(" (gear teeth, mm)\r\n$14=")); Serial.print(sysSettings.chainPitch);
+    Serial.print(F(" (chain pitch, mm)\r\n$15=")); Serial.print(sysSettings.maxFeed);
+    Serial.print(F(" (max feed, mm/min)\r\n$16=")); Serial.print(sysSettings.zAxisAuto);
+    Serial.print(F(" (auto z axis)\r\n$17=")); Serial.print(sysSettings.maxZRPM);
+    Serial.print(F(" (max z axis RPM)\r\n$18=")); Serial.print(sysSettings.zDistPerRot);
+    Serial.print(F(" (z axis distance / rotation)\r\n$19=")); Serial.print(sysSettings.zEncoderSteps);
+    Serial.print(F(" (z axis steps per revolution)\r\n$20=")); Serial.print(sysSettings.KpPos);
+    Serial.print(F(" (main Kp Pos)\r\n$21=")); Serial.print(sysSettings.KiPos);
+    Serial.print(F(" (main Ki Pos)\r\n$22=")); Serial.print(sysSettings.KdPos);
+    Serial.print(F(" (main Kd Pos)\r\n$23=")); Serial.print(sysSettings.propWeightPos);
+    Serial.print(F(" (main Pos proportional weight)\r\n$24=")); Serial.print(sysSettings.KpV);
+    Serial.print(F(" (main Kp Velocity)\r\n$25=")); Serial.print(sysSettings.KiV);
+    Serial.print(F(" (main Ki Velocity)\r\n$26=")); Serial.print(sysSettings.KdV);
+    Serial.print(F(" (main Kd Velocity)\r\n$27=")); Serial.print(sysSettings.propWeightV);
+    Serial.print(F(" (main Velocity proportional weight)\r\n$28=")); Serial.print(sysSettings.zKpPos);
+    Serial.print(F(" (z axis Kp Pos)\r\n$29=")); Serial.print(sysSettings.zKiPos);
+    Serial.print(F(" (z axis Ki Pos)\r\n$30=")); Serial.print(sysSettings.zKdPos);
+    Serial.print(F(" (z axis Kd Pos)\r\n$31=")); Serial.print(sysSettings.zPropWeightPos);
+    Serial.print(F(" (z axis Pos proportional weight)\r\n$32=")); Serial.print(sysSettings.zKpV);
+    Serial.print(F(" (z axis Kp Velocity)\r\n$33=")); Serial.print(sysSettings.zKiV);
+    Serial.print(F(" (z axis Ki Velocity)\r\n$34=")); Serial.print(sysSettings.zKdV);
+    Serial.print(F(" (z axis Kd Velocity)\r\n$35=")); Serial.print(sysSettings.zPropWeightV);
+    Serial.println(F(" (z axis Velocity proportional weight)"));
   #endif
-
-  // Print axis settings
-  // uint8_t idx, set_idx;
-  // uint8_t val = AXIS_SETTINGS_START_VAL;
-  // for (set_idx=0; set_idx<AXIS_N_SETTINGS; set_idx++) {
-  //   for (idx=0; idx<N_AXIS; idx++) {
-  //     printPgmString(PSTR("$"));
-  //     print_uint8_base10(val+idx);
-  //     printPgmString(PSTR("="));
-  //     switch (set_idx) {
-  //       case 0: printFloat_SettingValue(settings.steps_per_mm[idx]); break;
-  //       case 1: printFloat_SettingValue(settings.max_rate[idx]); break;
-  //       case 2: printFloat_SettingValue(settings.acceleration[idx]/(60*60)); break;
-  //       case 3: printFloat_SettingValue(-settings.max_travel[idx]); break;
-  //     }
-  //     #ifdef REPORT_GUI_MODE
-  //       printPgmString(PSTR("\r\n"));
-  //     #else
-  //       printPgmString(PSTR(" ("));
-  //       switch (idx) {
-  //         case X_AXIS: printPgmString(PSTR("x")); break;
-  //         case Y_AXIS: printPgmString(PSTR("y")); break;
-  //         case Z_AXIS: printPgmString(PSTR("z")); break;
-  //       }
-  //       switch (set_idx) {
-  //         case 0: printPgmString(PSTR(", step/mm")); break;
-  //         case 1: printPgmString(PSTR(" max rate, mm/min")); break;
-  //         case 2: printPgmString(PSTR(" accel, mm/sec^2")); break;
-  //         case 3: printPgmString(PSTR(" max travel, mm")); break;
-  //       }
-  //       printPgmString(PSTR(")\r\n"));
-  //     #endif
-  //   }
-  //   val += AXIS_SETTINGS_INCREMENT;
-  // }
 }
 
 void  returnError(){
@@ -192,18 +225,18 @@ void  reportMaslowHelp(){
     */
     #ifndef REPORT_GUI_MODE
         Serial.println(F("$$ (view Maslow settings)"));
-        Serial.println(F("$# (view # parameters)"));
-        Serial.println(F("$G (view parser state)"));
-        Serial.println(F("$I (view build info)"));
-        Serial.println(F("$N (view startup blocks)"));
+        // Serial.println(F("$# (view # parameters)"));
+        // Serial.println(F("$G (view parser state)"));
+        // Serial.println(F("$I (view build info)"));
+        // Serial.println(F("$N (view startup blocks)"));
         Serial.println(F("$x=value (save Maslow setting)"));
-        Serial.println(F("$Nx=line (save startup block)"));
-        Serial.println(F("$C (check gcode mode)"));
-        Serial.println(F("$X (kill alarm lock)"));
-        Serial.println(F("$H (run homing cycle)"));
-        Serial.println(F("~ (cycle start)"));
-        Serial.println(F("! (feed hold)"));
-        Serial.println(F("? (current status)"));
-        Serial.println(F("ctrl-x (reset Maslow)"));
+        // Serial.println(F("$Nx=line (save startup block)"));
+        // Serial.println(F("$C (check gcode mode)"));
+        // Serial.println(F("$X (kill alarm lock)"));
+        // Serial.println(F("$H (run homing cycle)"));
+        Serial.println(F("~ (cycle start)"));  // Maslow treats this as resume or un-pause currently
+        Serial.println(F("! (feed hold)"));    // Maslow treats this as a cycle stop.
+        // Serial.println(F("? (current status)"));
+        // Serial.println(F("ctrl-x (reset Maslow)"));
     #endif
 }

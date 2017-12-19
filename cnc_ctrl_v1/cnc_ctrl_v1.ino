@@ -21,7 +21,7 @@ system_t sys;
 settings_t sysSettings;
 
 // Define the global step counter storage
-settingsSteps_t sysSteps;
+settingsStepsV1_t sysSteps;
 
 // Global realtime executor bitflag variable for setting various alarms.
 byte systemRtExecAlarm;  

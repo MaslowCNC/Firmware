@@ -47,6 +47,7 @@
 #include "Spindle.h"
 #include "Probe.h"
 #include "Settings.h"
+#include "NutsAndBolts.h"
 #include "System.h"
 
 #endif

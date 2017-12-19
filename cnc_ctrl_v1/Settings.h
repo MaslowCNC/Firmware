@@ -27,7 +27,7 @@ Copyright 2014-2017 Bar Smith*/
                                // to determine if the data in the EEPROM was 
                                // saved by maslow, or something else.
 
-typedef struct {
+typedef struct {  // I think this is about ~128 bytes in size if I counted correctly
   float machineWidth;
   float machineHeight;
   float distBetweenMotors;
@@ -79,13 +79,14 @@ typedef struct {
   long rSteps;
   long zSteps;
   byte eepromValidData;
-} settingsSteps_t;
-extern settingsSteps_t sysSteps;
+} settingsStepsV1_t;
+extern settingsStepsV1_t sysSteps;
 
 void settingsLoadFromEEprom();
 void settingsReset();
 void settingsSaveToEEprom();
 void settingsSaveStepstoEEprom();
 void settingsLoadStepsFromEEprom();
+byte settingsStoreGlobalSetting(const byte,const float);
 
 #endif

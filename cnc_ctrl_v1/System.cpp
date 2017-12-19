@@ -414,7 +414,7 @@ byte systemExecuteCmdstring(String& cmdString){
     }
     else {
         switch( cmdString[char_counter] ) {
-          case '$': case 'G': case 'C': case 'X':
+          case '$': // case 'G': case 'C': case 'X':
             if ( cmdString.length() > 2 ) { return(STATUS_INVALID_STATEMENT); }
             switch( cmdString[char_counter] ) {
               case '$' : // Prints Maslow settings
@@ -466,10 +466,10 @@ byte systemExecuteCmdstring(String& cmdString){
               // break;
               // }
               //break;
-          // default :
-          //   // Block any system command that requires the state as IDLE/ALARM. (i.e. EEPROM, homing)
-          //   if ( !(sys.state == STATE_IDLE || sys.state == STATE_ALARM) ) { return(STATUS_IDLE_ERROR); }
-          //   switch( line[char_counter] ) {
+          default :
+            // Block any system command that requires the state as IDLE/ALARM. (i.e. EEPROM, homing)
+            // if ( !(sys.state == STATE_IDLE || sys.state == STATE_ALARM) ) { return(STATUS_IDLE_ERROR); }
+            switch( cmdString[char_counter] ) {
           //     case '#' : // Print Grbl NGC parameters
           //       if ( line[++char_counter] != 0 ) { return(STATUS_INVALID_STATEMENT); }
           //       else { report_ngc_parameters(); }
@@ -536,28 +536,30 @@ byte systemExecuteCmdstring(String& cmdString){
           //         helper_var = true;  // Set helper_var to flag storing method.
           //         // No break. Continues into default: to read remaining command characters.
           //       }
-          //     default :  // Storing setting methods [IDLE/ALARM]
-          //       if(!read_float(line, &char_counter, &parameter)) { return(STATUS_BAD_NUMBER_FORMAT); }
-          //       if(line[char_counter++] != '=') { return(STATUS_INVALID_STATEMENT); }
-          //       if (helper_var) { // Store startup line
-          //         // Prepare sending gcode block to gcode parser by shifting all characters
-          //         helper_var = char_counter; // Set helper variable as counter to start of gcode block
-          //         do {
-          //           line[char_counter-helper_var] = line[char_counter];
-          //         } while (line[char_counter++] != 0);
-          //         // Execute gcode block to ensure block is valid.
-          //         helper_var = gc_execute_line(line); // Set helper_var to returned status code.
-          //         if (helper_var) { return(helper_var); }
-          //         else {
-          //           helper_var = trunc(parameter); // Set helper_var to int value of parameter
-          //           settings_store_startup_line(helper_var,line);
-          //         }
-          //       } else { // Store global setting.
-          //         if(!read_float(line, &char_counter, &value)) { return(STATUS_BAD_NUMBER_FORMAT); }
-          //         if((line[char_counter] != 0) || (parameter > 255)) { return(STATUS_INVALID_STATEMENT); }
-          //         return(settings_store_global_setting((uint8_t)parameter, value));
-          //       }
-          //   }
+              default :  // Storing setting methods [IDLE/ALARM]
+                if(!readFloat(cmdString, char_counter, parameter)) { return(STATUS_BAD_NUMBER_FORMAT); }
+                if(cmdString[char_counter++] != '=') { return(STATUS_INVALID_STATEMENT); }
+                // if (helper_var) { // Store startup line
+                //   // Prepare sending gcode block to gcode parser by shifting all characters
+                //   helper_var = char_counter; // Set helper variable as counter to start of gcode block
+                //   do {
+                //     line[char_counter-helper_var] = line[char_counter];
+                //   } while (line[char_counter++] != 0);
+                //   // Execute gcode block to ensure block is valid.
+                //   helper_var = gc_execute_line(line); // Set helper_var to returned status code.
+                //   if (helper_var) { return(helper_var); }
+                //   else {
+                //     helper_var = trunc(parameter); // Set helper_var to int value of parameter
+                //     settings_store_startup_line(helper_var,line);
+                //   }
+                // } else { // Store global setting.
+                  char_counter++;
+                  if(!readFloat(cmdString, char_counter, value)) { return(STATUS_BAD_NUMBER_FORMAT); }
+                  if((cmdString[char_counter] != 0) || (parameter > 255)) { return(STATUS_INVALID_STATEMENT); }
+                  return(settingsStoreGlobalSetting((byte)parameter, value));
+                // }
+            }
         }
     }
+    return(STATUS_OK);
 }
