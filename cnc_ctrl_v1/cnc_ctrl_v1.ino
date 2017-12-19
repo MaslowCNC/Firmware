@@ -17,6 +17,15 @@
 // Define system global state structure
 system_t sys;
 
+// Define the global settings storage - treat as readonly
+settings_t sysSettings;
+
+// Define the global step counter storage
+settingsSteps_t sysSteps;
+
+// Global realtime executor bitflag variable for setting various alarms.
+byte systemRtExecAlarm;  
+
 // Define axes, it might be tighter to define these within the sys struct
 Axis leftAxis;
 Axis rightAxis;
@@ -67,7 +76,7 @@ void loop(){
     }
     
     // Let's go!
-    _signalReady();
+    reportStatusMessage(STATUS_OK);
     sys.stop = false;            // We should consider an abort option which
                                  // is not reset automatically such as a software
                                  // limit

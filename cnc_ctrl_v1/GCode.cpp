@@ -559,7 +559,11 @@ void  interpretCommandString(String& cmdString){
     int secondG;
 
     if (cmdString.length() > 0) {
-        if (cmdString[0] == 'B'){                   //If the command is a B command
+        if (cmdString[0] == '$') {
+            // Maslow '$' system command
+            systemExecuteCmdstring(cmdString);
+        }
+        else if (cmdString[0] == 'B'){                   //If the command is a B command
             #if defined (verboseDebug) && verboseDebug > 0
             Serial.print(F("iCS executing B code line: "));
             #endif
@@ -624,7 +628,7 @@ void gcodeExecuteLoop(){
       readyCommandString = "";
 
       // Get next line of GCode
-      if (!sys.stop){_signalReady();}
+      if (!sys.stop){reportStatusMessage(STATUS_OK);}
   }
 }
 

@@ -52,6 +52,7 @@ extern Axis rightAxis;
 extern Axis zAxis;
 extern RingBuffer incSerialBuffer;
 extern Kinematics kinematics;
+extern byte systemRtExecAlarm;
 
 bool machineReady();
 void finalizeMachineSettings();
@@ -64,5 +65,6 @@ void pause();
 void maslowDelay(unsigned long);
 void  _watchDog();
 void execSystemRealtime();
+byte systemExecuteCmdstring(String&);
 
 #endif

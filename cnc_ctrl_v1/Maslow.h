@@ -46,6 +46,7 @@
 #include "Report.h"
 #include "Spindle.h"
 #include "Probe.h"
+#include "Settings.h"
 #include "System.h"
 
 #endif
