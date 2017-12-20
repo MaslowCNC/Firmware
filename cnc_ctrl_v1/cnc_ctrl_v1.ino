@@ -36,9 +36,10 @@ Axis zAxis;
 Kinematics kinematics;
 
 void setup(){
-    sys.inchesToMMConversion = 1;
-    setupAxes();
     Serial.begin(57600);
+    sys.inchesToMMConversion = 1;
+    settingsInit();
+    setupAxes();
     readyCommandString.reserve(INCBUFFERLENGTH);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
     gcodeLine.reserve(INCBUFFERLENGTH);
     Timer1.initialize(LOOPINTERVAL);
