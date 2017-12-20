@@ -119,7 +119,7 @@ void   Axis::enablePositionPID(){
     
 }
 
-void   Axis::setPIDValues(float KpPos, float KiPos, float KdPos, float propWeight, float KpV, float KiV, float KdV){
+void   Axis::setPIDValues(float KpPos, float KiPos, float KdPos, float propWeight, float KpV, float KiV, float KdV, float propWeightV){
     /*
     
     Sets the positional PID values for the axis
@@ -131,7 +131,7 @@ void   Axis::setPIDValues(float KpPos, float KiPos, float KdPos, float propWeigh
     
     _pidController.SetTunings(_Kp, _Ki, _Kd, propWeight);
     
-    motorGearboxEncoder.setPIDValues(KpV, KiV, KdV);
+    motorGearboxEncoder.setPIDValues(KpV, KiV, KdV, propWeightV);
 }
 
 String  Axis::getPIDString(){
@@ -216,9 +216,7 @@ bool   Axis::attached(){
 }
 
 void   Axis::hold(){
-    int timeout   = 2000;
-    
-    if (millis() - _timeLastMoved < timeout){
+    if (millis() - _timeLastMoved < sysSettings.axisHoldTime){
         //write(_axisTarget*_mmPerRotation);
     }
     else{

@@ -17,8 +17,6 @@
 #ifndef spindle_h
 #define spindle_h
 
-extern bool zAxisAuto;
-
 void  setSpindlePower(bool powerState);
 
 #endif

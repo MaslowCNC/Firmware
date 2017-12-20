@@ -62,6 +62,7 @@ void settingsReset() {
         10,     // byte gearTeeth;
         6.35,   // float chainPitch;
         1000,   // int maxFeed;
+        true,   // zAxisAttached;
         false,  // bool zAxisAuto;
         12.60,  // float maxZRPM;
         3.17,   // float zDistPerRot;
@@ -166,80 +167,152 @@ byte settingsStoreGlobalSetting(const byte parameter,const float value){
     
     // We can add whatever sanity checks we want here and error out if we like
     switch(parameter) {
-      case 0:
-          sysSettings.machineWidth = value;
-      case 1: 
-          sysSettings.machineHeight = value;
-      case 2: 
-          sysSettings.distBetweenMotors = value;
-      case 3: 
-          sysSettings.motorOffsetY = value;
-      case 4: 
-          sysSettings.sledWidth = value;
-      case 5: 
-          sysSettings.sledHeight = value;
-      case 6: 
-          sysSettings.sledCG = value;
-      case 7: 
-          sysSettings.kinematicsType = value;
-      case 8: 
-          sysSettings.rotationDiskRadius = value;
-      case 9: 
-          sysSettings.axisHoldTime = value;
-      case 10: 
-          sysSettings.kinematicsMaxGuess = value;
-      case 11: 
-          sysSettings.originalChainLength = value;
-      case 12: 
-          sysSettings.encoderSteps = value;
-      case 13: 
-          sysSettings.gearTeeth = value;
-      case 14: 
-          sysSettings.chainPitch = value;
-      case 15: 
-          sysSettings.maxFeed = value;
-      case 16: 
-          sysSettings.zAxisAuto = value;
-      case 17: 
-          sysSettings.maxZRPM = value;
-      case 18: 
-          sysSettings.zDistPerRot = value;
-      case 19: 
-          sysSettings.zEncoderSteps = value;
-      case 20: 
-          sysSettings.KpPos = value;
-      case 21: 
-          sysSettings.KiPos = value;
-      case 22: 
-          sysSettings.KdPos = value;
-      case 23: 
-          sysSettings.propWeightPos = value;
-      case 24: 
-          sysSettings.KpV = value;
-      case 25: 
-          sysSettings.KiV = value;
-      case 26: 
-          sysSettings.KdV = value;
-      case 27: 
-          sysSettings.propWeightV = value;
-      case 28: 
-          sysSettings.zKpPos = value;
-      case 29: 
-          sysSettings.zKiPos = value;
-      case 30: 
-          sysSettings.zKdPos = value;
-      case 31: 
-          sysSettings.zPropWeightPos = value;
-      case 32: 
-          sysSettings.zKpV = value;
-      case 33: 
-          sysSettings.zKiV = value;
-      case 34: 
-          sysSettings.zKdV = value;
-      case 35: 
-          sysSettings.zPropWeightV = value;
-      default:
-          return(STATUS_INVALID_STATEMENT);
+        case 0: case 1: case 2: case 3: case 4: case 5:
+            switch(parameter) {
+                case 0:
+                      sysSettings.machineWidth = value;
+                      break;
+                case 1: 
+                      sysSettings.machineHeight = value;
+                      break;
+                case 2: 
+                      sysSettings.distBetweenMotors = value;
+                      break;
+                case 3: 
+                      sysSettings.motorOffsetY = value;
+                      break;
+                case 4: 
+                      sysSettings.sledWidth = value;
+                      break;
+                case 5: 
+                      sysSettings.sledHeight = value;
+                      break;
+            }
+            // TODO not sure how to handle kinematics calc now. or when we 
+            // should finalize.  What happens if not fully complete and 
+            // location can't be calculated
+            sys.rcvdKinematicSettings = 1;
+            finalizeMachineSettings();
+            kinematics.recomputeGeometry();
+            break;
+        case 6: 
+              sysSettings.sledCG = value;
+              break;
+        case 7: 
+              sysSettings.kinematicsType = value;
+              break;
+        case 8: 
+              sysSettings.rotationDiskRadius = value;
+              break;
+        case 9: 
+              sysSettings.axisHoldTime = value;
+              break;
+        case 10: 
+              sysSettings.kinematicsMaxGuess = value;
+              break;
+        case 11: 
+              sysSettings.originalChainLength = value;
+              break;
+        case 12: 
+              sysSettings.encoderSteps = value;
+              leftAxis.changeEncoderResolution(sysSettings.encoderSteps);
+              rightAxis.changeEncoderResolution(sysSettings.encoderSteps);
+              sys.encoderStepsChanged = true;
+              break;
+        case 13: 
+              sysSettings.gearTeeth = value;
+              leftAxis.changePitch(sysSettings.gearTeeth*sysSettings.chainPitch);
+              rightAxis.changePitch(sysSettings.gearTeeth*sysSettings.chainPitch);
+              kinematics.R = (sysSettings.gearTeeth*sysSettings.chainPitch)/(2.0 * 3.14159);
+              break;
+        case 14: 
+              sysSettings.chainPitch = value;
+              leftAxis.changePitch(sysSettings.gearTeeth*sysSettings.chainPitch);
+              rightAxis.changePitch(sysSettings.gearTeeth*sysSettings.chainPitch);
+              kinematics.R = (sysSettings.gearTeeth*sysSettings.chainPitch)/(2.0 * 3.14159);
+              break;
+        case 15: 
+              sysSettings.maxFeed = value;
+              break;
+        case 16:
+              sysSettings.zAxisAttached = value;
+              break;
+        case 17: 
+              sysSettings.zAxisAuto = value;
+              break;
+        case 18: 
+              sysSettings.maxZRPM = value;
+              break;
+        case 19: 
+              sysSettings.zDistPerRot = value;
+              zAxis.changePitch(sysSettings.zDistPerRot);
+              break;
+        case 20: 
+              sysSettings.zEncoderSteps = value;
+              zAxis.changeEncoderResolution(sysSettings.zEncoderSteps);
+              sys.zEncoderStepsChanged = true;
+              break;
+        case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28:
+            switch(parameter) {
+                case 21:
+                      sysSettings.KpPos = value;
+                      break;
+                case 22: 
+                      sysSettings.KiPos = value;
+                      break;
+                case 23: 
+                      sysSettings.KdPos = value;
+                      break;
+                case 24: 
+                      sysSettings.propWeightPos = value;
+                      break;
+                case 25: 
+                      sysSettings.KpV = value;
+                      break;
+                case 26: 
+                      sysSettings.KiV = value;
+                      break;
+                case 27: 
+                      sysSettings.KdV = value;
+                      break;
+                case 28: 
+                      sysSettings.propWeightV = value;
+                      break;
+                }
+                leftAxis.setPIDValues(sysSettings.KpPos, sysSettings.KiPos, sysSettings.KdPos, sysSettings.propWeightPos, sysSettings.KpV, sysSettings.KiV, sysSettings.KdV, sysSettings.propWeightV);
+                rightAxis.setPIDValues(sysSettings.KpPos, sysSettings.KiPos, sysSettings.KdPos, sysSettings.propWeightPos, sysSettings.KpV, sysSettings.KiV, sysSettings.KdV, sysSettings.propWeightV);
+                break;
+        case 29: case 30: case 31: case 32: case 33: case 34: case 35: case 36:
+            switch(parameter) {
+                case 29: 
+                      sysSettings.zKpPos = value;
+                      break;
+                case 30: 
+                      sysSettings.zKiPos = value;
+                      break;
+                case 31: 
+                      sysSettings.zKdPos = value;
+                      break;
+                case 32: 
+                      sysSettings.zPropWeightPos = value;
+                      break;
+                case 33: 
+                      sysSettings.zKpV = value;
+                      break;
+                case 34: 
+                      sysSettings.zKiV = value;
+                      break;
+                case 35: 
+                      sysSettings.zKdV = value;
+                      break;
+                case 36: 
+                      sysSettings.zPropWeightV = value;
+                      break;
+            }
+            zAxis.setPIDValues(sysSettings.zKpPos, sysSettings.zKiPos, sysSettings.zKdPos, sysSettings.zPropWeightPos, sysSettings.zKpV, sysSettings.zKiV, sysSettings.zKdV, sysSettings.zPropWeightV);
+            break;
+        default:
+              return(STATUS_INVALID_STATEMENT);
     }
     settingsSaveToEEprom();
     return(STATUS_OK);

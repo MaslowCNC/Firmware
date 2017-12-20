@@ -40,7 +40,6 @@ typedef struct {
   int   lastGCommand;         //Stores the value of the last command run eg: G01 -> 1
   int   lastTool;             //Stores the value of the last tool number eg: T4 -> 4
   int   nextTool;             //Stores the value of the next tool number eg: T4 -> 4
-  bool  zAxisAttached;        //Whether the zAxis is controllable
   float inchesToMMConversion; //Used to track whether to convert from inches, can probably be done in a way that doesn't require RAM
   float feedrate;             //The feedrate of the machine in mm/min
   bool  encoderStepsChanged;  //These are used to determine 
@@ -57,8 +56,6 @@ extern byte systemRtExecAlarm;
 bool machineReady();
 void finalizeMachineSettings();
 void  calibrateChainLengths(String);
-void  updateKinematicsSettings(const String&);
-void  updateMotorSettings(const String&);
 void  setupAxes();
 int   getPCBVersion();
 void pause();

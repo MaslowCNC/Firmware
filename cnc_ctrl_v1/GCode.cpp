@@ -26,7 +26,7 @@ String gcodeLine          = "";  //Our use of this is a bit sloppy, at times,
                                  //we pass references to this global and then 
                                  //name them the same thing.
 // Commands that can safely be executed before machineReady
-String safeCommands[] = {"B01", "B03", "B04", "B05", "B07", "B12", "G20", "G21", "G90", "G91"};
+String safeCommands[] = {"B01", "B04", "B05", "B07", "G20", "G21", "G90", "G91"};
 
 void initGCode(){
     // Called on startup or after a stop command
@@ -148,11 +148,6 @@ void  executeBcodeLine(const String& gcodeLine){
         return;
     }
     
-    if(gcodeLine.substring(0, 3) == "B03"){
-        updateKinematicsSettings(gcodeLine);
-        return;
-    }
-    
     if(gcodeLine.substring(0, 3) == "B04"){
         //Test each of the axis
         maslowDelay(500);
@@ -201,8 +196,8 @@ void  executeBcodeLine(const String& gcodeLine){
     
     if(gcodeLine.substring(0, 3) == "B08"){
         //Manually recalibrate chain lengths
-        leftAxis.set(ORIGINCHAINLEN);
-        rightAxis.set(ORIGINCHAINLEN);
+        leftAxis.set(sysSettings.originalChainLength);
+        rightAxis.set(sysSettings.originalChainLength);
         
         Serial.print(F("Left: "));
         Serial.print(leftAxis.read());
@@ -267,12 +262,6 @@ void  executeBcodeLine(const String& gcodeLine){
             if (sys.stop){return;}
         }
         leftAxis.set(leftAxis.read());
-        return;
-    }
-    
-    if(gcodeLine.substring(0, 3) == "B12"){
-        //Update the motor characteristics
-        updateMotorSettings(gcodeLine);
         return;
     }
     
@@ -664,10 +653,10 @@ int   G1(const String& readString, int G0orG1){
         }
     }
     
-    sys.feedrate = constrain(sys.feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
+    sys.feedrate = constrain(sys.feedrate, 1, sysSettings.maxFeed);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     
     //if the zaxis is attached
-    if(!sys.zAxisAttached){
+    if(!sysSettings.zAxisAttached){
         float threshold = .1; //units of mm
         if (abs(currentZPos - zgoto) > threshold){
             Serial.print(F("Message: Please adjust Z-Axis to a depth of "));
@@ -722,7 +711,7 @@ int   G2(const String& readString, int G2orG3){
     float centerX = X1 + I;
     float centerY = Y1 + J;
     
-    sys.feedrate = constrain(sys.feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
+    sys.feedrate = constrain(sys.feedrate, 1, sysSettings.maxFeed);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     
     if (G2orG3 == 2){
         return arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, CLOCKWISE);
@@ -744,7 +733,7 @@ void  G10(const String& readString){
 
 void  G38(const String& readString) {
   //if the zaxis is attached
-  if (sys.zAxisAttached) {
+  if (sysSettings.zAxisAttached) {
     /*
        The G38() function handles the G38 gcode which zeros the machine's z axis.
        Currently ignores X and Y options
@@ -758,7 +747,7 @@ void  G38(const String& readString) {
 
       zgoto      = sys.inchesToMMConversion * extractGcodeValue(readString, 'Z', currentZPos / sys.inchesToMMConversion);
       sys.feedrate   = sys.inchesToMMConversion * extractGcodeValue(readString, 'F', sys.feedrate / sys.inchesToMMConversion);
-      sys.feedrate = constrain(sys.feedrate, 1, MAXZROTMIN * abs(zAxis.getPitch()));
+      sys.feedrate = constrain(sys.feedrate, 1, sysSettings.maxZRPM * abs(zAxis.getPitch()));
 
       if (sys.useRelativeUnits) { //if we are using a relative coordinate system
         if (readString.indexOf('Z') >= 0) { //if z has moved

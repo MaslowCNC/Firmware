@@ -45,7 +45,7 @@
             bool   attached();
             void   wipeEEPROM();
             MotorGearboxEncoder    motorGearboxEncoder;
-            void   setPIDValues(float Kp, float Ki, float Kd, float propWeight, float KpV, float KiV, float KdV);
+            void   setPIDValues(float Kp, float Ki, float Kd, float propWeight, float KpV, float KiV, float KdV, float propWeightV);
             void   loadPositionFromMemory();
             String     getPIDString();
             double     pidInput();

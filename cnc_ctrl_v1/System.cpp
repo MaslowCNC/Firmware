@@ -36,7 +36,7 @@ void  calibrateChainLengths(String gcodeLine){
     if (extractGcodeValue(gcodeLine, 'L', 0)){
         //measure out the left chain
         Serial.println(F("Measuring out left chain"));
-        singleAxisMove(&leftAxis, ORIGINCHAINLEN, 800);
+        singleAxisMove(&leftAxis, sysSettings.originalChainLength, sysSettings.maxFeed);
         
         Serial.print(leftAxis.read());
         Serial.println(F("mm"));
@@ -46,7 +46,7 @@ void  calibrateChainLengths(String gcodeLine){
     else if(extractGcodeValue(gcodeLine, 'R', 0)){
         //measure out the right chain
         Serial.println(F("Measuring out right chain"));
-        singleAxisMove(&rightAxis, ORIGINCHAINLEN, 800);
+        singleAxisMove(&rightAxis, sysSettings.originalChainLength, sysSettings.maxFeed);
         
         Serial.print(rightAxis.read());
         Serial.println(F("mm"));
@@ -56,134 +56,11 @@ void  calibrateChainLengths(String gcodeLine){
     
 }
 
-void  updateKinematicsSettings(const String& readString){
-    /*
-    Updates the machine dimensions from the Ground Control settings
-    */
-    
-    //Extract the settings values
-
-    float bedWidth           = extractGcodeValue(readString, 'A', -1);
-    float bedHeight          = extractGcodeValue(readString, 'C', -1);
-    float distBetweenMotors  = extractGcodeValue(readString, 'Q', -1);
-    float motorOffsetY       = extractGcodeValue(readString, 'E', -1);
-    float sledWidth          = extractGcodeValue(readString, 'F', -1);
-    float sledHeight         = extractGcodeValue(readString, 'R', -1);
-    float sledCG             = extractGcodeValue(readString, 'H', -1);
-
-    float kinematicsType     = extractGcodeValue(readString, 'Y', -1);
-    float rotationDiskRadius = extractGcodeValue(readString, 'Z', -1);
-    
-    
-    
-    //Change the machine dimensions in the kinematics if new values have been received
-    if (sledWidth != -1){
-        kinematics.l            = sledWidth;
-    }
-    if (sledHeight != -1){
-        kinematics.s            = sledHeight;
-    }
-    if (sledCG != -1){
-        kinematics.h3           = sledCG;
-    }
-    //if (distPerRot != -1){
-    //    kinematics.R            = distPerRot / (2.0*3.14159);
-    //}
-    if (distBetweenMotors != -1){
-        kinematics.D            = distBetweenMotors;
-    }
-    if (motorOffsetY != -1){
-        kinematics.motorOffsetY = motorOffsetY;
-    }
-    if (bedWidth != -1){
-        kinematics.machineWidth = bedWidth;
-    }
-    if (bedHeight != -1){
-        kinematics.machineHeight= bedHeight;
-    }
-    if (kinematicsType != -1){
-        kinematics.kinematicsType = kinematicsType;
-    }
-    if (rotationDiskRadius != -1){
-        kinematics.rotationDiskRadius = rotationDiskRadius;
-    }
-    
-    //propagate the new values
-    sys.rcvdKinematicSettings = 1;
-    kinematics.recomputeGeometry();
-    finalizeMachineSettings();
-    
-    Serial.println(F("Kinematics Settings Loaded"));
-}
-
-void updateMotorSettings(const String& readString){
-    /*
-    
-    Update settings related to the motor configurations
-    
-    */
-    
-    if (extractGcodeValue(readString, 'I', -1) != -1){
-        sys.zAxisAttached            = extractGcodeValue(readString, 'I', -1);
-    }
-    float encoderSteps       = extractGcodeValue(readString, 'J', -1);
-    float gearTeeth          = extractGcodeValue(readString, 'K', -1);
-    float chainPitch         = extractGcodeValue(readString, 'M', -1);
-    
-    float zDistPerRot        = extractGcodeValue(readString, 'N', -1);
-    float zEncoderSteps      = extractGcodeValue(readString, 'P', -1);
-    
-    float propWeight         = extractGcodeValue(readString, 'R', -1);
-    float KpPos              = extractGcodeValue(readString, 'S', -1);
-    float KiPos              = extractGcodeValue(readString, 'T', -1);
-    float KdPos              = extractGcodeValue(readString, 'U', -1);
-    float KpV                = extractGcodeValue(readString, 'V', -1);
-    float KiV                = extractGcodeValue(readString, 'W', -1);
-    float KdV                = extractGcodeValue(readString, 'X', -1);
-    if (extractGcodeValue(readString, 'Y', -1) != -1) {
-	zAxisAuto            = extractGcodeValue(readString, 'Y', -1);
-    }
-      
-    //Write the PID values to the axis if new ones have been received
-    if (KpPos != -1){
-        leftAxis.setPIDValues(KpPos, KiPos, KdPos, propWeight, KpV, KiV, KdV);
-        rightAxis.setPIDValues(KpPos, KiPos, KdPos, propWeight, KpV, KiV, KdV);
-        zAxis.setPIDValues(KpPos, KiPos, KdPos, propWeight, KpV, KiV, KdV);
-    }
-    
-    //Change the motor properties in cnc_funtions if new values have been sent
-    if (gearTeeth != -1 and chainPitch != -1){
-        float distPerRot = gearTeeth*chainPitch; 
-        leftAxis.changePitch(distPerRot);
-        rightAxis.changePitch(distPerRot);
-        zAxis.changePitch(zDistPerRot);
-        
-        kinematics.R = (gearTeeth * chainPitch)/(2.0 * 3.14159);
-    }
-    
-    //update the number of encoder steps if new values have been received
-    if (encoderSteps != -1){
-        leftAxis.changeEncoderResolution(encoderSteps);
-        rightAxis.changeEncoderResolution(encoderSteps);
-        sys.encoderStepsChanged = true;
-    }
-    if (zEncoderSteps != -1){
-        zAxis.changeEncoderResolution(zEncoderSteps);
-        sys.zEncoderStepsChanged = true;
-    }
-    
-    sys.rcvdMotorSettings = 1;
-    finalizeMachineSettings(); 
-    Serial.println(F("Motor Settings Loaded"));
-}
-
 void finalizeMachineSettings(){
     if(machineReady()){
         if (sys.encoderStepsChanged){
             leftAxis.loadPositionFromMemory();
             rightAxis.loadPositionFromMemory();
-            
-            
             sys.encoderStepsChanged = false;
         }
         if (sys.zEncoderStepsChanged){

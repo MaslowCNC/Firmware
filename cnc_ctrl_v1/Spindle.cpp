@@ -18,13 +18,12 @@
 
 // Globals for Spindle control, both poorly named
 Servo myservo;  // create servo object to control a servo 
-bool zAxisAuto = false;
 
 void  setSpindlePower(bool powerState) {
     /*
      * Turn spindle on or off depending on powerState
      */ 
-    boolean useServo = !zAxisAuto;
+    boolean useServo = !sysSettings.zAxisAuto;
     boolean activeHigh = true;
     int delayAfterChange = 1000;  // milliseconds
     int servoIdle =  90;  // degrees

@@ -66,7 +66,7 @@ void  MotorGearboxEncoder::computePID(){
     motor.additiveWrite(_pidOutput);
 }
 
-void  MotorGearboxEncoder::setPIDValues(float KpV, float KiV, float KdV){
+void  MotorGearboxEncoder::setPIDValues(float KpV, float KiV, float KdV, float propWeightV){
     /*
     
     Set PID tuning values
@@ -77,7 +77,7 @@ void  MotorGearboxEncoder::setPIDValues(float KpV, float KiV, float KdV){
     _Ki = KiV;
     _Kd = KdV;
     
-    _PIDController.SetTunings(_Kp, _Ki, _Kd, P_ON_E);
+    _PIDController.SetTunings(_Kp, _Ki, _Kd, propWeightV);
 }
 
 String  MotorGearboxEncoder::getPIDString(){

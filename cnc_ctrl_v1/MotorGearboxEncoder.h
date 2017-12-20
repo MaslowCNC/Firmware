@@ -30,7 +30,7 @@
             char       name();
             void       initializePID(const unsigned long& loopInterval);
             void       setPIDAggressiveness(float aggressiveness);
-            void       setPIDValues(float KpV, float KiV, float KdV);
+            void       setPIDValues(float KpV, float KiV, float KdV, float propWeight);
             void       setEncoderResolution(float resolution);
             float      computeSpeed();
             String     getPIDString();
