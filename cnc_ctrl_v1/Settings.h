@@ -83,6 +83,7 @@ typedef struct {
 } settingsStepsV1_t;
 extern settingsStepsV1_t sysSteps;
 
+void settingsInit();
 void settingsLoadFromEEprom();
 void settingsReset();
 void settingsSaveToEEprom();
