@@ -45,7 +45,7 @@ void setup(){
     Serial.print(F("PCB v1."));
     Serial.print(getPCBVersion());
     Serial.println(F(" Detected"));
-    Serial.println(F("Grbl v1.00"));  // Why GRBL?  Why not Maslow?
+    Serial.println(F("Grbl v1.00"));  // Why GRBL?  Apparenlty because some programs are silly and look for this as an initailization command
     Serial.println(F("ready"));
 }
 

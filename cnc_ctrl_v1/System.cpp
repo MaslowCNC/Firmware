@@ -236,27 +236,28 @@ void systemSaveAxesPosition(){
 // something like this at all
 void  _watchDog(){
     /*
-    Watchdog tells ground control that the machine is ready every second. _watchDog() should only be called when 
-    the machine is actually ready.
+    If:
+      No incoming serial in 5 seconds 
+      Motors are detached
+      Nothing in Serial buffer
+      Watchdog has not run in 5 seconds
+    Then:
+      Send an ok message
     
     This fixes the issue where the machine is ready, but Ground Control doesn't know the machine is ready and the system locks up.
     */
     static unsigned long lastRan = millis();
-    unsigned long        timeout = 5000;
     
-    if ((millis() - lastRan) > timeout){
-        
-        if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
-            
-            if (incSerialBuffer.length() == 0) {       // if the buffer is empty
-                #if defined (verboseDebug) && verboseDebug > 0              
-                Serial.println(F("_watchDog requesting new code"));
-                #endif
-                reportStatusMessage(STATUS_OK);
-            }
-        }
-        
-        lastRan = millis();
+    if ( millis() - sys.lastSerialRcvd > 5000 &&
+        (millis() - lastRan) > 5000 && 
+        !leftAxis.attached() and !rightAxis.attached() and !zAxis.attached() &&
+        incSerialBuffer.length() == 0
+       ){
+          #if defined (verboseDebug) && verboseDebug > 0              
+            Serial.println(F("_watchDog requesting new code"));
+          #endif
+          reportStatusMessage(STATUS_OK);
+          lastRan = millis();
     }
 }
 
