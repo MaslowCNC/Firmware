@@ -33,7 +33,7 @@ void Axis::setup(const int& pwmPin, const int& directionPin1, const int& directi
     
     initializePID(loopInterval);
     
-    motorGearboxEncoder.setName(_axisName);
+    motorGearboxEncoder.setName(&_axisName);
 }
 
 void   Axis::initializePID(const unsigned long& loopInterval){

@@ -35,8 +35,8 @@ Kinematics kinematics;
 void setup(){
     Serial.begin(57600);
     sys.inchesToMMConversion = 1;
-    settingsInit();
     setupAxes();
+    settingsInit();
     readyCommandString.reserve(INCBUFFERLENGTH);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
     gcodeLine.reserve(INCBUFFERLENGTH);
     Timer1.initialize(LOOPINTERVAL);

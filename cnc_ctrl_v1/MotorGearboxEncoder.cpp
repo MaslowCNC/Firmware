@@ -190,7 +190,7 @@ float MotorGearboxEncoder::cachedSpeed(){
     return _RPM;
 }
 
-void MotorGearboxEncoder::setName(const char& newName){
+void MotorGearboxEncoder::setName(char *newName){
     /*
     Set the name for the object
     */
@@ -201,5 +201,5 @@ char MotorGearboxEncoder::name(){
     /*
     Get the name for the object
     */
-    return _motorName;
+    return *_motorName;
 }
