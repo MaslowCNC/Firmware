@@ -25,8 +25,6 @@ String readyCommandString = "";  //KRK why is this a global?
 String gcodeLine          = "";  //Our use of this is a bit sloppy, at times,
                                  //we pass references to this global and then 
                                  //name them the same thing.
-// Commands that can safely be executed before machineReady
-String safeCommands[] = {"B01", "B04", "B05", "B07", "G20", "G21", "G90", "G91"};
 
 void initGCode(){
     // Called on startup or after a stop command
@@ -45,10 +43,10 @@ void readSerialCommands(){
             char c = Serial.read();
             if (c == '!'){
                 sys.stop = true;
-                sys.pause = false;
+                bit_false(sys.pause, PAUSE_FLAG_USER_PAUSE);
             }
             else if (c == '~'){
-                sys.pause = false;
+                bit_false(sys.pause, PAUSE_FLAG_USER_PAUSE);
             }
             else{
                 int bufferOverflow = incSerialBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
@@ -64,21 +62,6 @@ void readSerialCommands(){
         incSerialBuffer.print();        
         #endif
     }
-}
-
-// *** There is a more elegant way to do this - put the machineReady check at the beginning of each non-safe code!
-//     This will reduce the overhead of looking through safeCommands[] using isSafeCommand()
-//     and eliminate the 76 bytes of dynamic memory consumed by the safeCommands[] array in global variables!
-bool isSafeCommand(const String& readString){
-    bool ret = false;
-    String command = readString.substring(0, 3);
-    for(byte i = 0; i < sizeof(safeCommands); i++){
-       if(safeCommands[i] == command){
-           ret = true;
-           break;
-       }
-    }
-    return ret;
 }
 
 int   findEndOfNumber(const String& textString, const int& index){
@@ -126,13 +109,6 @@ void  executeBcodeLine(const String& gcodeLine){
     Executes a single line of gcode beginning with the character 'B'.
     
     */
-    
-    // *** There is a more elegant way to do this - put the machineReady check at the beginning of each non-safe code!
-    //     This will reduce the overhead of looking through safe commands using isSafeCommand()
-    if (!machineReady() && !isSafeCommand(gcodeLine)){
-        Serial.println(F("Unable to execute command, machine settings not yet received"));
-        return;
-    }
     
     //Handle B-codes
     
@@ -185,13 +161,6 @@ void  executeBcodeLine(const String& gcodeLine){
         Serial.println(F("mm"));
         
         return;
-    }
-    
-    if(gcodeLine.substring(0, 3) == "B07"){
-        //erase EEPROM
-        leftAxis.wipeEEPROM();
-        rightAxis.wipeEEPROM();
-        zAxis.wipeEEPROM();
     }
     
     if(gcodeLine.substring(0, 3) == "B08"){
@@ -337,13 +306,6 @@ void  executeGcodeLine(const String& gcodeLine){
     not included on the front of the line, the code from the previous line will be added.
     
     */
-
-    // *** There is a more elegant way to do this - put the machineReady check at the beginning of each non-safe code!
-    //     This will reduce the overhead of looking through safe commands using isSafeCommand()
-    if (!machineReady() && !isSafeCommand(gcodeLine)){
-        Serial.println(F("Unable to execute command, machine settings not yet received"));
-        return;
-    }
       
     //Handle G-Codes
    

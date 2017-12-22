@@ -42,7 +42,6 @@ void settingsLoadFromEEprom(){
     }
 }
 
-
 void settingsReset() {
     /* 
     Loads default data into settings, many of these values are approximations
@@ -93,6 +92,28 @@ void settingsReset() {
     };
 }
 
+void settingsWipe(byte resetType){
+  /*
+  Wipes certain bytes in the EEPROM, you probably want to reset after calling
+  this
+  */
+  if (bit_true(resetType, SETTINGS_RESTORE_SETTINGS)){
+    for (int i = 40 ; i < sizeof(sysSettings) ; i++) {
+      EEPROM.write(i, 0);
+    }
+  }
+  else if (bit_true(resetType, SETTINGS_RESTORE_MASLOW)){
+    for (int i = 0 ; i < sizeof(sysSettings) + 40; i++) {
+      EEPROM.write(i, 0);
+    }
+  }
+  else if (bit_true(resetType, SETTINGS_RESTORE_ALL)){
+    for (int i = 0 ; i < EEPROM.length() ; i++) {
+      EEPROM.write(i, 0);
+    }
+  }
+}
+
 void settingsSaveToEEprom(){
     /* 
     Saves settings to EEPROM, only called when settings change
@@ -112,6 +133,12 @@ void settingsSaveStepstoEEprom(){
     axes in the future.
     */
     settingsVersion_t settingsVersionStruct = {SETTINGSVERSION, EEPROMVALIDDATA};
+    settingsStepsV1_t sysSteps = {
+      leftAxis.steps(),
+      rightAxis.steps(),
+      zAxis.steps(),
+      EEPROMVALIDDATA
+    };
     EEPROM.put(0, settingsVersionStruct);
     EEPROM.put(10, sysSteps);
 }
@@ -127,13 +154,14 @@ void settingsLoadStepsFromEEprom(){
     settingsStepsV1_t tempStepsV1;
     settingsVersion_t settingsVersionStruct;
     
-    settingsReset(); // Load default values first
     EEPROM.get(0, settingsVersionStruct);
     if (settingsVersionStruct.settingsVersion == SETTINGSVERSION &&
         settingsVersionStruct.eepromValidData == EEPROMVALIDDATA){
         EEPROM.get(10, tempStepsV1);
         if (tempStepsV1.eepromValidData == EEPROMVALIDDATA){
-            sysSteps = tempStepsV1;
+            leftAxis.setSteps(tempStepsV1.lSteps);
+            rightAxis.setSteps(tempStepsV1.rSteps);
+            zAxis.setSteps(tempStepsV1.zSteps);
         }
         else {
             systemRtExecAlarm |= ALARM_POSITION_LOST;
@@ -143,20 +171,14 @@ void settingsLoadStepsFromEEprom(){
     else if (EEPROM.read(5) == EEPROMVALIDDATA &&
         EEPROM.read(105) == EEPROMVALIDDATA &&
         EEPROM.read(205) == EEPROMVALIDDATA){
-        // Try and load position from pre settings days
+        // Load position from pre settings days
         float l, r , z;
         EEPROM.get(9, l);
         EEPROM.get(109, r);
         EEPROM.get(209, z);
-        // Old method stored position as a float of rotations
-        // TODO figure out when this runs how to convert to steps. 
-        // perhaps just set axis to position and let conversion happen
-        // naturally there
-        // There is a small bug in the old way of doing it as the number
-        // of rotations is calculated using either the encoderSteps per 
-        // rotation or distance per rotation, changing of either of these
-        // values requires a recalibration of the machine
-        //position = {l,r,z, EEPROMVALIDDATA}
+        leftAxis.set(l);
+        rightAxis.set(r);
+        zAxis.set(z);
     }
     else {
         systemRtExecAlarm |= ALARM_POSITION_LOST;  // if this same global is touched by ISR then need to make atomic somehow
@@ -165,7 +187,7 @@ void settingsLoadStepsFromEEprom(){
     }
 }
 
-byte settingsStoreGlobalSetting(const byte parameter,const float value){
+byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
     /*
     Alters individual settings which are then stored to EEPROM.  Returns a 
     status message byte value 
@@ -195,11 +217,6 @@ byte settingsStoreGlobalSetting(const byte parameter,const float value){
                       sysSettings.sledHeight = value;
                       break;
             }
-            // TODO not sure how to handle kinematics calc now. or when we 
-            // should finalize.  What happens if not fully complete and 
-            // location can't be calculated
-            sys.rcvdKinematicSettings = 1;
-            finalizeMachineSettings();
             kinematics.recomputeGeometry();
             break;
         case 6: 
@@ -224,7 +241,6 @@ byte settingsStoreGlobalSetting(const byte parameter,const float value){
               sysSettings.encoderSteps = value;
               leftAxis.changeEncoderResolution(&sysSettings.encoderSteps);
               rightAxis.changeEncoderResolution(&sysSettings.encoderSteps);
-              sys.encoderStepsChanged = true;
               break;
         case 13: 
               sysSettings.gearTeeth = value;
@@ -259,7 +275,6 @@ byte settingsStoreGlobalSetting(const byte parameter,const float value){
         case 20: 
               sysSettings.zEncoderSteps = value;
               zAxis.changeEncoderResolution(&sysSettings.zEncoderSteps);
-              sys.zEncoderStepsChanged = true;
               break;
         case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28:
             switch(parameter) {

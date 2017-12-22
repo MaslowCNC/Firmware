@@ -20,10 +20,11 @@
 
     class Axis{
         public:
-            void   setup(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const int& eepromAdr, const unsigned long& loopInterval);
+            void   setup(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const unsigned long& loopInterval);
             void   write(const float& targetPosition);
             float  read();
             void   set(const float& newAxisPosition);
+            void   setSteps(const long& steps);
             int    updatePositionFromEncoder();
             void   initializePID(const unsigned long& loopInterval);
             int    detach();
@@ -43,13 +44,12 @@
             float  getPitch();
             void   changeEncoderResolution(float* newResolution);
             bool   attached();
-            void   wipeEEPROM();
             MotorGearboxEncoder    motorGearboxEncoder;
             void   setPIDValues(float* Kp, float* Ki, float* Kd, float* propWeight, float* KpV, float* KiV, float* KdV, float* propWeightV);
-            void   loadPositionFromMemory();
             String     getPIDString();
             double     pidInput();
             double     pidOutput();
+            long  steps();
             
         private:
             int        _PWMread(int pin);
@@ -62,7 +62,6 @@
             volatile double _pidOutput;
             float      *_Kp, *_Ki, *_Kd;
             PID        _pidController;
-            int        _eepromAdr;
             float      *_mmPerRotation;
             float      *_encoderSteps;
             bool       _disableAxisForTesting = false;

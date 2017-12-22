@@ -26,13 +26,14 @@ Copyright 2014-2017 Bar Smith*/
 #define MILLIMETERS 1
 #define INCHES      25.4
 
+// Define various pause bits
+#define PAUSE_FLAG_USER_PAUSE bit(0)  // a pause triggered within the code that must be cleared by user using the ~ command
+
 // Storage for global system states
 // Some of this could be more appropiately moved to the gcode parser
 typedef struct {
-  byte stop;                  // Stop flag.
-  byte pause;                 // Pause flag.
-  byte rcvdMotorSettings;     // Motor Settings Status Flag
-  byte rcvdKinematicSettings; // Kinematics Settings Status Flag
+  bool stop;                  // Stop flag.
+  bool pause;                 // Pause flag.
   float xPosition;            // Cartessian position of XY axes
   float yPosition;            // Cached because calculating position is intensive
   float steps[3];             // Encoder position of axes
@@ -42,8 +43,6 @@ typedef struct {
   int   nextTool;             //Stores the value of the next tool number eg: T4 -> 4
   float inchesToMMConversion; //Used to track whether to convert from inches, can probably be done in a way that doesn't require RAM
   float feedrate;             //The feedrate of the machine in mm/min
-  bool  encoderStepsChanged;  //These are used to determine 
-  bool  zEncoderStepsChanged; //These are used to determine
 } system_t;
 extern system_t sys;
 extern Axis leftAxis;
@@ -53,8 +52,6 @@ extern RingBuffer incSerialBuffer;
 extern Kinematics kinematics;
 extern byte systemRtExecAlarm;
 
-bool machineReady();
-void finalizeMachineSettings();
 void  calibrateChainLengths(String);
 void  setupAxes();
 int   getPCBVersion();
@@ -62,6 +59,7 @@ void pause();
 void maslowDelay(unsigned long);
 void  _watchDog();
 void execSystemRealtime();
+void systemSaveAxesPosition();
 byte systemExecuteCmdstring(String&);
 
 #endif

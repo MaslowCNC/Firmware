@@ -20,9 +20,6 @@ system_t sys;
 // Define the global settings storage - treat as readonly
 settings_t sysSettings;
 
-// Define the global step counter storage
-settingsStepsV1_t sysSteps;
-
 // Global realtime executor bitflag variable for setting various alarms.
 byte systemRtExecAlarm;  
 
@@ -72,9 +69,7 @@ void loop(){
         setSpindlePower(false);  // this restriction for safety if we are 
     }                            // comfortable that USB disconnects are
                                  // not a common occurence anymore
-    if (sys.rcvdKinematicSettings && sys.rcvdMotorSettings){
-        kinematics.init();
-    }
+    kinematics.init();
     
     // Let's go!
     reportStatusMessage(STATUS_OK);

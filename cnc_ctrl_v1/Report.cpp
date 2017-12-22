@@ -78,6 +78,35 @@ void  reportStatusMessage(byte status_code){
     }
 }
 
+void reportFeedbackMessage(byte message_code){
+  Serial.print(F("Message: "));
+  switch(message_code) {
+    case MESSAGE_CRITICAL_EVENT:
+      Serial.print(F("Reset to continue")); break;
+    case MESSAGE_ALARM_LOCK:
+      Serial.print(F("'$H'|'$X' to unlock")); break;
+    case MESSAGE_ALARM_UNLOCK:
+      Serial.print(F("Caution: Unlocked")); break;
+    case MESSAGE_ENABLED:
+      Serial.print(F("Enabled")); break;
+    case MESSAGE_DISABLED:
+      Serial.print(F("Disabled")); break;
+    case MESSAGE_SAFETY_DOOR_AJAR:
+      Serial.print(F("Check Door")); break;
+    case MESSAGE_CHECK_LIMITS:
+      Serial.print(F("Check Limits")); break;
+    case MESSAGE_PROGRAM_END:
+      Serial.print(F("Pgm End")); break;
+    case MESSAGE_RESTORE_DEFAULTS:
+      Serial.print(F("Restoring defaults")); break;
+    case MESSAGE_SPINDLE_RESTORE:
+      Serial.print(F("Restoring spindle")); break;
+    case MESSAGE_SLEEP_MODE:
+      Serial.print(F("Sleeping")); break;
+  }
+  Serial.println(F(" "));
+}
+
 // Prints alarm messages.
 void  reportAlarmMessage(byte alarm_code) {
   Serial.print(F("ALARM: "));
@@ -136,22 +165,22 @@ void reportMaslowSettings() {
     Serial.print(F("$36=")); Serial.println(sysSettings.zPropWeightV);
   #else
     Serial.print(F("$0=")); Serial.print(sysSettings.machineWidth);
-    Serial.print(F(" (machine width, mm)\r\n$1=")); Serial.print(sysSettings.machineHeight);
-    Serial.print(F(" (machine height, mm)\r\n$2=")); Serial.print(sysSettings.distBetweenMotors);
-    Serial.print(F(" (motor distance, mm)\r\n$3=")); Serial.print(sysSettings.motorOffsetY);
-    Serial.print(F(" (motor height, mm)\r\n$4=")); Serial.print(sysSettings.sledWidth);
-    Serial.print(F(" (sled width, mm)\r\n$5=")); Serial.print(sysSettings.sledHeight);
-    Serial.print(F(" (sled height, mm)\r\n$6=")); Serial.print(sysSettings.sledCG);
-    Serial.print(F(" (sled cg, mm)\r\n$7=")); Serial.print(sysSettings.kinematicsType);
-    Serial.print(F(" (Kinematics Type 1=Quadrilateral, 2=Triangular)\r\n$8=")); Serial.print(sysSettings.rotationDiskRadius);
-    Serial.print(F(" (rotation radius, mm)\r\n$9=")); Serial.print(sysSettings.axisHoldTime);
+    Serial.print(F(" (machine width, mm, $K)\r\n$1=")); Serial.print(sysSettings.machineHeight);
+    Serial.print(F(" (machine height, mm, $K)\r\n$2=")); Serial.print(sysSettings.distBetweenMotors);
+    Serial.print(F(" (motor distance, mm, $K)\r\n$3=")); Serial.print(sysSettings.motorOffsetY);
+    Serial.print(F(" (motor height, mm, $K)\r\n$4=")); Serial.print(sysSettings.sledWidth);
+    Serial.print(F(" (sled width, mm, $K)\r\n$5=")); Serial.print(sysSettings.sledHeight);
+    Serial.print(F(" (sled height, mm, $K)\r\n$6=")); Serial.print(sysSettings.sledCG);
+    Serial.print(F(" (sled cg, mm, $K)\r\n$7=")); Serial.print(sysSettings.kinematicsType);
+    Serial.print(F(" (Kinematics Type 1=Quadrilateral, 2=Triangular, $K)\r\n$8=")); Serial.print(sysSettings.rotationDiskRadius);
+    Serial.print(F(" (rotation radius, mm, $K)\r\n$9=")); Serial.print(sysSettings.axisHoldTime);
     Serial.print(F(" (axis hold time, ms)\r\n$10=")); Serial.print(sysSettings.kinematicsMaxGuess);
     Serial.print(F(" (kinematics max guess)\r\n$11=")); Serial.print(sysSettings.originalChainLength);
     Serial.print(F(" (original chain length, mm)\r\n$12=")); Serial.print(sysSettings.encoderSteps);
-    Serial.print(F(" (main steps per revolution)\r\n$13=")); Serial.print(sysSettings.gearTeeth);
-    Serial.print(F(" (gear teeth, mm)\r\n$14=")); Serial.print(sysSettings.chainPitch);
-    Serial.print(F(" (chain pitch, mm)\r\n$15=")); Serial.print(sysSettings.maxFeed);
-    Serial.print(F(" (max feed, mm/min)\r\n$16=")); Serial.print(sysSettings.zAxisAttached);
+    Serial.print(F(" (main steps per revolution, $K)\r\n$13=")); Serial.print(sysSettings.gearTeeth);
+    Serial.print(F(" (gear teeth, mm, $K)\r\n$14=")); Serial.print(sysSettings.chainPitch);
+    Serial.print(F(" (chain pitch, mm, $K)\r\n$15=")); Serial.print(sysSettings.maxFeed);
+    Serial.print(F(" (max feed, mm/min, $K)\r\n$16=")); Serial.print(sysSettings.zAxisAttached);
     Serial.print(F(" (Auto Z Axis, 1 = Yes)\r\n$17=")); Serial.print(sysSettings.zAxisAuto);
     Serial.print(F(" (auto z axis)\r\n$18=")); Serial.print(sysSettings.maxZRPM);
     Serial.print(F(" (max z axis RPM)\r\n$19=")); Serial.print(sysSettings.zDistPerRot);
@@ -232,6 +261,7 @@ void  reportMaslowHelp(){
         // Serial.println(F("$I (view build info)"));
         // Serial.println(F("$N (view startup blocks)"));
         Serial.println(F("$x=value (save Maslow setting)"));
+        Serial.println(F("$K (recompute kinematics)"));
         // Serial.println(F("$Nx=line (save startup block)"));
         // Serial.println(F("$C (check gcode mode)"));
         // Serial.println(F("$X (kill alarm lock)"));

@@ -28,11 +28,6 @@
 
 #define LOOPINTERVAL 10000 // What is the frequency of the PID loop in microseconds
 
-// The EEPROM locations for each axis data
-#define LEFT_EEPROM_ADR     5
-#define RIGHT_EEPROM_ADR  105
-#define Z_EEPROM_ADR      205
-
 // Define extra pins
 #define AUX1 17
 #define AUX2 16

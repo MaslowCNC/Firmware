@@ -58,7 +58,21 @@ Copyright 2014-2017 Bar Smith*/
 // Define Maslow alarm codes.
 #define ALARM_POSITION_LOST bit(0)
 
+// Define Maslow feedback message codes. Valid values (0-255).
+#define MESSAGE_CRITICAL_EVENT 1
+#define MESSAGE_ALARM_LOCK 2
+#define MESSAGE_ALARM_UNLOCK 3
+#define MESSAGE_ENABLED 4
+#define MESSAGE_DISABLED 5
+#define MESSAGE_SAFETY_DOOR_AJAR 6
+#define MESSAGE_CHECK_LIMITS 7
+#define MESSAGE_PROGRAM_END 8
+#define MESSAGE_RESTORE_DEFAULTS 9
+#define MESSAGE_SPINDLE_RESTORE 10
+#define MESSAGE_SLEEP_MODE 11
+
 void  reportStatusMessage(byte);
+void  reportFeedbackMessage(byte);
 void  reportMaslowSettings();
 void  returnError();
 void  returnPoz();

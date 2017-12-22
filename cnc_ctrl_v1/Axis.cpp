@@ -18,11 +18,7 @@
 
 #include "Maslow.h"
 
-#define EEPROMVALIDDATA 56
-#define SIZEOFFLOAT      4
-#define SIZEOFLINSEG    17
-
-void Axis::setup(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const int& eepromAdr, const unsigned long& loopInterval)
+void Axis::setup(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const unsigned long& loopInterval)
 {
     // I don't really like this, but I don't know how else to initialize a pointer to a value
     float zero = 0.0;
@@ -34,27 +30,10 @@ void Axis::setup(const int& pwmPin, const int& directionPin1, const int& directi
     
     //initialize variables
     _axisName     = axisName;
-    _eepromAdr    = eepromAdr;
     
     initializePID(loopInterval);
     
     motorGearboxEncoder.setName(_axisName);
-}
-
-void   Axis::loadPositionFromMemory(){
-        /*
-        
-        Reload the last known position for the axis
-        
-        */
-        
-        //If a valid position has been stored
-        if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
-            float f = 0.00f;
-            f = EEPROM.get(_eepromAdr + SIZEOFFLOAT, f );
-            set(f);
-        }
-        
 }
 
 void   Axis::initializePID(const unsigned long& loopInterval){
@@ -92,6 +71,21 @@ void   Axis::set(const float& newAxisPosition){
     _pidSetpoint  =  newAxisPosition/ *_mmPerRotation;
     motorGearboxEncoder.encoder.write((newAxisPosition * *_encoderSteps)/ *_mmPerRotation);
     
+}
+
+long Axis::steps(){
+    /*
+    Returns the number of steps reported by the encoder
+    */
+    return motorGearboxEncoder.encoder.read();
+}
+
+void   Axis::setSteps(const long& steps){
+    
+    //reset everything to the new value
+    _axisTarget   =  steps/ *_encoderSteps;
+    _pidSetpoint  =  steps/ *_encoderSteps;
+    motorGearboxEncoder.encoder.write(steps);
     
 }
 
@@ -195,12 +189,6 @@ void   Axis::changeEncoderResolution(float *newResolution){
 
 int    Axis::detach(){
     
-    if (motorGearboxEncoder.motor.attached()){
-        float f = read();  //Store the axis position
-        EEPROM.put(_eepromAdr + SIZEOFFLOAT, f);
-        EEPROM.update(_eepromAdr, EEPROMVALIDDATA);
-    }
-    
     motorGearboxEncoder.motor.detach();
     
     return 1;
@@ -249,23 +237,6 @@ void   Axis::stop(){
     _axisTarget    = read()/ *_mmPerRotation;
     _pidSetpoint   = read()/ *_mmPerRotation;
 
-}
-
-void   Axis::wipeEEPROM(){
-    /*
-    
-    Over-write all the values stored in EEPROM to return the machine to a known state.
-    
-    */
-    
-    int i = 0;
-    while(i < 50){
-        EEPROM.update(_eepromAdr + i, 0);
-        i++;
-    }
-    
-    Serial.print(_axisName);
-    Serial.println(F(" EEPROM erased"));
 }
 
 void   Axis::test(){

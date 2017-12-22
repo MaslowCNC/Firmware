@@ -19,14 +19,6 @@ Copyright 2014-2017 Bar Smith*/
 
 #include "Maslow.h"
 
-bool machineReady(){
-  bool ret = false;
-  if (sys.rcvdMotorSettings && sys.rcvdKinematicSettings){
-      ret = true;
-  }
-  return ret;
-}
-
 void  calibrateChainLengths(String gcodeLine){
     /*
     The calibrateChainLengths function lets the machine know that the chains are set to a given length where each chain is ORIGINCHAINLEN
@@ -54,21 +46,6 @@ void  calibrateChainLengths(String gcodeLine){
         rightAxis.detach();
     }
     
-}
-
-void finalizeMachineSettings(){
-    if(machineReady()){
-        if (sys.encoderStepsChanged){
-            leftAxis.loadPositionFromMemory();
-            rightAxis.loadPositionFromMemory();
-            sys.encoderStepsChanged = false;
-        }
-        if (sys.zEncoderStepsChanged){
-            zAxis.loadPositionFromMemory();
-            sys.zEncoderStepsChanged = false;
-        }
-        kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
-    }
 }
 
 void   setupAxes(){
@@ -174,9 +151,9 @@ void   setupAxes(){
 
 
     }
-    leftAxis.setup (ENC, IN6, IN5, ENCODER3B, ENCODER3A, 'L',  LEFT_EEPROM_ADR, LOOPINTERVAL);
-    rightAxis.setup(ENA, IN1, IN2, ENCODER1A, ENCODER1B, 'R', RIGHT_EEPROM_ADR, LOOPINTERVAL);
-    zAxis.setup    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, 'Z',     Z_EEPROM_ADR, LOOPINTERVAL);
+    leftAxis.setup (ENC, IN6, IN5, ENCODER3B, ENCODER3A, 'L', LOOPINTERVAL);
+    rightAxis.setup(ENA, IN1, IN2, ENCODER1A, ENCODER1B, 'R', LOOPINTERVAL);
+    zAxis.setup    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, 'Z', LOOPINTERVAL);
 }
 
 int getPCBVersion(){
@@ -198,18 +175,14 @@ void pause(){
     
     */
     
-    sys.pause = true;
+    bit_true(sys.pause, PAUSE_FLAG_USER_PAUSE);
     Serial.println(F("Maslow Paused"));
     
-    while(1){
+    while(bit_istrue(sys.pause, PAUSE_FLAG_USER_PAUSE)) {
         
         // Run realtime commands
         execSystemRealtime();
         if (sys.stop){return;}
-        
-        if (!sys.pause){
-            return;
-        }
     }    
 }
 
@@ -246,7 +219,17 @@ void maslowDelay(unsigned long waitTimeMs) {
 void execSystemRealtime(){
     readSerialCommands();
     returnPoz();
+    systemSaveAxesPosition();
     // check systemRtExecAlarm flag and do stuff
+}
+
+void systemSaveAxesPosition(){
+    /*
+    Save steps of axes to EEPROM if they are all detached
+    */
+    if (!leftAxis.attached() && !rightAxis.attached() && !zAxis.attached()){
+        settingsSaveStepstoEEprom();
+    }
 }
 
 // This should be the ultimate fallback, it would be best if we didn't even need 
@@ -277,6 +260,19 @@ void  _watchDog(){
     }
 }
 
+void systemReset(){
+    /* 
+    Stops everything and resets the arduino
+    */
+    leftAxis.detach();
+    rightAxis.detach();
+    zAxis.detach();
+    setSpindlePower(false);
+    // Restarts program from beginning but
+    // does not reset the peripherals and registers
+    asm volatile ("  jmp 0");  
+}
+
 byte systemExecuteCmdstring(String& cmdString){
     /*
     This function processes the $ system commands
@@ -291,7 +287,7 @@ byte systemExecuteCmdstring(String& cmdString){
     }
     else {
         switch( cmdString[char_counter] ) {
-          case '$': // case 'G': case 'C': case 'X':
+          case '$': case 'K':// case 'G': case 'C': case 'X':
             if ( cmdString.length() > 2 ) { return(STATUS_INVALID_STATEMENT); }
             switch( cmdString[char_counter] ) {
               case '$' : // Prints Maslow settings
@@ -299,6 +295,10 @@ byte systemExecuteCmdstring(String& cmdString){
                 // else {
                   reportMaslowSettings();
                 // }
+                break;
+              case 'K' : // forces kinematics update
+                kinematics.recomputeGeometry();
+                kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
                 break;
               // case 'G' : // Prints gcode parser state
               //   report_gcode_modes();
@@ -384,20 +384,20 @@ byte systemExecuteCmdstring(String& cmdString){
           //         settings_store_build_info(line);
           //       }
           //       break;
-          //     case 'R' : // Restore defaults [IDLE/ALARM]
-          //       if (line[++char_counter] != 'S') { return(STATUS_INVALID_STATEMENT); }
-          //       if (line[++char_counter] != 'T') { return(STATUS_INVALID_STATEMENT); }
-          //       if (line[++char_counter] != '=') { return(STATUS_INVALID_STATEMENT); }
-          //       if (line[char_counter+2] != 0) { return(STATUS_INVALID_STATEMENT); }
-          //       switch (line[++char_counter]) {
-          //         case '$': settings_restore(SETTINGS_RESTORE_DEFAULTS); break;
-          //         case '#': settings_restore(SETTINGS_RESTORE_PARAMETERS); break;
-          //         case '*': settings_restore(SETTINGS_RESTORE_ALL); break;
-          //         default: return(STATUS_INVALID_STATEMENT);
-          //       }
-          //       report_feedback_message(MESSAGE_RESTORE_DEFAULTS);
-          //       mc_reset(); // Force reset to ensure settings are initialized correctly.
-          //       break;
+              case 'R' : // Restore defaults [IDLE/ALARM]
+                if (cmdString[++char_counter] != 'S') { return(STATUS_INVALID_STATEMENT); }
+                if (cmdString[++char_counter] != 'T') { return(STATUS_INVALID_STATEMENT); }
+                if (cmdString[++char_counter] != '=') { return(STATUS_INVALID_STATEMENT); }
+                if (cmdString.length() != 5) { return(STATUS_INVALID_STATEMENT); }
+                switch (cmdString[++char_counter]) {
+                  case '$': settingsWipe(SETTINGS_RESTORE_SETTINGS); break;
+                  case '#': settingsWipe(SETTINGS_RESTORE_MASLOW); break;
+                  case '*': settingsWipe(SETTINGS_RESTORE_ALL); break;
+                  default: return(STATUS_INVALID_STATEMENT);
+                }
+                reportFeedbackMessage(MESSAGE_RESTORE_DEFAULTS);
+                systemReset(); // Force reset to ensure settings are initialized correctly.
+                break;
           //     case 'N' : // Startup lines. [IDLE/ALARM]
           //       if ( line[++char_counter] == 0 ) { // Print startup lines
           //         for (helper_var=0; helper_var < N_STARTUP_LINE; helper_var++) {

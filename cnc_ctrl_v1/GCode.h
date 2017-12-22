@@ -36,7 +36,6 @@ void  executeGcodeLine(const String&);
 void  executeMcodeLine(const String&);
 void  executeOtherCodeLine(const String&);
 int   findNextGM(const String&, const int&);
-bool isSafeCommand(const String&);
 void  sanitizeCommandString(String&);
 void  interpretCommandString(String&);
 int   G1(const String&, int);

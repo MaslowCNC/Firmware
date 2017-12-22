@@ -28,6 +28,7 @@ Kinematics::Kinematics(){
 }
 
 void Kinematics::init(){
+    recomputeGeometry();
     forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
 }
 

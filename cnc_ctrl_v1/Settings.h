@@ -27,6 +27,11 @@ Copyright 2014-2017 Bar Smith*/
                                // to determine if the data in the EEPROM was 
                                // saved by maslow, or something else.
 
+// Reset Types
+#define SETTINGS_RESTORE_SETTINGS bit(0)
+#define SETTINGS_RESTORE_MASLOW bit(1)
+#define SETTINGS_RESTORE_ALL bit(2)
+
 typedef struct {  // I think this is about ~128 bytes in size if I counted correctly
   float machineWidth;
   float machineHeight;
@@ -81,14 +86,14 @@ typedef struct {
   long zSteps;
   byte eepromValidData;
 } settingsStepsV1_t;
-extern settingsStepsV1_t sysSteps;
 
 void settingsInit();
 void settingsLoadFromEEprom();
 void settingsReset();
+void settingsWipe(byte);
 void settingsSaveToEEprom();
 void settingsSaveStepstoEEprom();
 void settingsLoadStepsFromEEprom();
-byte settingsStoreGlobalSetting(const byte,const float);
+byte settingsStoreGlobalSetting(const byte&,const float&);
 
 #endif

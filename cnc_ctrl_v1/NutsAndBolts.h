@@ -20,6 +20,12 @@ Copyright 2014-2017 Bar Smith*/
 #ifndef nutsandbolts_h
 #define nutsandbolts_h
 
+// These are nifty functions from Grbl
+#define bit_true(x,mask) (x) |= (mask)
+#define bit_false(x,mask) (x) &= ~(mask)
+#define bit_istrue(x,mask) ((x & mask) != 0)
+#define bit_isfalse(x,mask) ((x & mask) == 0)
+
 float readFloat(const String&, byte&, float&);
 
 #endif 
