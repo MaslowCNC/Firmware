@@ -27,6 +27,10 @@ void MotorGearboxEncoder::setup(const int& pwmPin, const int& directionPin1, con
 {
     //initialize encoder
     encoder.setup(encoderPin1,encoderPin2);
+    // I don't like this, but I don't know how else to initialize a pointer to a value
+    float zero = 0.0;
+    float one = 1.0;
+    _Kp = _Ki = _Kd = &zero;
     
     //initialize motor
     motor.setupMotor(pwmPin, directionPin1, directionPin2);
