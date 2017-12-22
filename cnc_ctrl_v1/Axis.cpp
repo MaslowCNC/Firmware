@@ -209,11 +209,12 @@ bool   Axis::attached(){
     return motorGearboxEncoder.motor.attached();
 }
 
-void   Axis::hold(){
-    if (millis() - _timeLastMoved < sysSettings.axisHoldTime){
-        //write(_axisTarget * *_mmPerRotation);
-    }
-    else{
+void   Axis::detachIfIdle(){
+    /*
+    Detaches the axis, turning off the motor and PID control, if it has been
+    stationary for more than axisDetachTime
+    */
+    if (millis() - _timeLastMoved > sysSettings.axisDetachTime){
         detach();
     }
     

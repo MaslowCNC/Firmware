@@ -60,7 +60,7 @@ void settingsReset() {
         79.0,   // float sledCG;
         1,      // byte kinematicsType;
         100.0,  // float rotationDiskRadius;
-        2000,   // int axisHoldTime;
+        2000,   // int axisDetachTime;
         1650,   // int originalChainLength;
         8113.7, // float encoderSteps;
         63.5,   // float distPerRot;
@@ -234,7 +234,7 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               sysSettings.rotationDiskRadius = value;
               break;
         case 9: 
-              sysSettings.axisHoldTime = value;
+              sysSettings.axisDetachTime = value;
               break;
         case 11: 
               sysSettings.originalChainLength = value;

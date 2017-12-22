@@ -327,7 +327,7 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
     return 1;
 }
 
-void  holdPosition(){
+void  motionDetachIfIdle(){
     /*
     
     This function is called every time the main loop runs. When the machine is executing a move it is not called, but when the machine is
@@ -335,7 +335,7 @@ void  holdPosition(){
     
     */
     
-    leftAxis.hold();
-    rightAxis.hold();
-    zAxis.hold();
+    leftAxis.detachIfIdle();
+    rightAxis.detachIfIdle();
+    zAxis.detachIfIdle();
 }

@@ -220,6 +220,7 @@ void execSystemRealtime(){
     readSerialCommands();
     returnPoz();
     systemSaveAxesPosition();
+    motionDetachIfIdle();
     // check systemRtExecAlarm flag and do stuff
 }
 

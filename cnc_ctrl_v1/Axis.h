@@ -29,7 +29,7 @@
             void   initializePID(const unsigned long& loopInterval);
             int    detach();
             int    attach();
-            void   hold();
+            void   detachIfIdle();
             void   endMove(const float& finalTarget);
             void   stop();
             float  target();

@@ -79,8 +79,6 @@ void loop(){
     while (sys.stop != true){
         gcodeExecuteLoop();
         
-        holdPosition();  // bad name, also shouldn't write positions just detach
-    
         execSystemRealtime();
     
         _watchDog();

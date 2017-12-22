@@ -32,6 +32,6 @@ float calculateDelay(const float&, const float&);
 float calculateFeedrate(const float&, const float&);
 float computeStepSize(const float&);
 void movementUpdate();
-void holdPosition();
+void motionDetachIfIdle();
 
 #endif
