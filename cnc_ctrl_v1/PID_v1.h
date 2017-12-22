@@ -13,8 +13,8 @@ class PID
   #define MANUAL	0
   #define DIRECT  0
   #define REVERSE  1
-  #define P_ON_M 0
-  #define P_ON_E 1
+  #define P_ON_M 0.0
+  #define P_ON_E 1.0
   bool pOnE = true, pOnM = false;
   double pOnEKp, pOnMKp;
 
@@ -23,7 +23,7 @@ class PID
     PID();
     
     void setup(volatile double*, volatile double*, volatile double*,        // * constructor.  links the PID to the Input, Output, and 
-        const double&, const double&, const double&, const double&, const int&);//   Setpoint.  Initial tuning parameters are also set here.
+        float*, float*, float*, float*, const int&);//   Setpoint.  Initial tuning parameters are also set here.
                                           //   (overload for specifying proportional mode)
 
     PID(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 
@@ -43,11 +43,11 @@ class PID
 
 
   //available but not commonly used functions ********************************************************
-    void SetTunings(const double&, const double&,       // * While most users will set the tunings once in the 
-                    const double&);         	  //   constructor, this function gives the user the option
+    void SetTunings(float*, float*,       // * While most users will set the tunings once in the 
+                    float*);         	  //   constructor, this function gives the user the option
                                           //   of changing tunings during runtime for Adaptive control
-    void SetTunings(const double&, const double&,       // * overload for specifying proportional mode
-                    const double&, const double&);         	  
+    void SetTunings(float*, float*,       // * overload for specifying proportional mode
+                    float*, float*);         	  
 
 	void SetControllerDirection(const int&);	  // * Sets the Direction, or "Action" of the controller. DIRECT
 										  //   means the output will increase when error is positive. REVERSE
@@ -69,10 +69,12 @@ class PID
   private:
 	void Initialize();
 	
-	double dispKp;				// * we'll hold on to the tuning parameters in user-entered 
-	double dispKi;				//   format for display purposes
-	double dispKd;				//
-    
+	float *dispKp;				// * we'll hold on to the tuning parameters in user-entered 
+	float *dispKi;				//   format for display purposes
+	float *dispKd;				//
+
+// While shared by both main motors, these are not pointers because they are 
+// calculated using sample time in this file.
 	double kp;                  // * (P)roportional Tuning Parameter
     double ki;                  // * (I)ntegral Tuning Parameter
     double kd;                  // * (D)erivative Tuning Parameter

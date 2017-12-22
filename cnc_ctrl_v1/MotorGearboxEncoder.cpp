@@ -33,7 +33,7 @@ void MotorGearboxEncoder::setup(const int& pwmPin, const int& directionPin1, con
     motor.write(0);
     
     //initialize the PID
-    _PIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, P_ON_E, DIRECT);
+    _PIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, &one, DIRECT);
     initializePID(loopInterval);
     
     
@@ -66,7 +66,7 @@ void  MotorGearboxEncoder::computePID(){
     motor.additiveWrite(_pidOutput);
 }
 
-void  MotorGearboxEncoder::setPIDValues(float KpV, float KiV, float KdV, float propWeightV){
+void  MotorGearboxEncoder::setPIDValues(float* KpV, float* KiV, float* KdV, float* propWeightV){
     /*
     
     Set PID tuning values
@@ -87,7 +87,7 @@ String  MotorGearboxEncoder::getPIDString(){
     
     */
     String PIDString = "Kp=";
-    return PIDString + _Kp + ",Ki=" + _Ki + ",Kd=" + _Kd;
+    return PIDString + *_Kp + ",Ki=" + *_Ki + ",Kd=" + *_Kd;
 }
 
 String  MotorGearboxEncoder::pidState(){
@@ -107,7 +107,10 @@ void MotorGearboxEncoder::setPIDAggressiveness(float aggressiveness){
     
     */
     
-    _PIDController.SetTunings(aggressiveness*_Kp, _Ki, _Kd, P_ON_E);
+    float adjustedKp = aggressiveness * *_Kp;
+    float one = 1.0;
+    
+    _PIDController.SetTunings(&adjustedKp, _Ki, _Kd, &one);
     
 }
 

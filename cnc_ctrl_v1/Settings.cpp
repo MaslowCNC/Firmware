@@ -172,6 +172,7 @@ byte settingsStoreGlobalSetting(const byte parameter,const float value){
     */
     
     // We can add whatever sanity checks we want here and error out if we like
+    float distPerRot;
     switch(parameter) {
         case 0: case 1: case 2: case 3: case 4: case 5:
             switch(parameter) {
@@ -221,21 +222,23 @@ byte settingsStoreGlobalSetting(const byte parameter,const float value){
               break;
         case 12: 
               sysSettings.encoderSteps = value;
-              leftAxis.changeEncoderResolution(sysSettings.encoderSteps);
-              rightAxis.changeEncoderResolution(sysSettings.encoderSteps);
+              leftAxis.changeEncoderResolution(&sysSettings.encoderSteps);
+              rightAxis.changeEncoderResolution(&sysSettings.encoderSteps);
               sys.encoderStepsChanged = true;
               break;
         case 13: 
               sysSettings.gearTeeth = value;
-              leftAxis.changePitch(sysSettings.gearTeeth*sysSettings.chainPitch);
-              rightAxis.changePitch(sysSettings.gearTeeth*sysSettings.chainPitch);
-              kinematics.R = (sysSettings.gearTeeth*sysSettings.chainPitch)/(2.0 * 3.14159);
+              distPerRot = sysSettings.gearTeeth*sysSettings.chainPitch;
+              leftAxis.changePitch(&distPerRot);
+              rightAxis.changePitch(&distPerRot);
+              kinematics.R = (distPerRot)/(2.0 * 3.14159);
               break;
         case 14: 
               sysSettings.chainPitch = value;
-              leftAxis.changePitch(sysSettings.gearTeeth*sysSettings.chainPitch);
-              rightAxis.changePitch(sysSettings.gearTeeth*sysSettings.chainPitch);
-              kinematics.R = (sysSettings.gearTeeth*sysSettings.chainPitch)/(2.0 * 3.14159);
+              distPerRot = sysSettings.gearTeeth*sysSettings.chainPitch;
+              leftAxis.changePitch(&distPerRot);
+              rightAxis.changePitch(&distPerRot);
+              kinematics.R = (distPerRot)/(2.0 * 3.14159);
               break;
         case 15: 
               sysSettings.maxFeed = value;
@@ -251,11 +254,11 @@ byte settingsStoreGlobalSetting(const byte parameter,const float value){
               break;
         case 19: 
               sysSettings.zDistPerRot = value;
-              zAxis.changePitch(sysSettings.zDistPerRot);
+              zAxis.changePitch(&sysSettings.zDistPerRot);
               break;
         case 20: 
               sysSettings.zEncoderSteps = value;
-              zAxis.changeEncoderResolution(sysSettings.zEncoderSteps);
+              zAxis.changeEncoderResolution(&sysSettings.zEncoderSteps);
               sys.zEncoderStepsChanged = true;
               break;
         case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28:
@@ -285,8 +288,8 @@ byte settingsStoreGlobalSetting(const byte parameter,const float value){
                       sysSettings.propWeightV = value;
                       break;
                 }
-                leftAxis.setPIDValues(sysSettings.KpPos, sysSettings.KiPos, sysSettings.KdPos, sysSettings.propWeightPos, sysSettings.KpV, sysSettings.KiV, sysSettings.KdV, sysSettings.propWeightV);
-                rightAxis.setPIDValues(sysSettings.KpPos, sysSettings.KiPos, sysSettings.KdPos, sysSettings.propWeightPos, sysSettings.KpV, sysSettings.KiV, sysSettings.KdV, sysSettings.propWeightV);
+                leftAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
+                rightAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
                 break;
         case 29: case 30: case 31: case 32: case 33: case 34: case 35: case 36:
             switch(parameter) {
@@ -315,7 +318,7 @@ byte settingsStoreGlobalSetting(const byte parameter,const float value){
                       sysSettings.zPropWeightV = value;
                       break;
             }
-            zAxis.setPIDValues(sysSettings.zKpPos, sysSettings.zKiPos, sysSettings.zKdPos, sysSettings.zPropWeightPos, sysSettings.zKpV, sysSettings.zKiV, sysSettings.zKdV, sysSettings.zPropWeightV);
+            zAxis.setPIDValues(&sysSettings.zKpPos, &sysSettings.zKiPos, &sysSettings.zKdPos, &sysSettings.zPropWeightPos, &sysSettings.zKpV, &sysSettings.zKiV, &sysSettings.zKdV, &sysSettings.zPropWeightV);
             break;
         default:
               return(STATUS_INVALID_STATEMENT);
