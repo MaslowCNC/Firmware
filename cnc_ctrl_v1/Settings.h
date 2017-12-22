@@ -43,11 +43,9 @@ typedef struct {  // I think this is about ~128 bytes in size if I counted corre
   byte kinematicsType;
   float rotationDiskRadius;
   int axisHoldTime;
-  int kinematicsMaxGuess;
   int originalChainLength;
   float encoderSteps;
-  byte gearTeeth;
-  float chainPitch;
+  float distPerRot;
   int maxFeed;
   bool zAxisAttached;
   bool zAxisAuto;

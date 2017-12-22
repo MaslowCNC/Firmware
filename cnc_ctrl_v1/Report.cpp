@@ -136,11 +136,9 @@ void reportMaslowSettings() {
     Serial.print(F("$7=")); Serial.println(sysSettings.kinematicsType);
     Serial.print(F("$8=")); Serial.println(sysSettings.rotationDiskRadius);
     Serial.print(F("$9=")); Serial.println(sysSettings.axisHoldTime);
-    Serial.print(F("$10=")); Serial.println(sysSettings.kinematicsMaxGuess);
     Serial.print(F("$11=")); Serial.println(sysSettings.originalChainLength);
     Serial.print(F("$12=")); Serial.println(sysSettings.encoderSteps);
-    Serial.print(F("$13=")); Serial.println(sysSettings.gearTeeth);
-    Serial.print(F("$14=")); Serial.println(sysSettings.chainPitch);
+    Serial.print(F("$13=")); Serial.println(sysSettings.distPerRot);
     Serial.print(F("$15=")); Serial.println(sysSettings.maxFeed);
     Serial.print(F("$16=")); Serial.println(sysSettings.zAxisAttached);
     Serial.print(F("$17=")); Serial.println(sysSettings.zAxisAuto);
@@ -174,12 +172,10 @@ void reportMaslowSettings() {
     Serial.print(F(" (sled cg, mm, $K)\r\n$7=")); Serial.print(sysSettings.kinematicsType);
     Serial.print(F(" (Kinematics Type 1=Quadrilateral, 2=Triangular, $K)\r\n$8=")); Serial.print(sysSettings.rotationDiskRadius);
     Serial.print(F(" (rotation radius, mm, $K)\r\n$9=")); Serial.print(sysSettings.axisHoldTime);
-    Serial.print(F(" (axis hold time, ms)\r\n$10=")); Serial.print(sysSettings.kinematicsMaxGuess);
-    Serial.print(F(" (kinematics max guess)\r\n$11=")); Serial.print(sysSettings.originalChainLength);
+    Serial.print(F(" (axis hold time, ms)\r\n$11=")); Serial.print(sysSettings.originalChainLength);
     Serial.print(F(" (original chain length, mm)\r\n$12=")); Serial.print(sysSettings.encoderSteps);
-    Serial.print(F(" (main steps per revolution, $K)\r\n$13=")); Serial.print(sysSettings.gearTeeth);
-    Serial.print(F(" (gear teeth, mm, $K)\r\n$14=")); Serial.print(sysSettings.chainPitch);
-    Serial.print(F(" (chain pitch, mm, $K)\r\n$15=")); Serial.print(sysSettings.maxFeed);
+    Serial.print(F(" (main steps per revolution, $K)\r\n$13=")); Serial.print(sysSettings.distPerRot);
+    Serial.print(F(" (distance / rotation, mm, $K)\r\n$15=")); Serial.print(sysSettings.maxFeed);
     Serial.print(F(" (max feed, mm/min, $K)\r\n$16=")); Serial.print(sysSettings.zAxisAttached);
     Serial.print(F(" (Auto Z Axis, 1 = Yes)\r\n$17=")); Serial.print(sysSettings.zAxisAuto);
     Serial.print(F(" (auto z axis)\r\n$18=")); Serial.print(sysSettings.maxZRPM);

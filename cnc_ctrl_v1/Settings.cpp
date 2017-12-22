@@ -61,11 +61,9 @@ void settingsReset() {
         1,      // byte kinematicsType;
         100.0,  // float rotationDiskRadius;
         2000,   // int axisHoldTime;
-        200,    // int kinematicsMaxGuess;
         1650,   // int originalChainLength;
         8113.7, // float encoderSteps;
-        10,     // byte gearTeeth;
-        6.35,   // float chainPitch;
+        63.5,   // float distPerRot;
         1000,   // int maxFeed;
         true,   // zAxisAttached;
         false,  // bool zAxisAuto;
@@ -185,6 +183,14 @@ void settingsLoadStepsFromEEprom(){
                                                    // also need to consider if need difference between flag with bits and
                                                    // error message as a byte.
     }
+    // Apply settings
+    kinematics.recomputeGeometry();
+    leftAxis.changeEncoderResolution(&sysSettings.encoderSteps);
+    rightAxis.changeEncoderResolution(&sysSettings.encoderSteps);
+    leftAxis.changePitch(&sysSettings.distPerRot);
+    rightAxis.changePitch(&sysSettings.distPerRot);
+    zAxis.changePitch(&sysSettings.zDistPerRot);
+    zAxis.changeEncoderResolution(&sysSettings.zEncoderSteps);
 }
 
 byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
@@ -194,7 +200,6 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
     */
     
     // We can add whatever sanity checks we want here and error out if we like
-    float distPerRot;
     switch(parameter) {
         case 0: case 1: case 2: case 3: case 4: case 5:
             switch(parameter) {
@@ -231,9 +236,6 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
         case 9: 
               sysSettings.axisHoldTime = value;
               break;
-        case 10: 
-              sysSettings.kinematicsMaxGuess = value;
-              break;
         case 11: 
               sysSettings.originalChainLength = value;
               break;
@@ -243,18 +245,9 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               rightAxis.changeEncoderResolution(&sysSettings.encoderSteps);
               break;
         case 13: 
-              sysSettings.gearTeeth = value;
-              distPerRot = sysSettings.gearTeeth*sysSettings.chainPitch;
-              leftAxis.changePitch(&distPerRot);
-              rightAxis.changePitch(&distPerRot);
-              kinematics.R = (distPerRot)/(2.0 * 3.14159);
-              break;
-        case 14: 
-              sysSettings.chainPitch = value;
-              distPerRot = sysSettings.gearTeeth*sysSettings.chainPitch;
-              leftAxis.changePitch(&distPerRot);
-              rightAxis.changePitch(&distPerRot);
-              kinematics.R = (distPerRot)/(2.0 * 3.14159);
+              leftAxis.changePitch(&sysSettings.distPerRot);
+              rightAxis.changePitch(&sysSettings.distPerRot);
+              kinematics.R = (sysSettings.distPerRot)/(2.0 * 3.14159);
               break;
         case 15: 
               sysSettings.maxFeed = value;

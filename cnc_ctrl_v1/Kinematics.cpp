@@ -128,15 +128,15 @@ void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChai
 
                           //Estimate the Jacobian components
 
-        Jac[0] = (_moment( Y1Plus, Y2Plus,Phi + DeltaPhi, MySinPhiDelta, SinPsi1D, CosPsi1D, SinPsi2D, CosPsi2D) + Crit[0])/DeltaPhi;
-        Jac[1] = (_moment( Y1Plus + DeltaY, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DeltaY;
-        Jac[2] = (_moment(Y1Plus, Y2Plus + DeltaY,  Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DeltaY;
-        Jac[3] = (_YOffsetEqn(Y1Plus, x - h * CosPsi1D, SinPsi1D) + Crit[1])/DeltaPhi;
-        Jac[4] = (_YOffsetEqn(Y1Plus + DeltaY, x - h * CosPsi1,SinPsi1) + Crit[1])/DeltaY;
+        Jac[0] = (_moment( Y1Plus, Y2Plus,Phi + DELTAPHI, MySinPhiDelta, SinPsi1D, CosPsi1D, SinPsi2D, CosPsi2D) + Crit[0])/DELTAPHI;
+        Jac[1] = (_moment( Y1Plus + DELTAY, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DELTAY;
+        Jac[2] = (_moment(Y1Plus, Y2Plus + DELTAY,  Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DELTAY;
+        Jac[3] = (_YOffsetEqn(Y1Plus, x - h * CosPsi1D, SinPsi1D) + Crit[1])/DELTAPHI;
+        Jac[4] = (_YOffsetEqn(Y1Plus + DELTAY, x - h * CosPsi1,SinPsi1) + Crit[1])/DELTAY;
         Jac[5] = 0.0;
-        Jac[6] = (_YOffsetEqn(Y2Plus, sysSettings.distBetweenMotors - (x + h * CosPsi2D), SinPsi2D) + Crit[2])/DeltaPhi;
+        Jac[6] = (_YOffsetEqn(Y2Plus, sysSettings.distBetweenMotors - (x + h * CosPsi2D), SinPsi2D) + Crit[2])/DELTAPHI;
         Jac[7] = 0.0;
-        Jac[8] = (_YOffsetEqn(Y2Plus + DeltaY, sysSettings.distBetweenMotors - (x + h * CosPsi2D), SinPsi2) + Crit[2])/DeltaY;
+        Jac[8] = (_YOffsetEqn(Y2Plus + DELTAY, sysSettings.distBetweenMotors - (x + h * CosPsi2D), SinPsi2) + Crit[2])/DELTAY;
 
 
         //solve for the next guess
@@ -256,8 +256,8 @@ void  Kinematics::forward(const float& chainALength, const float& chainBLength, 
         // No need for sys.stop check here
 
         //if we've converged on the point...or it's time to give up, exit the loop
-        if((abs(aChainError) < .1 && abs(bChainError) < .1) or guessCount > sysSettings.kinematicsMaxGuess){
-            if(guessCount > sysSettings.kinematicsMaxGuess){
+        if((abs(aChainError) < .1 && abs(bChainError) < .1) or guessCount > KINEMATICSMAXGUESS){
+            if(guessCount > KINEMATICSMAXGUESS){
                 Serial.print(F("Message: Unable to find valid machine position for chain lengths "));
                 Serial.print(chainALength);
                 Serial.print(", ");
@@ -348,17 +348,17 @@ float Kinematics::_moment(const float& Y1Plus, const float& Y2Plus, const float&
 void Kinematics::_MyTrig(){
     float Phisq = Phi * Phi;
     float Phicu = Phi * Phisq;
-    float Phidel = Phi + DeltaPhi;
+    float Phidel = Phi + DELTAPHI;
     float Phidelsq = Phidel * Phidel;
     float Phidelcu = Phidel * Phidelsq;
     float Psi1sq = Psi1 * Psi1;
     float Psi1cu = Psi1sq * Psi1;
     float Psi2sq = Psi2 * Psi2;
     float Psi2cu = Psi2 * Psi2sq;
-    float Psi1del = Psi1 - DeltaPhi;
+    float Psi1del = Psi1 - DELTAPHI;
     float Psi1delsq = Psi1del * Psi1del;
     float Psi1delcu = Psi1del * Psi1delsq;
-    float Psi2del = Psi2 + DeltaPhi;
+    float Psi2del = Psi2 + DELTAPHI;
     float Psi2delsq = Psi2del * Psi2del;
     float Psi2delcu = Psi2del * Psi2delsq;
 

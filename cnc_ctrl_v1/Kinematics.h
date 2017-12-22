@@ -19,10 +19,12 @@
     #define Kinematics_h
 
 
-    // TODO do we want these as system settings?  would allow users to trade 
-    // accuracy for speed?
+    //Calculation tolerances
+    #define DELTAPHI 0.001
+    #define DELTAY 0.01
     #define KINEMATICSMAXERROR 0.001
     #define KINEMATICSMAXINVERSE 10
+    #define KINEMATICSMAXGUESS 200
 
     class Kinematics{
         public:
@@ -54,11 +56,6 @@
 
             //utility variables
             boolean Mirror;
-
-            //Calculation tolerances
-            // TODO Can these be changed to defines?  Would save us some RAM
-            float DeltaPhi = 0.001;
-            float DeltaY = 0.01;
 
             //Criterion Computation Variables
             float Phi = -0.2;
@@ -98,8 +95,6 @@
             // output = chain lengths measured from 12 o'clock
             float Chain1; //left chain length 
             float Chain2; //right chain length
-
-            int i;
     };
 
     #endif
