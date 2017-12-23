@@ -55,7 +55,6 @@
             int        _PWMread(int pin);
             void       _writeFloat(const unsigned int& addr, const float& x);
             float      _readFloat(const unsigned int& addr);
-            float      _axisTarget;
             unsigned long   _timeLastMoved;
             volatile double _pidSetpoint;
             volatile double _pidInput; 

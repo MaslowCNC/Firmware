@@ -44,9 +44,11 @@ void readSerialCommands(){
             if (c == '!'){
                 sys.stop = true;
                 bit_false(sys.pause, PAUSE_FLAG_USER_PAUSE);
+                reportStatusMessage(STATUS_OK);
             }
             else if (c == '~'){
                 bit_false(sys.pause, PAUSE_FLAG_USER_PAUSE);
+                reportStatusMessage(STATUS_OK);
             }
             else{
                 int bufferOverflow = incSerialBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
@@ -494,7 +496,7 @@ void  sanitizeCommandString(String& cmdString){
     #endif
 }
 
-void  interpretCommandString(String& cmdString){
+byte  interpretCommandString(String& cmdString){
     /*
     
     Splits a string into lines of gcode which begin with 'G' or 'M', executing each in order
@@ -512,7 +514,7 @@ void  interpretCommandString(String& cmdString){
     if (cmdString.length() > 0) {
         if (cmdString[0] == '$') {
             // Maslow '$' system command
-            systemExecuteCmdstring(cmdString);
+            return(systemExecuteCmdstring(cmdString));
         }
         else if (cmdString[0] == 'B'){                   //If the command is a B command
             #if defined (verboseDebug) && verboseDebug > 0
@@ -520,6 +522,7 @@ void  interpretCommandString(String& cmdString){
             #endif
             Serial.println(cmdString);
             executeBcodeLine(cmdString);
+            return STATUS_OK;
         }
         else{
             while(cmdString.length() > 0){          //Extract each line of gcode from the string
@@ -561,25 +564,21 @@ void  interpretCommandString(String& cmdString){
                 cmdString = cmdString.substring(secondG, cmdString.length());
                 
             }
+            return STATUS_OK;
         }
     }
-    
-    #if defined (verboseDebug) && verboseDebug > 1              
-    // print ring buffer contents
-    Serial.println(F("iCS execution complete"));
-    incSerialBuffer.print();
-    #endif
 }
 
 void gcodeExecuteLoop(){
+  byte status;
   if (incSerialBuffer.numberOfLines() > 0){
       incSerialBuffer.prettyReadLine(readyCommandString);
       sanitizeCommandString(readyCommandString);
-      interpretCommandString(readyCommandString);
+      status = interpretCommandString(readyCommandString);
       readyCommandString = "";
 
       // Get next line of GCode
-      if (!sys.stop){reportStatusMessage(STATUS_OK);}
+      if (!sys.stop){reportStatusMessage(status);}
   }
 }
 
@@ -595,7 +594,7 @@ int   G1(const String& readString, int G0orG1){
     float currentXPos = sys.xPosition;
     float currentYPos = sys.yPosition;
     
-    float currentZPos = zAxis.target();
+    float currentZPos = zAxis.read();
     
     xgoto      = sys.inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/sys.inchesToMMConversion);
     ygoto      = sys.inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/sys.inchesToMMConversion);
@@ -705,7 +704,7 @@ void  G38(const String& readString) {
       float zgoto;
 
 
-      float currentZPos = zAxis.target();
+      float currentZPos = zAxis.read();
 
       zgoto      = sys.inchesToMMConversion * extractGcodeValue(readString, 'Z', currentZPos / sys.inchesToMMConversion);
       sys.feedrate   = sys.inchesToMMConversion * extractGcodeValue(readString, 'F', sys.feedrate / sys.inchesToMMConversion);
@@ -742,7 +741,7 @@ void  G38(const String& readString) {
 
         Axis* axis = &zAxis;
         float MMPerMin             = sys.feedrate;
-        float startingPos          = axis->target();
+        float startingPos          = axis->read();
         float endPos               = zgoto;
         float moveDist             = endPos - currentZPos; //total distance to move
 

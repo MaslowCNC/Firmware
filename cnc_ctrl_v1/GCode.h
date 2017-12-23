@@ -37,7 +37,7 @@ void  executeMcodeLine(const String&);
 void  executeOtherCodeLine(const String&);
 int   findNextGM(const String&, const int&);
 void  sanitizeCommandString(String&);
-void  interpretCommandString(String&);
+byte  interpretCommandString(String&);
 int   G1(const String&, int);
 int   G2(const String&, int);
 void  G10(const String&);

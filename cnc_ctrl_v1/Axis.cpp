@@ -55,11 +55,6 @@ float  Axis::read(){
     
 }
 
-float  Axis::target(){
-    //returns the axis target
-    return _axisTarget * *_mmPerRotation;
-}
-
 float  Axis::setpoint(){
     return _pidSetpoint * *_mmPerRotation;
 }
@@ -67,7 +62,6 @@ float  Axis::setpoint(){
 void   Axis::set(const float& newAxisPosition){
     
     //reset everything to the new value
-    _axisTarget   =  newAxisPosition/ *_mmPerRotation;
     _pidSetpoint  =  newAxisPosition/ *_mmPerRotation;
     motorGearboxEncoder.encoder.write((newAxisPosition * *_encoderSteps)/ *_mmPerRotation);
     
@@ -83,7 +77,6 @@ long Axis::steps(){
 void   Axis::setSteps(const long& steps){
     
     //reset everything to the new value
-    _axisTarget   =  steps/ *_encoderSteps;
     _pidSetpoint  =  steps/ *_encoderSteps;
     motorGearboxEncoder.encoder.write(steps);
     
@@ -223,7 +216,7 @@ void   Axis::detachIfIdle(){
 void   Axis::endMove(const float& finalTarget){
     
     _timeLastMoved = millis();
-    _axisTarget    = finalTarget/ *_mmPerRotation;
+    _pidSetpoint    = finalTarget/ *_mmPerRotation;
     
 }
 
@@ -235,7 +228,6 @@ void   Axis::stop(){
     */
 
     _timeLastMoved = millis();
-    _axisTarget    = read()/ *_mmPerRotation;
     _pidSetpoint   = read()/ *_mmPerRotation;
 
 }

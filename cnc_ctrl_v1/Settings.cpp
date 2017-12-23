@@ -32,13 +32,17 @@ void settingsLoadFromEEprom(){
     Settings are stored starting at address 40 all the way up.
     */
     settingsVersion_t settingsVersionStruct;
+    settings_t tempSettings;
     
     settingsReset(); // Load default values first
     EEPROM.get(0, settingsVersionStruct);
     if (settingsVersionStruct.settingsVersion == SETTINGSVERSION &&
         settingsVersionStruct.eepromValidData == EEPROMVALIDDATA){
         // This is a valid data
-        EEPROM.get(40, sysSettings);
+        EEPROM.get(40, tempSettings);
+        if (tempSettings.eepromValidData == EEPROMVALIDDATA){
+          sysSettings = tempSettings;
+        }
     }
 }
 
@@ -50,44 +54,42 @@ void settingsReset() {
     so that if a value is not changed by a user or is not used, it doesn't 
     need to be updated here.
     */
-    sysSettings = {
-        2438.4, // float machineWidth;
-        1219.2, // float machineHeight;
-        2978.4, // float distBetweenMotors;
-        463.0,  // float motorOffsetY;
-        310.0,  // float sledWidth;
-        139.0,  // float sledHeight;
-        79.0,   // float sledCG;
-        1,      // byte kinematicsType;
-        100.0,  // float rotationDiskRadius;
-        2000,   // int axisDetachTime;
-        1650,   // int originalChainLength;
-        8113.7, // float encoderSteps;
-        63.5,   // float distPerRot;
-        1000,   // int maxFeed;
-        true,   // zAxisAttached;
-        false,  // bool zAxisAuto;
-        12.60,  // float maxZRPM;
-        3.17,   // float zDistPerRot;
-        7560.0, // float zEncoderSteps;
-        1300.0, // float KpPos;
-        0.0,    // float KiPos;
-        34.0,   // float KdPos;
-        1.0,    // float propWeightPos;
-        7.0,    // float KpV;
-        0.0,    // float KiV;
-        0.28,   // float KdV;
-        1.0,    // float propWeightV;
-        1300.0, // float zKpPos;
-        0.0,    // float zKiPos;
-        34.0,   // float zKdPos;
-        1.0,    // float zPropWeightPos;
-        7.0,    // float zKpV;
-        0.0,    // float zKiV;
-        0.28,   // float zKdV;
-        1.0,    // float zPropWeightV;
-        EEPROMVALIDDATA // byte eepromValidData;
-    };
+    sysSettings.machineWidth = 2438.4; // float machineWidth;
+    sysSettings.machineHeight = 1219.2; // float machineHeight;
+    sysSettings.distBetweenMotors = 2978.4; // float distBetweenMotors;
+    sysSettings.motorOffsetY = 463.0;  // float motorOffsetY;
+    sysSettings.sledWidth = 310.0;  // float sledWidth;
+    sysSettings.sledHeight = 139.0;  // float sledHeight;
+    sysSettings.sledCG = 79.0;   // float sledCG;
+    sysSettings.kinematicsType = 1;      // byte kinematicsType;
+    sysSettings.rotationDiskRadius = 100.0;  // float rotationDiskRadius;
+    sysSettings.axisDetachTime = 2000;   // int axisDetachTime;
+    sysSettings.originalChainLength = 1650;   // int originalChainLength;
+    sysSettings.encoderSteps = 8113.7; // float encoderSteps;
+    sysSettings.distPerRot = 63.5;   // float distPerRot;
+    sysSettings.maxFeed = 1000;   // int maxFeed;
+    sysSettings.zAxisAttached = true;   // zAxisAttached;
+    sysSettings.zAxisAuto = false;  // bool zAxisAuto;
+    sysSettings.maxZRPM = 12.60;  // float maxZRPM;
+    sysSettings.zDistPerRot = 3.17;   // float zDistPerRot;
+    sysSettings.zEncoderSteps = 7560.0; // float zEncoderSteps;
+    sysSettings.KpPos = 1300.0; // float KpPos;
+    sysSettings.KiPos = 0.0;    // float KiPos;
+    sysSettings.KdPos = 34.0;   // float KdPos;
+    sysSettings.propWeightPos = 1.0;    // float propWeightPos;
+    sysSettings.KpV = 7.0;    // float KpV;
+    sysSettings.KiV = 0.0;    // float KiV;
+    sysSettings.KdV = 0.28;   // float KdV;
+    sysSettings.propWeightV = 1.0;    // float propWeightV;
+    sysSettings.zKdPos = 1300.0; // float zKpPos;
+    sysSettings.zKiPos = 0.0;    // float zKiPos;
+    sysSettings.zKdPos = 34.0;   // float zKdPos;
+    sysSettings.zPropWeightPos = 1.0;    // float zPropWeightPos;
+    sysSettings.zKpV = 7.0;    // float zKpV;
+    sysSettings.zKiV = 0.0;    // float zKiV;
+    sysSettings.zKdV = 0.28;   // float zKdV;
+    sysSettings.zPropWeightV = 1.0;    // float zPropWeightV;
+    sysSettings.eepromValidData = EEPROMVALIDDATA; // byte eepromValidData;
 }
 
 void settingsWipe(byte resetType){
@@ -95,17 +97,17 @@ void settingsWipe(byte resetType){
   Wipes certain bytes in the EEPROM, you probably want to reset after calling
   this
   */
-  if (bit_true(resetType, SETTINGS_RESTORE_SETTINGS)){
-    for (int i = 40 ; i < sizeof(sysSettings) ; i++) {
+  if (bit_istrue(resetType, SETTINGS_RESTORE_SETTINGS)){
+    for (int i = 40 ; i < sizeof(sysSettings) + 40 ; i++) {
       EEPROM.write(i, 0);
     }
   }
-  else if (bit_true(resetType, SETTINGS_RESTORE_MASLOW)){
+  else if (bit_istrue(resetType, SETTINGS_RESTORE_MASLOW)){
     for (int i = 0 ; i < sizeof(sysSettings) + 40; i++) {
       EEPROM.write(i, 0);
     }
   }
-  else if (bit_true(resetType, SETTINGS_RESTORE_ALL)){
+  else if (bit_istrue(resetType, SETTINGS_RESTORE_ALL)){
     for (int i = 0 ; i < EEPROM.length() ; i++) {
       EEPROM.write(i, 0);
     }

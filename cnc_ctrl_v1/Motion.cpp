@@ -88,7 +88,7 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
     float  xStartingLocation = sys.xPosition;
     float  yStartingLocation = sys.yPosition;
     float  zStartingLocation = zAxis.read();  // I don't know why we treat the zaxis differently
-    float  zMAXFEED          = sysSettings.maxZRPM * abs(zAxis.getPitch());
+    float  zMaxFeed          = sysSettings.maxZRPM * abs(zAxis.getPitch());
     
     //find the total distances to move
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  + sq(zEnd - zStartingLocation));
@@ -104,8 +104,8 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
     float  zFeedrate            = calculateFeedrate(abs(zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
     
     //throttle back federate if it exceeds zaxis max
-    if (zFeedrate > zMAXFEED){
-      float  zStepSizeMM        = computeStepSize(zMAXFEED);
+    if (zFeedrate > zMaxFeed){
+      float  zStepSizeMM        = computeStepSize(zMaxFeed);
       finalNumberOfSteps        = abs(zDistanceToMoveInMM/zStepSizeMM);
       stepSizeMM                = (distanceToMoveInMM/finalNumberOfSteps);
       MMPerMin                  = calculateFeedrate(stepSizeMM, delayTime);

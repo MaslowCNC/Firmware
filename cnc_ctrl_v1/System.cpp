@@ -270,9 +270,9 @@ void systemReset(){
     rightAxis.detach();
     zAxis.detach();
     setSpindlePower(false);
-    // Restarts program from beginning but
-    // does not reset the peripherals and registers
-    asm volatile ("  jmp 0");  
+    // Reruns the initial setup function and calls stop to re-init state
+    sys.stop = true;
+    setup();
 }
 
 byte systemExecuteCmdstring(String& cmdString){
@@ -330,6 +330,7 @@ byte systemExecuteCmdstring(String& cmdString){
               //   } // Otherwise, no effect.
               //   break;
             }
+            break;
           //case 'J' : break;  // Jogging methods
               // TODO: Here jogging can be placed for execution as a seperate subprogram. It does not need to be
               // susceptible to other realtime commands except for e-stop. The jogging function is intended to
@@ -390,7 +391,7 @@ byte systemExecuteCmdstring(String& cmdString){
                 if (cmdString[++char_counter] != 'S') { return(STATUS_INVALID_STATEMENT); }
                 if (cmdString[++char_counter] != 'T') { return(STATUS_INVALID_STATEMENT); }
                 if (cmdString[++char_counter] != '=') { return(STATUS_INVALID_STATEMENT); }
-                if (cmdString.length() != 5) { return(STATUS_INVALID_STATEMENT); }
+                if (cmdString.length() != 6) { return(STATUS_INVALID_STATEMENT); }
                 switch (cmdString[++char_counter]) {
                   case '$': settingsWipe(SETTINGS_RESTORE_SETTINGS); break;
                   case '#': settingsWipe(SETTINGS_RESTORE_MASLOW); break;
@@ -432,7 +433,6 @@ byte systemExecuteCmdstring(String& cmdString){
                 //     settings_store_startup_line(helper_var,line);
                 //   }
                 // } else { // Store global setting.
-                  char_counter++;
                   if(!readFloat(cmdString, char_counter, value)) { return(STATUS_BAD_NUMBER_FORMAT); }
                   if((cmdString[char_counter] != 0) || (parameter > 255)) { return(STATUS_INVALID_STATEMENT); }
                   return(settingsStoreGlobalSetting((byte)parameter, value));

@@ -37,6 +37,13 @@ void setup(){
     sys.inchesToMMConversion = 1;
     setupAxes();
     settingsInit();
+    // TODO This seems wrong, if the encoder steps are changed, axis position
+    // will be in the wrong place.  Would be better if we stored positions as
+    // steps 
+    // Set initial desired position of the machine to its current position
+    leftAxis.write(leftAxis.read());
+    rightAxis.write(leftAxis.read());
+    zAxis.write(leftAxis.read());
     readyCommandString.reserve(INCBUFFERLENGTH);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
     gcodeLine.reserve(INCBUFFERLENGTH);
     Timer1.initialize(LOOPINTERVAL);
