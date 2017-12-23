@@ -245,7 +245,7 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               rightAxis.changeEncoderResolution(&sysSettings.encoderSteps);
               break;
         case 13: 
-              sysSettings.distPerRot = value
+              sysSettings.distPerRot = value;
               leftAxis.changePitch(&sysSettings.distPerRot);
               rightAxis.changePitch(&sysSettings.distPerRot);
               kinematics.R = (sysSettings.distPerRot)/(2.0 * 3.14159);
