@@ -44,6 +44,15 @@ void settingsLoadFromEEprom(){
           sysSettings = tempSettings;
         }
     }
+    
+    // Apply settings
+    kinematics.recomputeGeometry();
+    leftAxis.changeEncoderResolution(&sysSettings.encoderSteps);
+    rightAxis.changeEncoderResolution(&sysSettings.encoderSteps);
+    leftAxis.changePitch(&sysSettings.distPerRot);
+    rightAxis.changePitch(&sysSettings.distPerRot);
+    zAxis.changePitch(&sysSettings.zDistPerRot);
+    zAxis.changeEncoderResolution(&sysSettings.zEncoderSteps);
 }
 
 void settingsReset() {
@@ -185,14 +194,6 @@ void settingsLoadStepsFromEEprom(){
                                                    // also need to consider if need difference between flag with bits and
                                                    // error message as a byte.
     }
-    // Apply settings
-    kinematics.recomputeGeometry();
-    leftAxis.changeEncoderResolution(&sysSettings.encoderSteps);
-    rightAxis.changeEncoderResolution(&sysSettings.encoderSteps);
-    leftAxis.changePitch(&sysSettings.distPerRot);
-    rightAxis.changePitch(&sysSettings.distPerRot);
-    zAxis.changePitch(&sysSettings.zDistPerRot);
-    zAxis.changeEncoderResolution(&sysSettings.zEncoderSteps);
 }
 
 byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
