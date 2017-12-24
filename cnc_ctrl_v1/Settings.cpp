@@ -17,6 +17,9 @@ Copyright 2014-2017 Bar Smith*/
 
 // This file contains the machine settings that are saved to eeprom
 
+// EEPROM addresses 300 and up can be used by Maslow.  Under 300 was used
+// previously by pre v1.00 Firmware.
+
 #include "Maslow.h"
 
 void settingsInit(){
@@ -29,20 +32,21 @@ void settingsLoadFromEEprom(){
     /* 
     Loads data from EEPROM if EEPROM data is valid, only called on startup
     
-    Settings are stored starting at address 40 all the way up.
+    Settings are stored starting at address 340 all the way up.
     */
     settingsVersion_t settingsVersionStruct;
     settings_t tempSettings;
     
     settingsReset(); // Load default values first
-    EEPROM.get(0, settingsVersionStruct);
+    EEPROM.get(300, settingsVersionStruct);
+    EEPROM.get(340, tempSettings);
     if (settingsVersionStruct.settingsVersion == SETTINGSVERSION &&
-        settingsVersionStruct.eepromValidData == EEPROMVALIDDATA){
-        // This is a valid data
-        EEPROM.get(40, tempSettings);
-        if (tempSettings.eepromValidData == EEPROMVALIDDATA){
+        settingsVersionStruct.eepromValidData == EEPROMVALIDDATA &&
+        tempSettings.eepromValidData == EEPROMVALIDDATA){
           sysSettings = tempSettings;
-        }
+    }
+    else {
+      reportStatusMessage(STATUS_SETTING_READ_FAIL);
     }
     
     // Apply settings
@@ -107,12 +111,12 @@ void settingsWipe(byte resetType){
   this
   */
   if (bit_istrue(resetType, SETTINGS_RESTORE_SETTINGS)){
-    for (int i = 40 ; i < sizeof(sysSettings) + 40 ; i++) {
+    for (int i = 340 ; i < sizeof(sysSettings) + 340 ; i++) {
       EEPROM.write(i, 0);
     }
   }
   else if (bit_istrue(resetType, SETTINGS_RESTORE_MASLOW)){
-    for (int i = 0 ; i < sizeof(sysSettings) + 40; i++) {
+    for (int i = 300 ; i < sizeof(sysSettings) + 340; i++) {
       EEPROM.write(i, 0);
     }
   }
@@ -127,72 +131,93 @@ void settingsSaveToEEprom(){
     /* 
     Saves settings to EEPROM, only called when settings change
     
-    Settings are stored starting at address 40 all the way up.
+    Settings are stored starting at address 340 all the way up.
     */
     settingsVersion_t settingsVersionStruct = {SETTINGSVERSION, EEPROMVALIDDATA};
-    EEPROM.put(0, settingsVersionStruct);
-    EEPROM.put(40, sysSettings);
+    EEPROM.put(300, settingsVersionStruct);
+    EEPROM.put(340, sysSettings);
 }
 
 void settingsSaveStepstoEEprom(){
     /* 
     Saves position to EEPROM, is called frequently by execSystemRealtime
     
-    Steps are saved in address 10 -> 39.  Room for expansion for additional
+    Steps are saved in address 310 -> 339.  Room for expansion for additional
     axes in the future.
     */
-    settingsVersion_t settingsVersionStruct = {SETTINGSVERSION, EEPROMVALIDDATA};
-    settingsStepsV1_t sysSteps = {
-      leftAxis.steps(),
-      rightAxis.steps(),
-      zAxis.steps(),
-      EEPROMVALIDDATA
-    };
-    EEPROM.put(0, settingsVersionStruct);
-    EEPROM.put(10, sysSteps);
+    // don't run if old position data has not been incorporated yet
+    if (!sys.oldSettingsFlag){
+      settingsVersion_t settingsVersionStruct = {SETTINGSVERSION, EEPROMVALIDDATA};
+      settingsStepsV1_t sysSteps = {
+        leftAxis.steps(),
+        rightAxis.steps(),
+        zAxis.steps(),
+        EEPROMVALIDDATA
+      };
+      EEPROM.put(300, settingsVersionStruct);
+      EEPROM.put(310, sysSteps);
+    }
 }
 
 void settingsLoadStepsFromEEprom(){
     /* 
-    Saves position to EEPROM, is on startup.  This struct should never change
-    so it doesn't check the settings version
+    Loads position to EEPROM, is called on startup.
     
-    Steps are saved in address 10 -> 39.  Room for expansion for additional
+    Steps are saved in address 310 -> 339.  Room for expansion for additional
     axes in the future.
     */
     settingsStepsV1_t tempStepsV1;
     settingsVersion_t settingsVersionStruct;
     
-    EEPROM.get(0, settingsVersionStruct);
+    EEPROM.get(300, settingsVersionStruct);
+    EEPROM.get(310, tempStepsV1);
     if (settingsVersionStruct.settingsVersion == SETTINGSVERSION &&
-        settingsVersionStruct.eepromValidData == EEPROMVALIDDATA){
-        EEPROM.get(10, tempStepsV1);
-        if (tempStepsV1.eepromValidData == EEPROMVALIDDATA){
+        settingsVersionStruct.eepromValidData == EEPROMVALIDDATA &&
+        tempStepsV1.eepromValidData == EEPROMVALIDDATA){
             leftAxis.setSteps(tempStepsV1.lSteps);
             rightAxis.setSteps(tempStepsV1.rSteps);
             zAxis.setSteps(tempStepsV1.zSteps);
-        }
-        else {
-            systemRtExecAlarm |= ALARM_POSITION_LOST;
-        }
     }// We can add additional elseif statements here to check for old settings 
     // versions and upgrade them without a loss of data.
     else if (EEPROM.read(5) == EEPROMVALIDDATA &&
         EEPROM.read(105) == EEPROMVALIDDATA &&
         EEPROM.read(205) == EEPROMVALIDDATA){
-        // Load position from pre settings days
-        float l, r , z;
-        EEPROM.get(9, l);
-        EEPROM.get(109, r);
-        EEPROM.get(209, z);
-        leftAxis.set(l);
-        rightAxis.set(r);
-        zAxis.set(z);
+        bit_true(sys.oldSettingsFlag, NEED_ENCODER_STEPS);
+        bit_true(sys.oldSettingsFlag, NEED_DIST_PER_ROT);
+        bit_true(sys.oldSettingsFlag, NEED_Z_ENCODER_STEPS);
+        bit_true(sys.oldSettingsFlag, NEED_Z_DIST_PER_ROT);
+        sys.state = STATE_OLD_SETTINGS;
+        Serial.print(F("Old position data detected. "));
+        Serial.println(F("Please set the values fo $12, $13, $19, and $20 to load position."));
     }
     else {
         systemRtExecAlarm |= ALARM_POSITION_LOST;  // if this same global is touched by ISR then need to make atomic somehow
                                                    // also need to consider if need difference between flag with bits and
                                                    // error message as a byte.
+    }
+}
+
+void settingsLoadOldSteps(){
+    /*
+    Loads the old version of step settings, only called once encoder steps 
+    and distance per rotation have been loaded.  Wipes the old data once 
+    incorporated to prevent oddities in the future
+    */
+    if (sys.state == STATE_OLD_SETTINGS){
+      float l, r , z;
+      EEPROM.get(9, l);
+      EEPROM.get(109, r);
+      EEPROM.get(209, z);
+      leftAxis.set(l);
+      rightAxis.set(r);
+      zAxis.set(z);
+      for (int i = 0; i <= 200; i = i +100){
+        for (int j = 5; j <= 13; j++){
+          EEPROM.write(i + j, 0);
+        }
+      }
+      sys.state = STATE_IDLE;
+      Serial.println(F("Successfully imported position from old settings."));
     }
 }
 
@@ -246,12 +271,24 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               sysSettings.encoderSteps = value;
               leftAxis.changeEncoderResolution(&sysSettings.encoderSteps);
               rightAxis.changeEncoderResolution(&sysSettings.encoderSteps);
+              if (sys.oldSettingsFlag){
+                bit_false(sys.oldSettingsFlag, NEED_ENCODER_STEPS);
+                if (!sys.oldSettingsFlag){
+                  settingsLoadOldSteps();
+                }
+              }
               break;
         case 13: 
               sysSettings.distPerRot = value;
               leftAxis.changePitch(&sysSettings.distPerRot);
               rightAxis.changePitch(&sysSettings.distPerRot);
               kinematics.R = (sysSettings.distPerRot)/(2.0 * 3.14159);
+              if (sys.oldSettingsFlag){
+                bit_false(sys.oldSettingsFlag, NEED_DIST_PER_ROT);
+                if (!sys.oldSettingsFlag){
+                  settingsLoadOldSteps();
+                }
+              }
               break;
         case 15: 
               sysSettings.maxFeed = value;
@@ -268,10 +305,22 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
         case 19: 
               sysSettings.zDistPerRot = value;
               zAxis.changePitch(&sysSettings.zDistPerRot);
+              if (sys.oldSettingsFlag){
+                bit_false(sys.oldSettingsFlag, NEED_Z_DIST_PER_ROT);
+                if (!sys.oldSettingsFlag){
+                  settingsLoadOldSteps();
+                }
+              }
               break;
         case 20: 
               sysSettings.zEncoderSteps = value;
               zAxis.changeEncoderResolution(&sysSettings.zEncoderSteps);
+              if (sys.oldSettingsFlag){
+                bit_false(sys.oldSettingsFlag, NEED_Z_ENCODER_STEPS);
+                if (!sys.oldSettingsFlag){
+                  settingsLoadOldSteps();
+                }
+              }
               break;
         case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28:
             switch(parameter) {

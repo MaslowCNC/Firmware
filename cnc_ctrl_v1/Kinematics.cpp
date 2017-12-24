@@ -29,7 +29,9 @@ Kinematics::Kinematics(){
 
 void Kinematics::init(){
     recomputeGeometry();
-    forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
+    if (sys.state != STATE_OLD_SETTINGS){
+      forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
+    }
 }
 
 void Kinematics::_verifyValidTarget(float* xTarget,float* yTarget){

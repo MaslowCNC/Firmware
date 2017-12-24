@@ -105,7 +105,7 @@ float extractGcodeValue(const String& readString, char target, const float& defa
     return numberAsFloat;
 }
 
-void  executeBcodeLine(const String& gcodeLine){
+byte  executeBcodeLine(const String& gcodeLine){
     /*
     
     Executes a single line of gcode beginning with the character 'B'.
@@ -114,37 +114,41 @@ void  executeBcodeLine(const String& gcodeLine){
     
     //Handle B-codes
     
+    if(gcodeLine.substring(0, 3) == "B05"){
+        Serial.print(F("Firmware Version "));
+        Serial.println(VERSIONNUMBER);
+        return STATUS_OK;
+    }
+    
+    if(sys.state == STATE_OLD_SETTINGS){
+      return STATUS_OLD_SETTINGS;
+    }
+    
     if(gcodeLine.substring(0, 3) == "B01"){
         
         Serial.println(F("Motor Calibration Not Needed"));
         
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B02"){
         calibrateChainLengths(gcodeLine);
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B04"){
         //Test each of the axis
         maslowDelay(500);
-        if(sys.stop){return;}
+        if(sys.stop){return STATUS_OK;}
         leftAxis.test();
         maslowDelay(500);
-        if(sys.stop){return;}
+        if(sys.stop){return STATUS_OK;}
         rightAxis.test();
         maslowDelay(500);
-        if(sys.stop){return;}
+        if(sys.stop){return STATUS_OK;}
         zAxis.test();
         Serial.println(F("Tests complete."));
-        return;
-    }
-    
-    if(gcodeLine.substring(0, 3) == "B05"){
-        Serial.print(F("Firmware Version "));
-        Serial.println(VERSIONNUMBER);
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B06"){
@@ -162,7 +166,7 @@ void  executeBcodeLine(const String& gcodeLine){
         Serial.print(rightAxis.read());
         Serial.println(F("mm"));
         
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B08"){
@@ -181,7 +185,7 @@ void  executeBcodeLine(const String& gcodeLine){
         
         Serial.println(F("Message: The machine chains have been manually re-calibrated."));
         
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B09"){
@@ -203,7 +207,7 @@ void  executeBcodeLine(const String& gcodeLine){
             singleAxisMove(&rightAxis, rDist, speed);
         }
         
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B10"){
@@ -211,7 +215,7 @@ void  executeBcodeLine(const String& gcodeLine){
         Serial.print(F("[Measure: "));
         Serial.print(leftAxis.read());
         Serial.println(F("]"));
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B11"){
@@ -230,10 +234,10 @@ void  executeBcodeLine(const String& gcodeLine){
             }
             i++;
             execSystemRealtime();
-            if (sys.stop){return;}
+            if (sys.stop){return STATUS_OK;}
         }
         leftAxis.set(leftAxis.read());
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B13"){
@@ -249,7 +253,7 @@ void  executeBcodeLine(const String& gcodeLine){
         if (left > 0) axis = &leftAxis;
         if (useZ > 0) axis = &zAxis;
         PIDTestVelocity(axis, start, stop, steps, version);
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B14"){
@@ -266,7 +270,7 @@ void  executeBcodeLine(const String& gcodeLine){
         if (left > 0) axis = &leftAxis;
         if (useZ > 0) axis = &zAxis;
         PIDTestPosition(axis, start, stop, steps, stepTime, version);
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B16"){
@@ -280,7 +284,7 @@ void  executeBcodeLine(const String& gcodeLine){
         if (left > 0) axis = &leftAxis;
         if (useZ > 0) axis = &zAxis;
         voltageTest(axis, start, stop);
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B15"){
@@ -298,6 +302,8 @@ void  executeBcodeLine(const String& gcodeLine){
         
         //Reload the position
         kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
+        
+        return STATUS_OK;
     }
 }
     
@@ -521,10 +527,12 @@ byte  interpretCommandString(String& cmdString){
             Serial.print(F("iCS executing B code line: "));
             #endif
             Serial.println(cmdString);
-            executeBcodeLine(cmdString);
-            return STATUS_OK;
+            return executeBcodeLine(cmdString);
         }
-        else{
+        else if (sys.state == STATE_OLD_SETTINGS){
+          return STATUS_OLD_SETTINGS;
+        }
+        else {
             while(cmdString.length() > 0){          //Extract each line of gcode from the string
                 firstG  = findNextGM(cmdString, 0);
                 secondG = findNextGM(cmdString, firstG + 1);

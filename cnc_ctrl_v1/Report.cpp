@@ -41,15 +41,17 @@ void  reportStatusMessage(byte status_code){
           case STATUS_BAD_NUMBER_FORMAT:
           Serial.println(F("Bad number format")); break;
           case STATUS_INVALID_STATEMENT:
-          Serial.println(F("Invalid statement")); break;
+            Serial.println(F("Invalid statement")); break;
+          case STATUS_OLD_SETTINGS:
+            Serial.println(F("Please set $12, $13, $19, and $20 to load old position data.")); break;
           // case STATUS_NEGATIVE_VALUE:
           // Serial.println(F("Value < 0")); break;
           // case STATUS_SETTING_DISABLED:
           // Serial.println(F("Setting disabled")); break;
           // case STATUS_SETTING_STEP_PULSE_MIN:
           // Serial.println(F("Value < 3 usec")); break;
-          // case STATUS_SETTING_READ_FAIL:
-          // Serial.println(F("EEPROM read fail. Using defaults")); break;
+          case STATUS_SETTING_READ_FAIL:
+            Serial.println(F("EEPROM read fail. Using default settings.")); break;
           // case STATUS_IDLE_ERROR:
           // Serial.println(F("Not idle")); break;
           // case STATUS_ALARM_LOCK:
@@ -81,28 +83,28 @@ void  reportStatusMessage(byte status_code){
 void reportFeedbackMessage(byte message_code){
   Serial.print(F("Message: "));
   switch(message_code) {
-    case MESSAGE_CRITICAL_EVENT:
-      Serial.print(F("Reset to continue")); break;
-    case MESSAGE_ALARM_LOCK:
-      Serial.print(F("'$H'|'$X' to unlock")); break;
-    case MESSAGE_ALARM_UNLOCK:
-      Serial.print(F("Caution: Unlocked")); break;
-    case MESSAGE_ENABLED:
-      Serial.print(F("Enabled")); break;
-    case MESSAGE_DISABLED:
-      Serial.print(F("Disabled")); break;
-    case MESSAGE_SAFETY_DOOR_AJAR:
-      Serial.print(F("Check Door")); break;
-    case MESSAGE_CHECK_LIMITS:
-      Serial.print(F("Check Limits")); break;
-    case MESSAGE_PROGRAM_END:
-      Serial.print(F("Pgm End")); break;
+    // case MESSAGE_CRITICAL_EVENT:
+    //   Serial.print(F("Reset to continue")); break;
+    // case MESSAGE_ALARM_LOCK:
+    //   Serial.print(F("'$H'|'$X' to unlock")); break;
+    // case MESSAGE_ALARM_UNLOCK:
+    //   Serial.print(F("Caution: Unlocked")); break;
+    // case MESSAGE_ENABLED:
+    //   Serial.print(F("Enabled")); break;
+    // case MESSAGE_DISABLED:
+    //   Serial.print(F("Disabled")); break;
+    // case MESSAGE_SAFETY_DOOR_AJAR:
+    //   Serial.print(F("Check Door")); break;
+    // case MESSAGE_CHECK_LIMITS:
+    //   Serial.print(F("Check Limits")); break;
+    // case MESSAGE_PROGRAM_END:
+    //   Serial.print(F("Pgm End")); break;
     case MESSAGE_RESTORE_DEFAULTS:
       Serial.print(F("Restoring defaults")); break;
-    case MESSAGE_SPINDLE_RESTORE:
-      Serial.print(F("Restoring spindle")); break;
-    case MESSAGE_SLEEP_MODE:
-      Serial.print(F("Sleeping")); break;
+    // case MESSAGE_SPINDLE_RESTORE:
+    //   Serial.print(F("Restoring spindle")); break;
+    // case MESSAGE_SLEEP_MODE:
+    //   Serial.print(F("Sleeping")); break;
   }
   Serial.println(F(" "));
 }

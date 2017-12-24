@@ -34,6 +34,9 @@ Kinematics kinematics;
 
 void setup(){
     Serial.begin(57600);
+    Serial.print(F("PCB v1."));
+    Serial.print(getPCBVersion());
+    Serial.println(F(" Detected"));
     sys.inchesToMMConversion = 1;
     setupAxes();
     settingsInit();
@@ -49,9 +52,6 @@ void setup(){
     Timer1.initialize(LOOPINTERVAL);
     Timer1.attachInterrupt(runsOnATimer);
     
-    Serial.print(F("PCB v1."));
-    Serial.print(getPCBVersion());
-    Serial.println(F(" Detected"));
     Serial.println(F("Grbl v1.00"));  // Why GRBL?  Apparenlty because some programs are silly and look for this as an initailization command
     Serial.println(F("ready"));
 }
@@ -83,7 +83,7 @@ void loop(){
     sys.stop = false;            // We should consider an abort option which
                                  // is not reset automatically such as a software
                                  // limit
-    while (sys.stop != true){
+    while (!sys.stop){
         gcodeExecuteLoop();
         
         execSystemRealtime();
