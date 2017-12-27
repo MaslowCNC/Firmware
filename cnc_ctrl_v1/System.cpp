@@ -19,14 +19,6 @@ Copyright 2014-2017 Bar Smith*/
 
 #include "Maslow.h"
 
-bool machineReady(){
-  bool ret = false;
-  if (sys.rcvdMotorSettings && sys.rcvdKinematicSettings){
-      ret = true;
-  }
-  return ret;
-}
-
 void  calibrateChainLengths(String gcodeLine){
     /*
     The calibrateChainLengths function lets the machine know that the chains are set to a given length where each chain is ORIGINCHAINLEN
@@ -36,7 +28,7 @@ void  calibrateChainLengths(String gcodeLine){
     if (extractGcodeValue(gcodeLine, 'L', 0)){
         //measure out the left chain
         Serial.println(F("Measuring out left chain"));
-        singleAxisMove(&leftAxis, ORIGINCHAINLEN, 800);
+        singleAxisMove(&leftAxis, sysSettings.originalChainLength, (sysSettings.maxFeed * .9));
         
         Serial.print(leftAxis.read());
         Serial.println(F("mm"));
@@ -46,7 +38,7 @@ void  calibrateChainLengths(String gcodeLine){
     else if(extractGcodeValue(gcodeLine, 'R', 0)){
         //measure out the right chain
         Serial.println(F("Measuring out right chain"));
-        singleAxisMove(&rightAxis, ORIGINCHAINLEN, 800);
+        singleAxisMove(&rightAxis, sysSettings.originalChainLength, (sysSettings.maxFeed * .9));
         
         Serial.print(rightAxis.read());
         Serial.println(F("mm"));
@@ -54,144 +46,6 @@ void  calibrateChainLengths(String gcodeLine){
         rightAxis.detach();
     }
     
-}
-
-void  updateKinematicsSettings(const String& readString){
-    /*
-    Updates the machine dimensions from the Ground Control settings
-    */
-    
-    //Extract the settings values
-
-    float bedWidth           = extractGcodeValue(readString, 'A', -1);
-    float bedHeight          = extractGcodeValue(readString, 'C', -1);
-    float distBetweenMotors  = extractGcodeValue(readString, 'Q', -1);
-    float motorOffsetY       = extractGcodeValue(readString, 'E', -1);
-    float sledWidth          = extractGcodeValue(readString, 'F', -1);
-    float sledHeight         = extractGcodeValue(readString, 'R', -1);
-    float sledCG             = extractGcodeValue(readString, 'H', -1);
-
-    float kinematicsType     = extractGcodeValue(readString, 'Y', -1);
-    float rotationDiskRadius = extractGcodeValue(readString, 'Z', -1);
-    
-    
-    
-    //Change the machine dimensions in the kinematics if new values have been received
-    if (sledWidth != -1){
-        kinematics.l            = sledWidth;
-    }
-    if (sledHeight != -1){
-        kinematics.s            = sledHeight;
-    }
-    if (sledCG != -1){
-        kinematics.h3           = sledCG;
-    }
-    //if (distPerRot != -1){
-    //    kinematics.R            = distPerRot / (2.0*3.14159);
-    //}
-    if (distBetweenMotors != -1){
-        kinematics.D            = distBetweenMotors;
-    }
-    if (motorOffsetY != -1){
-        kinematics.motorOffsetY = motorOffsetY;
-    }
-    if (bedWidth != -1){
-        kinematics.machineWidth = bedWidth;
-    }
-    if (bedHeight != -1){
-        kinematics.machineHeight= bedHeight;
-    }
-    if (kinematicsType != -1){
-        kinematics.kinematicsType = kinematicsType;
-    }
-    if (rotationDiskRadius != -1){
-        kinematics.rotationDiskRadius = rotationDiskRadius;
-    }
-    
-    //propagate the new values
-    sys.rcvdKinematicSettings = 1;
-    kinematics.recomputeGeometry();
-    finalizeMachineSettings();
-    
-    Serial.println(F("Kinematics Settings Loaded"));
-}
-
-void updateMotorSettings(const String& readString){
-    /*
-    
-    Update settings related to the motor configurations
-    
-    */
-    
-    if (extractGcodeValue(readString, 'I', -1) != -1){
-        sys.zAxisAttached            = extractGcodeValue(readString, 'I', -1);
-    }
-    float encoderSteps       = extractGcodeValue(readString, 'J', -1);
-    float gearTeeth          = extractGcodeValue(readString, 'K', -1);
-    float chainPitch         = extractGcodeValue(readString, 'M', -1);
-    
-    float zDistPerRot        = extractGcodeValue(readString, 'N', -1);
-    float zEncoderSteps      = extractGcodeValue(readString, 'P', -1);
-    
-    float propWeight         = extractGcodeValue(readString, 'R', -1);
-    float KpPos              = extractGcodeValue(readString, 'S', -1);
-    float KiPos              = extractGcodeValue(readString, 'T', -1);
-    float KdPos              = extractGcodeValue(readString, 'U', -1);
-    float KpV                = extractGcodeValue(readString, 'V', -1);
-    float KiV                = extractGcodeValue(readString, 'W', -1);
-    float KdV                = extractGcodeValue(readString, 'X', -1);
-    if (extractGcodeValue(readString, 'Y', -1) != -1) {
-	zAxisAuto            = extractGcodeValue(readString, 'Y', -1);
-    }
-      
-    //Write the PID values to the axis if new ones have been received
-    if (KpPos != -1){
-        leftAxis.setPIDValues(KpPos, KiPos, KdPos, propWeight, KpV, KiV, KdV);
-        rightAxis.setPIDValues(KpPos, KiPos, KdPos, propWeight, KpV, KiV, KdV);
-        zAxis.setPIDValues(KpPos, KiPos, KdPos, propWeight, KpV, KiV, KdV);
-    }
-    
-    //Change the motor properties in cnc_funtions if new values have been sent
-    if (gearTeeth != -1 and chainPitch != -1){
-        float distPerRot = gearTeeth*chainPitch; 
-        leftAxis.changePitch(distPerRot);
-        rightAxis.changePitch(distPerRot);
-        zAxis.changePitch(zDistPerRot);
-        
-        kinematics.R = (gearTeeth * chainPitch)/(2.0 * 3.14159);
-    }
-    
-    //update the number of encoder steps if new values have been received
-    if (encoderSteps != -1){
-        leftAxis.changeEncoderResolution(encoderSteps);
-        rightAxis.changeEncoderResolution(encoderSteps);
-        sys.encoderStepsChanged = true;
-    }
-    if (zEncoderSteps != -1){
-        zAxis.changeEncoderResolution(zEncoderSteps);
-        sys.zEncoderStepsChanged = true;
-    }
-    
-    sys.rcvdMotorSettings = 1;
-    finalizeMachineSettings(); 
-    Serial.println(F("Motor Settings Loaded"));
-}
-
-void finalizeMachineSettings(){
-    if(machineReady()){
-        if (sys.encoderStepsChanged){
-            leftAxis.loadPositionFromMemory();
-            rightAxis.loadPositionFromMemory();
-            
-            
-            sys.encoderStepsChanged = false;
-        }
-        if (sys.zEncoderStepsChanged){
-            zAxis.loadPositionFromMemory();
-            sys.zEncoderStepsChanged = false;
-        }
-        kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
-    }
 }
 
 void   setupAxes(){
@@ -297,9 +151,9 @@ void   setupAxes(){
 
 
     }
-    leftAxis.setup (ENC, IN6, IN5, ENCODER3B, ENCODER3A, 'L',  LEFT_EEPROM_ADR, LOOPINTERVAL);
-    rightAxis.setup(ENA, IN1, IN2, ENCODER1A, ENCODER1B, 'R', RIGHT_EEPROM_ADR, LOOPINTERVAL);
-    zAxis.setup    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, 'Z',     Z_EEPROM_ADR, LOOPINTERVAL);
+    leftAxis.setup (ENC, IN6, IN5, ENCODER3B, ENCODER3A, 'L', LOOPINTERVAL);
+    rightAxis.setup(ENA, IN1, IN2, ENCODER1A, ENCODER1B, 'R', LOOPINTERVAL);
+    zAxis.setup    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, 'Z', LOOPINTERVAL);
 }
 
 int getPCBVersion(){
@@ -321,18 +175,14 @@ void pause(){
     
     */
     
-    sys.pause = true;
+    bit_true(sys.pause, PAUSE_FLAG_USER_PAUSE);
     Serial.println(F("Maslow Paused"));
     
-    while(1){
+    while(bit_istrue(sys.pause, PAUSE_FLAG_USER_PAUSE)) {
         
         // Run realtime commands
         execSystemRealtime();
         if (sys.stop){return;}
-        
-        if (!sys.pause){
-            return;
-        }
     }    
 }
 
@@ -369,32 +219,226 @@ void maslowDelay(unsigned long waitTimeMs) {
 void execSystemRealtime(){
     readSerialCommands();
     returnPoz();
+    systemSaveAxesPosition();
+    motionDetachIfIdle();
+    // check systemRtExecAlarm flag and do stuff
+}
+
+void systemSaveAxesPosition(){
+    /*
+    Save steps of axes to EEPROM if they are all detached
+    */
+    if (!leftAxis.attached() && !rightAxis.attached() && !zAxis.attached()){
+        settingsSaveStepstoEEprom();
+    }
 }
 
 // This should be the ultimate fallback, it would be best if we didn't even need 
 // something like this at all
 void  _watchDog(){
     /*
-    Watchdog tells ground control that the machine is ready every second. _watchDog() should only be called when 
-    the machine is actually ready.
+    If:
+      No incoming serial in 5 seconds 
+      Motors are detached
+      Nothing in Serial buffer
+      Watchdog has not run in 5 seconds
+    Then:
+      Send an ok message
     
     This fixes the issue where the machine is ready, but Ground Control doesn't know the machine is ready and the system locks up.
     */
     static unsigned long lastRan = millis();
-    unsigned long        timeout = 5000;
     
-    if ((millis() - lastRan) > timeout){
-        
-        if (!leftAxis.attached() and !rightAxis.attached() and !zAxis.attached()){
-            
-            if (incSerialBuffer.length() == 0) {       // if the buffer is empty
-                #if defined (verboseDebug) && verboseDebug > 0              
-                Serial.println(F("_watchDog requesting new code"));
-                #endif
-                _signalReady();
+    if ( millis() - sys.lastSerialRcvd > 5000 &&
+        (millis() - lastRan) > 5000 && 
+        !leftAxis.attached() and !rightAxis.attached() and !zAxis.attached() &&
+        incSerialBuffer.length() == 0
+       ){
+          #if defined (verboseDebug) && verboseDebug > 0              
+            Serial.println(F("_watchDog requesting new code"));
+          #endif
+          reportStatusMessage(STATUS_OK);
+          lastRan = millis();
+    }
+}
+
+void systemReset(){
+    /* 
+    Stops everything and resets the arduino
+    */
+    leftAxis.detach();
+    rightAxis.detach();
+    zAxis.detach();
+    setSpindlePower(false);
+    // Reruns the initial setup function and calls stop to re-init state
+    sys.stop = true;
+    setup();
+}
+
+byte systemExecuteCmdstring(String& cmdString){
+    /*
+    This function processes the $ system commands
+
+    This is taken heavily from grbl.  https://github.com/grbl/grbl
+    */
+    byte char_counter = 1;
+    byte helper_var = 0; // Helper variable
+    float parameter, value;
+    if (cmdString.length() == 1){
+        reportMaslowHelp();
+    }
+    else {
+        switch( cmdString[char_counter] ) {
+          case '$': case 'K':// case 'G': case 'C': case 'X':
+            if ( cmdString.length() > 2 ) { return(STATUS_INVALID_STATEMENT); }
+            switch( cmdString[char_counter] ) {
+              case '$' : // Prints Maslow settings
+                // if ( sys.state & (STATE_CYCLE | STATE_HOLD) ) { return(STATUS_IDLE_ERROR); } // Block during cycle. Takes too long to print.
+                // else {
+                  reportMaslowSettings();
+                // }
+                break;
+              case 'K' : // forces kinematics update
+                kinematics.recomputeGeometry();
+                kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
+                break;
+              // case 'G' : // Prints gcode parser state
+              //   report_gcode_modes();
+              //   break;
+              // case 'C' : // Set check g-code mode [IDLE/CHECK]
+              //   // Perform reset when toggling off. Check g-code mode should only work if Grbl
+              //   // is idle and ready, regardless of alarm locks. This is mainly to keep things
+              //   // simple and consistent.
+              //   if ( sys.state == STATE_CHECK_MODE ) {
+              //     mc_reset();
+              //     report_feedback_message(MESSAGE_DISABLED);
+              //   } else {
+              //     if (sys.state) { return(STATUS_IDLE_ERROR); } // Requires no alarm mode.
+              //     sys.state = STATE_CHECK_MODE;
+              //     report_feedback_message(MESSAGE_ENABLED);
+              //   }
+              //   break;
+              // case 'X' : // Disable alarm lock [ALARM]
+              //   if (sys.state == STATE_ALARM) {
+              //     report_feedback_message(MESSAGE_ALARM_UNLOCK);
+              //     sys.state = STATE_IDLE;
+              //     // Don't run startup script. Prevents stored moves in startup from causing accidents.
+              //     if (system_check_safety_door_ajar()) { // Check safety door switch before returning.
+              //       bit_true(sys_rt_exec_state, EXEC_SAFETY_DOOR);
+              //       protocol_execute_realtime(); // Enter safety door mode.
+              //     }
+              //   } // Otherwise, no effect.
+              //   break;
+            }
+            break;
+          //case 'J' : break;  // Jogging methods
+              // TODO: Here jogging can be placed for execution as a seperate subprogram. It does not need to be
+              // susceptible to other realtime commands except for e-stop. The jogging function is intended to
+              // be a basic toggle on/off with controlled acceleration and deceleration to prevent skipped
+              // steps. The user would supply the desired feedrate, axis to move, and direction. Toggle on would
+              // start motion and toggle off would initiate a deceleration to stop. One could 'feather' the
+              // motion by repeatedly toggling to slow the motion to the desired location. Location data would
+              // need to be updated real-time and supplied to the user through status queries.
+              //   More controlled exact motions can be taken care of by inputting G0 or G1 commands, which are
+              // handled by the planner. It would be possible for the jog subprogram to insert blocks into the
+              // block buffer without having the planner plan them. It would need to manage de/ac-celerations
+              // on its own carefully. This approach could be effective and possibly size/memory efficient.
+              // break;
+              // }
+              //break;
+          default :
+            // Block any system command that requires the state as IDLE/ALARM. (i.e. EEPROM, homing)
+            // if ( !(sys.state == STATE_IDLE || sys.state == STATE_ALARM) ) { return(STATUS_IDLE_ERROR); }
+            switch( cmdString[char_counter] ) {
+          //     case '#' : // Print Grbl NGC parameters
+          //       if ( line[++char_counter] != 0 ) { return(STATUS_INVALID_STATEMENT); }
+          //       else { report_ngc_parameters(); }
+          //       break;
+          //     case 'H' : // Perform homing cycle [IDLE/ALARM]
+          //       if (bit_istrue(settings.flags,BITFLAG_HOMING_ENABLE)) {
+          //         sys.state = STATE_HOMING; // Set system state variable
+          //         // Only perform homing if Grbl is idle or lost.
+          // 
+          //         // TODO: Likely not required.
+          //         if (system_check_safety_door_ajar()) { // Check safety door switch before homing.
+          //           bit_true(sys_rt_exec_state, EXEC_SAFETY_DOOR);
+          //           protocol_execute_realtime(); // Enter safety door mode.
+          //         }
+          // 
+          // 
+          //         mc_homing_cycle();
+          //         if (!sys.abort) {  // Execute startup scripts after successful homing.
+          //           sys.state = STATE_IDLE; // Set to IDLE when complete.
+          //           st_go_idle(); // Set steppers to the settings idle state before returning.
+          //           system_execute_startup(line);
+          //         }
+          //       } else { return(STATUS_SETTING_DISABLED); }
+          //       break;
+          //     case 'I' : // Print or store build info. [IDLE/ALARM]
+          //       if ( line[++char_counter] == 0 ) {
+          //         settings_read_build_info(line);
+          //         report_build_info(line);
+          //       } else { // Store startup line [IDLE/ALARM]
+          //         if(line[char_counter++] != '=') { return(STATUS_INVALID_STATEMENT); }
+          //         helper_var = char_counter; // Set helper variable as counter to start of user info line.
+          //         do {
+          //           line[char_counter-helper_var] = line[char_counter];
+          //         } while (line[char_counter++] != 0);
+          //         settings_store_build_info(line);
+          //       }
+          //       break;
+              case 'R' : // Restore defaults [IDLE/ALARM]
+                if (cmdString[++char_counter] != 'S') { return(STATUS_INVALID_STATEMENT); }
+                if (cmdString[++char_counter] != 'T') { return(STATUS_INVALID_STATEMENT); }
+                if (cmdString[++char_counter] != '=') { return(STATUS_INVALID_STATEMENT); }
+                if (cmdString.length() != 6) { return(STATUS_INVALID_STATEMENT); }
+                switch (cmdString[++char_counter]) {
+                  case '$': settingsWipe(SETTINGS_RESTORE_SETTINGS); break;
+                  case '#': settingsWipe(SETTINGS_RESTORE_MASLOW); break;
+                  case '*': settingsWipe(SETTINGS_RESTORE_ALL); break;
+                  default: return(STATUS_INVALID_STATEMENT);
+                }
+                reportFeedbackMessage(MESSAGE_RESTORE_DEFAULTS);
+                systemReset(); // Force reset to ensure settings are initialized correctly.
+                break;
+          //     case 'N' : // Startup lines. [IDLE/ALARM]
+          //       if ( line[++char_counter] == 0 ) { // Print startup lines
+          //         for (helper_var=0; helper_var < N_STARTUP_LINE; helper_var++) {
+          //           if (!(settings_read_startup_line(helper_var, line))) {
+          //             report_status_message(STATUS_SETTING_READ_FAIL);
+          //           } else {
+          //             report_startup_line(helper_var,line);
+          //           }
+          //         }
+          //         break;
+          //       } else { // Store startup line [IDLE Only] Prevents motion during ALARM.
+          //         if (sys.state != STATE_IDLE) { return(STATUS_IDLE_ERROR); } // Store only when idle.
+          //         helper_var = true;  // Set helper_var to flag storing method.
+          //         // No break. Continues into default: to read remaining command characters.
+          //       }
+              default :  // Storing setting methods [IDLE/ALARM]
+                if(!readFloat(cmdString, char_counter, parameter)) { return(STATUS_BAD_NUMBER_FORMAT); }
+                if(cmdString[char_counter++] != '=') { return(STATUS_INVALID_STATEMENT); }
+                // if (helper_var) { // Store startup line
+                //   // Prepare sending gcode block to gcode parser by shifting all characters
+                //   helper_var = char_counter; // Set helper variable as counter to start of gcode block
+                //   do {
+                //     line[char_counter-helper_var] = line[char_counter];
+                //   } while (line[char_counter++] != 0);
+                //   // Execute gcode block to ensure block is valid.
+                //   helper_var = gc_execute_line(line); // Set helper_var to returned status code.
+                //   if (helper_var) { return(helper_var); }
+                //   else {
+                //     helper_var = trunc(parameter); // Set helper_var to int value of parameter
+                //     settings_store_startup_line(helper_var,line);
+                //   }
+                // } else { // Store global setting.
+                  if(!readFloat(cmdString, char_counter, value)) { return(STATUS_BAD_NUMBER_FORMAT); }
+                  if((cmdString[char_counter] != 0) || (parameter > 255)) { return(STATUS_INVALID_STATEMENT); }
+                  return(settingsStoreGlobalSetting((byte)parameter, value));
+                // }
             }
         }
-        
-        lastRan = millis();
     }
+    return(STATUS_OK);
 }

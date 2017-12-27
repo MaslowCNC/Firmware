@@ -28,7 +28,7 @@ void initMotion(){
     // Called on startup or after a stop command
     leftAxis.stop();
     rightAxis.stop();
-    if(sys.zAxisAttached){
+    if(sysSettings.zAxisAttached){
       zAxis.stop();
     }
 }
@@ -88,7 +88,7 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
     float  xStartingLocation = sys.xPosition;
     float  yStartingLocation = sys.yPosition;
     float  zStartingLocation = zAxis.read();  // I don't know why we treat the zaxis differently
-    float  zMAXFEED          = MAXZROTMIN * abs(zAxis.getPitch());
+    float  zMaxFeed          = sysSettings.maxZRPM * abs(zAxis.getPitch());
     
     //find the total distances to move
     float  distanceToMoveInMM         = sqrt(  sq(xEnd - xStartingLocation)  +  sq(yEnd - yStartingLocation)  + sq(zEnd - zStartingLocation));
@@ -97,15 +97,15 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
     float  zDistanceToMoveInMM        = zEnd - zStartingLocation;
     
     //compute feed details
-    MMPerMin = constrain(MMPerMin, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
+    MMPerMin = constrain(MMPerMin, 1, sysSettings.maxFeed);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     float  stepSizeMM           = computeStepSize(MMPerMin);
     float  finalNumberOfSteps   = abs(distanceToMoveInMM/stepSizeMM);
     float  delayTime            = calculateDelay(stepSizeMM, MMPerMin);
     float  zFeedrate            = calculateFeedrate(abs(zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
     
     //throttle back federate if it exceeds zaxis max
-    if (zFeedrate > zMAXFEED){
-      float  zStepSizeMM        = computeStepSize(zMAXFEED);
+    if (zFeedrate > zMaxFeed){
+      float  zStepSizeMM        = computeStepSize(zMaxFeed);
       finalNumberOfSteps        = abs(zDistanceToMoveInMM/zStepSizeMM);
       stepSizeMM                = (distanceToMoveInMM/finalNumberOfSteps);
       MMPerMin                  = calculateFeedrate(stepSizeMM, delayTime);
@@ -119,7 +119,7 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
     //attach the axes
     leftAxis.attach();
     rightAxis.attach();
-    if(sys.zAxisAttached){
+    if(sysSettings.zAxisAttached){
       zAxis.attach();
     }
     
@@ -149,7 +149,7 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
             // This section ~180us
             leftAxis.write(aChainLength);
             rightAxis.write(bChainLength);
-            if(sys.zAxisAttached){
+            if(sysSettings.zAxisAttached){
               zAxis.write(zPosition);
             }
             
@@ -170,7 +170,7 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
     kinematics.inverse(xEnd,yEnd,&aChainLength,&bChainLength);
     leftAxis.endMove(aChainLength);
     rightAxis.endMove(bChainLength);
-    if(sys.zAxisAttached){
+    if(sysSettings.zAxisAttached){
       zAxis.endMove(zPosition);
     }
     
@@ -327,7 +327,7 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
     return 1;
 }
 
-void  holdPosition(){
+void  motionDetachIfIdle(){
     /*
     
     This function is called every time the main loop runs. When the machine is executing a move it is not called, but when the machine is
@@ -335,7 +335,7 @@ void  holdPosition(){
     
     */
     
-    leftAxis.hold();
-    rightAxis.hold();
-    zAxis.hold();
+    leftAxis.detachIfIdle();
+    rightAxis.detachIfIdle();
+    zAxis.detachIfIdle();
 }

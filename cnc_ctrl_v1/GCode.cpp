@@ -25,8 +25,6 @@ String readyCommandString = "";  //KRK why is this a global?
 String gcodeLine          = "";  //Our use of this is a bit sloppy, at times,
                                  //we pass references to this global and then 
                                  //name them the same thing.
-// Commands that can safely be executed before machineReady
-String safeCommands[] = {"B01", "B03", "B04", "B05", "B07", "B12", "G20", "G21", "G90", "G91"};
 
 void initGCode(){
     // Called on startup or after a stop command
@@ -45,10 +43,12 @@ void readSerialCommands(){
             char c = Serial.read();
             if (c == '!'){
                 sys.stop = true;
-                sys.pause = false;
+                bit_false(sys.pause, PAUSE_FLAG_USER_PAUSE);
+                reportStatusMessage(STATUS_OK);
             }
             else if (c == '~'){
-                sys.pause = false;
+                bit_false(sys.pause, PAUSE_FLAG_USER_PAUSE);
+                reportStatusMessage(STATUS_OK);
             }
             else{
                 int bufferOverflow = incSerialBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
@@ -64,21 +64,6 @@ void readSerialCommands(){
         incSerialBuffer.print();        
         #endif
     }
-}
-
-// *** There is a more elegant way to do this - put the machineReady check at the beginning of each non-safe code!
-//     This will reduce the overhead of looking through safeCommands[] using isSafeCommand()
-//     and eliminate the 76 bytes of dynamic memory consumed by the safeCommands[] array in global variables!
-bool isSafeCommand(const String& readString){
-    bool ret = false;
-    String command = readString.substring(0, 3);
-    for(byte i = 0; i < sizeof(safeCommands); i++){
-       if(safeCommands[i] == command){
-           ret = true;
-           break;
-       }
-    }
-    return ret;
 }
 
 int   findEndOfNumber(const String& textString, const int& index){
@@ -120,58 +105,50 @@ float extractGcodeValue(const String& readString, char target, const float& defa
     return numberAsFloat;
 }
 
-void  executeBcodeLine(const String& gcodeLine){
+byte  executeBcodeLine(const String& gcodeLine){
     /*
     
     Executes a single line of gcode beginning with the character 'B'.
     
     */
     
-    // *** There is a more elegant way to do this - put the machineReady check at the beginning of each non-safe code!
-    //     This will reduce the overhead of looking through safe commands using isSafeCommand()
-    if (!machineReady() && !isSafeCommand(gcodeLine)){
-        Serial.println(F("Unable to execute command, machine settings not yet received"));
-        return;
+    //Handle B-codes
+    
+    if(gcodeLine.substring(0, 3) == "B05"){
+        Serial.print(F("Firmware Version "));
+        Serial.println(VERSIONNUMBER);
+        return STATUS_OK;
     }
     
-    //Handle B-codes
+    if(sys.state == STATE_OLD_SETTINGS){
+      return STATUS_OLD_SETTINGS;
+    }
     
     if(gcodeLine.substring(0, 3) == "B01"){
         
         Serial.println(F("Motor Calibration Not Needed"));
         
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B02"){
         calibrateChainLengths(gcodeLine);
-        return;
-    }
-    
-    if(gcodeLine.substring(0, 3) == "B03"){
-        updateKinematicsSettings(gcodeLine);
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B04"){
         //Test each of the axis
         maslowDelay(500);
-        if(sys.stop){return;}
+        if(sys.stop){return STATUS_OK;}
         leftAxis.test();
         maslowDelay(500);
-        if(sys.stop){return;}
+        if(sys.stop){return STATUS_OK;}
         rightAxis.test();
         maslowDelay(500);
-        if(sys.stop){return;}
+        if(sys.stop){return STATUS_OK;}
         zAxis.test();
         Serial.println(F("Tests complete."));
-        return;
-    }
-    
-    if(gcodeLine.substring(0, 3) == "B05"){
-        Serial.print(F("Firmware Version "));
-        Serial.println(VERSIONNUMBER);
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B06"){
@@ -189,20 +166,13 @@ void  executeBcodeLine(const String& gcodeLine){
         Serial.print(rightAxis.read());
         Serial.println(F("mm"));
         
-        return;
-    }
-    
-    if(gcodeLine.substring(0, 3) == "B07"){
-        //erase EEPROM
-        leftAxis.wipeEEPROM();
-        rightAxis.wipeEEPROM();
-        zAxis.wipeEEPROM();
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B08"){
         //Manually recalibrate chain lengths
-        leftAxis.set(ORIGINCHAINLEN);
-        rightAxis.set(ORIGINCHAINLEN);
+        leftAxis.set(sysSettings.originalChainLength);
+        rightAxis.set(sysSettings.originalChainLength);
         
         Serial.print(F("Left: "));
         Serial.print(leftAxis.read());
@@ -215,7 +185,7 @@ void  executeBcodeLine(const String& gcodeLine){
         
         Serial.println(F("Message: The machine chains have been manually re-calibrated."));
         
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B09"){
@@ -237,7 +207,7 @@ void  executeBcodeLine(const String& gcodeLine){
             singleAxisMove(&rightAxis, rDist, speed);
         }
         
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B10"){
@@ -245,7 +215,7 @@ void  executeBcodeLine(const String& gcodeLine){
         Serial.print(F("[Measure: "));
         Serial.print(leftAxis.read());
         Serial.println(F("]"));
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B11"){
@@ -264,16 +234,10 @@ void  executeBcodeLine(const String& gcodeLine){
             }
             i++;
             execSystemRealtime();
-            if (sys.stop){return;}
+            if (sys.stop){return STATUS_OK;}
         }
         leftAxis.set(leftAxis.read());
-        return;
-    }
-    
-    if(gcodeLine.substring(0, 3) == "B12"){
-        //Update the motor characteristics
-        updateMotorSettings(gcodeLine);
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B13"){
@@ -289,7 +253,7 @@ void  executeBcodeLine(const String& gcodeLine){
         if (left > 0) axis = &leftAxis;
         if (useZ > 0) axis = &zAxis;
         PIDTestVelocity(axis, start, stop, steps, version);
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B14"){
@@ -306,7 +270,7 @@ void  executeBcodeLine(const String& gcodeLine){
         if (left > 0) axis = &leftAxis;
         if (useZ > 0) axis = &zAxis;
         PIDTestPosition(axis, start, stop, steps, stepTime, version);
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B16"){
@@ -320,7 +284,7 @@ void  executeBcodeLine(const String& gcodeLine){
         if (left > 0) axis = &leftAxis;
         if (useZ > 0) axis = &zAxis;
         voltageTest(axis, start, stop);
-        return;
+        return STATUS_OK;
     }
     
     if(gcodeLine.substring(0, 3) == "B15"){
@@ -338,6 +302,8 @@ void  executeBcodeLine(const String& gcodeLine){
         
         //Reload the position
         kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
+        
+        return STATUS_OK;
     }
 }
     
@@ -348,13 +314,6 @@ void  executeGcodeLine(const String& gcodeLine){
     not included on the front of the line, the code from the previous line will be added.
     
     */
-
-    // *** There is a more elegant way to do this - put the machineReady check at the beginning of each non-safe code!
-    //     This will reduce the overhead of looking through safe commands using isSafeCommand()
-    if (!machineReady() && !isSafeCommand(gcodeLine)){
-        Serial.println(F("Unable to execute command, machine settings not yet received"));
-        return;
-    }
       
     //Handle G-Codes
    
@@ -538,7 +497,7 @@ void  sanitizeCommandString(String& cmdString){
     #endif
 }
 
-void  interpretCommandString(String& cmdString){
+byte  interpretCommandString(String& cmdString){
     /*
     
     Splits a string into lines of gcode which begin with 'G' or 'M', executing each in order
@@ -554,14 +513,21 @@ void  interpretCommandString(String& cmdString){
     int secondG;
 
     if (cmdString.length() > 0) {
-        if (cmdString[0] == 'B'){                   //If the command is a B command
+        if (cmdString[0] == '$') {
+            // Maslow '$' system command
+            return(systemExecuteCmdstring(cmdString));
+        }
+        else if (cmdString[0] == 'B'){                   //If the command is a B command
             #if defined (verboseDebug) && verboseDebug > 0
             Serial.print(F("iCS executing B code line: "));
             #endif
             Serial.println(cmdString);
-            executeBcodeLine(cmdString);
+            return executeBcodeLine(cmdString);
         }
-        else{
+        else if (sys.state == STATE_OLD_SETTINGS){
+          return STATUS_OLD_SETTINGS;
+        }
+        else {
             while(cmdString.length() > 0){          //Extract each line of gcode from the string
                 firstG  = findNextGM(cmdString, 0);
                 secondG = findNextGM(cmdString, firstG + 1);
@@ -601,25 +567,21 @@ void  interpretCommandString(String& cmdString){
                 cmdString = cmdString.substring(secondG, cmdString.length());
                 
             }
+            return STATUS_OK;
         }
     }
-    
-    #if defined (verboseDebug) && verboseDebug > 1              
-    // print ring buffer contents
-    Serial.println(F("iCS execution complete"));
-    incSerialBuffer.print();
-    #endif
 }
 
 void gcodeExecuteLoop(){
+  byte status;
   if (incSerialBuffer.numberOfLines() > 0){
       incSerialBuffer.prettyReadLine(readyCommandString);
       sanitizeCommandString(readyCommandString);
-      interpretCommandString(readyCommandString);
+      status = interpretCommandString(readyCommandString);
       readyCommandString = "";
 
       // Get next line of GCode
-      if (!sys.stop){_signalReady();}
+      if (!sys.stop){reportStatusMessage(status);}
   }
 }
 
@@ -635,7 +597,7 @@ int   G1(const String& readString, int G0orG1){
     float currentXPos = sys.xPosition;
     float currentYPos = sys.yPosition;
     
-    float currentZPos = zAxis.target();
+    float currentZPos = zAxis.read();
     
     xgoto      = sys.inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/sys.inchesToMMConversion);
     ygoto      = sys.inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/sys.inchesToMMConversion);
@@ -655,10 +617,10 @@ int   G1(const String& readString, int G0orG1){
         }
     }
     
-    sys.feedrate = constrain(sys.feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
+    sys.feedrate = constrain(sys.feedrate, 1, sysSettings.maxFeed);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     
     //if the zaxis is attached
-    if(!sys.zAxisAttached){
+    if(!sysSettings.zAxisAttached){
         float threshold = .1; //units of mm
         if (abs(currentZPos - zgoto) > threshold){
             Serial.print(F("Message: Please adjust Z-Axis to a depth of "));
@@ -713,7 +675,7 @@ int   G2(const String& readString, int G2orG3){
     float centerX = X1 + I;
     float centerY = Y1 + J;
     
-    sys.feedrate = constrain(sys.feedrate, 1, MAXFEED);   //constrain the maximum feedrate, 35ipm = 900 mmpm
+    sys.feedrate = constrain(sys.feedrate, 1, sysSettings.maxFeed);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     
     if (G2orG3 == 2){
         return arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, CLOCKWISE);
@@ -735,7 +697,7 @@ void  G10(const String& readString){
 
 void  G38(const String& readString) {
   //if the zaxis is attached
-  if (sys.zAxisAttached) {
+  if (sysSettings.zAxisAttached) {
     /*
        The G38() function handles the G38 gcode which zeros the machine's z axis.
        Currently ignores X and Y options
@@ -745,11 +707,11 @@ void  G38(const String& readString) {
       float zgoto;
 
 
-      float currentZPos = zAxis.target();
+      float currentZPos = zAxis.read();
 
       zgoto      = sys.inchesToMMConversion * extractGcodeValue(readString, 'Z', currentZPos / sys.inchesToMMConversion);
       sys.feedrate   = sys.inchesToMMConversion * extractGcodeValue(readString, 'F', sys.feedrate / sys.inchesToMMConversion);
-      sys.feedrate = constrain(sys.feedrate, 1, MAXZROTMIN * abs(zAxis.getPitch()));
+      sys.feedrate = constrain(sys.feedrate, 1, sysSettings.maxZRPM * abs(zAxis.getPitch()));
 
       if (sys.useRelativeUnits) { //if we are using a relative coordinate system
         if (readString.indexOf('Z') >= 0) { //if z has moved
@@ -782,7 +744,7 @@ void  G38(const String& readString) {
 
         Axis* axis = &zAxis;
         float MMPerMin             = sys.feedrate;
-        float startingPos          = axis->target();
+        float startingPos          = axis->read();
         float endPos               = zgoto;
         float moveDist             = endPos - currentZPos; //total distance to move
 
