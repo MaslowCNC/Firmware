@@ -187,8 +187,8 @@ void settingsLoadStepsFromEEprom(){
         bit_true(sys.oldSettingsFlag, NEED_Z_ENCODER_STEPS);
         bit_true(sys.oldSettingsFlag, NEED_Z_DIST_PER_ROT);
         sys.state = STATE_OLD_SETTINGS;
-        Serial.print(F("Old position data detected. "));
-        Serial.println(F("Please set the values fo $12, $13, $19, and $20 to load position."));
+        Serial.println(F("Old position data detected."));
+        Serial.println(F("Please set $12, $13, $19, and $20 to load position."));
     }
     else {
         systemRtExecAlarm |= ALARM_POSITION_LOST;  // if this same global is touched by ISR then need to make atomic somehow
@@ -217,9 +217,8 @@ void settingsLoadOldSteps(){
         }
       }
       sys.state = STATE_IDLE;
-      Serial.println(F("Successfully imported position from old settings."));
     }
-}
+  }
 
 byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
     /*
