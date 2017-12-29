@@ -17,6 +17,12 @@
 // Define system global state structure
 system_t sys;
 
+// Define the global settings storage - treat as readonly
+settings_t sysSettings;
+
+// Global realtime executor bitflag variable for setting various alarms.
+byte systemRtExecAlarm;  
+
 // Define axes, it might be tighter to define these within the sys struct
 Axis leftAxis;
 Axis rightAxis;
@@ -27,18 +33,26 @@ Axis zAxis;
 Kinematics kinematics;
 
 void setup(){
+    Serial.begin(57600);
+    Serial.print(F("PCB v1."));
+    Serial.print(getPCBVersion());
+    Serial.println(F(" Detected"));
     sys.inchesToMMConversion = 1;
     setupAxes();
-    Serial.begin(57600);
+    settingsInit();
+    // TODO This seems wrong, if the encoder steps are changed, axis position
+    // will be in the wrong place.  Would be better if we stored positions as
+    // steps 
+    // Set initial desired position of the machine to its current position
+    leftAxis.write(leftAxis.read());
+    rightAxis.write(leftAxis.read());
+    zAxis.write(leftAxis.read());
     readyCommandString.reserve(INCBUFFERLENGTH);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
     gcodeLine.reserve(INCBUFFERLENGTH);
     Timer1.initialize(LOOPINTERVAL);
     Timer1.attachInterrupt(runsOnATimer);
     
-    Serial.print(F("PCB v1."));
-    Serial.print(getPCBVersion());
-    Serial.println(F(" Detected"));
-    Serial.println(F("Grbl v1.00"));  // Why GRBL?  Why not Maslow?
+    Serial.println(F("Grbl v1.00"));  // Why GRBL?  Apparenlty because some programs are silly and look for this as an initailization command
     Serial.println(F("ready"));
 }
 
@@ -61,21 +75,17 @@ void loop(){
         initMotion();            // on USB disconnect.  Might consider removing 
         setSpindlePower(false);  // this restriction for safety if we are 
     }                            // comfortable that USB disconnects are
-                                 // not a common occurrence anymore
-    if (sys.rcvdKinematicSettings && sys.rcvdMotorSettings){
-        kinematics.init();
-    }
+                                 // not a common occurence anymore
+    kinematics.init();
     
     // Let's go!
-    _signalReady();
+    reportStatusMessage(STATUS_OK);
     sys.stop = false;            // We should consider an abort option which
                                  // is not reset automatically such as a software
                                  // limit
-    while (sys.stop != true){
+    while (!sys.stop){
         gcodeExecuteLoop();
         
-        holdPosition();  // bad name, also shouldn't write positions just detach
-    
         execSystemRealtime();
     
         _watchDog();

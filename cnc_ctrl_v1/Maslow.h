@@ -18,7 +18,7 @@
 #define maslow_h
 
 // Maslow Firmware Version tracking
-#define VERSIONNUMBER 1.01
+#define VERSIONNUMBER 1.02
 
 // Define standard libraries used by maslow.
 #include <avr/io.h>
@@ -37,7 +37,6 @@
 #include "Encoder.h"
 #include "MotorGearboxEncoder.h"
 #include "Axis.h"
-#include "FormatDouble.h"
 #include "Kinematics.h"
 #include "RingBuffer.h"
 #include "GCode.h"
@@ -46,6 +45,8 @@
 #include "Report.h"
 #include "Spindle.h"
 #include "Probe.h"
+#include "Settings.h"
+#include "NutsAndBolts.h"
 #include "System.h"
 
 #endif

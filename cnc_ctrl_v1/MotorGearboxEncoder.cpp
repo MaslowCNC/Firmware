@@ -27,13 +27,17 @@ void MotorGearboxEncoder::setup(const int& pwmPin, const int& directionPin1, con
 {
     //initialize encoder
     encoder.setup(encoderPin1,encoderPin2);
+    // I don't like this, but I don't know how else to initialize a pointer to a value
+    float zero = 0.0;
+    float one = 1.0;
+    _Kp = _Ki = _Kd = &zero;
     
     //initialize motor
     motor.setupMotor(pwmPin, directionPin1, directionPin2);
     motor.write(0);
     
     //initialize the PID
-    _PIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, P_ON_E, DIRECT);
+    _PIDController.setup(&_currentSpeed, &_pidOutput, &_targetSpeed, _Kp, _Ki, _Kd, &one, DIRECT);
     initializePID(loopInterval);
     
     
@@ -66,7 +70,7 @@ void  MotorGearboxEncoder::computePID(){
     motor.additiveWrite(_pidOutput);
 }
 
-void  MotorGearboxEncoder::setPIDValues(float KpV, float KiV, float KdV){
+void  MotorGearboxEncoder::setPIDValues(float* KpV, float* KiV, float* KdV, float* propWeightV){
     /*
     
     Set PID tuning values
@@ -77,7 +81,7 @@ void  MotorGearboxEncoder::setPIDValues(float KpV, float KiV, float KdV){
     _Ki = KiV;
     _Kd = KdV;
     
-    _PIDController.SetTunings(_Kp, _Ki, _Kd, P_ON_E);
+    _PIDController.SetTunings(_Kp, _Ki, _Kd, propWeightV);
 }
 
 String  MotorGearboxEncoder::getPIDString(){
@@ -87,7 +91,7 @@ String  MotorGearboxEncoder::getPIDString(){
     
     */
     String PIDString = "Kp=";
-    return PIDString + _Kp + ",Ki=" + _Ki + ",Kd=" + _Kd;
+    return PIDString + *_Kp + ",Ki=" + *_Ki + ",Kd=" + *_Kd;
 }
 
 String  MotorGearboxEncoder::pidState(){
@@ -107,7 +111,10 @@ void MotorGearboxEncoder::setPIDAggressiveness(float aggressiveness){
     
     */
     
-    _PIDController.SetTunings(aggressiveness*_Kp, _Ki, _Kd, P_ON_E);
+    float adjustedKp = aggressiveness * *_Kp;
+    float one = 1.0;
+    
+    _PIDController.SetTunings(&adjustedKp, _Ki, _Kd, &one);
     
 }
 
@@ -183,7 +190,7 @@ float MotorGearboxEncoder::cachedSpeed(){
     return _RPM;
 }
 
-void MotorGearboxEncoder::setName(const char& newName){
+void MotorGearboxEncoder::setName(char *newName){
     /*
     Set the name for the object
     */
@@ -194,5 +201,5 @@ char MotorGearboxEncoder::name(){
     /*
     Get the name for the object
     */
-    return _motorName;
+    return *_motorName;
 }
