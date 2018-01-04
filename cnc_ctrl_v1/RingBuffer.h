@@ -17,10 +17,6 @@
     
     #ifndef RingBuffer_h
     #define RingBuffer_h
-    
-    #include "Arduino.h"
-    
-    #define BUFFERSIZE 128
 
     class RingBuffer{
         public:
@@ -32,15 +28,15 @@
             int   numberOfLines();
             int   spaceAvailable();
             void  empty();
-            String readLine();
-            
+            void  readLine(String&);
+            void  prettyReadLine(String&);
         private:
             void _incrementBeginning();
             int  _incrementEnd();
             void _incrementVariable(int* variable);
             int  _beginningOfString = 0;             //points to the first valid character which can be read
             int  _endOfString       = 0;             //points to the first open space which can be written
-            char _buffer[BUFFERSIZE];
+            char _buffer[INCBUFFERLENGTH];
     };
 
     #endif

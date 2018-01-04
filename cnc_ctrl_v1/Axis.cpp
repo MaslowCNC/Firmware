@@ -16,43 +16,24 @@
     Copyright 2014-2017 Bar Smith*/ 
 
 
-#include "Arduino.h"
-#include "Axis.h"
+#include "Maslow.h"
 
-#define EEPROMVALIDDATA 56
-#define SIZEOFFLOAT      4
-#define SIZEOFLINSEG    17
-
-Axis::Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const int& eepromAdr, const unsigned long& loopInterval)
-:
-motorGearboxEncoder(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2, loopInterval)
+void Axis::setup(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const unsigned long& loopInterval)
 {
+    // I don't really like this, but I don't know how else to initialize a pointer to a value
+    float zero = 0.0;
+    float one = 1.0;
+    _Kp = _Ki = _Kd = &zero;
     
-    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, 0, 0, 0, P_ON_E, REVERSE);
+    motorGearboxEncoder.setup(pwmPin, directionPin1, directionPin2, encoderPin1, encoderPin2, loopInterval);
+    _pidController.setup(&_pidInput, &_pidOutput, &_pidSetpoint, _Kp, _Ki, _Kd, &one, REVERSE);
     
     //initialize variables
     _axisName     = axisName;
-    _eepromAdr    = eepromAdr;
     
     initializePID(loopInterval);
     
-    motorGearboxEncoder.setName(_axisName);
-}
-
-void   Axis::loadPositionFromMemory(){
-        /*
-        
-        Reload the last known position for the axis
-        
-        */
-        
-        //If a valid position has been stored
-        if (EEPROM.read(_eepromAdr) == EEPROMVALIDDATA){
-            float f = 0.00f;
-            f = EEPROM.get(_eepromAdr + SIZEOFFLOAT, f );
-            set(f);
-        }
-        
+    motorGearboxEncoder.setName(&_axisName);
 }
 
 void   Axis::initializePID(const unsigned long& loopInterval){
@@ -62,38 +43,42 @@ void   Axis::initializePID(const unsigned long& loopInterval){
 }
 
 void    Axis::write(const float& targetPosition){
-    
-    // Ensure that _pidSetpoint is equal to whole number of encoder steps
-    float steps = (targetPosition/_mmPerRotation) * _encoderSteps;
-    steps = steps * 2;
-    steps = round(steps);
-    steps = steps /2;
-    _pidSetpoint   =  steps/_encoderSteps;
+    _timeLastMoved = millis();
+    _pidSetpoint   =  targetPosition/ *_mmPerRotation;
     return;
 }
 
 float  Axis::read(){
     //returns the true axis position
     
-    return (motorGearboxEncoder.encoder.read()/_encoderSteps)*_mmPerRotation;
+    return (motorGearboxEncoder.encoder.read()/ *_encoderSteps) * *_mmPerRotation;
     
 }
 
-float  Axis::target(){
-    //returns the axis target
-    return _axisTarget*_mmPerRotation;
-}
-
 float  Axis::setpoint(){
-    return _pidSetpoint*_mmPerRotation;
+    return _pidSetpoint * *_mmPerRotation;
 }
 
 void   Axis::set(const float& newAxisPosition){
     
     //reset everything to the new value
-    _axisTarget   =  newAxisPosition/_mmPerRotation;
-    _pidSetpoint  =  newAxisPosition/_mmPerRotation;
-    motorGearboxEncoder.encoder.write((newAxisPosition*_encoderSteps)/_mmPerRotation);
+    _pidSetpoint  =  newAxisPosition/ *_mmPerRotation;
+    motorGearboxEncoder.encoder.write((newAxisPosition * *_encoderSteps)/ *_mmPerRotation);
+    
+}
+
+long Axis::steps(){
+    /*
+    Returns the number of steps reported by the encoder
+    */
+    return motorGearboxEncoder.encoder.read();
+}
+
+void   Axis::setSteps(const long& steps){
+    
+    //reset everything to the new value
+    _pidSetpoint  =  steps/ *_encoderSteps;
+    motorGearboxEncoder.encoder.write(steps);
     
 }
 
@@ -104,7 +89,7 @@ void   Axis::computePID(){
         return;
     }
     
-    _pidInput      =  motorGearboxEncoder.encoder.read()/_encoderSteps;
+    _pidInput      =  motorGearboxEncoder.encoder.read()/ *_encoderSteps;
     
     if (_pidController.Compute()){
         // Only write output if the PID calculation was performed
@@ -127,7 +112,7 @@ void   Axis::enablePositionPID(){
     
 }
 
-void   Axis::setPIDValues(float KpPos, float KiPos, float KdPos, float propWeight, float KpV, float KiV, float KdV){
+void   Axis::setPIDValues(float* KpPos, float* KiPos, float* KdPos, float* propWeight, float* KpV, float* KiV, float* KdV, float* propWeightV){
     /*
     
     Sets the positional PID values for the axis
@@ -139,7 +124,7 @@ void   Axis::setPIDValues(float KpPos, float KiPos, float KdPos, float propWeigh
     
     _pidController.SetTunings(_Kp, _Ki, _Kd, propWeight);
     
-    motorGearboxEncoder.setPIDValues(KpV, KiV, KdV);
+    motorGearboxEncoder.setPIDValues(KpV, KiV, KdV, propWeightV);
 }
 
 String  Axis::getPIDString(){
@@ -149,7 +134,7 @@ String  Axis::getPIDString(){
     
     */
     String PIDString = "Kp=";
-    return PIDString + _Kp + ",Ki=" + _Ki + ",Kd=" + _Kd;
+    return PIDString + *_Kp + ",Ki=" + *_Ki + ",Kd=" + *_Kd;
 }
 
 void   Axis::setPIDAggressiveness(float aggressiveness){
@@ -165,12 +150,12 @@ void   Axis::setPIDAggressiveness(float aggressiveness){
 
 float  Axis::error(){
 
-    float encoderErr = (motorGearboxEncoder.encoder.read()/_encoderSteps) - _pidSetpoint;
+    float encoderErr = (motorGearboxEncoder.encoder.read()/ *_encoderSteps) - _pidSetpoint;
 
-    return encoderErr *_mmPerRotation;
+    return encoderErr * *_mmPerRotation;
 }
 
-void   Axis::changePitch(const float& newPitch){
+void   Axis::changePitch(float *newPitch){
     /*
     Reassign the distance moved per-rotation for the axis.
     */
@@ -181,27 +166,21 @@ float  Axis::getPitch(){
     /*
     Returns the distance moved per-rotation for the axis.
     */  
-    return _mmPerRotation;
+    return *_mmPerRotation;
 }
 
-void   Axis::changeEncoderResolution(const int& newResolution){
+void   Axis::changeEncoderResolution(float *newResolution){
     /*
     Reassign the encoder resolution for the axis.
     */
     _encoderSteps = newResolution;
     
     //push to the gearbox for calculating RPM
-    motorGearboxEncoder.setEncoderResolution(newResolution);
+    motorGearboxEncoder.setEncoderResolution(*newResolution);
     
 }
 
 int    Axis::detach(){
-    
-    if (motorGearboxEncoder.motor.attached()){
-        float f = read();  //Store the axis position
-        EEPROM.put(_eepromAdr + SIZEOFFLOAT, f);
-        EEPROM.update(_eepromAdr, EEPROMVALIDDATA);
-    }
     
     motorGearboxEncoder.motor.detach();
     
@@ -223,13 +202,12 @@ bool   Axis::attached(){
     return motorGearboxEncoder.motor.attached();
 }
 
-void   Axis::hold(){
-    int timeout   = 2000;
-    
-    if (millis() - _timeLastMoved < timeout){
-        write(_axisTarget*_mmPerRotation);
-    }
-    else{
+void   Axis::detachIfIdle(){
+    /*
+    Detaches the axis, turning off the motor and PID control, if it has been
+    stationary for more than axisDetachTime
+    */
+    if (millis() - _timeLastMoved > sysSettings.axisDetachTime){
         detach();
     }
     
@@ -238,7 +216,7 @@ void   Axis::hold(){
 void   Axis::endMove(const float& finalTarget){
     
     _timeLastMoved = millis();
-    _axisTarget    = finalTarget/_mmPerRotation;
+    _pidSetpoint    = finalTarget/ *_mmPerRotation;
     
 }
 
@@ -250,26 +228,8 @@ void   Axis::stop(){
     */
 
     _timeLastMoved = millis();
-    _axisTarget    = read()/_mmPerRotation;
-    _pidSetpoint   = read()/_mmPerRotation;
+    _pidSetpoint   = read()/ *_mmPerRotation;
 
-}
-
-void   Axis::wipeEEPROM(){
-    /*
-    
-    Over-write all the values stored in EEPROM to return the machine to a known state.
-    
-    */
-    
-    int i = 0;
-    while(i < 50){
-        EEPROM.update(_eepromAdr + i, 0);
-        i++;
-    }
-    
-    Serial.print(_axisName);
-    Serial.println(F(" EEPROM erased"));
 }
 
 void   Axis::test(){
@@ -291,7 +251,8 @@ void   Axis::test(){
     while (i < 1000){
         motorGearboxEncoder.motor.directWrite(255);
         i++;
-        delay(1);
+        maslowDelay(1);
+        if (sys.stop){return;}
     }
     
     //check to see if it moved
@@ -311,7 +272,8 @@ void   Axis::test(){
     while (i < 1000){
         motorGearboxEncoder.motor.directWrite(-255);
         i++;
-        delay(1);
+        maslowDelay(1);
+        if (sys.stop){return;}
     }
     
     //check to see if it moved
@@ -327,5 +289,5 @@ void   Axis::test(){
     Serial.print(F("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>"));
 }
 
-double  Axis::pidInput(){ return _pidInput*_mmPerRotation;}
+double  Axis::pidInput(){ return _pidInput * *_mmPerRotation;}
 double  Axis::pidOutput(){ return _pidOutput;}

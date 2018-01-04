@@ -18,8 +18,6 @@
     #ifndef Motor_h
     #define Motor_h
 
-    #include "Arduino.h"
-    
     struct LinSegment{
         float slope  = 1;
         float intercept = 0;

@@ -11,7 +11,7 @@
   #include "WProgram.h"
 #endif
 
-#include "PID_v1.h"
+#include "Maslow.h"
 
 /*Constructor (...)*********************************************************
  *    The parameters specified here are those for for which we can't set up
@@ -23,7 +23,7 @@ PID::PID()
 }
 
 void PID::setup(volatile double* Input, volatile double* Output, volatile double* Setpoint,
-        const double& Kp, const double& Ki, const double& Kd, const double& POn, const int& ControllerDirection)
+        float* Kp, float* Ki, float* Kd, float* POn, const int& ControllerDirection)
 {
 
     myOutput = Output;
@@ -96,19 +96,19 @@ bool PID::Compute()
  * it's called automatically from the constructor, but tunings can also
  * be adjusted on the fly during normal operation
  ******************************************************************************/
-void PID::SetTunings(const double& Kp, const double& Ki, const double& Kd, const double& pOn)
+void PID::SetTunings(float* Kp, float* Ki, float* Kd, float* pOn)
 {
-   if (Kp<0 || Ki<0 || Kd<0 || pOn<0 || pOn>1) return;
+   if (*Kp<0 || *Ki<0 || *Kd<0 || *pOn<0 || *pOn>1) return;
 
-   pOnE = pOn>0; //some p on error is desired;
-   pOnM = pOn<1; //some p on measurement is desired;  
+   pOnE = *pOn>0; //some p on error is desired;
+   pOnM = *pOn<1; //some p on measurement is desired;  
 
    dispKp = Kp; dispKi = Ki; dispKd = Kd;
 
    double SampleTimeInSec = ((double)SampleTime)/1000;
-   kp = Kp;
-   ki = Ki * SampleTimeInSec;
-   kd = Kd / SampleTimeInSec;
+   kp = *Kp;
+   ki = *Ki * SampleTimeInSec;
+   kd = *Kd / SampleTimeInSec;
 
   if(controllerDirection ==REVERSE)
    {
@@ -116,8 +116,8 @@ void PID::SetTunings(const double& Kp, const double& Ki, const double& Kd, const
       ki = (0 - ki);
       kd = (0 - kd);
    }
-   pOnEKp = pOn * kp; 
-   pOnMKp = (1 - pOn) * kp;
+   pOnEKp = *pOn * kp; 
+   pOnMKp = (1 - *pOn) * kp;
 }
 
 /* SetSampleTime(...) *********************************************************
@@ -211,9 +211,9 @@ void PID::SetControllerDirection(const int& Direction)
  * functions query the internal state of the PID.  they're here for display
  * purposes.  this are the functions the PID Front-end uses for example
  ******************************************************************************/
-double PID::GetKp(){ return  dispKp;}
-double PID::GetKi(){ return  dispKi;}
-double PID::GetKd(){ return  dispKd;}
+double PID::GetKp(){ return  *dispKp;}
+double PID::GetKi(){ return  *dispKi;}
+double PID::GetKd(){ return  *dispKd;}
 int PID::GetMode(){ return  inAuto ? AUTOMATIC : MANUAL;}
 int PID::GetDirection(){ return controllerDirection;}
 double PID::GetIterm(){ return outputSum; }

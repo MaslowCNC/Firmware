@@ -12,27 +12,48 @@
     
     Copyright 2014-2017 Bar Smith*/
     
-#include "CNC_Functions.h"
-#include "TimerOne.h"
+#include "Maslow.h"
+
+// Define system global state structure
+system_t sys;
+
+// Define the global settings storage - treat as readonly
+settings_t sysSettings;
+
+// Global realtime executor bitflag variable for setting various alarms.
+byte systemRtExecAlarm;  
+
+// Define axes, it might be tighter to define these within the sys struct
+Axis leftAxis;
+Axis rightAxis;
+Axis zAxis;
+
+// Define kinematics, is it necessary for this to be a class?  Is this really
+// going to be reused?
+Kinematics kinematics;
 
 void setup(){
     Serial.begin(57600);
-    
-    readyCommandString.reserve(128);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
-    gcodeLine.reserve(128);
-    
     Serial.print(F("PCB v1."));
-    Serial.print(pcbVersion);
+    Serial.print(getPCBVersion());
     Serial.println(F(" Detected"));
-    
-    Serial.println(F("ready"));
-    _signalReady();
-    
+    sys.inchesToMMConversion = 1;
+    setupAxes();
+    settingsInit();
+    // TODO This seems wrong, if the encoder steps are changed, axis position
+    // will be in the wrong place.  Would be better if we stored positions as
+    // steps 
+    // Set initial desired position of the machine to its current position
+    leftAxis.write(leftAxis.read());
+    rightAxis.write(leftAxis.read());
+    zAxis.write(leftAxis.read());
+    readyCommandString.reserve(INCBUFFERLENGTH);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
+    gcodeLine.reserve(INCBUFFERLENGTH);
     Timer1.initialize(LOOPINTERVAL);
     Timer1.attachInterrupt(runsOnATimer);
     
-    Serial.println(F("Grbl v1.00"));
-    
+    Serial.println(F("Grbl v1.00"));  // Why GRBL?  Apparenlty because some programs are silly and look for this as an initailization command
+    Serial.println(F("ready"));
 }
 
 void runsOnATimer(){
@@ -48,21 +69,25 @@ void runsOnATimer(){
 }
 
 void loop(){
+    // This section is called on startup and whenever a stop command is issued
+    initGCode();
+    if (sys.stop){               // only called on sys.stop to prevent stopping
+        initMotion();            // on USB disconnect.  Might consider removing 
+        setSpindlePower(false);  // this restriction for safety if we are 
+    }                            // comfortable that USB disconnects are
+                                 // not a common occurence anymore
+    kinematics.init();
     
-    readyCommandString = ringBuffer.readLine();
+    // Let's go!
+    reportStatusMessage(STATUS_OK);
+    sys.stop = false;            // We should consider an abort option which
+                                 // is not reset automatically such as a software
+                                 // limit
+    while (!sys.stop){
+        gcodeExecuteLoop();
+        
+        execSystemRealtime();
     
-    if (readyCommandString.length() > 0){
-        readyCommandString.trim();  // remove leading and trailing white space
-        readyCommandString.toUpperCase();
-        interpretCommandString(readyCommandString);
-        readyCommandString = "";
+        _watchDog();
     }
-    
-    holdPosition();
-    
-    readSerialCommands();
-    
-    returnPoz(xTarget, yTarget, zAxis.read());
-    
-    _watchDog();
 }

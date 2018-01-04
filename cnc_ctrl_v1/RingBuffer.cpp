@@ -20,9 +20,7 @@ The RingBuffer module creates a circular character buffer used for storing incom
 serial data.
 */
 
-#include "Arduino.h"
-#include "RingBuffer.h"
-
+#include "Maslow.h"
 
 RingBuffer::RingBuffer(){
     
@@ -82,15 +80,13 @@ int RingBuffer::numberOfLines() {
     return lineCount;
 }
 
-String RingBuffer::readLine(){
+void RingBuffer::readLine(String &lineToReturn){
     /*
    
     Return one line (terminated with \n) from the buffer
+    if there are no full lines in the buffer, passed string will be empty
    
     */
-    
-    String lineToReturn;
-    lineToReturn.reserve(128);
     lineToReturn = "";            // begin with an empty string
     
     if (numberOfLines() > 0) {    // there is at least one full line in the buffer
@@ -100,10 +96,18 @@ String RingBuffer::readLine(){
             lineToReturn += lastReadValue;
         }
     }
-    // if there are no full lines in the buffer, an empty string will be returned
-    
-    return lineToReturn;
-    
+}
+
+void RingBuffer::prettyReadLine(String &lineToReturn){
+    /*
+   
+    Return one line (terminated with \n) from the buffer, but in all uppercase
+    with no leading or trailing whitespaces
+   
+    */
+    readLine(lineToReturn);
+    lineToReturn.trim();  // remove leading and trailing white space
+    lineToReturn.toUpperCase();
 }
 
 void RingBuffer::print(){
@@ -148,7 +152,7 @@ void RingBuffer::_incrementBeginning(){
     if (_beginningOfString == _endOfString)  
         return;   //don't allow the beginning to pass the end
     else 
-        _beginningOfString = (_beginningOfString + 1) % BUFFERSIZE;    //move the beginning up one and wrap to zero based upon BUFFERSIZE
+        _beginningOfString = (_beginningOfString + 1) % INCBUFFERLENGTH;    //move the beginning up one and wrap to zero based upon INCBUFFERLENGTH
 }
 
 int RingBuffer::_incrementEnd(){
@@ -163,7 +167,7 @@ int RingBuffer::_incrementEnd(){
         return 1;
         }
     else
-        _endOfString = (_endOfString+1) % BUFFERSIZE;
+        _endOfString = (_endOfString+1) % INCBUFFERLENGTH;
         return 0;
  }
 
@@ -171,14 +175,14 @@ void RingBuffer::_incrementVariable(int* variable){
     /*
     Increment the target variable. 
     */
-    *variable = (*variable + 1 ) % BUFFERSIZE;
+    *variable = (*variable + 1 ) % INCBUFFERLENGTH;
    }
 
 int  RingBuffer::spaceAvailable(){
     /*
     Returns the number of characters available in the buffer
     */
-  return  BUFFERSIZE - length() - 1;
+  return  INCBUFFERLENGTH - length() - 1;
 }
 
 int RingBuffer::length(void)
@@ -189,7 +193,7 @@ int RingBuffer::length(void)
   if ( _endOfString >= _beginningOfString ) // Linear
     return _endOfString - _beginningOfString ;
   else          // must have rolled
-    return  ( BUFFERSIZE - _beginningOfString + _endOfString); 
+    return  ( INCBUFFERLENGTH - _beginningOfString + _endOfString); 
 }
 
 

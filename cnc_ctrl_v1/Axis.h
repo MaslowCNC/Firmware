@@ -18,22 +18,18 @@
     #ifndef Axis_h
     #define Axis_h
 
-    #include "Arduino.h"
-    #include "PID_v1.h"
-    #include <EEPROM.h>
-    #include "MotorGearboxEncoder.h"
-
     class Axis{
         public:
-            Axis(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const int& eepromAdr, const unsigned long& loopInterval);
+            void   setup(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const unsigned long& loopInterval);
             void   write(const float& targetPosition);
             float  read();
             void   set(const float& newAxisPosition);
+            void   setSteps(const long& steps);
             int    updatePositionFromEncoder();
             void   initializePID(const unsigned long& loopInterval);
             int    detach();
             int    attach();
-            void   hold();
+            void   detachIfIdle();
             void   endMove(const float& finalTarget);
             void   stop();
             float  target();
@@ -44,32 +40,29 @@
             void   enablePositionPID();
             void   setPIDAggressiveness(float aggressiveness);
             void   test();
-            void   changePitch(const float& newPitch);
+            void   changePitch(float* newPitch);
             float  getPitch();
-            void   changeEncoderResolution(const int& newResolution);
+            void   changeEncoderResolution(float* newResolution);
             bool   attached();
-            void   wipeEEPROM();
             MotorGearboxEncoder    motorGearboxEncoder;
-            void   setPIDValues(float Kp, float Ki, float Kd, float propWeight, float KpV, float KiV, float KdV);
-            void   loadPositionFromMemory();
+            void   setPIDValues(float* Kp, float* Ki, float* Kd, float* propWeight, float* KpV, float* KiV, float* KdV, float* propWeightV);
             String     getPIDString();
             double     pidInput();
             double     pidOutput();
+            long  steps();
             
         private:
             int        _PWMread(int pin);
             void       _writeFloat(const unsigned int& addr, const float& x);
             float      _readFloat(const unsigned int& addr);
-            float      _axisTarget;
-            double     _timeLastMoved;
+            unsigned long   _timeLastMoved;
             volatile double _pidSetpoint;
             volatile double _pidInput; 
             volatile double _pidOutput;
-            double     _Kp=0, _Ki = 0, _Kd=0;
+            float      *_Kp, *_Ki, *_Kd;
             PID        _pidController;
-            int        _eepromAdr;
-            float      _mmPerRotation = 1;
-            float      _encoderSteps  = 100;
+            float      *_mmPerRotation;
+            float      *_encoderSteps;
             bool       _disableAxisForTesting = false;
             char       _axisName;
     };

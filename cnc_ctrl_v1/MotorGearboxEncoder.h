@@ -17,25 +17,20 @@
     
     #ifndef MotorGearboxEncoder_h
     #define MotorGearboxEncoder_h
-
-    #include "Arduino.h"
-    #include "Encoder.h"
-    #include "Motor.h"
-    #include "PID_v1.h"
     
     class MotorGearboxEncoder{
         public:
-            MotorGearboxEncoder(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const unsigned long& loopInterval);
+            void setup(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const unsigned long& loopInterval);
             Encoder    encoder;
             Motor      motor;
             float      cachedSpeed();
             void       write(const float& speed);
             void       computePID();
-            void       setName(const char& newName);
+            void       setName(char *newName);
             char       name();
             void       initializePID(const unsigned long& loopInterval);
             void       setPIDAggressiveness(float aggressiveness);
-            void       setPIDValues(float KpV, float KiV, float KdV);
+            void       setPIDValues(float* KpV, float* KiV, float* KdV, float* propWeight);
             void       setEncoderResolution(float resolution);
             float      computeSpeed();
             String     getPIDString();
@@ -47,11 +42,15 @@
             volatile double     _lastTimeStamp;
             float               _lastDistMoved;
             float               _RPM;
-            char       _motorName;
+            char       *_motorName;
             double     _pidOutput;
             PID        _PIDController;
-            double     _Kp=0, _Ki=0, _Kd=0;
-            float      _encoderStepsToRPMScaleFactor = 7364.0;   //6*10^7 us per minute divided by 8148 steps per revolution
+            float      *_Kp, *_Ki, *_Kd;
+            // This could be converted to a pointer to save 4 bytes, but the
+            // calculation would have to be done at a much higher level and 
+            // passed through each axis for it to have a single pointer to 
+            // both main motors
+            float      _encoderStepsToRPMScaleFactor = 7394.9;   //6*10^7 us per minute divided by 8113.7 steps per revolution
     };
 
     #endif
