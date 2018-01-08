@@ -25,6 +25,10 @@
                            // LOOPINTERVAL tuning
 #define KINEMATICSDBG 0    // set to 1 for additional kinematics debug messaging
 
+// #define FAKE_SERVO      // Uncomment this line to cause the Firmware to mimic
+                           // a servo updating the encoder steps even if no servo
+                           // is connected.  Useful for testing on an arduino only
+
 
 #define LOOPINTERVAL 10000 // What is the frequency of the PID loop in microseconds
 

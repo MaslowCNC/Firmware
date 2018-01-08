@@ -84,6 +84,15 @@ void   Axis::setSteps(const long& steps){
 
 void   Axis::computePID(){
     
+    #ifdef FAKE_SERVO
+      static unsigned long lastPrint = millis();
+      if (motorGearboxEncoder.motor.attached()){
+        // Adds up to 10% error just to simulate servo noise
+        double rpm = (-1 * _pidOutput) * random(90, 110) / 100;
+        unsigned long steps = motorGearboxEncoder.encoder.read() + round( rpm * *_encoderSteps * LOOPINTERVAL)/(60 * 1000000);
+        motorGearboxEncoder.encoder.write(steps);
+      }
+    #endif
 
     if (_disableAxisForTesting || !motorGearboxEncoder.motor.attached()){
         return;
