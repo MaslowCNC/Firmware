@@ -48,7 +48,6 @@ void readSerialCommands(){
             }
             else if (c == '~'){
                 bit_false(sys.pause, PAUSE_FLAG_USER_PAUSE);
-                reportStatusMessage(STATUS_OK);
             }
             else{
                 int bufferOverflow = incSerialBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
@@ -580,7 +579,7 @@ void gcodeExecuteLoop(){
       status = interpretCommandString(readyCommandString);
       readyCommandString = "";
 
-      // Get next line of GCode
+      // Get next line of GCode (This will send an 'ok' command)
       if (!sys.stop){reportStatusMessage(status);}
   }
 }
@@ -634,12 +633,9 @@ int   G1(const String& readString, int G0orG1){
             else{
                 Serial.println(F(" mm"));
             }
-            
             pause(); //Wait until the z-axis is adjusted
             
             zAxis.set(zgoto);
-
-            maslowDelay(1000);
         }
     }
     
