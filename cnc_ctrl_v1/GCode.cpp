@@ -38,19 +38,29 @@ void readSerialCommands(){
     if this is a necessary character write to the incSerialBuffer otherwise discard
     it.
     */
+    
+    static bool quickCommandFlag = false;
+    
     if (Serial.available() > 0) {
         while (Serial.available() > 0) {
             char c = Serial.read();
             if (c == '!'){
                 sys.stop = true;
+                quickCommandFlag = true;
                 bit_false(sys.pause, PAUSE_FLAG_USER_PAUSE);
                 reportStatusMessage(STATUS_OK);
             }
             else if (c == '~'){
+                quickCommandFlag = true;
                 bit_false(sys.pause, PAUSE_FLAG_USER_PAUSE);
                 reportStatusMessage(STATUS_OK);
             }
+            // else if (quickCommandFlag and c == '\n'){
+            //   // Catch line ending and ignore after quick commands
+            //   quickCommandFlag = false;
+            // }
             else{
+                quickCommandFlag = false;
                 int bufferOverflow = incSerialBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
                 if (bufferOverflow != 0) {
                   sys.stop = true;
