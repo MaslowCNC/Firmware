@@ -55,10 +55,10 @@ void readSerialCommands(){
                 bit_false(sys.pause, PAUSE_FLAG_USER_PAUSE);
                 reportStatusMessage(STATUS_OK);
             }
-            // else if (quickCommandFlag and c == '\n'){
-            //   // Catch line ending and ignore after quick commands
-            //   quickCommandFlag = false;
-            // }
+            else if (quickCommandFlag and c == '\n'){
+              // Catch line ending and ignore after quick commands
+              quickCommandFlag = false;
+            }
             else{
                 quickCommandFlag = false;
                 int bufferOverflow = incSerialBuffer.write(c); //gets one byte from serial buffer, writes it to the internal ring buffer
