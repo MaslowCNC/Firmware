@@ -200,8 +200,8 @@ void reportMaslowSettings() {
     Serial.print(F(" (z axis Kp Velocity)\r\n$34=")); Serial.print(sysSettings.zKiV);
     Serial.print(F(" (z axis Ki Velocity)\r\n$35=")); Serial.print(sysSettings.zKdV);
     Serial.print(F(" (z axis Kd Velocity)\r\n$36=")); Serial.print(sysSettings.zPropWeightV);
-    Serial.print(F(" (chain sag correction value, $K)\r\n$37=")); Serial.print(sysSettings.chainSagCorrection);
-    Serial.println(F(" (z axis Velocity proportional weight)"));
+    Serial.print(F(" (z axis Velocity proportional weight)\r\n$37=")); Serial.print(sysSettings.chainSagCorrection);
+    Serial.println(F(" (chain sag correction value)"));
   #endif
 }
 

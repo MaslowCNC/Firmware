@@ -20,8 +20,8 @@ Copyright 2014-2017 Bar Smith*/
 #ifndef settings_h
 #define settings_h
 
-#define SETTINGSVERSION 1      // The current version of settings, if this doesn't
-                               // match what is in EEPROM then settings on 
+#define SETTINGSVERSION 2      // The current version of settings, if this doesn't
+                               // match what is in EEPROM then settings on
                                // machine are reset to defaults
 #define EEPROMVALIDDATA 56     // This is just a random byte value that is used 
                                // to determine if the data in the EEPROM was 
@@ -42,6 +42,7 @@ typedef struct {  // I think this is about ~128 bytes in size if I counted corre
   float sledCG;
   byte kinematicsType;
   float rotationDiskRadius;
+  float chainSagCorrection;
   unsigned int axisDetachTime;
   unsigned int originalChainLength;
   float encoderSteps;
