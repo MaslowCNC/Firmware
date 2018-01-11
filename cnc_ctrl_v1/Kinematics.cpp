@@ -205,16 +205,16 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     float Motor2Distance = sqrt(pow((_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
 
     //Calculate the chain angles from horizontal
-    float Chain1Angle = 3.14159 - acos(R/Motor1Distance) - acos((_yCordOfMotor - yTarget)/Motor1Distance)
-    float Chain2Angle = 3.14159 - acos(R/Motor2Distance) - acos((_yCordOfMotor - yTarget)/Motor2Distance)
+    float Chain1Angle = 3.14159 - acos(R/Motor1Distance) - acos((_yCordOfMotor - yTarget)/Motor1Distance);
+    float Chain2Angle = 3.14159 - acos(R/Motor2Distance) - acos((_yCordOfMotor - yTarget)/Motor2Distance);
 
     //Calculate the straight chain length from the sprocket to the bit
-    float Chain1Straight = sqrt(pow(Motor1Distance,2)-pow(R,2))
-    float Chain2Straight = sqrt(pow(Motor2Distance,2)-pow(R,2))
+    float Chain1Straight = sqrt(pow(Motor1Distance,2)-pow(R,2));
+    float Chain2Straight = sqrt(pow(Motor2Distance,2)-pow(R,2));
 
     //Correct the straight chain lengths to account for chain sag
-    Chain1Straight *= (1 + ((sysSettings.chainSagCorrection / 1000000000000) * pow(cos(Chain1Angle),2) * pow(Chain1Straight,2) * pow((tan(Chain2Angle) * cos(Chain1Angle)) + sin(Chain1Angle),2)))
-    Chain2Straight *= (1 + ((sysSettings.chainSagCorrection / 1000000000000) * pow(cos(Chain2Angle),2) * pow(Chain2Straight,2) * pow((tan(Chain1Angle) * cos(Chain2Angle)) + sin(Chain2Angle),2)))
+    Chain1Straight *= (1 + ((sysSettings.chainSagCorrection / 1000000000000) * pow(cos(Chain1Angle),2) * pow(Chain1Straight,2) * pow((tan(Chain2Angle) * cos(Chain1Angle)) + sin(Chain1Angle),2)));
+    Chain2Straight *= (1 + ((sysSettings.chainSagCorrection / 1000000000000) * pow(cos(Chain2Angle),2) * pow(Chain2Straight,2) * pow((tan(Chain1Angle) * cos(Chain2Angle)) + sin(Chain2Angle),2)));
 
     //Calculate total chain lengths accounting for sprocket geometry and chain sag
     float Chain1 = (R * Chain1Angle) + Chain1Straight;
