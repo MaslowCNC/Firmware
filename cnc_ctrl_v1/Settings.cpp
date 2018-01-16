@@ -102,6 +102,7 @@ void settingsReset() {
     sysSettings.zKiV = 0.0;    // float zKiV;
     sysSettings.zKdV = 0.28;   // float zKdV;
     sysSettings.zPropWeightV = 1.0;    // float zPropWeightV;
+    sysSettings.chainSagCorrection = 0.0;  // float chainSagCorrection;
     sysSettings.eepromValidData = EEPROMVALIDDATA; // byte eepromValidData;
 }
 
@@ -380,6 +381,9 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
             }
             zAxis.setPIDValues(&sysSettings.zKpPos, &sysSettings.zKiPos, &sysSettings.zKdPos, &sysSettings.zPropWeightPos, &sysSettings.zKpV, &sysSettings.zKiV, &sysSettings.zKdV, &sysSettings.zPropWeightV);
             break;
+        case 37:
+              sysSettings.chainSagCorrection = value;
+              break;
         default:
               return(STATUS_INVALID_STATEMENT);
     }
