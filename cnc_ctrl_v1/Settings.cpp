@@ -229,7 +229,7 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
     
     // We can add whatever sanity checks we want here and error out if we like
     switch(parameter) {
-        case 0: case 1: case 2: case 3: case 4: case 5:
+        case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
             switch(parameter) {
                 case 0:
                       sysSettings.machineWidth = value;
@@ -249,18 +249,18 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
                 case 5: 
                       sysSettings.sledHeight = value;
                       break;
+                case 6: 
+                      sysSettings.sledCG = value;
+                      break;
+                case 7: 
+                      sysSettings.kinematicsType = value;
+                      break;
+                case 8: 
+                      sysSettings.rotationDiskRadius = value;
+                      break;
             }
-            kinematics.recomputeGeometry();
+            kinematics.init();
             break;
-        case 6: 
-              sysSettings.sledCG = value;
-              break;
-        case 7: 
-              sysSettings.kinematicsType = value;
-              break;
-        case 8: 
-              sysSettings.rotationDiskRadius = value;
-              break;
         case 9: 
               sysSettings.axisDetachTime = value;
               break;
@@ -277,6 +277,7 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
                   settingsLoadOldSteps();
                 }
               }
+              kinematics.init();
               break;
         case 13: 
               sysSettings.distPerRot = value;
@@ -289,6 +290,7 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
                   settingsLoadOldSteps();
                 }
               }
+              kinematics.init();
               break;
         case 15: 
               sysSettings.maxFeed = value;
