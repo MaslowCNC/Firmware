@@ -235,6 +235,7 @@ void systemSaveAxesPosition(){
 
 // This should be the ultimate fallback, it would be best if we didn't even need 
 // something like this at all
+// TODO delete this function, we are not even using it anymore
 void  _watchDog(){
     /*
     If:
