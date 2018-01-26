@@ -301,7 +301,7 @@ byte systemExecuteCmdstring(String& cmdString){
                 break;
               case 'K' : // forces kinematics update
                 kinematics.recomputeGeometry();
-                kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
+                kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition, sys.xPosition, sys.yPosition);
                 break;
               // case 'G' : // Prints gcode parser state
               //   report_gcode_modes();
