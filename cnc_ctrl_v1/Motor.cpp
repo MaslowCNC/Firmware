@@ -90,16 +90,16 @@ void Motor::write(int speed){
 
       if(_pwmPin == 12){
           if (forward){
-              analogWrite(_pin1 , abs(speed));
-              digitalWrite(_pin2, LOW);
-              digitalWrite(_pwmPin, HIGH);
+              analogWrite(_pin1 , speed);  // PWM on this pin to avoid using pin12 (timer1)
+              digitalWrite(_pin2, LOW);    // this pin sets direction with respect to _pin1 
+              digitalWrite(_pwmPin, HIGH); // this pin enables the outputs of the other two
           }
           else if (speed == 0){
           }
           else{
-              analogWrite(_pin1 , 255 - abs(speed));
-              digitalWrite(_pin2, HIGH);
-              digitalWrite(_pwmPin, HIGH);
+              analogWrite(_pin1 , 255 - speed); // PWM signal is inverted to cause reverse motion
+              digitalWrite(_pin2, HIGH);        // setting this pin HIGH causes _pin1 PWM to drive reverse
+              digitalWrite(_pwmPin, HIGH);      // enable the output
           }        
       } else {
           if (forward){
@@ -124,17 +124,17 @@ void Motor::directWrite(int voltage){
     
     if(_pwmPin == 12){
         if (voltage > 0){
-            analogWrite(_pin1 , abs(voltage));
-            digitalWrite(_pin2, LOW);
-            digitalWrite(_pwmPin, HIGH);
+            analogWrite(_pin1 , abs(voltage)); // PWM on this pin to avoid using pin12 (timer1)
+            digitalWrite(_pin2, LOW);          // this pin sets direction with respect to _pin1 
+            digitalWrite(_pwmPin, HIGH);       // this pin enables the outputs of the other two
         }
         else if (voltage == 0){
             voltage = voltage;
         }
         else{
-            analogWrite(_pin1 , 255 - abs(voltage));
-            digitalWrite(_pin2, HIGH);
-            digitalWrite(_pwmPin, HIGH);
+            analogWrite(_pin1 , 255 - abs(voltage)); // PWM signal is inverted to cause reverse motion
+            digitalWrite(_pin2, HIGH);               // setting this pin HIGH causes _pin1 PWM to drive reverse
+            digitalWrite(_pwmPin, HIGH);             // enable the output
         }
     }
     else{
