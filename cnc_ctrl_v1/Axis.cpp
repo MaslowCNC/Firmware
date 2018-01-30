@@ -261,6 +261,7 @@ void   Axis::test(){
         motorGearboxEncoder.motor.directWrite(255);
         i++;
         maslowDelay(1);
+		//ToDo: it would be cool if we reported the actual velocity here, but you'd have to convert to kinematic
         if (sys.stop){return;}
     }
     
@@ -282,6 +283,7 @@ void   Axis::test(){
         motorGearboxEncoder.motor.directWrite(-255);
         i++;
         maslowDelay(1);
+		//ToDo: it would be cool if we reported the actual velocity here, but you'd have to convert to kinematic
         if (sys.stop){return;}
     }
     
