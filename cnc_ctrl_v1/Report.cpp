@@ -237,6 +237,8 @@ void  returnPoz(){
         Serial.print(sys.yPosition/sys.inchesToMMConversion);
         Serial.print(F(","));
         Serial.print(zAxis.read()/sys.inchesToMMConversion);
+        Serial.print(F(","));
+        Serial.print(sys.feedrate/sys.inchesToMMConversion);
         Serial.println(F(",WPos:0.000,0.000,0.000>"));
         
         returnError();
