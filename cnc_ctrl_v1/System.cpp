@@ -290,7 +290,7 @@ byte systemExecuteCmdstring(String& cmdString){
     }
     else {
         switch( cmdString[char_counter] ) {
-          case '$': case 'K':// case 'G': case 'C': case 'X':
+          case '$': // case 'G': case 'C': case 'X':
             if ( cmdString.length() > 2 ) { return(STATUS_INVALID_STATEMENT); }
             switch( cmdString[char_counter] ) {
               case '$' : // Prints Maslow settings
@@ -298,10 +298,6 @@ byte systemExecuteCmdstring(String& cmdString){
                 // else {
                   reportMaslowSettings();
                 // }
-                break;
-              case 'K' : // forces kinematics update
-                kinematics.recomputeGeometry();
-                kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition, sys.xPosition, sys.yPosition);
                 break;
               // case 'G' : // Prints gcode parser state
               //   report_gcode_modes();
