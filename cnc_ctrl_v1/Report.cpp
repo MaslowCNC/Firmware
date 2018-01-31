@@ -138,6 +138,7 @@ void reportMaslowSettings() {
     Serial.print(F("$7=")); Serial.println(sysSettings.kinematicsType);
     Serial.print(F("$8=")); Serial.println(sysSettings.rotationDiskRadius, 8);
     Serial.print(F("$9=")); Serial.println(sysSettings.axisDetachTime);
+    Serial.print(F("$10=")); Serial.println(sysSettings.chainLength);
     Serial.print(F("$11=")); Serial.println(sysSettings.originalChainLength);
     Serial.print(F("$12=")); Serial.println(sysSettings.encoderSteps, 8);
     Serial.print(F("$13=")); Serial.println(sysSettings.distPerRot, 8);
@@ -175,8 +176,9 @@ void reportMaslowSettings() {
     Serial.print(F(" (sled cg, mm)\r\n$7=")); Serial.print(sysSettings.kinematicsType);
     Serial.print(F(" (Kinematics Type 1=Quadrilateral, 2=Triangular)\r\n$8=")); Serial.print(sysSettings.rotationDiskRadius, 8);
     Serial.print(F(" (rotation radius, mm)\r\n$9=")); Serial.print(sysSettings.axisDetachTime);
-    Serial.print(F(" (axis idle before detach, ms)\r\n$11=")); Serial.print(sysSettings.originalChainLength);
-    Serial.print(F(" (original chain length, mm)\r\n$12=")); Serial.print(sysSettings.encoderSteps, 8);
+    Serial.print(F(" (axis idle before detach, ms)\r\n$10=")); Serial.print(sysSettings.chainLength);
+    Serial.print(F(" (full length of chain, mm)\r\n$11=")); Serial.print(sysSettings.originalChainLength);
+    Serial.print(F(" (calibration chain length, mm)\r\n$12=")); Serial.print(sysSettings.encoderSteps, 8);
     Serial.print(F(" (main steps per revolution)\r\n$13=")); Serial.print(sysSettings.distPerRot, 8);
     Serial.print(F(" (distance / rotation, mm)\r\n$15=")); Serial.print(sysSettings.maxFeed);
     Serial.print(F(" (max feed, mm/min)\r\n$16=")); Serial.print(sysSettings.zAxisAttached);

@@ -269,8 +269,8 @@ void  Kinematics::forward(const float& chainALength, const float& chainBLength, 
         // No need for sys.stop check here
 
         //if we've converged on the point...or it's time to give up, exit the loop
-        if((abs(aChainError) < .1 && abs(bChainError) < .1) or guessCount > KINEMATICSMAXGUESS or guessLengthA > 3360  or guessLengthB > 3360){
-            if((guessCount > KINEMATICSMAXGUESS) or guessLengthA > 3360 or guessLengthB > 3360){
+        if((abs(aChainError) < .1 && abs(bChainError) < .1) or guessCount > KINEMATICSMAXGUESS or guessLengthA > sysSettings.chainLength  or guessLengthB > sysSettings.chainLength){
+            if((guessCount > KINEMATICSMAXGUESS) or guessLengthA > sysSettings.chainLength or guessLengthB > sysSettings.chainLength){
                 Serial.print(F("Message: Unable to find valid machine position for chain lengths "));
                 Serial.print(chainALength);
                 Serial.print(", ");

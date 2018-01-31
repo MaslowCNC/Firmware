@@ -264,6 +264,9 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
         case 9: 
               sysSettings.axisDetachTime = value;
               break;
+        case 10: 
+              sysSettings.chainLength = value;
+              break;
         case 11: 
               sysSettings.originalChainLength = value;
               break;
