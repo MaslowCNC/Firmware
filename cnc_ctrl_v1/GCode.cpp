@@ -591,7 +591,7 @@ void gcodeExecuteLoop(){
       readyCommandString = "";
 
       // Get next line of GCode
-      if (!sys.stop){reportStatusMessage(status);}
+      reportStatusMessage(status);
   }
 }
 
