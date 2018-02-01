@@ -75,7 +75,7 @@ void settingsReset() {
     sysSettings.sledHeight = 139.0;  // float sledHeight;
     sysSettings.sledCG = 79.0;   // float sledCG;
     sysSettings.kinematicsType = 1;      // byte kinematicsType;
-    sysSettings.rotationDiskRadius = 100.0;  // float rotationDiskRadius;
+    sysSettings.rotationDiskRadius = 250.0;  // float rotationDiskRadius;
     sysSettings.axisDetachTime = 2000;   // int axisDetachTime;
     sysSettings.originalChainLength = 1650;   // int originalChainLength;
     sysSettings.encoderSteps = 8113.7; // float encoderSteps;
