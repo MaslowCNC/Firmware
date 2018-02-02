@@ -199,25 +199,31 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     
     //Confirm that the coordinates are on the wood
     _verifyValidTarget(&xTarget, &yTarget);
-    
+
+    //Set up variables
+    float Chain1Angle = 0;
+    float Chain2Angle = 0;
+    float Chain1AroundSprocket = 0;
+    float Chain2AroundSprocket = 0;
+
     //Calculate motor axes length to the bit
     float Motor1Distance = sqrt(pow((-1*_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
     float Motor2Distance = sqrt(pow((_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
 
     //Calculate the chain angles from horizontal, based on if the chain connects to the sled from the top or bottom of the sprocket
     if(sysSettings.chainOverSprocket == 1){
-        float Chain1Angle = asin((_yCordOfMotor - yTarget)/Motor1Distance) + asin(R/Motor1Distance);
-        float Chain2Angle = asin((_yCordOfMotor - yTarget)/Motor2Distance) + asin(R/Motor2Distance);
+        Chain1Angle = asin((_yCordOfMotor - yTarget)/Motor1Distance) + asin(R/Motor1Distance);
+        Chain2Angle = asin((_yCordOfMotor - yTarget)/Motor2Distance) + asin(R/Motor2Distance);
 
-        float Chain1AroundSprocket = R * Chain1Angle;
-        float Chain2AroundSprocket = R * Chain2Angle;
+        Chain1AroundSprocket = R * Chain1Angle;
+        Chain2AroundSprocket = R * Chain2Angle;
     }
     else{
-        float Chain1Angle = asin((_yCordOfMotor - yTarget)/Motor1Distance) - asin(R/Motor1Distance);
-        float Chain2Angle = asin((_yCordOfMotor - yTarget)/Motor2Distance) - asin(R/Motor2Distance);
+        Chain1Angle = asin((_yCordOfMotor - yTarget)/Motor1Distance) - asin(R/Motor1Distance);
+        Chain2Angle = asin((_yCordOfMotor - yTarget)/Motor2Distance) - asin(R/Motor2Distance);
 
-        float Chain1AroundSprocket = R * (3.14159 - Chain1Angle);
-        float Chain2AroundSprocket = R * (3.14159 - Chain2Angle);
+        Chain1AroundSprocket = R * (3.14159 - Chain1Angle);
+        Chain2AroundSprocket = R * (3.14159 - Chain2Angle);
     }
 
     //Calculate the straight chain length from the sprocket to the bit
