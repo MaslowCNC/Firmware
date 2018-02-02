@@ -69,6 +69,7 @@ typedef struct {  // I think this is about ~128 bytes in size if I counted corre
   float zKdV;
   float zPropWeightV;
   float chainSagCorrection;
+  byte chainOverSprocket;
   byte eepromValidData;  // This should always be last, that way if an error
                          // happens in writing, it will not be written and we
 } settings_t;            // will know to reset the settings
