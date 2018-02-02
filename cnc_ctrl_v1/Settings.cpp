@@ -103,6 +103,7 @@ void settingsReset() {
     sysSettings.zKdV = 0.28;   // float zKdV;
     sysSettings.zPropWeightV = 1.0;    // float zPropWeightV;
     sysSettings.chainSagCorrection = 0.0;  // float chainSagCorrection;
+    sysSettings.chainOverSprocket = 1;   // byte chainOverSprocket;
     sysSettings.eepromValidData = EEPROMVALIDDATA; // byte eepromValidData;
 }
 
@@ -383,6 +384,10 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
             break;
         case 37:
               sysSettings.chainSagCorrection = value;
+              break;
+        case 38:
+              sysSettings.chainOverSprocket = value;
+              setupAxes();
               break;
         default:
               return(STATUS_INVALID_STATEMENT);
