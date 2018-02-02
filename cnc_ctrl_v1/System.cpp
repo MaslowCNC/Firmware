@@ -151,8 +151,16 @@ void   setupAxes(){
 
 
     }
-    leftAxis.setup (ENC, IN6, IN5, ENCODER3B, ENCODER3A, 'L', LOOPINTERVAL);
-    rightAxis.setup(ENA, IN1, IN2, ENCODER1A, ENCODER1B, 'R', LOOPINTERVAL);
+
+    if(sysSettings.chainOverSprocket == 1){
+        leftAxis.setup (ENC, IN6, IN5, ENCODER3B, ENCODER3A, 'L', LOOPINTERVAL);
+        rightAxis.setup(ENA, IN1, IN2, ENCODER1A, ENCODER1B, 'R', LOOPINTERVAL);
+    }
+    else{
+        leftAxis.setup (ENC, IN5, IN6, ENCODER3A, ENCODER3B, 'L', LOOPINTERVAL);
+        rightAxis.setup(ENA, IN2, IN1, ENCODER1B, ENCODER1A, 'R', LOOPINTERVAL);
+    }
+    
     zAxis.setup    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, 'Z', LOOPINTERVAL);
 }
 
