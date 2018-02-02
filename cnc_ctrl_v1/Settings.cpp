@@ -386,8 +386,10 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               sysSettings.chainSagCorrection = value;
               break;
         case 38:
-              sysSettings.chainOverSprocket = value;
-              setupAxes();
+              if (sysSettings.chainOverSprocket != value){
+                  sysSettings.chainOverSprocket = value;
+                  systemReset();
+              }
               break;
         default:
               return(STATUS_INVALID_STATEMENT);
