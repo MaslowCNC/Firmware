@@ -87,7 +87,6 @@ typedef struct {
   byte eepromValidData;
 } settingsStepsV1_t;
 
-void settingsInit();
 void settingsLoadFromEEprom();
 void settingsReset();
 void settingsWipe(byte);
