@@ -38,8 +38,9 @@ void setup(){
     Serial.print(getPCBVersion());
     Serial.println(F(" Detected"));
     sys.inchesToMMConversion = 1;
-    settingsInit();
+    settingsLoadFromEEprom();
     setupAxes();
+    settingsLoadStepsFromEEprom();
     // TODO This seems wrong, if the encoder steps are changed, axis position
     // will be in the wrong place.  Would be better if we stored positions as
     // steps 

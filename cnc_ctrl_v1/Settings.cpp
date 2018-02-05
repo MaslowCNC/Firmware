@@ -22,12 +22,6 @@ Copyright 2014-2017 Bar Smith*/
 
 #include "Maslow.h"
 
-void settingsInit(){
-    // Do we have any error handling of this?
-    settingsLoadFromEEprom();
-    settingsLoadStepsFromEEprom();
-}
-
 void settingsLoadFromEEprom(){
     /* 
     Loads data from EEPROM if EEPROM data is valid, only called on startup
