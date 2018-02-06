@@ -165,6 +165,7 @@ void reportMaslowSettings() {
     Serial.print(F("$35=")); Serial.println(sysSettings.zKdV, 8);
     Serial.print(F("$36=")); Serial.println(sysSettings.zPropWeightV, 8);
     Serial.print(F("$37=")); Serial.println(sysSettings.chainSagCorrection, 8);
+    Serial.print(F("$38=")); Serial.println(sysSettings.chainOverSprocket);
   #else
     Serial.print(F("$0=")); Serial.print(sysSettings.machineWidth);
     Serial.print(F(" (machine width, mm)\r\n$1=")); Serial.print(sysSettings.machineHeight, 8);
@@ -203,7 +204,8 @@ void reportMaslowSettings() {
     Serial.print(F(" (z axis Ki Velocity)\r\n$35=")); Serial.print(sysSettings.zKdV, 8);
     Serial.print(F(" (z axis Kd Velocity)\r\n$36=")); Serial.print(sysSettings.zPropWeightV, 8);
     Serial.print(F(" (z axis Velocity proportional weight)\r\n$37=")); Serial.print(sysSettings.chainSagCorrection, 8);
-    Serial.println(F(" (chain sag correction value)"));
+    Serial.print(F(" (chain sag correction value)\r\n$38=")); Serial.print(sysSettings.chainOverSprocket);
+    Serial.println(F(" (chain over sprocket)"));
   #endif
 }
 

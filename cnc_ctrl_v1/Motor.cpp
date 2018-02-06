@@ -83,42 +83,37 @@ void Motor::write(int speed){
     Sets motor speed from input. Speed = 0 is stopped, -255 is full reverse, 255 is full ahead.
     */
     if (_attachedState == 1){
-        
-        //linearize the motor
-        //speed = _convolve(speed);
-        
-        //set direction range is 0-180
-        if (speed > 0){
-            digitalWrite(_pin1 , HIGH);
-            digitalWrite(_pin2 , LOW );
-            speed = speed;
-        }
-        else if (speed == 0){
-            speed = speed;
-        }
-        else{
-            digitalWrite(_pin1 , LOW);
-            digitalWrite(_pin2 , HIGH );
-            speed = speed;
-        }
-        
-        //enforce range
-        speed = constrain(speed, -255, 255);
-        
-        _lastSpeed = speed; //saves speed for use in additive write
-        
-        speed = abs(speed); //remove sign from input because direction is set by control pins on H-bridge
-        
-        int pwmFrequency = round(speed);
-        
-        if(_pwmPin == 12){
-            pwmFrequency = map(pwmFrequency, 0, 255, 0, 1023);  //Scales 0-255 to 0-1023
-            Timer1.pwm(2, pwmFrequency);  //Special case for pin 12 due to timer blocking analogWrite()
-        }
-        else{
-            analogWrite(_pwmPin, pwmFrequency);
-        }
-        
+      speed = constrain(speed, -255, 255);
+      _lastSpeed = speed; //saves speed for use in additive write
+      bool forward = (speed > 0);
+      speed = abs(speed); //remove sign from input because direction is set by control pins on H-bridge   
+
+      if(_pwmPin == 12){
+          if (forward){
+              analogWrite(_pin1 , speed);  // PWM on this pin to avoid using pin12 (timer1)
+              digitalWrite(_pin2, LOW);    // this pin sets direction with respect to _pin1 
+              digitalWrite(_pwmPin, HIGH); // this pin enables the outputs of the other two
+          }
+          else if (speed == 0){
+          }
+          else{
+              analogWrite(_pin1 , 255 - speed); // PWM signal is inverted to cause reverse motion
+              digitalWrite(_pin2, HIGH);        // setting this pin HIGH causes _pin1 PWM to drive reverse
+              digitalWrite(_pwmPin, HIGH);      // enable the output
+          }        
+      } else {
+          if (forward){
+              digitalWrite(_pin1 , HIGH);
+              digitalWrite(_pin2 , LOW );
+          }
+          else if (speed == 0){
+          }
+          else{
+              digitalWrite(_pin1 , LOW);
+              digitalWrite(_pin2 , HIGH );
+          }
+          analogWrite(_pwmPin, speed);
+      }
     }
 }
 
@@ -127,24 +122,33 @@ void Motor::directWrite(int voltage){
     Write directly to the motor, ignoring if the axis is attached or any applied calibration.
     */
     
-    if (voltage > 0){
-        digitalWrite(_pin1 , HIGH);
-        digitalWrite(_pin2 , LOW );
-    }
-    else if (voltage == 0){
-        voltage = voltage;
-    }
-    else{
-        digitalWrite(_pin1 , LOW);
-        digitalWrite(_pin2 , HIGH );
-    }
-    
     if(_pwmPin == 12){
-        voltage = abs(voltage);
-        voltage = map(voltage, 0, 255, 0, 1023);  //Scales 0-255 to 0-1023
-        Timer1.pwm(2, voltage);  //Special case for pin 12 due to timer blocking analogWrite()
+        if (voltage > 0){
+            analogWrite(_pin1 , abs(voltage)); // PWM on this pin to avoid using pin12 (timer1)
+            digitalWrite(_pin2, LOW);          // this pin sets direction with respect to _pin1 
+            digitalWrite(_pwmPin, HIGH);       // this pin enables the outputs of the other two
+        }
+        else if (voltage == 0){
+            voltage = voltage;
+        }
+        else{
+            analogWrite(_pin1 , 255 - abs(voltage)); // PWM signal is inverted to cause reverse motion
+            digitalWrite(_pin2, HIGH);               // setting this pin HIGH causes _pin1 PWM to drive reverse
+            digitalWrite(_pwmPin, HIGH);             // enable the output
+        }
     }
     else{
+        if (voltage > 0){
+            digitalWrite(_pin1 , HIGH);
+            digitalWrite(_pin2 , LOW );
+        }
+        else if (voltage == 0){
+            voltage = voltage;
+        }
+        else{
+            digitalWrite(_pin1 , LOW);
+            digitalWrite(_pin2 , HIGH );
+        }
         analogWrite(_pwmPin, abs(voltage));
     }
 }

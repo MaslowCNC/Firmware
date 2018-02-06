@@ -22,12 +22,6 @@ Copyright 2014-2017 Bar Smith*/
 
 #include "Maslow.h"
 
-void settingsInit(){
-    // Do we have any error handling of this?
-    settingsLoadFromEEprom();
-    settingsLoadStepsFromEEprom();
-}
-
 void settingsLoadFromEEprom(){
     /* 
     Loads data from EEPROM if EEPROM data is valid, only called on startup
@@ -75,7 +69,7 @@ void settingsReset() {
     sysSettings.sledHeight = 139.0;  // float sledHeight;
     sysSettings.sledCG = 79.0;   // float sledCG;
     sysSettings.kinematicsType = 1;      // byte kinematicsType;
-    sysSettings.rotationDiskRadius = 100.0;  // float rotationDiskRadius;
+    sysSettings.rotationDiskRadius = 250.0;  // float rotationDiskRadius;
     sysSettings.axisDetachTime = 2000;   // int axisDetachTime;
     sysSettings.originalChainLength = 1650;   // int originalChainLength;
     sysSettings.encoderSteps = 8113.7; // float encoderSteps;
@@ -103,6 +97,7 @@ void settingsReset() {
     sysSettings.zKdV = 0.28;   // float zKdV;
     sysSettings.zPropWeightV = 1.0;    // float zPropWeightV;
     sysSettings.chainSagCorrection = 0.0;  // float chainSagCorrection;
+    sysSettings.chainOverSprocket = 1;   // byte chainOverSprocket;
     sysSettings.eepromValidData = EEPROMVALIDDATA; // byte eepromValidData;
 }
 
@@ -388,6 +383,9 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
             break;
         case 37:
               sysSettings.chainSagCorrection = value;
+              break;
+        case 38:
+              sysSettings.chainOverSprocket = value;
               break;
         default:
               return(STATUS_INVALID_STATEMENT);

@@ -38,8 +38,9 @@ void setup(){
     Serial.print(getPCBVersion());
     Serial.println(F(" Detected"));
     sys.inchesToMMConversion = 1;
+    settingsLoadFromEEprom();
     setupAxes();
-    settingsInit();
+    settingsLoadStepsFromEEprom();
     // TODO This seems wrong, if the encoder steps are changed, axis position
     // will be in the wrong place.  Would be better if we stored positions as
     // steps 
@@ -54,6 +55,7 @@ void setup(){
     
     Serial.println(F("Grbl v1.00"));  // Why GRBL?  Apparenlty because some programs are silly and look for this as an initailization command
     Serial.println(F("ready"));
+    reportStatusMessage(STATUS_OK);
 }
 
 void runsOnATimer(){
@@ -79,7 +81,6 @@ void loop(){
     kinematics.init();
     
     // Let's go!
-    reportStatusMessage(STATUS_OK);
     sys.stop = false;            // We should consider an abort option which
                                  // is not reset automatically such as a software
                                  // limit
