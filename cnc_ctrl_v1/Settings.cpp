@@ -143,14 +143,12 @@ void settingsSaveStepstoEEprom(){
     */
     // don't run if old position data has not been incorporated yet
     if (!sys.oldSettingsFlag){
-      settingsVersion_t settingsVersionStruct = {SETTINGSVERSION, EEPROMVALIDDATA};
       settingsStepsV1_t sysSteps = {
         leftAxis.steps(),
         rightAxis.steps(),
         zAxis.steps(),
         EEPROMVALIDDATA
       };
-      EEPROM.put(300, settingsVersionStruct);
       EEPROM.put(310, sysSteps);
     }
 }
@@ -165,16 +163,12 @@ void settingsLoadStepsFromEEprom(){
     settingsStepsV1_t tempStepsV1;
     settingsVersion_t settingsVersionStruct;
     
-    EEPROM.get(300, settingsVersionStruct);
     EEPROM.get(310, tempStepsV1);
-    if (settingsVersionStruct.settingsVersion == SETTINGSVERSION &&
-        settingsVersionStruct.eepromValidData == EEPROMVALIDDATA &&
-        tempStepsV1.eepromValidData == EEPROMVALIDDATA){
+    if (tempStepsV1.eepromValidData == EEPROMVALIDDATA){
             leftAxis.setSteps(tempStepsV1.lSteps);
             rightAxis.setSteps(tempStepsV1.rSteps);
             zAxis.setSteps(tempStepsV1.zSteps);
-    }// We can add additional elseif statements here to check for old settings 
-    // versions and upgrade them without a loss of data.
+    }
     else if (EEPROM.read(5) == EEPROMVALIDDATA &&
         EEPROM.read(105) == EEPROMVALIDDATA &&
         EEPROM.read(205) == EEPROMVALIDDATA){
