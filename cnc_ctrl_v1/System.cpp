@@ -169,6 +169,32 @@ int getPCBVersion(){
 }
 
 
+//
+// PWM frequency change
+//  presently just sets the default value
+//  different values seem to need specific PWM tunings...
+//
+void setPWMPrescalers() {
+// first must erase the bits in each TTCRxB register that control the timers prescaler
+    int prescalerEraser = 0B0111;
+    TCCR2B &= ~prescalerEraser;
+    TCCR3B &= ~prescalerEraser;
+    TCCR4B &= ~prescalerEraser;
+// now choose how to set those same three bits
+    // prescaler = 1 ---> PWM frequency is 31000 Hz
+    // prescaler = 2 ---> PWM frequency is 4000 Hz
+    // prescaler = 3 ---> PWM frequency is 490 Hz (default value)
+    // prescaler = 4 ---> PWM frequency is 120 Hz
+    // prescaler = 5 ---> PWM frequency is 30 Hz
+    // prescaler = 6 ---> PWM frequency is <20 Hz
+    int prescalerChoice = 3;
+// and apply it
+    TCCR2B |= prescalerChoice; // pins 9, 10
+    TCCR3B |= prescalerChoice; // pins 2, 3, 5
+    TCCR4B |= prescalerChoice; // pins 6, 7, 8
+}
+
+
 // This should likely go away and be handled by setting the pause flag and then
 // pausing in the execSystemRealtime function
 // Need to check if all returns from this subsequently look to sys.stop
