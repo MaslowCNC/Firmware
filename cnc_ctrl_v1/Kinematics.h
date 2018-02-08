@@ -34,7 +34,7 @@
             void  quadrilateralInverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  triangularInverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  recomputeGeometry();
-            void  forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos);
+            void  forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos, float xGuess, float yGuess);
             //geometry
             float h; //distance between sled attach point and bit
             float R             = 10.1;                                //sprocket radius

@@ -41,13 +41,10 @@ void setup(){
     settingsLoadFromEEprom();
     setupAxes();
     settingsLoadStepsFromEEprom();
-    // TODO This seems wrong, if the encoder steps are changed, axis position
-    // will be in the wrong place.  Would be better if we stored positions as
-    // steps 
     // Set initial desired position of the machine to its current position
     leftAxis.write(leftAxis.read());
-    rightAxis.write(leftAxis.read());
-    zAxis.write(leftAxis.read());
+    rightAxis.write(rightAxis.read());
+    zAxis.write(zAxis.read());
     readyCommandString.reserve(INCBUFFERLENGTH);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
     gcodeLine.reserve(INCBUFFERLENGTH);
     Timer1.initialize(LOOPINTERVAL);
