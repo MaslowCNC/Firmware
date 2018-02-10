@@ -44,6 +44,7 @@ void settingsLoadFromEEprom(){
     }
     
     // Apply settings
+    setPWMPrescalers(int(sysSettings.fPWM));
     kinematics.recomputeGeometry();
     leftAxis.changeEncoderResolution(&sysSettings.encoderSteps);
     rightAxis.changeEncoderResolution(&sysSettings.encoderSteps);
@@ -98,6 +99,7 @@ void settingsReset() {
     sysSettings.zPropWeightV = 1.0;    // float zPropWeightV;
     sysSettings.chainSagCorrection = 0.0;  // float chainSagCorrection;
     sysSettings.chainOverSprocket = 1;   // byte chainOverSprocket;
+    sysSettings.fPWM = 3;   // byte fPWM;
     sysSettings.eepromValidData = EEPROMVALIDDATA; // byte eepromValidData;
 }
 
@@ -380,6 +382,10 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               break;
         case 38:
               sysSettings.chainOverSprocket = value;
+              break;
+        case 39:
+              sysSettings.fPWM = value;
+              setPWMPrescalers(value);
               break;
         default:
               return(STATUS_INVALID_STATEMENT);
