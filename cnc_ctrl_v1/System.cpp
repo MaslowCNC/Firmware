@@ -171,6 +171,62 @@ int getPCBVersion(){
     return (8*digitalRead(53) + 4*digitalRead(52) + 2*digitalRead(23) + 1*digitalRead(22)) - 1;
 }
 
+//
+// PWM frequency change
+//  presently just sets the default value
+//  different values seem to need specific PWM tunings...
+//
+void setPWMPrescalers(int prescalerChoice) {
+    #if defined (verboseDebug) && verboseDebug > 0
+        Serial.print(F("fPWM set to "));
+        switch (prescalerChoice) {
+            case 1:
+                Serial.println(F("31,000Hz"));
+            break;
+            case 2:
+                Serial.println(F("4,100Hz"));
+            break;
+            case 3:
+                Serial.println(F("490Hz"));
+            }
+    #endif
+// first must erase the bits in each TTCRxB register that control the timers prescaler
+    int prescalerEraser = 7;      // this is 111 in binary and is used as an eraser
+    TCCR2B &= ~prescalerEraser;   // this operation sets the three bits in TCCR2B to 0
+    TCCR3B &= ~prescalerEraser;   // this operation sets the three bits in TCCR3B to 0
+    TCCR4B &= ~prescalerEraser;   // this operation sets the three bits in TCCR4B to 0
+    // now set those same three bits
+// ————————————————————————————–
+// TIMER 2       (Pin 9, 10)
+// Value  Divisor  Frequency
+// 0x01   1        31.374 KHz
+// 0x02   8        3.921 KHz
+// 0x03   32       980.3 Hz        // don;t use this...
+// 0x04   64       490.1 Hz        // default
+// 0x05   128      245 hz
+// 0x06   256      122.5 hz
+// 0x07   1024     30.63 hz
+// Code:  TCCR2B = (TCCR2B & 0xF8) | value ;
+// —————————————————————————————-
+// Timers 3, 4 ( Pin 2, 3, 5), (Pin 6, 7, 8)
+// 
+// Value  Divisor  Frequency
+// 0x01   1        31.374 KHz
+// 0x02   8        3.921 Khz
+// 0x03   64       490.1 Hz        // default
+// 0x04   256      122.5 Hz
+// 0x05   1024     30.63 Hz
+// Code:  TCCR3B = (TCCR3B & 0xF8) | value ;
+// —————————————————————————————-
+    // and apply it
+    if (prescalerChoice >= 3) {
+      TCCR2B |= (prescalerChoice + 1); // pins 9, 10 - change to match timers3&4
+    } else {
+      TCCR2B |= prescalerChoice; // pins 9, 10
+      }
+    TCCR3B |= prescalerChoice;   // pins 2, 3, 5
+    TCCR4B |= prescalerChoice;   // pins 6, 7, 8
+}
 
 //
 // PWM frequency change
