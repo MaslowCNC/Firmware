@@ -48,5 +48,6 @@
 #include "Settings.h"
 #include "NutsAndBolts.h"
 #include "System.h"
+#include "SimavrSerial.h"
 
 #endif
