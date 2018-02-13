@@ -87,6 +87,7 @@ void Motor::write(int speed){
         _lastSpeed = speed; //saves speed for use in additive write
         bool forward = (speed > 0);
         speed = abs(speed); //remove sign from input because direction is set by control pins on H-bridge   
+        
         bool usePin1 = ((_pin1 != 4) && (_pin1 != 13) && (_pin1 != 11) && (_pin1 != 12)); // avoid PWM using timer0 or timer1
         bool usePin2 = ((_pin2 != 4) && (_pin2 != 13) && (_pin2 != 11) && (_pin2 != 12)); // avoid PWM using timer0 or timer1
         if (forward) {
