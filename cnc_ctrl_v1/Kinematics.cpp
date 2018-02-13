@@ -30,7 +30,7 @@ Kinematics::Kinematics(){
 void Kinematics::init(){
     recomputeGeometry();
     if (sys.state != STATE_OLD_SETTINGS){
-      forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
+      forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition, sys.xPosition, sys.yPosition);
     }
 }
 
@@ -48,6 +48,7 @@ void Kinematics::recomputeGeometry(){
     calling this function regenerates those values.  These are all floats so they take up
     ~32bytes of RAM to keep them in memory.
     */
+    Phi = -0.2;
     h = sqrt((sysSettings.sledWidth/2)*(sysSettings.sledWidth/2) + sysSettings.sledHeight * sysSettings.sledHeight);
     Theta = atan(2*sysSettings.sledHeight/sysSettings.sledWidth);
     Psi1 = Theta - Phi;
@@ -246,12 +247,10 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     *bChainLength = Chain2;
 }
 
-void  Kinematics::forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos){
+void  Kinematics::forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos, float xGuess, float yGuess){
   
     Serial.println(F("[Forward Calculating Position]"));
     
-    float xGuess = 0;
-    float yGuess = 0;
 
     float guessLengthA;
     float guessLengthB;
@@ -288,8 +287,8 @@ void  Kinematics::forward(const float& chainALength, const float& chainBLength, 
         // No need for sys.stop check here
 
         //if we've converged on the point...or it's time to give up, exit the loop
-        if((abs(aChainError) < .1 && abs(bChainError) < .1) or guessCount > KINEMATICSMAXGUESS){
-            if(guessCount > KINEMATICSMAXGUESS){
+        if((abs(aChainError) < .1 && abs(bChainError) < .1) or guessCount > KINEMATICSMAXGUESS or guessLengthA > sysSettings.chainLength  or guessLengthB > sysSettings.chainLength){
+            if((guessCount > KINEMATICSMAXGUESS) or guessLengthA > sysSettings.chainLength or guessLengthB > sysSettings.chainLength){
                 Serial.print(F("Message: Unable to find valid machine position for chain lengths "));
                 Serial.print(chainALength);
                 Serial.print(", ");
