@@ -49,7 +49,7 @@ typedef struct {  // I think this is about ~128 bytes in size if I counted corre
   float distPerRot;
   unsigned int maxFeed;
   bool zAxisAttached;
-  bool zAxisAuto;
+  bool spindleAutomate;
   float maxZRPM;
   float zDistPerRot;
   float zEncoderSteps;

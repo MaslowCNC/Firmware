@@ -144,7 +144,7 @@ void reportMaslowSettings() {
     Serial.print(F("$13=")); Serial.println(sysSettings.distPerRot, 8);
     Serial.print(F("$15=")); Serial.println(sysSettings.maxFeed);
     Serial.print(F("$16=")); Serial.println(sysSettings.zAxisAttached);
-    Serial.print(F("$17=")); Serial.println(sysSettings.zAxisAuto);
+    Serial.print(F("$17=")); Serial.println(sysSettings.spindleAutomate);
     Serial.print(F("$18=")); Serial.println(sysSettings.maxZRPM, 8);
     Serial.print(F("$19=")); Serial.println(sysSettings.zDistPerRot, 8);
     Serial.print(F("$20=")); Serial.println(sysSettings.zEncoderSteps, 8);
@@ -184,8 +184,8 @@ void reportMaslowSettings() {
     Serial.print(F(" (main steps per revolution)\r\n$13=")); Serial.print(sysSettings.distPerRot, 8);
     Serial.print(F(" (distance / rotation, mm)\r\n$15=")); Serial.print(sysSettings.maxFeed);
     Serial.print(F(" (max feed, mm/min)\r\n$16=")); Serial.print(sysSettings.zAxisAttached);
-    Serial.print(F(" (Auto Z Axis, 1 = Yes)\r\n$17=")); Serial.print(sysSettings.zAxisAuto);
-    Serial.print(F(" (auto z axis)\r\n$18=")); Serial.print(sysSettings.maxZRPM, 8);
+    Serial.print(F(" (Auto Z Axis, 1 = Yes)\r\n$17=")); Serial.print(sysSettings.spindleAutomate);
+    Serial.print(F(" (auto spindle)\r\n$18=")); Serial.print(sysSettings.maxZRPM, 8);
     Serial.print(F(" (max z axis RPM)\r\n$19=")); Serial.print(sysSettings.zDistPerRot, 8);
     Serial.print(F(" (z axis distance / rotation)\r\n$20=")); Serial.print(sysSettings.zEncoderSteps, 8);
     Serial.print(F(" (z axis steps per revolution)\r\n$21=")); Serial.print(sysSettings.KpPos, 8);
