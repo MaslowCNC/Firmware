@@ -38,16 +38,25 @@ int  Motor::setupMotor(const int& pwmPin, const int& pin1, const int& pin2){
   _pin2  = pin2;
   _attachedState = 0;
   
+  if (TLE5206 == false) {  
   //set pinmodes
-  pinMode(_pwmPin,   OUTPUT); 
-  pinMode(_pin1,     OUTPUT); 
-  pinMode(_pin2,     OUTPUT);
-  
-  //stop the motor
-  digitalWrite(_pin1,    HIGH);
-  digitalWrite(_pin2,    LOW) ;
-  digitalWrite(_pwmPin,  LOW);
-  
+    pinMode(_pwmPin,   OUTPUT); 
+    pinMode(_pin1,     OUTPUT); 
+    pinMode(_pin2,     OUTPUT);
+    
+    //stop the motor
+    digitalWrite(_pin1,    HIGH);
+    digitalWrite(_pin2,    LOW) ;
+    digitalWrite(_pwmPin,  LOW);
+  } else {
+    pinMode(_pwmPin,   INPUT); 
+    pinMode(_pin1,     OUTPUT); 
+    pinMode(_pin2,     OUTPUT);
+
+    //stop the motor
+    digitalWrite(_pin1,    LOW);
+    digitalWrite(_pin2,    LOW) ;
+  }
   return 1;
 }
 
@@ -58,10 +67,16 @@ void Motor::attach(){
 void Motor::detach(){
     _attachedState = 0;
     
+  if (TLE5206 == false) {  
     //stop the motor
     digitalWrite(_pin1,    HIGH);
     digitalWrite(_pin2,    LOW) ;
     digitalWrite(_pwmPin,  LOW);
+  } else {
+    //stop the motor
+    digitalWrite(_pin1,    LOW);
+    digitalWrite(_pin2,    LOW) ;
+  }
 }
 
 int Motor::lastSpeed(){
@@ -87,32 +102,33 @@ void Motor::write(int speed){
       _lastSpeed = speed; //saves speed for use in additive write
       bool forward = (speed > 0);
       speed = abs(speed); //remove sign from input because direction is set by control pins on H-bridge   
-
-      if(_pwmPin == 12){
-          if (forward){
-              analogWrite(_pin1 , speed);  // PWM on this pin to avoid using pin12 (timer1)
-              digitalWrite(_pin2, LOW);    // this pin sets direction with respect to _pin1 
-              digitalWrite(_pwmPin, HIGH); // this pin enables the outputs of the other two
+        
+        bool usePin1 = ((_pin1 != 4) && (_pin1 != 13) && (_pin1 != 11) && (_pin1 != 12)); // avoid PWM using timer0 or timer1
+        bool usePin2 = ((_pin2 != 4) && (_pin2 != 13) && (_pin2 != 11) && (_pin2 != 12)); // avoid PWM using timer0 or timer1
+      if (forward) {
+        if (speed > 0) {
+              if (usePin2) {
+            digitalWrite(_pin1 , HIGH );
+            analogWrite(_pin2 , 255 - speed); // invert drive signals - don't alter speed
+          } else {
+                analogWrite(_pin1 , speed);
+            digitalWrite(_pin2 , LOW );
           }
-          else if (speed == 0){
-          }
-          else{
-              analogWrite(_pin1 , 255 - speed); // PWM signal is inverted to cause reverse motion
-              digitalWrite(_pin2, HIGH);        // setting this pin HIGH causes _pin1 PWM to drive reverse
-              digitalWrite(_pwmPin, HIGH);      // enable the output
-          }        
-      } else {
-          if (forward){
-              digitalWrite(_pin1 , HIGH);
-              digitalWrite(_pin2 , LOW );
-          }
-          else if (speed == 0){
-          }
-          else{
-              digitalWrite(_pin1 , LOW);
-              digitalWrite(_pin2 , HIGH );
-          }
-          analogWrite(_pwmPin, speed);
+        } else {
+          digitalWrite(_pin1 , LOW );
+          digitalWrite(_pin2 , LOW );
+        }
+      } else{
+            if (usePin1) {
+          analogWrite(_pin1 , 255 - speed); // invert drive signals - don't alter speed
+          digitalWrite(_pin2 , HIGH );
+        } else {
+                analogWrite(_pin2 , speed);
+            digitalWrite(_pin1 , LOW );
+        }
+      }
+      if (TLE5206 == false) {
+        digitalWrite(_pwmPin, HIGH);
       }
     }
 }
@@ -121,36 +137,23 @@ void Motor::directWrite(int voltage){
     /*
     Write directly to the motor, ignoring if the axis is attached or any applied calibration.
     */
-    
-    if(_pwmPin == 12){
-        if (voltage > 0){
-            analogWrite(_pin1 , abs(voltage)); // PWM on this pin to avoid using pin12 (timer1)
-            digitalWrite(_pin2, LOW);          // this pin sets direction with respect to _pin1 
-            digitalWrite(_pwmPin, HIGH);       // this pin enables the outputs of the other two
+      bool forward = (voltage >= 0);
+      if (forward) {
+        if (voltage > 0) {
+          digitalWrite(_pin1 , HIGH );
+          analogWrite(_pin2 , 255 - abs(voltage)); // invert drive signals - don't alter speed
+        } else {
+          digitalWrite(_pin1 , LOW );
+          digitalWrite(_pin2 , LOW );
         }
-        else if (voltage == 0){
-            voltage = voltage;
-        }
-        else{
-            analogWrite(_pin1 , 255 - abs(voltage)); // PWM signal is inverted to cause reverse motion
-            digitalWrite(_pin2, HIGH);               // setting this pin HIGH causes _pin1 PWM to drive reverse
-            digitalWrite(_pwmPin, HIGH);             // enable the output
-        }
-    }
-    else{
-        if (voltage > 0){
-            digitalWrite(_pin1 , HIGH);
-            digitalWrite(_pin2 , LOW );
-        }
-        else if (voltage == 0){
-            voltage = voltage;
-        }
-        else{
-            digitalWrite(_pin1 , LOW);
-            digitalWrite(_pin2 , HIGH );
-        }
-        analogWrite(_pwmPin, abs(voltage));
-    }
+      }
+      else{
+          analogWrite(_pin1 , 255 - abs(voltage)); // invert drive signals - don't alter speed
+          digitalWrite(_pin2 , HIGH );
+      }
+      if (TLE5206 == false) {
+        digitalWrite(_pwmPin, HIGH);
+      }
 }
 
 int  Motor::attached(){

@@ -19,6 +19,11 @@ Copyright 2014-2017 Bar Smith*/
 
 #include "Maslow.h"
 
+bool TLE5206;
+int SpindlePowerControlPin;  // output for controlling spindle power
+int ProbePin;                // use this input for zeroing zAxis with G38.2 gcode
+    
+
 void  calibrateChainLengths(String gcodeLine){
     /*
     The calibrateChainLengths function lets the machine know that the chains are set to a given length where each chain is ORIGINCHAINLEN
@@ -76,6 +81,16 @@ void   setupAxes(){
     int ENB;
     int ENC;
     
+    int AUX1;
+    int AUX2;
+    int AUX3;
+    int AUX4;
+    int AUX5;
+    int AUX6;
+    int AUX7;
+    int AUX8;
+    int AUX9;
+
     //read the pins which indicate the PCB version
     int pcbVersion = getPCBVersion();
     
@@ -101,6 +116,11 @@ void   setupAxes(){
         IN5 = 12;       // OUTPUT
         IN6 = 13;       // OUTPUT
         ENC = 5;        // PWM
+
+        AUX1 = 17;
+        AUX2 = 16;
+        AUX3 = 15;
+        AUX4 = 14;
     }
     else if(pcbVersion == 1){
         //PCB v1.1 Detected
@@ -124,6 +144,11 @@ void   setupAxes(){
         IN5 = 10;        // OUTPUT
         IN6 = 11;        // OUTPUT
         ENC = 12;        // PWM
+
+        AUX1 = 17;
+        AUX2 = 16;
+        AUX3 = 15;
+        AUX4 = 14;
     }
     else if(pcbVersion == 2){
         //PCB v1.2 Detected
@@ -149,7 +174,43 @@ void   setupAxes(){
         IN6 = 12;        // OUTPUT
         ENC = 10;        // PWM
 
+        AUX1 = 17;
+        AUX2 = 16;
+        AUX3 = 15;
+        AUX4 = 14;
+    }
+    else if(pcbVersion == 3){ // TLE5206
+        //TLE5206 PCB v1.3 Detected
+        //MP1 - Right Motor
+        ENCODER1A = 20; // INPUT
+        ENCODER1B = 21; // INPUT
+        IN1 = 6;        // OUTPUT
+        IN2 = 4;        // OUTPUT
+        ENA = 5;        // errorFlag
+        
+        //MP2 - Z-axis
+        ENCODER2A = 18; // INPUT
+        ENCODER2B = 19; // INPUT
+        IN3 = 9;        // OUTPUT
+        IN4 = 7;        // OUTPUT
+        ENB = 8;        // errorFlag
+        
+        //MP3 - Left Motor
+        ENCODER3A = 2;   // INPUT
+        ENCODER3B = 3;   // INPUT
+        IN5 = 10;        // OUTPUT
+        IN6 = 11;        // OUTPUT
+        ENC = 12;        // errorFlag
 
+        AUX1 = 40;
+        AUX2 = 41;
+        AUX3 = 42;
+        AUX4 = 43;
+        AUX5 = 68;
+        AUX6 = 69;
+        AUX7 = 45;
+        AUX8 = 46;
+        AUX9 = 47;
     }
 
     if(sysSettings.chainOverSprocket == 1){
@@ -162,10 +223,111 @@ void   setupAxes(){
     }
     
     zAxis.setup    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, 'Z', LOOPINTERVAL);
+    leftAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
+    rightAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
+    zAxis.setPIDValues(&sysSettings.zKpPos, &sysSettings.zKiPos, &sysSettings.zKdPos, &sysSettings.zPropWeightPos, &sysSettings.zKpV, &sysSettings.zKiV, &sysSettings.zKdV, &sysSettings.zPropWeightV);
 }
 
 int getPCBVersion(){
-    return (8*digitalRead(53) + 4*digitalRead(52) + 2*digitalRead(23) + 1*digitalRead(22)) - 1;
+    pinMode(VERS1,INPUT);
+    pinMode(VERS2,INPUT);
+    pinMode(VERS3,INPUT);
+    pinMode(VERS4,INPUT);
+    int pinCheck = (8*digitalRead(VERS4) + 4*digitalRead(VERS3) + 2*digitalRead(VERS2) + 1*digitalRead(VERS1));
+    switch (pinCheck) {
+        case 0: case 1: case 2: case 3: // v1.2 board
+            TLE5206 = false;
+            break;
+        case 4:
+            TLE5206 = true;
+            break;
+    }
+    #define SpindlePowerControlPin = AUX1;  // output for controlling spindle power
+    #define ProbePin = AUX4                 // use this input for zeroing zAxis with G38.2 gcode
+    return pinCheck - 1;
+}
+
+
+//
+// PWM frequency change
+//  presently just sets the default value
+//  different values seem to need specific PWM tunings...
+//
+void setPWMPrescalers(int prescalerChoice) {
+    #if defined (verboseDebug) && verboseDebug > 0
+        Serial.print(F("fPWM set to "));
+        switch (prescalerChoice) {
+        case 1:
+                Serial.println(F("31,000Hz"));
+            break;
+        case 2:
+                Serial.println(F("4,100Hz"));
+            break;
+            case 3:
+                Serial.println(F("490Hz"));
+    }
+    #endif
+// first must erase the bits in each TTCRxB register that control the timers prescaler
+    int prescalerEraser = 7;      // this is 111 in binary and is used as an eraser
+    TCCR2B &= ~prescalerEraser;   // this operation sets the three bits in TCCR2B to 0
+    TCCR3B &= ~prescalerEraser;   // this operation sets the three bits in TCCR3B to 0
+    TCCR4B &= ~prescalerEraser;   // this operation sets the three bits in TCCR4B to 0
+    // now set those same three bits
+// ————————————————————————————–
+// TIMER 2       (Pin 9, 10)
+// Value  Divisor  Frequency
+// 0x01   1        31.374 KHz
+// 0x02   8        3.921 KHz
+// 0x03   32       980.3 Hz        // don;t use this...
+// 0x04   64       490.1 Hz        // default
+// 0x05   128      245 hz
+// 0x06   256      122.5 hz
+// 0x07   1024     30.63 hz
+// Code:  TCCR2B = (TCCR2B & 0xF8) | value ;
+// —————————————————————————————-
+// Timers 3, 4 ( Pin 2, 3, 5), (Pin 6, 7, 8)
+// 
+// Value  Divisor  Frequency
+// 0x01   1        31.374 KHz
+// 0x02   8        3.921 Khz
+// 0x03   64       490.1 Hz        // default
+// 0x04   256      122.5 Hz
+// 0x05   1024     30.63 Hz
+// Code:  TCCR3B = (TCCR3B & 0xF8) | value ;
+// —————————————————————————————-
+    // and apply it
+    if (prescalerChoice >= 3) {
+      TCCR2B |= (prescalerChoice + 1); // pins 9, 10 - change to match timers3&4
+    } else {
+      TCCR2B |= prescalerChoice; // pins 9, 10
+}
+    TCCR3B |= prescalerChoice;   // pins 2, 3, 5
+    TCCR4B |= prescalerChoice;   // pins 6, 7, 8
+}
+
+//
+// PWM frequency change
+//  presently just sets the default value
+//  different values seem to need specific PWM tunings...
+//
+void setPWMPrescalers() {
+// first must erase the bits in each TTCRxB register that control the timers prescaler
+    int prescalerEraser = 0B0111;
+    TCCR2B &= ~prescalerEraser;
+    TCCR3B &= ~prescalerEraser;
+    TCCR4B &= ~prescalerEraser;
+// now choose how to set those same three bits
+    // prescaler = 1 ---> PWM frequency is 31000 Hz
+    // prescaler = 2 ---> PWM frequency is 4000 Hz
+    // prescaler = 3 ---> PWM frequency is 490 Hz (default value)
+    // prescaler = 4 ---> PWM frequency is 120 Hz
+    // prescaler = 5 ---> PWM frequency is 30 Hz
+    // prescaler = 6 ---> PWM frequency is <20 Hz
+    int prescalerChoice = 3;
+// and apply it
+    TCCR2B |= prescalerChoice; // pins 9, 10
+    TCCR3B |= prescalerChoice; // pins 2, 3, 5
+    TCCR4B |= prescalerChoice; // pins 6, 7, 8
 }
 
 
@@ -298,7 +460,7 @@ byte systemExecuteCmdstring(String& cmdString){
     }
     else {
         switch( cmdString[char_counter] ) {
-          case '$': case 'K':// case 'G': case 'C': case 'X':
+          case '$': // case 'G': case 'C': case 'X':
             if ( cmdString.length() > 2 ) { return(STATUS_INVALID_STATEMENT); }
             switch( cmdString[char_counter] ) {
               case '$' : // Prints Maslow settings
@@ -306,10 +468,6 @@ byte systemExecuteCmdstring(String& cmdString){
                 // else {
                   reportMaslowSettings();
                 // }
-                break;
-              case 'K' : // forces kinematics update
-                kinematics.recomputeGeometry();
-                kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
                 break;
               // case 'G' : // Prints gcode parser state
               //   report_gcode_modes();

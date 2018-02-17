@@ -23,7 +23,7 @@ void  setSpindlePower(bool powerState) {
     /*
      * Turn spindle on or off depending on powerState
      */ 
-    boolean useServo = !sysSettings.zAxisAuto;
+    boolean useServo = !sysSettings.spindleAutomate;
     boolean activeHigh = true;
     int delayAfterChange = 1000;  // milliseconds
     int servoIdle =  90;  // degrees

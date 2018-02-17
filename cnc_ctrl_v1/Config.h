@@ -32,13 +32,11 @@
 
 #define LOOPINTERVAL 10000 // What is the frequency of the PID loop in microseconds
 
-// Define extra pins
-#define AUX1 17
-#define AUX2 16
-#define AUX3 15
-#define AUX4 14
-#define SpindlePowerControlPin AUX1 // output for controlling spindle power
-#define ProbePin AUX4 // use this input for zeroing zAxis with G38.2 gcode
+// Define version detect pins
+#define VERS1 22
+#define VERS2 23
+#define VERS3 24
+#define VERS4 25  
 
 // Serial variables
 #define INCBUFFERLENGTH 128 // The number of bytes(characters) allocated to the

@@ -52,5 +52,5 @@
             int _lastSpeed  = 0;
             
     };
-
+    extern bool TLE5206;
     #endif

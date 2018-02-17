@@ -11,7 +11,10 @@
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
     
     Copyright 2014-2017 Bar Smith*/
-    
+
+// TLE5206 version
+
+
 #include "Maslow.h"
 
 // Define system global state structure
@@ -36,18 +39,16 @@ void setup(){
     Serial.begin(57600);
     Serial.print(F("PCB v1."));
     Serial.print(getPCBVersion());
+    if (TLE5206 == true) { Serial.print(F(" TLE5206 ")); }
     Serial.println(F(" Detected"));
     sys.inchesToMMConversion = 1;
     settingsLoadFromEEprom();
     setupAxes();
     settingsLoadStepsFromEEprom();
-    // TODO This seems wrong, if the encoder steps are changed, axis position
-    // will be in the wrong place.  Would be better if we stored positions as
-    // steps 
     // Set initial desired position of the machine to its current position
     leftAxis.write(leftAxis.read());
-    rightAxis.write(leftAxis.read());
-    zAxis.write(leftAxis.read());
+    rightAxis.write(rightAxis.read());
+    zAxis.write(zAxis.read());
     readyCommandString.reserve(INCBUFFERLENGTH);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
     gcodeLine.reserve(INCBUFFERLENGTH);
     Timer1.initialize(LOOPINTERVAL);
