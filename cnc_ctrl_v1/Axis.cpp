@@ -105,27 +105,30 @@ void   Axis::computePID(){
     if (_pidController.Compute()){
         // Only write output if the PID calculation was performed
         motorGearboxEncoder.write(_pidOutput);
-		
-		if (millis() - stallmillis > STALLTIMEOUT)
-		{
-			stallmillis = millis();
-			
-			long delta=lastcoder - motorGearboxEncoder.encoder.read(); 
-			
-			if(lastcoder == 0 || delta >  STALLSTEPS || delta < STALLSTEPS)
-			{
-				moved=lastcoder !=0;
-				lastcoder = motorGearboxEncoder.encoder.read();
-			}
-			else
-			{
-				stalled=1;
-				stalldelta= delta;
-			}
-		}
-    } else {
-      lastcoder=0;  //We've been deactivated; reset counts
-    }
+
+        if(_pidOutput) {
+            if (millis() - stallmillis > STALLTIMEOUT)
+            {
+                stallmillis = millis();
+                
+                long delta=lastcoder - motorGearboxEncoder.encoder.read(); 
+                
+                if(lastcoder == 0 || delta >  STALLSTEPS || delta < STALLSTEPS)
+                {
+                    moved=lastcoder !=0;
+                    lastcoder = motorGearboxEncoder.encoder.read();
+                }
+                else
+                {
+                    stalled=1;
+                    stalldelta= delta;
+                }
+            }
+        } else {
+            lastcoder=0;  //No motion requested; reset counts
+            stalled=moved=stalldelta=0;
+        }
+    } 
     
     motorGearboxEncoder.computePID();
 }
