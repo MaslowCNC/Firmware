@@ -83,6 +83,8 @@ void   Axis::setSteps(const long& steps){
 }
 
 void   Axis::computePID(){
+	static unsigned long stallmillis;
+	static long lastcoder;
     
     #ifdef FAKE_SERVO
       static unsigned long lastPrint = millis();
@@ -103,10 +105,29 @@ void   Axis::computePID(){
     if (_pidController.Compute()){
         // Only write output if the PID calculation was performed
         motorGearboxEncoder.write(_pidOutput);
+		
+		if (millis() - stallmillis > STALLTIMEOUT)
+		{
+			stallmillis = millis();
+			
+			long delta=lastcoder - motorGearboxEncoder.encoder.read(); 
+			
+			if(lastcoder == 0 || delta >  STALLSTEPS || delta < STALLSTEPS)
+			{
+				moved=lastcoder !=0;
+				lastcoder = motorGearboxEncoder.encoder.read();
+			}
+			else
+			{
+				stalled=1;
+				stalldelta= delta;
+			}
+		}
+    } else {
+      lastcoder=0;  //We've been deactivated; reset counts
     }
     
     motorGearboxEncoder.computePID();
-    
 }
 
 void   Axis::disablePositionPID(){
@@ -190,9 +211,8 @@ void   Axis::changeEncoderResolution(float *newResolution){
 }
 
 int    Axis::detach(){
-    
     motorGearboxEncoder.motor.detach();
-    
+	stalled=moved=0;
     return 1;
 }
 
@@ -300,3 +320,4 @@ void   Axis::test(){
 
 double  Axis::pidInput(){ return _pidInput * *_mmPerRotation;}
 double  Axis::pidOutput(){ return _pidOutput;}
+char	Axis::name(){ return _axisName;}

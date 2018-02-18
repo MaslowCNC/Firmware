@@ -18,6 +18,9 @@
     #ifndef Axis_h
     #define Axis_h
 
+	#define STALLTIMEOUT	100 //100ms
+	#define STALLSTEPS		10	//Deadband; if it hasn't moved STALLSTEPS in STALLTIMEOUT, the axis is stalled.
+	
     class Axis{
         public:
             void   setup(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const unsigned long& loopInterval);
@@ -50,7 +53,10 @@
             double     pidInput();
             double     pidOutput();
             long  steps();
-            
+			char  moved, stalled;
+			long  stalldelta;
+			char  name();
+			
         private:
             int        _PWMread(int pin);
             void       _writeFloat(const unsigned int& addr, const float& x);
@@ -66,5 +72,5 @@
             bool       _disableAxisForTesting = false;
             char       _axisName;
     };
-
+	
     #endif

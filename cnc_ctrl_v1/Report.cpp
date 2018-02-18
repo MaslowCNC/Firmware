@@ -236,7 +236,20 @@ void  returnPoz(){
     static unsigned long lastRan = millis();
     
     if (millis() - lastRan > POSITIONTIMEOUT){
+        char tmpbuf[80], buflen=0;
+        memset(tmpbuf, 0, sizeof(tmpbuf));
         
+        for (int i=0;i<3;i++){
+            if(axes[i].stalled > 5){
+                buflen+=snprintf(tmpbuf+buflen, sizeof(tmpbuf)-buflen, "%c %s ", axes[i].name(), (axes[i].moved > 5) ? F("STALL") : F("UNHK "));
+            }
+        }
+        
+        if(buflen>0){
+            Serial.print(F("Message: "));
+            Serial.println(tmpbuf);
+            pause();    //Which should unattach the axes, which should clear the error.
+        }
         
         Serial.print(F("<Idle,MPos:"));
         Serial.print(sys.xPosition/sys.inchesToMMConversion);

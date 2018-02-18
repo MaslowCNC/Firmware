@@ -53,7 +53,7 @@ typedef struct {
   bool stop;                  // Stop flag.
   byte state;                 // State tracking flag
   byte pause;                 // Pause flag.
-  float xPosition;            // Cartessian position of XY axes
+  float xPosition;            // Cartesian position of XY axes
   float yPosition;            // Cached because calculating position is intensive
   float steps[3];             // Encoder position of axes
   bool  useRelativeUnits;     // 
@@ -71,6 +71,7 @@ extern system_t sys;
 extern Axis leftAxis;
 extern Axis rightAxis;
 extern Axis zAxis;
+extern Axis axes[3];
 extern RingBuffer incSerialBuffer;
 extern Kinematics kinematics;
 extern byte systemRtExecAlarm;
