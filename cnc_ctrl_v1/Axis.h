@@ -53,8 +53,9 @@
             double     pidInput();
             double     pidOutput();
             long  steps();
-			char  moved, stalled;
-			long  stalldelta;
+			bool  moved;        //1 if the axis has ever moved since it's been attached
+            char  stalled;      //+1 every time through the PID loop if the encoder hasn't changed
+			long  stalldelta;   //Debug var keeping track of what the delta was (so we can fine tune STALLSTEPS if it shows up at wrong times.
 			char  name();
 			
         private:

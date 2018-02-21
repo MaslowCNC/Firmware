@@ -71,7 +71,7 @@ extern system_t sys;
 extern Axis leftAxis;
 extern Axis rightAxis;
 extern Axis zAxis;
-extern Axis axes[3];
+extern Axis *axes[3];
 extern RingBuffer incSerialBuffer;
 extern Kinematics kinematics;
 extern byte systemRtExecAlarm;
