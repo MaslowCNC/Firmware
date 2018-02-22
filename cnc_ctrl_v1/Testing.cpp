@@ -66,7 +66,7 @@ void PIDTestVelocity(Axis* axis, const float start, const float stop, const floa
     axis->write(axis->read());
     axis->detach();
     axis->enablePositionPID();
-    kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition, 0.0, 0.0);
 }
 
 void positionPIDOutput (Axis* axis, float setpoint, float startingPoint){
@@ -145,7 +145,7 @@ void PIDTestPosition(Axis* axis, float start, float stop, const float steps, con
     Serial.println(F("--PID Position Test Stop--\n"));
     axis->write(axis->read());
     axis->detach();
-    kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition, 0.0, 0.0);
 }
 
 void voltageTest(Axis* axis, int start, int stop){
@@ -177,5 +177,5 @@ void voltageTest(Axis* axis, int start, int stop){
     axis->motorGearboxEncoder.motor.directWrite(0);
     Serial.println(F("--Voltage Test Stop--\n"));
     axis->write(axis->read());
-    kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition);
+    kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition, 0.0, 0.0);
 }
