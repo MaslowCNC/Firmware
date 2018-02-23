@@ -22,21 +22,9 @@ This should compile the project without errors, and possibly some warnings.
 ### Using PlatformIO
 1. Download package for [Atom](https://atom.io/)
 2. Follow directions for [installing PlatformIO within Atom](http://docs.platformio.org/en/latest/ide/atom.html#ide-installation)
-3. Within Atom navigate menus: PlatformIO, Open Project Folder...
+3. Within Atom navigate menus: PlatformIO, Open Project
 4. Select "Firmware" directory
-5. Select menu: PlatformIO, Initialize or Update PlatformIO Project
-6. Select Board: Adruino Mega or Mega 2560 ATmega2560 (Mega 2560)
-7. Click the "Process" button, this creates a platformio.ini file with PlatformIO settings
-8. Edit the platformio.ini file by adding these lines:
- 
-    > [platformio]
-
-    > src_dir = cnc_ctrl_v1
-
-9. Save the platformio.ini, wait for Atom to reload the project automatically
-10. Select menu: PlatformIO, Build
-
-The reason for the editing of the platformio.ini is because the default location for code files is a "src" directory. To override this default and stay compatible with the Arduino IDE this fix must be made.
+5. Click "Open Firmware" 
 
 ### Using Eclipse Neon C/C++ with Sloeber plugin
 
