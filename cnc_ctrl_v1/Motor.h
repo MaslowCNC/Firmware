@@ -50,6 +50,8 @@
             bool _attachedState = false;
             LinSegment _linSegments[4];
             int _lastSpeed  = 0;
+            unsigned long _overSpeedStartTime;
+            bool _isOverSpeed;
             
     };
 
