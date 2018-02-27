@@ -382,6 +382,13 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               break;
         case 38:
               sysSettings.chainOverSprocket = value;
+              setupAxes();
+              settingsLoadStepsFromEEprom();
+              // Set initial desired position of the machine to its current position
+              leftAxis.write(leftAxis.read());
+              rightAxis.write(rightAxis.read());
+              zAxis.write(zAxis.read());
+              kinematics.init();
               break;
         case 39:
               sysSettings.fPWM = value;
