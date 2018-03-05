@@ -660,7 +660,7 @@ int   G1(const String& readString, int G0orG1){
     }
     else{
         //if this is a rapid move
-        coordinatedMove(xgoto, ygoto, zgoto, 1000); //move the same as a regular move, but go fast
+        coordinatedMove(xgoto, ygoto, zgoto, 600); //move the same as a regular move, but go fast
     }
 }
 
