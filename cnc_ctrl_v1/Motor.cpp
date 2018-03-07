@@ -83,10 +83,12 @@ void Motor::write(int speed){
     Sets motor speed from input. Speed = 0 is stopped, -255 is full reverse, 255 is full ahead.
     */
     if (_attachedState == 1){
-        if ((speed > 255) || (speed < -255)){
+        if (((speed > 255) || (speed < -255)) && millis() - _overSpeedWarningTime > 250){
           if (_isOverSpeed){
-            if (millis() - _overSpeedStartTime >= 20){  // 20 means 3 consecutive PID cycles, change to whatever you like
-              Serial.println(F("WARNING OVERSPEED EVENT!"));
+            if (millis() - _overSpeedStartTime >= OVERSPEEDTIME){
+              // Should be replaced with an alarm when we have the system
+              reportStatusMessage(STATUS_OVERSPEED);
+              _overSpeedWarningTime = millis();
               _overSpeedStartTime = millis();
             }
           }
