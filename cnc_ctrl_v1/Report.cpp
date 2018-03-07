@@ -228,6 +228,7 @@ void  returnError(){
         Serial.println(F("]"));
 }
 
+char tmpbuf[80];
 void  returnPoz(){
     /*
     Causes the machine's position (x,y) to be sent over the serial connection updated on the UI
@@ -238,7 +239,25 @@ void  returnPoz(){
     static unsigned long lastRan = millis();
     
     if (millis() - lastRan > POSITIONTIMEOUT){
+        char buflen=0;
         
+        for (int i=0;i<3;i++){          //For each axis (A,B,z)
+            if(axes[i]->stalled > 5){    //If it's been stalled for at least 5 passes through the PID loop
+                if(buflen==0)
+                    memset(tmpbuf, 0, sizeof(tmpbuf));  //Clear the buffer if this is the first axis that was stalled.
+                buflen+=snprintf(tmpbuf+buflen, 
+                    sizeof(tmpbuf)-buflen, "%c %s [%d] ",              //Format a message:
+                    axes[i]->name(),                                     //Axis Name
+                    (axes[i]->moved) ? F("STALLED ") : F("UNHOOKED "),   //If it has ever moved, "Stalled", otherwise, "Unhooked
+                    axes[i]->stalldelta);                                //Debug var: the stall delta (bigger indicates last stall it was told to move a lot, but didn't
+            }
+        }
+        
+        if(buflen>0){
+            Serial.print(F("ALARM: "));
+            Serial.println(tmpbuf);
+            pause();    //Which should unattach the axes, which should clear the error.
+        }
         
         Serial.print(F("<Idle,MPos:"));
         Serial.print(sys.xPosition/sys.inchesToMMConversion);

@@ -133,7 +133,7 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
         #if misloopDebug > 0
         inMovementLoop = true;
         #endif
-        //if last movment was performed start the next
+        //if last movement was performed start the next
         if (!movementUpdated) {
             //find the target point for this step
             // This section ~20us

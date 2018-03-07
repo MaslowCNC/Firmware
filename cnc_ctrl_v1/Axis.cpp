@@ -83,6 +83,8 @@ void   Axis::setSteps(const long& steps){
 }
 
 void   Axis::computePID(){
+	static unsigned long stallmillis=0;
+	static unsigned long lastencodervalue=0;
     
     #ifdef FAKE_SERVO
       static unsigned long lastPrint = millis();
@@ -103,10 +105,33 @@ void   Axis::computePID(){
     if (_pidController.Compute()){
         // Only write output if the PID calculation was performed
         motorGearboxEncoder.write(_pidOutput);
-    }
+
+        if(_pidOutput) {
+            if (millis() - stallmillis > STALLTIMEOUT)
+            {
+                stallmillis = millis();
+                
+                long delta=lastencodervalue - motorGearboxEncoder.encoder.read(); 
+                
+                if(lastencodervalue == 0 || delta >  STALLSTEPS || delta < -STALLSTEPS)
+                {   
+                    moved=lastencodervalue !=0;                             //If not the first time through the function and we gots a lot of delta, we've moved.
+                    lastencodervalue = motorGearboxEncoder.encoder.read();  //Keep track of lastencodervalue; this inits it for the next round.
+                }
+                else
+                {
+                    stalled+=1;
+                    if(stalled>240) stalled=240;    //No wrapping!
+                    stalldelta= delta;              //Debug: Keep track of the delta; if it shows up as 8 all the time, we should change STALLSTEPS.
+                }
+            }
+        } else {
+            lastencodervalue=0;     //No motion requested; reset counts
+            stalled=stalldelta=0;
+        }
+    } 
     
     motorGearboxEncoder.computePID();
-    
 }
 
 void   Axis::disablePositionPID(){
@@ -190,9 +215,8 @@ void   Axis::changeEncoderResolution(float *newResolution){
 }
 
 int    Axis::detach(){
-    
     motorGearboxEncoder.motor.detach();
-    
+	stalled=moved=0;
     return 1;
 }
 
@@ -300,3 +324,4 @@ void   Axis::test(){
 
 double  Axis::pidInput(){ return _pidInput * *_mmPerRotation;}
 double  Axis::pidOutput(){ return _pidOutput;}
+char	Axis::name(){ return _axisName;}
