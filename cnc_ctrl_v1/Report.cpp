@@ -71,8 +71,6 @@ void  reportStatusMessage(byte status_code){
           // Serial.println(F("Unsupported command")); break;
           // case STATUS_GCODE_UNDEFINED_FEED_RATE:
           // Serial.println(F("Undefined feed rate")); break;
-          case STATUS_OVERSPEED:
-            Serial.println(F("OVERSPEED WARNING: Check feedrate and motors.")); break;
           default:
             // Remaining g-code parser errors with error codes
             Serial.print(F("Invalid gcode ID:"));

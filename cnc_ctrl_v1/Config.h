@@ -35,10 +35,6 @@
 
 #define LOOPINTERVAL 10000 // What is the frequency of the PID loop in microseconds
 
-#define OVERSPEEDTIME 20   // How long in milliseconds can a motor operate a max speed before the 
-                           // user is warned? You likely want this a multiple of the LOOPINTERVAL 
-                           // 20 means 3 consecutive PID cycles for the default setup
-
 // Define extra pins
 #define AUX1 17
 #define AUX2 16
