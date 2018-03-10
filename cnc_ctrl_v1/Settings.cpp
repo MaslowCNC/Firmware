@@ -75,7 +75,7 @@ void settingsReset() {
     sysSettings.originalChainLength = 1650;   // int originalChainLength;
     sysSettings.encoderSteps = 8113.7; // float encoderSteps;
     sysSettings.distPerRot = 63.5;   // float distPerRot;
-    sysSettings.maxFeed = 1000;   // int maxFeed;
+    sysSettings.maxFeed = 700;   // int maxFeed;
     sysSettings.zAxisAttached = true;   // zAxisAttached;
     sysSettings.spindleAutomate = false;  // bool spindleAutomate;
     sysSettings.maxZRPM = 12.60;  // float maxZRPM;
@@ -382,6 +382,13 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               break;
         case 38:
               sysSettings.chainOverSprocket = value;
+              setupAxes();
+              settingsLoadStepsFromEEprom();
+              // Set initial desired position of the machine to its current position
+              leftAxis.write(leftAxis.read());
+              rightAxis.write(rightAxis.read());
+              zAxis.write(zAxis.read());
+              kinematics.init();
               break;
         case 39:
               sysSettings.fPWM = value;
