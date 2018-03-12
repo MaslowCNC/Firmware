@@ -29,6 +29,9 @@
                            // a servo updating the encoder steps even if no servo
                            // is connected.  Useful for testing on an arduino only
 
+// #define SIMAVR          // Uncomment this if you plan to run the Firmware in the simavr
+                           // simulator. Normally, you would not define this directly, but
+                           // use PlatformIO to build the simavr environment.
 
 #define LOOPINTERVAL 10000 // What is the frequency of the PID loop in microseconds
 
