@@ -109,17 +109,17 @@ void settingsWipe(byte resetType){
   this
   */
   if (bit_istrue(resetType, SETTINGS_RESTORE_SETTINGS)){
-    for (int i = 340 ; i < sizeof(sysSettings) + 340 ; i++) {
+    for (size_t i = 340 ; i < sizeof(sysSettings) + 340 ; i++) {
       EEPROM.write(i, 0);
     }
   }
   else if (bit_istrue(resetType, SETTINGS_RESTORE_MASLOW)){
-    for (int i = 300 ; i < sizeof(sysSettings) + 340; i++) {
+    for (size_t i = 300 ; i < sizeof(sysSettings) + 340; i++) {
       EEPROM.write(i, 0);
     }
   }
   else if (bit_istrue(resetType, SETTINGS_RESTORE_ALL)){
-    for (int i = 0 ; i < EEPROM.length() ; i++) {
+    for (size_t i = 0 ; i < EEPROM.length() ; i++) {
       EEPROM.write(i, 0);
     }
   }

@@ -461,7 +461,7 @@ void  sanitizeCommandString(String& cmdString){
     */
     
     byte line_flags = 0;
-    short pos = 0;
+    size_t pos = 0;
     
     while (cmdString.length() > pos){
         if (line_flags) {
@@ -519,8 +519,8 @@ byte  interpretCommandString(String& cmdString){
     
     */
     
-    int firstG;  
-    int secondG;
+    size_t firstG;  
+    size_t secondG;
 
     if (cmdString.length() > 0) {
         if (cmdString[0] == '$') {
