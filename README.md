@@ -1,5 +1,7 @@
-
 # Maslow Firmware
+
+This is the firmware which controls the Maslow CNC machine
+
 [![Build Status](https://travis-ci.org/MaslowCNC/Firmware.svg?branch=master)](https://travis-ci.org/MaslowCNC/Firmware)
 
 This is the firmware for the Maslow CNC Router
