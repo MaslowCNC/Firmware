@@ -598,7 +598,7 @@ void gcodeExecuteLoop(){
   }
 }
 
-int   G1(const String& readString, int G0orG1){
+void G1(const String& readString, int G0orG1){
     
     /*G1() is the function which is called to process the string if it begins with 
     'G01' or 'G00'*/
@@ -667,7 +667,7 @@ int   G1(const String& readString, int G0orG1){
     }
 }
 
-int   G2(const String& readString, int G2orG3){
+void G2(const String& readString, int G2orG3){
     /*
     
     The G2 function handles the processing of the gcode line for both the command G2 and the
@@ -691,10 +691,10 @@ int   G2(const String& readString, int G2orG3){
     sys.feedrate = constrain(sys.feedrate, 1, sysSettings.maxFeed);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     
     if (G2orG3 == 2){
-        return arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, CLOCKWISE);
+        arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, CLOCKWISE);
     }
     else {
-        return arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, COUNTERCLOCKWISE);
+        arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, COUNTERCLOCKWISE);
     }
 }
 
