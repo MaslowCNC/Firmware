@@ -753,7 +753,6 @@ void  G38(const String& readString) {
         */
 
         Axis* axis = &zAxis;
-        float MMPerMin             = sys.feedrate;
         float startingPos          = axis->read();
         float endPos               = zgoto;
         float moveDist             = endPos - currentZPos; //total distance to move

@@ -158,13 +158,12 @@ void settingsSaveStepstoEEprom(){
 void settingsLoadStepsFromEEprom(){
     /* 
     Loads position to EEPROM, is called on startup.
-    
+
     Steps are saved in address 310 -> 339.  Room for expansion for additional
     axes in the future.
     */
     settingsStepsV1_t tempStepsV1;
-    settingsVersion_t settingsVersionStruct;
-    
+
     EEPROM.get(310, tempStepsV1);
     if (tempStepsV1.eepromValidData == EEPROMVALIDDATA){
             leftAxis.setSteps(tempStepsV1.lSteps);
