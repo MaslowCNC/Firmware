@@ -315,6 +315,7 @@ byte  executeBcodeLine(const String& gcodeLine){
         
         return STATUS_OK;
     }
+    return STATUS_INVALID_STATEMENT;
 }
     
 void  executeGcodeLine(const String& gcodeLine){
@@ -579,7 +580,9 @@ byte  interpretCommandString(String& cmdString){
             }
             return STATUS_OK;
         }
+        return STATUS_INVALID_STATEMENT;
     }
+    return STATUS_OK;
 }
 
 void gcodeExecuteLoop(){
