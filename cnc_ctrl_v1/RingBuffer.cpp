@@ -38,6 +38,7 @@ int RingBuffer::write(char letter){
         int bufferOverflow = _incrementEnd();
         return bufferOverflow;
     }
+    return 0;
 }
 
 char RingBuffer::read(){

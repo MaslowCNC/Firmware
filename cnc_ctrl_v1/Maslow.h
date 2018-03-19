@@ -23,7 +23,6 @@
 // Define standard libraries used by maslow.
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <EEPROM.h>
 #include <Arduino.h>
 #include <Servo.h>
 

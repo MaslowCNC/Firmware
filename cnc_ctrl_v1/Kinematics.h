@@ -43,7 +43,7 @@
             float halfWidth;                      //Half the machine width
             float halfHeight;                    //Half the machine height
         private:
-            float _moment(const float& Y1Plus, const float& Y2Plus, const float& Phi, const float& MSinPhi, const float& MSinPsi1, const float& MCosPsi1, const float& MSinPsi2, const float& MCosPsi2);
+            float _moment(const float& Y1Plus, const float& Y2Plus, const float& MSinPhi, const float& MSinPsi1, const float& MCosPsi1, const float& MSinPsi2, const float& MCosPsi2);
             float _YOffsetEqn(const float& YPlus, const float& Denominator, const float& Psi);
             void  _MatSolv();
             void  _MyTrig();
