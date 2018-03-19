@@ -11,6 +11,24 @@
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
     
     Copyright 2014-2017 Bar Smith*/
+	
+	
+/* To the projects contributers:
+ * 
+ * it is highly recommended to activate warning output of the arduino gcc compiler. 
+ * Compiler warnings are a great help to keep the codebase clean and can give clues
+ * to potentally wrong code. Also, if a codebase produces too many warnings it gets 
+ * more likely that possibly important warnings could be overlooked. 
+ *
+ * Since the Arduino IDE suppresses any compiler output by default we have to activate it.
+ *
+ * Therefore Arduino IDE users need to activate compiler output in the 
+ * preferences dialog. Additionally Arduino IDE needs to tell the compiler to generate
+ * warning  messages. This is done in the Arduino IDE's preferences.txt file - you can 
+ * get there via the Preferences Dialog - there is a link to the file at the bottom. 
+ * Edit the line "compiler.warning_level=none" to "compiler.warning_level=all"
+ * and restart the IDE.
+ */
     
 #include "Maslow.h"
 
