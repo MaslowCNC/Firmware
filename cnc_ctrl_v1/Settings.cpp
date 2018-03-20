@@ -21,6 +21,7 @@ Copyright 2014-2017 Bar Smith*/
 // previously by pre v1.00 Firmware.
 
 #include "Maslow.h"
+#include <EEPROM.h>
 
 void settingsLoadFromEEprom(){
     /* 
@@ -109,17 +110,17 @@ void settingsWipe(byte resetType){
   this
   */
   if (bit_istrue(resetType, SETTINGS_RESTORE_SETTINGS)){
-    for (int i = 340 ; i < sizeof(sysSettings) + 340 ; i++) {
+    for (size_t i = 340 ; i < sizeof(sysSettings) + 340 ; i++) {
       EEPROM.write(i, 0);
     }
   }
   else if (bit_istrue(resetType, SETTINGS_RESTORE_MASLOW)){
-    for (int i = 300 ; i < sizeof(sysSettings) + 340; i++) {
+    for (size_t i = 300 ; i < sizeof(sysSettings) + 340; i++) {
       EEPROM.write(i, 0);
     }
   }
   else if (bit_istrue(resetType, SETTINGS_RESTORE_ALL)){
-    for (int i = 0 ; i < EEPROM.length() ; i++) {
+    for (size_t i = 0 ; i < EEPROM.length() ; i++) {
       EEPROM.write(i, 0);
     }
   }
@@ -158,13 +159,12 @@ void settingsSaveStepstoEEprom(){
 void settingsLoadStepsFromEEprom(){
     /* 
     Loads position to EEPROM, is called on startup.
-    
+
     Steps are saved in address 310 -> 339.  Room for expansion for additional
     axes in the future.
     */
     settingsStepsV1_t tempStepsV1;
-    settingsVersion_t settingsVersionStruct;
-    
+
     EEPROM.get(310, tempStepsV1);
     if (tempStepsV1.eepromValidData == EEPROMVALIDDATA){
             leftAxis.setSteps(tempStepsV1.lSteps);

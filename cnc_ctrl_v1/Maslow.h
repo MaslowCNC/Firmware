@@ -18,12 +18,11 @@
 #define maslow_h
 
 // Maslow Firmware Version tracking
-#define VERSIONNUMBER 1.09
+#define VERSIONNUMBER 1.10
 
 // Define standard libraries used by maslow.
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <EEPROM.h>
 #include <Arduino.h>
 #include <Servo.h>
 
