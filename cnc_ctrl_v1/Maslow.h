@@ -9,7 +9,7 @@
     GNU General Public License for more details.
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Copyright 2014-2017 Bar Smith*/
 
 // This is the main maslow include file
@@ -18,16 +18,15 @@
 #define maslow_h
 
 // Maslow Firmware Version tracking
-#define VERSIONNUMBER 1.09
+#define VERSIONNUMBER 1.10
 
 // Define standard libraries used by maslow.
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <EEPROM.h>
 #include <Arduino.h>
 #include <Servo.h>
 
-// Define the maslow system include files. This ensures that dependencies are 
+// Define the maslow system include files. This ensures that dependencies are
 // loaded in the proper order.  Be careful moving these around.
 #include "Config.h"
 #include "TimerOne.h"

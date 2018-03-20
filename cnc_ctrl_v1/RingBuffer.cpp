@@ -12,7 +12,7 @@
 
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Copyright 2014-2017 Bar Smith*/
 
 /*
@@ -23,30 +23,31 @@ serial data.
 #include "Maslow.h"
 
 RingBuffer::RingBuffer(){
-    
+
 }
 int RingBuffer::write(char letter){
     /*
-    
+
     Write one character into the ring buffer.
     Return 0 on success
     Return 1 on buffer overflow
-    
+
     */
     if (letter != '?'){                    //ignore question marks because grbl sends them all the time
         _buffer[_endOfString] = letter;
         int bufferOverflow = _incrementEnd();
         return bufferOverflow;
     }
+    return 0;
 }
 
 char RingBuffer::read(){
     /*
-    
+
     Read one character from the ring buffer.
-    
+
     */
-    
+
     char letter;
     if (_beginningOfString == _endOfString){
         letter = '\0';                          //if the buffer is empty return null
@@ -56,15 +57,15 @@ char RingBuffer::read(){
         _buffer[_beginningOfString] = '\0';       //set the read character to null so it cannot be read again
         _incrementBeginning();                    //and increment the pointer
     }
-    
+
     return letter;
 }
 
 int RingBuffer::numberOfLines() {
     /*
-   
+
     Return the number of full lines (as determined by \n terminations) in the buffer
-   
+
     */
 
     int lineCount = 0;
@@ -76,19 +77,19 @@ int RingBuffer::numberOfLines() {
         }
         _incrementVariable(&i);     // go to the next character in the buffer
     }
-    
+
     return lineCount;
 }
 
 void RingBuffer::readLine(String &lineToReturn){
     /*
-   
+
     Return one line (terminated with \n) from the buffer
     if there are no full lines in the buffer, passed string will be empty
-   
+
     */
     lineToReturn = "";            // begin with an empty string
-    
+
     if (numberOfLines() > 0) {    // there is at least one full line in the buffer
         char lastReadValue = '\0';
         while(lastReadValue != '\n'){   //read until the end of the line is found, building the string
@@ -100,10 +101,10 @@ void RingBuffer::readLine(String &lineToReturn){
 
 void RingBuffer::prettyReadLine(String &lineToReturn){
     /*
-   
+
     Return one line (terminated with \n) from the buffer, but in all uppercase
     with no leading or trailing whitespaces
-   
+
     */
     readLine(lineToReturn);
     lineToReturn.trim();  // remove leading and trailing white space
@@ -119,7 +120,7 @@ void RingBuffer::print(){
     Serial.println(_beginningOfString);
     Serial.print(F("Buffer End: "));
     Serial.println(_endOfString);
-    
+
     Serial.print(F("Buffer Contents: "));
     int i = _beginningOfString;
     while(i != _endOfString){
@@ -127,39 +128,39 @@ void RingBuffer::print(){
             Serial.print(F("\\n"));
         }
         else if (_buffer[i] == '\r') {
-            Serial.print(F("\\r"));          
+            Serial.print(F("\\r"));
         }
         else if (_buffer[i] == '\t') {
-            Serial.print(F("\\t"));          
+            Serial.print(F("\\t"));
         }
         else {
-            Serial.print(_buffer[i]);          
+            Serial.print(_buffer[i]);
         }
         _incrementVariable(&i);
     }
-    
+
     Serial.println(F("(End of Buffer)"));
-    
+
 }
 
 void RingBuffer::_incrementBeginning(){
     /*
-    
+
     Increment the pointer to the beginning of the ring buffer by one.
-    
+
     */
-    
-    if (_beginningOfString == _endOfString)  
+
+    if (_beginningOfString == _endOfString)
         return;   //don't allow the beginning to pass the end
-    else 
+    else
         _beginningOfString = (_beginningOfString + 1) % INCBUFFERLENGTH;    //move the beginning up one and wrap to zero based upon INCBUFFERLENGTH
 }
 
 int RingBuffer::_incrementEnd(){
     /*
-    
+
     Increment the pointer to the end of the ring buffer by one.
-    
+
     */
     if ( spaceAvailable() == 0 ) {
         Serial.println(F("Buffer overflow!"));
@@ -173,7 +174,7 @@ int RingBuffer::_incrementEnd(){
 
 void RingBuffer::_incrementVariable(int* variable){
     /*
-    Increment the target variable. 
+    Increment the target variable.
     */
     *variable = (*variable + 1 ) % INCBUFFERLENGTH;
    }
@@ -193,7 +194,7 @@ int RingBuffer::length(void)
   if ( _endOfString >= _beginningOfString ) // Linear
     return _endOfString - _beginningOfString ;
   else          // must have rolled
-    return  ( INCBUFFERLENGTH - _beginningOfString + _endOfString); 
+    return  ( INCBUFFERLENGTH - _beginningOfString + _endOfString);
 }
 
 
@@ -201,7 +202,7 @@ void RingBuffer::empty(){
     /*
     Empty the contents of the ring buffer
     */
-    
+
     _beginningOfString = 0;
     _endOfString       = 0;
 }

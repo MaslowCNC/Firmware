@@ -21,16 +21,17 @@ Copyright 2014-2017 Bar Smith*/
 // previously by pre v1.00 Firmware.
 
 #include "Maslow.h"
+#include <EEPROM.h>
 
 void settingsLoadFromEEprom(){
-    /* 
+    /*
     Loads data from EEPROM if EEPROM data is valid, only called on startup
-    
+
     Settings are stored starting at address 340 all the way up.
     */
     settingsVersion_t settingsVersionStruct;
     settings_t tempSettings;
-    
+
     settingsReset(); // Load default values first
     EEPROM.get(300, settingsVersionStruct);
     EEPROM.get(340, tempSettings);
@@ -42,7 +43,7 @@ void settingsLoadFromEEprom(){
     else {
       reportStatusMessage(STATUS_SETTING_READ_FAIL);
     }
-    
+
     // Apply settings
     setPWMPrescalers(int(sysSettings.fPWM));
     kinematics.recomputeGeometry();
@@ -55,11 +56,11 @@ void settingsLoadFromEEprom(){
 }
 
 void settingsReset() {
-    /* 
+    /*
     Loads default data into settings, many of these values are approximations
     from the an ideal stock frame.  Other values are just the recommended
     value.  Ideally we want these defaults to match the defaults in GroundControl
-    so that if a value is not changed by a user or is not used, it doesn't 
+    so that if a value is not changed by a user or is not used, it doesn't
     need to be updated here.
     */
     sysSettings.machineWidth = 2438.4; // float machineWidth;
@@ -109,26 +110,26 @@ void settingsWipe(byte resetType){
   this
   */
   if (bit_istrue(resetType, SETTINGS_RESTORE_SETTINGS)){
-    for (int i = 340 ; i < sizeof(sysSettings) + 340 ; i++) {
+    for (size_t i = 340 ; i < sizeof(sysSettings) + 340 ; i++) {
       EEPROM.write(i, 0);
     }
   }
   else if (bit_istrue(resetType, SETTINGS_RESTORE_MASLOW)){
-    for (int i = 300 ; i < sizeof(sysSettings) + 340; i++) {
+    for (size_t i = 300 ; i < sizeof(sysSettings) + 340; i++) {
       EEPROM.write(i, 0);
     }
   }
   else if (bit_istrue(resetType, SETTINGS_RESTORE_ALL)){
-    for (int i = 0 ; i < EEPROM.length() ; i++) {
+    for (size_t i = 0 ; i < EEPROM.length() ; i++) {
       EEPROM.write(i, 0);
     }
   }
 }
 
 void settingsSaveToEEprom(){
-    /* 
+    /*
     Saves settings to EEPROM, only called when settings change
-    
+
     Settings are stored starting at address 340 all the way up.
     */
     settingsVersion_t settingsVersionStruct = {SETTINGSVERSION, EEPROMVALIDDATA};
@@ -137,9 +138,9 @@ void settingsSaveToEEprom(){
 }
 
 void settingsSaveStepstoEEprom(){
-    /* 
+    /*
     Saves position to EEPROM, is called frequently by execSystemRealtime
-    
+
     Steps are saved in address 310 -> 339.  Room for expansion for additional
     axes in the future.
     */
@@ -156,15 +157,14 @@ void settingsSaveStepstoEEprom(){
 }
 
 void settingsLoadStepsFromEEprom(){
-    /* 
+    /*
     Loads position to EEPROM, is called on startup.
-    
+
     Steps are saved in address 310 -> 339.  Room for expansion for additional
     axes in the future.
     */
     settingsStepsV1_t tempStepsV1;
-    settingsVersion_t settingsVersionStruct;
-    
+
     EEPROM.get(310, tempStepsV1);
     if (tempStepsV1.eepromValidData == EEPROMVALIDDATA){
             leftAxis.setSteps(tempStepsV1.lSteps);
@@ -191,8 +191,8 @@ void settingsLoadStepsFromEEprom(){
 
 void settingsLoadOldSteps(){
     /*
-    Loads the old version of step settings, only called once encoder steps 
-    and distance per rotation have been loaded.  Wipes the old data once 
+    Loads the old version of step settings, only called once encoder steps
+    and distance per rotation have been loaded.  Wipes the old data once
     incorporated to prevent oddities in the future
     */
     if (sys.state == STATE_OLD_SETTINGS){
@@ -214,10 +214,10 @@ void settingsLoadOldSteps(){
 
 byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
     /*
-    Alters individual settings which are then stored to EEPROM.  Returns a 
-    status message byte value 
+    Alters individual settings which are then stored to EEPROM.  Returns a
+    status message byte value
     */
-    
+
     // We can add whatever sanity checks we want here and error out if we like
     switch(parameter) {
         case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8:
@@ -225,43 +225,43 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
                 case 0:
                       sysSettings.machineWidth = value;
                       break;
-                case 1: 
+                case 1:
                       sysSettings.machineHeight = value;
                       break;
-                case 2: 
+                case 2:
                       sysSettings.distBetweenMotors = value;
                       break;
-                case 3: 
+                case 3:
                       sysSettings.motorOffsetY = value;
                       break;
-                case 4: 
+                case 4:
                       sysSettings.sledWidth = value;
                       break;
-                case 5: 
+                case 5:
                       sysSettings.sledHeight = value;
                       break;
-        case 6: 
-              sysSettings.sledCG = value;
-              break;
-        case 7: 
-              sysSettings.kinematicsType = value;
-              break;
-        case 8: 
-              sysSettings.rotationDiskRadius = value;
-              break;
+                case 6:
+                      sysSettings.sledCG = value;
+                      break;
+                case 7:
+                      sysSettings.kinematicsType = value;
+                      break;
+                case 8:
+                      sysSettings.rotationDiskRadius = value;
+                      break;
             }
             kinematics.init();
             break;
-        case 9: 
+        case 9:
               sysSettings.axisDetachTime = value;
               break;
-        case 10: 
+        case 10:
               sysSettings.chainLength = value;
               break;
-        case 11: 
+        case 11:
               sysSettings.originalChainLength = value;
               break;
-        case 12: 
+        case 12:
               sysSettings.encoderSteps = value;
               leftAxis.changeEncoderResolution(&sysSettings.encoderSteps);
               rightAxis.changeEncoderResolution(&sysSettings.encoderSteps);
@@ -273,7 +273,7 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               }
               kinematics.init();
               break;
-        case 13: 
+        case 13:
               sysSettings.distPerRot = value;
               leftAxis.changePitch(&sysSettings.distPerRot);
               rightAxis.changePitch(&sysSettings.distPerRot);
@@ -286,19 +286,19 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               }
               kinematics.init();
               break;
-        case 15: 
+        case 15:
               sysSettings.maxFeed = value;
               break;
         case 16:
               sysSettings.zAxisAttached = value;
               break;
-        case 17: 
+        case 17:
               sysSettings.spindleAutomate = value;
               break;
-        case 18: 
+        case 18:
               sysSettings.maxZRPM = value;
               break;
-        case 19: 
+        case 19:
               sysSettings.zDistPerRot = value;
               zAxis.changePitch(&sysSettings.zDistPerRot);
               if (sys.oldSettingsFlag){
@@ -308,7 +308,7 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
                 }
               }
               break;
-        case 20: 
+        case 20:
               sysSettings.zEncoderSteps = value;
               zAxis.changeEncoderResolution(&sysSettings.zEncoderSteps);
               if (sys.oldSettingsFlag){
@@ -323,25 +323,25 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
                 case 21:
                       sysSettings.KpPos = value;
                       break;
-                case 22: 
+                case 22:
                       sysSettings.KiPos = value;
                       break;
-                case 23: 
+                case 23:
                       sysSettings.KdPos = value;
                       break;
-                case 24: 
+                case 24:
                       sysSettings.propWeightPos = value;
                       break;
-                case 25: 
+                case 25:
                       sysSettings.KpV = value;
                       break;
-                case 26: 
+                case 26:
                       sysSettings.KiV = value;
                       break;
-                case 27: 
+                case 27:
                       sysSettings.KdV = value;
                       break;
-                case 28: 
+                case 28:
                       sysSettings.propWeightV = value;
                       break;
                 }
@@ -350,28 +350,28 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
                 break;
         case 29: case 30: case 31: case 32: case 33: case 34: case 35: case 36:
             switch(parameter) {
-                case 29: 
+                case 29:
                       sysSettings.zKpPos = value;
                       break;
-                case 30: 
+                case 30:
                       sysSettings.zKiPos = value;
                       break;
-                case 31: 
+                case 31:
                       sysSettings.zKdPos = value;
                       break;
-                case 32: 
+                case 32:
                       sysSettings.zPropWeightPos = value;
                       break;
-                case 33: 
+                case 33:
                       sysSettings.zKpV = value;
                       break;
-                case 34: 
+                case 34:
                       sysSettings.zKiV = value;
                       break;
-                case 35: 
+                case 35:
                       sysSettings.zKdV = value;
                       break;
-                case 36: 
+                case 36:
                       sysSettings.zPropWeightV = value;
                       break;
             }

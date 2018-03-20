@@ -114,7 +114,7 @@ void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChai
                                              //These criteria will be zero when the correct values are reached
                                              //They are negated here as a numerical efficiency expedient
 
-        Crit[0]=  - _moment(Y1Plus, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
+        Crit[0]=  - _moment(Y1Plus, Y2Plus, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2);
         Crit[1] = - _YOffsetEqn(Y1Plus, x - h * CosPsi1, SinPsi1);
         Crit[2] = - _YOffsetEqn(Y2Plus, sysSettings.distBetweenMotors - (x + h * CosPsi2), SinPsi2);
 
@@ -131,9 +131,9 @@ void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChai
 
                           //Estimate the Jacobian components
 
-        Jac[0] = (_moment( Y1Plus, Y2Plus,Phi + DELTAPHI, MySinPhiDelta, SinPsi1D, CosPsi1D, SinPsi2D, CosPsi2D) + Crit[0])/DELTAPHI;
-        Jac[1] = (_moment( Y1Plus + DELTAY, Y2Plus, Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DELTAY;
-        Jac[2] = (_moment(Y1Plus, Y2Plus + DELTAY,  Phi, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DELTAY;
+        Jac[0] = (_moment( Y1Plus, Y2Plus, MySinPhiDelta, SinPsi1D, CosPsi1D, SinPsi2D, CosPsi2D) + Crit[0])/DELTAPHI;
+        Jac[1] = (_moment( Y1Plus + DELTAY, Y2Plus, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DELTAY;
+        Jac[2] = (_moment(Y1Plus, Y2Plus + DELTAY, MySinPhi, SinPsi1, CosPsi1, SinPsi2, CosPsi2) + Crit[0])/DELTAY;
         Jac[3] = (_YOffsetEqn(Y1Plus, x - h * CosPsi1D, SinPsi1D) + Crit[1])/DELTAPHI;
         Jac[4] = (_YOffsetEqn(Y1Plus + DELTAY, x - h * CosPsi1,SinPsi1) + Crit[1])/DELTAY;
         Jac[5] = 0.0;
@@ -358,7 +358,7 @@ void  Kinematics::_MatSolv(){
     }
 }
 
-float Kinematics::_moment(const float& Y1Plus, const float& Y2Plus, const float& Phi, const float& MSinPhi, const float& MSinPsi1, const float& MCosPsi1, const float& MSinPsi2, const float& MCosPsi2){   //computes net moment about center of mass
+float Kinematics::_moment(const float& Y1Plus, const float& Y2Plus, const float& MSinPhi, const float& MSinPsi1, const float& MCosPsi1, const float& MSinPsi2, const float& MCosPsi2){   //computes net moment about center of mass
     float Offsetx1;
     float Offsetx2;
     float Offsety1;

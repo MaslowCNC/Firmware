@@ -22,46 +22,46 @@ Copyright 2014-2017 Bar Smith*/
 bool TLE5206;
 int SpindlePowerControlPin;  // output for controlling spindle power
 int ProbePin;                // use this input for zeroing zAxis with G38.2 gcode
-    
+
 
 void  calibrateChainLengths(String gcodeLine){
     /*
     The calibrateChainLengths function lets the machine know that the chains are set to a given length where each chain is ORIGINCHAINLEN
     in length
     */
-    
+
     if (extractGcodeValue(gcodeLine, 'L', 0)){
         //measure out the left chain
         Serial.println(F("Measuring out left chain"));
         singleAxisMove(&leftAxis, sysSettings.originalChainLength, (sysSettings.maxFeed * .9));
-        
+
         Serial.print(leftAxis.read());
         Serial.println(F("mm"));
-        
+
         leftAxis.detach();
     }
     else if(extractGcodeValue(gcodeLine, 'R', 0)){
         //measure out the right chain
         Serial.println(F("Measuring out right chain"));
         singleAxisMove(&rightAxis, sysSettings.originalChainLength, (sysSettings.maxFeed * .9));
-        
+
         Serial.print(rightAxis.read());
         Serial.println(F("mm"));
-        
+
         rightAxis.detach();
     }
-    
+
 }
 
 void   setupAxes(){
     /*
-    
+
     Detect the version of the Arduino shield connected, and use the appropriate pins
-    
+
     This function runs before the serial port is open so the version is not printed here
-    
+
     */
-    
+
     // These shouldn't be CAPS, they are not precompile defines
     int ENCODER1A;
     int ENCODER1B;
@@ -69,18 +69,18 @@ void   setupAxes(){
     int ENCODER2B;
     int ENCODER3A;
     int ENCODER3B;
-    
+
     int IN1;
     int IN2;
     int IN3;
     int IN4;
     int IN5;
     int IN6;
-    
+
     int ENA;
     int ENB;
     int ENC;
-    
+
     int AUX1;
     int AUX2;
     int AUX3;
@@ -93,7 +93,7 @@ void   setupAxes(){
 
     //read the pins which indicate the PCB version
     int pcbVersion = getPCBVersion();
-    
+
     if(pcbVersion == 0){
         //Beta PCB v1.0 Detected
         //MP1 - Right Motor
@@ -102,14 +102,14 @@ void   setupAxes(){
         IN1 = 9;        // OUTPUT
         IN2 = 8;        // OUTPUT
         ENA = 6;        // PWM
-        
+
         //MP2 - Z-axis
         ENCODER2A = 2;  // INPUT
         ENCODER2B = 3;  // INPUT
         IN3 = 11;       // OUTPUT
         IN4 = 10;       // OUTPUT
         ENB = 7;        // PWM
-        
+
         //MP3 - Left Motor
         ENCODER3A = 21; // INPUT
         ENCODER3B = 20; // INPUT
@@ -130,14 +130,14 @@ void   setupAxes(){
         IN1 = 6;        // OUTPUT
         IN2 = 4;        // OUTPUT
         ENA = 5;        // PWM
-        
+
         //MP2 - Z-axis
         ENCODER2A = 19; // INPUT
         ENCODER2B = 18; // INPUT
         IN3 = 9;        // OUTPUT
         IN4 = 7;        // OUTPUT
         ENB = 8;        // PWM
-        
+
         //MP3 - Left Motor
         ENCODER3A = 2;   // INPUT
         ENCODER3B = 3;   // INPUT
@@ -152,21 +152,21 @@ void   setupAxes(){
     }
     else if(pcbVersion == 2){
         //PCB v1.2 Detected
-        
+
         //MP1 - Right Motor
         ENCODER1A = 20;  // INPUT
         ENCODER1B = 21;  // INPUT
         IN1 = 4;         // OUTPUT
         IN2 = 6;         // OUTPUT
         ENA = 5;         // PWM
-        
+
         //MP2 - Z-axis
         ENCODER2A = 19;  // INPUT
         ENCODER2B = 18;  // INPUT
         IN3 = 7;         // OUTPUT
         IN4 = 9;         // OUTPUT
         ENB = 8;         // PWM
-        
+
         //MP3 - Left Motor
         ENCODER3A = 2;   // INPUT
         ENCODER3B = 3;   // INPUT
@@ -187,14 +187,14 @@ void   setupAxes(){
         IN1 = 6;        // OUTPUT
         IN2 = 4;        // OUTPUT
         ENA = 5;        // errorFlag
-        
+
         //MP2 - Z-axis
         ENCODER2A = 18; // INPUT
         ENCODER2B = 19; // INPUT
         IN3 = 9;        // OUTPUT
         IN4 = 7;        // OUTPUT
         ENB = 8;        // errorFlag
-        
+
         //MP3 - Left Motor
         ENCODER3A = 2;   // INPUT
         ENCODER3B = 3;   // INPUT
@@ -221,7 +221,7 @@ void   setupAxes(){
         leftAxis.setup (ENC, IN5, IN6, ENCODER3A, ENCODER3B, 'L', LOOPINTERVAL);
         rightAxis.setup(ENA, IN2, IN1, ENCODER1B, ENCODER1A, 'R', LOOPINTERVAL);
     }
-    
+
     zAxis.setup    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, 'Z', LOOPINTERVAL);
     leftAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     rightAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
@@ -286,7 +286,7 @@ void setPWMPrescalers(int prescalerChoice) {
 // Code:  TCCR2B = (TCCR2B & 0xF8) | value ;
 // —————————————————————————————-
 // Timers 3, 4 ( Pin 2, 3, 5), (Pin 6, 7, 8)
-// 
+//
 // Value  Divisor  Frequency
 // 0x01   1        31.374 KHz
 // 0x02   8        3.921 Khz
@@ -300,34 +300,9 @@ void setPWMPrescalers(int prescalerChoice) {
       TCCR2B |= (prescalerChoice + 1); // pins 9, 10 - change to match timers3&4
     } else {
       TCCR2B |= prescalerChoice; // pins 9, 10
-}
+    }
     TCCR3B |= prescalerChoice;   // pins 2, 3, 5
     TCCR4B |= prescalerChoice;   // pins 6, 7, 8
-}
-
-//
-// PWM frequency change
-//  presently just sets the default value
-//  different values seem to need specific PWM tunings...
-//
-void setPWMPrescalers() {
-// first must erase the bits in each TTCRxB register that control the timers prescaler
-    int prescalerEraser = 0B0111;
-    TCCR2B &= ~prescalerEraser;
-    TCCR3B &= ~prescalerEraser;
-    TCCR4B &= ~prescalerEraser;
-// now choose how to set those same three bits
-    // prescaler = 1 ---> PWM frequency is 31000 Hz
-    // prescaler = 2 ---> PWM frequency is 4000 Hz
-    // prescaler = 3 ---> PWM frequency is 490 Hz (default value)
-    // prescaler = 4 ---> PWM frequency is 120 Hz
-    // prescaler = 5 ---> PWM frequency is 30 Hz
-    // prescaler = 6 ---> PWM frequency is <20 Hz
-    int prescalerChoice = 3;
-// and apply it
-    TCCR2B |= prescalerChoice; // pins 9, 10
-    TCCR3B |= prescalerChoice; // pins 2, 3, 5
-    TCCR4B |= prescalerChoice; // pins 6, 7, 8
 }
 
 
@@ -336,24 +311,24 @@ void setPWMPrescalers() {
 // Need to check if all returns from this subsequently look to sys.stop
 void pause(){
     /*
-    
+
     The pause command pauses the machine in place without flushing the lines stored in the machine's
     buffer.
-    
-    When paused the machine enters a while() loop and doesn't exit until the '~' cycle resume command 
+
+    When paused the machine enters a while() loop and doesn't exit until the '~' cycle resume command
     is issued from Ground Control.
-    
+
     */
-    
+
     bit_true(sys.pause, PAUSE_FLAG_USER_PAUSE);
     Serial.println(F("Maslow Paused"));
-    
+
     while(bit_istrue(sys.pause, PAUSE_FLAG_USER_PAUSE)) {
-        
+
         // Run realtime commands
         execSystemRealtime();
         if (sys.stop){return;}
-    }    
+    }
 }
 
 
@@ -368,13 +343,13 @@ void maslowDelay(unsigned long waitTimeMs) {
    * Provides a time delay while holding the machine position, reading serial commands,
    * and periodically sending the machine position to Ground Control.  This prevents
    * Ground Control from thinking that the connection is lost.
-   * 
+   *
    * This is similar to the pause() command above, but provides a time delay rather than
    * waiting for the user (through Ground Control) to tell the machine to continue.
    */
-   
+
     unsigned long startTime  = millis();
-    
+
     while ((millis() - startTime) < waitTimeMs){
         execSystemRealtime();
         if (sys.stop){return;}
@@ -403,29 +378,29 @@ void systemSaveAxesPosition(){
     }
 }
 
-// This should be the ultimate fallback, it would be best if we didn't even need 
+// This should be the ultimate fallback, it would be best if we didn't even need
 // something like this at all
 // TODO delete this function, we are not even using it anymore
 void  _watchDog(){
     /*
     If:
-      No incoming serial in 5 seconds 
+      No incoming serial in 5 seconds
       Motors are detached
       Nothing in Serial buffer
       Watchdog has not run in 5 seconds
     Then:
       Send an ok message
-    
+
     This fixes the issue where the machine is ready, but Ground Control doesn't know the machine is ready and the system locks up.
     */
     static unsigned long lastRan = millis();
-    
+
     if ( millis() - sys.lastSerialRcvd > 5000 &&
-        (millis() - lastRan) > 5000 && 
+        (millis() - lastRan) > 5000 &&
         !leftAxis.attached() and !rightAxis.attached() and !zAxis.attached() &&
         incSerialBuffer.length() == 0
        ){
-          #if defined (verboseDebug) && verboseDebug > 0              
+          #if defined (verboseDebug) && verboseDebug > 0
             Serial.println(F("_watchDog requesting new code"));
           #endif
           reportStatusMessage(STATUS_OK);
@@ -434,7 +409,7 @@ void  _watchDog(){
 }
 
 void systemReset(){
-    /* 
+    /*
     Stops everything and resets the arduino
     */
     leftAxis.detach();
@@ -453,7 +428,7 @@ byte systemExecuteCmdstring(String& cmdString){
     This is taken heavily from grbl.  https://github.com/grbl/grbl
     */
     byte char_counter = 1;
-    byte helper_var = 0; // Helper variable
+//    byte helper_var = 0; // Helper variable
     float parameter, value;
     if (cmdString.length() == 1){
         reportMaslowHelp();
@@ -525,14 +500,14 @@ byte systemExecuteCmdstring(String& cmdString){
           //       if (bit_istrue(settings.flags,BITFLAG_HOMING_ENABLE)) {
           //         sys.state = STATE_HOMING; // Set system state variable
           //         // Only perform homing if Grbl is idle or lost.
-          // 
+          //
           //         // TODO: Likely not required.
           //         if (system_check_safety_door_ajar()) { // Check safety door switch before homing.
           //           bit_true(sys_rt_exec_state, EXEC_SAFETY_DOOR);
           //           protocol_execute_realtime(); // Enter safety door mode.
           //         }
-          // 
-          // 
+          //
+          //
           //         mc_homing_cycle();
           //         if (!sys.abort) {  // Execute startup scripts after successful homing.
           //           sys.state = STATE_IDLE; // Set to IDLE when complete.

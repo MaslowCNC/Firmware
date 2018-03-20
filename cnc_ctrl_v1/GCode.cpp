@@ -23,7 +23,7 @@ Copyright 2014-2017 Bar Smith*/
 RingBuffer incSerialBuffer;
 String readyCommandString = "";  //KRK why is this a global?
 String gcodeLine          = "";  //Our use of this is a bit sloppy, at times,
-                                 //we pass references to this global and then 
+                                 //we pass references to this global and then
                                  //name them the same thing.
 
 void initGCode(){
@@ -34,13 +34,13 @@ void initGCode(){
 
 void readSerialCommands(){
     /*
-    Check to see if a new character is available from the serial connection, 
+    Check to see if a new character is available from the serial connection,
     if this is a necessary character write to the incSerialBuffer otherwise discard
     it.
     */
-    
+
     static bool quickCommandFlag = false;
-    
+
     if (Serial.available() > 0) {
         while (Serial.available() > 0) {
             char c = Serial.read();
@@ -68,10 +68,10 @@ void readSerialCommands(){
             }
             if (sys.stop){return;}
         }
-        #if defined (verboseDebug) && verboseDebug > 1              
+        #if defined (verboseDebug) && verboseDebug > 1
         // print ring buffer contents
         Serial.println(F("rSC added to ring buffer"));
-        incSerialBuffer.print();        
+        incSerialBuffer.print();
         #endif
     }
 }
@@ -79,9 +79,9 @@ void readSerialCommands(){
 int   findEndOfNumber(const String& textString, const int& index){
     //Return the index of the last digit of the number beginning at the index passed in
     unsigned int i = index;
-    
+
     while (i < textString.length()){
-        
+
         if(isDigit(textString[i]) or isPunct(textString[i])){ //If we're still looking at a number, keep goin
             i++;
         }
@@ -101,51 +101,51 @@ float extractGcodeValue(const String& readString, char target, const float& defa
     int end;
     String numberAsString;
     float numberAsFloat;
-    
+
     begin           =  readString.indexOf(target);
     end             =  findEndOfNumber(readString,begin+1);
     numberAsString  =  readString.substring(begin+1,end);
-    
+
     numberAsFloat   =  numberAsString.toFloat();
-    
+
     if (begin == -1){ //if the character was not found, return error
         return defaultReturn;
     }
-    
+
     return numberAsFloat;
 }
 
 byte  executeBcodeLine(const String& gcodeLine){
     /*
-    
+
     Executes a single line of gcode beginning with the character 'B'.
-    
+
     */
-    
+
     //Handle B-codes
-    
+
     if(gcodeLine.substring(0, 3) == "B05"){
         Serial.print(F("Firmware Version "));
         Serial.println(VERSIONNUMBER);
         return STATUS_OK;
     }
-    
+
     if(sys.state == STATE_OLD_SETTINGS){
       return STATUS_OLD_SETTINGS;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B01"){
-        
+
         Serial.println(F("Motor Calibration Not Needed"));
-        
+
         return STATUS_OK;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B02"){
         calibrateChainLengths(gcodeLine);
         return STATUS_OK;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B04"){
         //Test each of the axis
         maslowDelay(500);
@@ -160,50 +160,50 @@ byte  executeBcodeLine(const String& gcodeLine){
         Serial.println(F("Tests complete."));
         return STATUS_OK;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B06"){
         Serial.println(F("Setting Chain Lengths To: "));
         float newL = extractGcodeValue(gcodeLine, 'L', 0);
         float newR = extractGcodeValue(gcodeLine, 'R', 0);
-        
+
         leftAxis.set(newL);
         rightAxis.set(newR);
-        
+
         Serial.print(F("Left: "));
         Serial.print(leftAxis.read());
         Serial.println(F("mm"));
         Serial.print(F("Right: "));
         Serial.print(rightAxis.read());
         Serial.println(F("mm"));
-        
+
         return STATUS_OK;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B08"){
         //Manually recalibrate chain lengths
         leftAxis.set(sysSettings.originalChainLength);
         rightAxis.set(sysSettings.originalChainLength);
-        
+
         Serial.print(F("Left: "));
         Serial.print(leftAxis.read());
         Serial.println(F("mm"));
         Serial.print(F("Right: "));
         Serial.print(rightAxis.read());
         Serial.println(F("mm"));
-        
+
         kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition, 0, 0);
-        
+
         Serial.println(F("Message: The machine chains have been manually re-calibrated."));
-        
+
         return STATUS_OK;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B09"){
         //Directly command each axis to move to a given distance
         float lDist = extractGcodeValue(gcodeLine, 'L', 0);
         float rDist = extractGcodeValue(gcodeLine, 'R', 0);
         float speed = extractGcodeValue(gcodeLine, 'F', 800);
-        
+
         if(sys.useRelativeUnits){
             if(abs(lDist) > 0){
                 singleAxisMove(&leftAxis,  leftAxis.read()  + lDist, speed);
@@ -216,10 +216,10 @@ byte  executeBcodeLine(const String& gcodeLine){
             singleAxisMove(&leftAxis,  lDist, speed);
             singleAxisMove(&rightAxis, rDist, speed);
         }
-        
+
         return STATUS_OK;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B10"){
         //measure the left axis chain length
         Serial.print(F("[Measure: "));
@@ -227,15 +227,15 @@ byte  executeBcodeLine(const String& gcodeLine){
         Serial.println(F("]"));
         return STATUS_OK;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B11"){
         //run right motor in the given direction at the given speed for the given time
         float  speed      = extractGcodeValue(gcodeLine, 'S', 100);
         float  time       = extractGcodeValue(gcodeLine, 'T', 1);
-        
+
         double ms    = 1000*time;
         double begin = millis();
-        
+
         int i = 0;
         while (millis() - begin < ms){
             leftAxis.motorGearboxEncoder.motor.directWrite(speed);
@@ -249,7 +249,7 @@ byte  executeBcodeLine(const String& gcodeLine){
         leftAxis.set(leftAxis.read());
         return STATUS_OK;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B13"){
         //PID Testing of Velocity
         float  left       = extractGcodeValue(gcodeLine, 'L', 0);
@@ -258,14 +258,14 @@ byte  executeBcodeLine(const String& gcodeLine){
         float  stop       = extractGcodeValue(gcodeLine, 'F', 1);
         float  steps      = extractGcodeValue(gcodeLine, 'I', 1);
         float  version    = extractGcodeValue(gcodeLine, 'V', 1);
-        
+
         Axis* axis = &rightAxis;
         if (left > 0) axis = &leftAxis;
         if (useZ > 0) axis = &zAxis;
         PIDTestVelocity(axis, start, stop, steps, version);
         return STATUS_OK;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B14"){
         //PID Testing of Position
         float  left       = extractGcodeValue(gcodeLine, 'L', 0);
@@ -275,64 +275,65 @@ byte  executeBcodeLine(const String& gcodeLine){
         float  steps      = extractGcodeValue(gcodeLine, 'I', 1);
         float  stepTime   = extractGcodeValue(gcodeLine, 'T', 2000);
         float  version    = extractGcodeValue(gcodeLine, 'V', 1);
-        
+
         Axis* axis = &rightAxis;
         if (left > 0) axis = &leftAxis;
         if (useZ > 0) axis = &zAxis;
         PIDTestPosition(axis, start, stop, steps, stepTime, version);
         return STATUS_OK;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B16"){
         //Incrementally tests voltages to see what RPMs they produce
         float  left       = extractGcodeValue(gcodeLine, 'L', 0);
         float  useZ       = extractGcodeValue(gcodeLine, 'Z', 0);
         float  start      = extractGcodeValue(gcodeLine, 'S', 1);
         float  stop       = extractGcodeValue(gcodeLine, 'F', 1);
-        
+
         Axis* axis = &rightAxis;
         if (left > 0) axis = &leftAxis;
         if (useZ > 0) axis = &zAxis;
         voltageTest(axis, start, stop);
         return STATUS_OK;
     }
-    
+
     if(gcodeLine.substring(0, 3) == "B15"){
         //The B15 command moves the chains to the length which will put the sled in the center of the sheet
-        
+
         //Compute chain length for position 0,0
         float chainLengthAtMiddle;
         kinematics.inverse(0,0,&chainLengthAtMiddle,&chainLengthAtMiddle);
-        
+
         //Adjust left chain length
         singleAxisMove(&leftAxis,  chainLengthAtMiddle, 800);
-        
+
         //Adjust right chain length
         singleAxisMove(&rightAxis, chainLengthAtMiddle, 800);
-        
+
         //Reload the position
         kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition, 0, 0);
-        
+
         return STATUS_OK;
     }
+    return STATUS_INVALID_STATEMENT;
 }
-    
+
 void  executeGcodeLine(const String& gcodeLine){
     /*
-    
+
     Executes a single line of gcode beginning with the character 'G'.  If the G code is
     not included on the front of the line, the code from the previous line will be added.
-    
+
     */
-      
+
     //Handle G-Codes
-   
+
     int gNumber = extractGcodeValue(gcodeLine,'G', -1);
-    
+
     if (gNumber == -1){               // If the line does not have a G command
         gNumber = sys.lastGCommand;        // apply the last one
     }
-    
+
     switch(gNumber){
         case 0:   // Rapid positioning
         case 1:   // Linear interpolation
@@ -369,18 +370,18 @@ void  executeGcodeLine(const String& gcodeLine){
     }
 
 }
-    
+
 void  executeMcodeLine(const String& gcodeLine){
     /*
-    
+
     Executes a single line of gcode beginning with the character 'M'.
-    
+
     */
-    
+
     //Handle M-Codes
-   
+
     int mNumber = extractGcodeValue(gcodeLine,'M', -1);
-    
+
     switch(mNumber){
         case 0:   // Program Pause / Unconditional Halt / Stop
         case 1:   // Optional Pause / Halt / Sleep
@@ -410,14 +411,14 @@ void  executeMcodeLine(const String& gcodeLine){
             Serial.print(mNumber);
             Serial.println(F(" unsupported and ignored."));
     }
-    
+
 }
 
 void  executeOtherCodeLine(const String& gcodeLine){
     /*
-    
+
     Executes a single line of gcode beginning with a character other than 'G', 'B', or 'M'.
-    
+
     */
 
     if (gcodeLine.length() > 1) {
@@ -434,10 +435,10 @@ void  executeOtherCodeLine(const String& gcodeLine){
     else {
         Serial.print(F("Command "));
         Serial.print(gcodeLine);
-        Serial.println(F(" too short - ignored."));      
+        Serial.println(F(" too short - ignored."));
     }
-        
-} 
+
+}
 
 int   findNextGM(const String& readString, const int& startingPoint){
     int nextGIndex = readString.indexOf('G', startingPoint);
@@ -450,19 +451,19 @@ int   findNextGM(const String& readString, const int& startingPoint){
     if (nextGIndex == -1) {           // if 'G' was not found (and therefore 'M' was not found)
         nextGIndex = readString.length();   // then use the whole string
     }
-    
+
     return nextGIndex;
 }
 
 void  sanitizeCommandString(String& cmdString){
     /*
-    Primarily removes comments and some other non supported characters or functions.  
+    Primarily removes comments and some other non supported characters or functions.
     This is taken heavily from the GRBL project at https://github.com/gnea/grbl
     */
-    
+
     byte line_flags = 0;
-    short pos = 0;
-    
+    size_t pos = 0;
+
     while (cmdString.length() > pos){
         if (line_flags) {
             // Throw away all (except EOL) comment characters and overflow characters.
@@ -500,7 +501,7 @@ void  sanitizeCommandString(String& cmdString){
             }
         }
     }
-    #if defined (verboseDebug) && verboseDebug > 1              
+    #if defined (verboseDebug) && verboseDebug > 1
       // print results
       Serial.println(F("sCS execution complete"));
       Serial.println(cmdString);
@@ -509,18 +510,18 @@ void  sanitizeCommandString(String& cmdString){
 
 byte  interpretCommandString(String& cmdString){
     /*
-    
+
     Splits a string into lines of gcode which begin with 'G' or 'M', executing each in order
     Also executes full lines for 'B' codes, and handles 'T' at beginning of line
 
     Assumptions:
         Leading and trailing white space has already been removed from cmdString
         cmdString has been converted to upper case
-    
+
     */
-    
-    int firstG;  
-    int secondG;
+
+    size_t firstG;
+    size_t secondG;
 
     if (cmdString.length() > 0) {
         if (cmdString[0] == '$') {
@@ -541,11 +542,11 @@ byte  interpretCommandString(String& cmdString){
             while(cmdString.length() > 0){          //Extract each line of gcode from the string
                 firstG  = findNextGM(cmdString, 0);
                 secondG = findNextGM(cmdString, firstG + 1);
-                
+
                 if(firstG == cmdString.length()){   //If the line contains no G or M letters
                     firstG = 0;                     //send the whole line
                 }
-    
+
                 if (firstG > 0) {                   //If there is something before the first 'G' or 'M'
                     gcodeLine = cmdString.substring(0, firstG);
                     #if defined (verboseDebug) && verboseDebug > 0
@@ -554,9 +555,9 @@ byte  interpretCommandString(String& cmdString){
                     Serial.println(gcodeLine);
                     executeOtherCodeLine(gcodeLine);  // execute it first
                 }
-                
+
                 gcodeLine = cmdString.substring(firstG, secondG);
-                
+
                 if (gcodeLine.length() > 0){
                     if (gcodeLine[0] == 'M') {
                         #if defined (verboseDebug) && verboseDebug > 0
@@ -573,13 +574,15 @@ byte  interpretCommandString(String& cmdString){
                         executeGcodeLine(gcodeLine);
                     }
                 }
-                
+
                 cmdString = cmdString.substring(secondG, cmdString.length());
-                
+
             }
             return STATUS_OK;
         }
+        return STATUS_INVALID_STATEMENT;
     }
+    return STATUS_OK;
 }
 
 void gcodeExecuteLoop(){
@@ -595,27 +598,27 @@ void gcodeExecuteLoop(){
   }
 }
 
-int   G1(const String& readString, int G0orG1){
-    
-    /*G1() is the function which is called to process the string if it begins with 
+void G1(const String& readString, int G0orG1){
+
+    /*G1() is the function which is called to process the string if it begins with
     'G01' or 'G00'*/
-    
+
     float xgoto;
     float ygoto;
     float zgoto;
-        
+
     float currentXPos = sys.xPosition;
     float currentYPos = sys.yPosition;
-    
+
     float currentZPos = zAxis.read();
-    
+
     xgoto      = sys.inchesToMMConversion*extractGcodeValue(readString, 'X', currentXPos/sys.inchesToMMConversion);
     ygoto      = sys.inchesToMMConversion*extractGcodeValue(readString, 'Y', currentYPos/sys.inchesToMMConversion);
     zgoto      = sys.inchesToMMConversion*extractGcodeValue(readString, 'Z', currentZPos/sys.inchesToMMConversion);
     sys.feedrate   = sys.inchesToMMConversion*extractGcodeValue(readString, 'F', sys.feedrate/sys.inchesToMMConversion);
-    
-    if (sys.useRelativeUnits){ //if we are using a relative coordinate system 
-        
+
+    if (sys.useRelativeUnits){ //if we are using a relative coordinate system
+
         if(readString.indexOf('X') >= 0){ //if there is an X command
             xgoto = currentXPos + xgoto;
         }
@@ -626,9 +629,9 @@ int   G1(const String& readString, int G0orG1){
             zgoto = currentZPos + zgoto;
         }
     }
-    
+
     sys.feedrate = constrain(sys.feedrate, 1, sysSettings.maxFeed);   //constrain the maximum feedrate, 35ipm = 900 mmpm
-    
+
     //if the zaxis is attached
     if(!sysSettings.zAxisAttached){
         float threshold = .1; //units of mm
@@ -644,16 +647,16 @@ int   G1(const String& readString, int G0orG1){
             else{
                 Serial.println(F(" mm"));
             }
-            
+
             pause(); //Wait until the z-axis is adjusted
-            
+
             zAxis.set(zgoto);
 
             maslowDelay(1000);
         }
     }
-    
-    
+
+
     if (G0orG1 == 1){
         //if this is a regular move
         coordinatedMove(xgoto, ygoto, zgoto, sys.feedrate); //The XY move is performed
@@ -664,34 +667,34 @@ int   G1(const String& readString, int G0orG1){
     }
 }
 
-int   G2(const String& readString, int G2orG3){
+void G2(const String& readString, int G2orG3){
     /*
-    
+
     The G2 function handles the processing of the gcode line for both the command G2 and the
     command G3 which cut arcs.
-    
+
     */
-    
-    
+
+
     float X1 = sys.xPosition; //does this work if units are inches? (It seems to)
     float Y1 = sys.yPosition;
-    
+
     float X2      = sys.inchesToMMConversion*extractGcodeValue(readString, 'X', X1/sys.inchesToMMConversion);
     float Y2      = sys.inchesToMMConversion*extractGcodeValue(readString, 'Y', Y1/sys.inchesToMMConversion);
     float I       = sys.inchesToMMConversion*extractGcodeValue(readString, 'I', 0.0);
     float J       = sys.inchesToMMConversion*extractGcodeValue(readString, 'J', 0.0);
     sys.feedrate      = sys.inchesToMMConversion*extractGcodeValue(readString, 'F', sys.feedrate/sys.inchesToMMConversion);
-    
+
     float centerX = X1 + I;
     float centerY = Y1 + J;
-    
+
     sys.feedrate = constrain(sys.feedrate, 1, sysSettings.maxFeed);   //constrain the maximum feedrate, 35ipm = 900 mmpm
-    
+
     if (G2orG3 == 2){
-        return arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, CLOCKWISE);
+        arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, CLOCKWISE);
     }
     else {
-        return arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, COUNTERCLOCKWISE);
+        arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, COUNTERCLOCKWISE);
     }
 }
 
@@ -699,7 +702,7 @@ void  G10(const String& readString){
     /*The G10() function handles the G10 gcode which re-zeros one or all of the machine's axes.*/
     float currentZPos = zAxis.read();
     float zgoto      = sys.inchesToMMConversion*extractGcodeValue(readString, 'Z', currentZPos/sys.inchesToMMConversion);
-    
+
     zAxis.set(zgoto);
     zAxis.endMove(zgoto);
     zAxis.attach();
@@ -753,7 +756,6 @@ void  G38(const String& readString) {
         */
 
         Axis* axis = &zAxis;
-        float MMPerMin             = sys.feedrate;
         float startingPos          = axis->read();
         float endPos               = zgoto;
         float moveDist             = endPos - currentZPos; //total distance to move
@@ -768,7 +770,7 @@ void  G38(const String& readString) {
 
         long numberOfStepsTaken    = 0;
         float whereAxisShouldBeAtThisStep = startingPos;
-  
+
         axis->attach();
         //  zAxis->attach();
 
