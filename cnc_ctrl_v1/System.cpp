@@ -234,6 +234,9 @@ void   setupAxes(){
     zAxis.setPIDValues(&sysSettings.zKpPos, &sysSettings.zKiPos, &sysSettings.zKdPos, &sysSettings.zPropWeightPos, &sysSettings.zKpV, &sysSettings.zKiV, &sysSettings.zKdV, &sysSettings.zPropWeightV);
 
 // implement the AUXx values that are 'used'. This accomplishes setting their values at runtime.
+// Using a function is a compiler work-around to avoid
+//  "warning: variable ‘xxxxx’ set but not used [-Wunused-but-set-variable]"
+//  for AUX pins defined but not connected
     configAuxLow(AUX1, AUX2, AUX3, AUX4, AUX5, AUX6);
     if(pcbVersion == 3){ // TLE5206
       configAuxHigh(AUX7, AUX8, AUX9);
