@@ -182,8 +182,8 @@ void   setupAxes(){
         AUX2 = 16;
         AUX3 = 15;
         AUX4 = 14;
-        AUX5 = A7;
-        AUX6 = A6;
+        AUX5 = 61; // A7;
+        AUX6 = 60; // A6;
     }
     else if(pcbVersion == 3){ // TLE5206
         //TLE5206 PCB v1.3 Detected
