@@ -121,6 +121,8 @@ void   setupAxes(){
         AUX2 = 16;
         AUX3 = 15;
         AUX4 = 14;
+        AUX5 = 0;
+        AUX6 = 1;
     }
     else if(pcbVersion == 1){
         //PCB v1.1 Detected
@@ -149,6 +151,8 @@ void   setupAxes(){
         AUX2 = 16;
         AUX3 = 15;
         AUX4 = 14;
+        AUX5 = A7;
+        AUX6 = A6;
     }
     else if(pcbVersion == 2){
         //PCB v1.2 Detected
@@ -178,6 +182,8 @@ void   setupAxes(){
         AUX2 = 16;
         AUX3 = 15;
         AUX4 = 14;
+        AUX5 = A7;
+        AUX6 = A6;
     }
     else if(pcbVersion == 3){ // TLE5206
         //TLE5206 PCB v1.3 Detected
@@ -226,6 +232,20 @@ void   setupAxes(){
     leftAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     rightAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     zAxis.setPIDValues(&sysSettings.zKpPos, &sysSettings.zKiPos, &sysSettings.zKdPos, &sysSettings.zPropWeightPos, &sysSettings.zKpV, &sysSettings.zKiV, &sysSettings.zKdV, &sysSettings.zPropWeightV);
+
+// implement the AUXx values that are 'used'. This accomplishes setting their values at runtime.
+    configAuxLow(AUX1, AUX2, AUX3, AUX4, AUX5, AUX6);
+    if(pcbVersion == 3){ // TLE5206
+      configAuxHigh(AUX7, AUX8, AUX9);
+    }
+}
+
+void configAuxLow(int AUX1, int AUX2, int AUX3, int AUX4, int AUX5, int AUX6) {
+  #define SpindlePowerControlPin = AUX1;  // output for controlling spindle power
+  #define ProbePin = AUX4                 // use this input for zeroing zAxis with G38.2 gcode
+}
+
+void configAuxHigh(int AUX7, int AUX8, int AUX9) {
 }
 
 int getPCBVersion(){
@@ -242,8 +262,6 @@ int getPCBVersion(){
             TLE5206 = true;
             break;
     }
-    #define SpindlePowerControlPin = AUX1;  // output for controlling spindle power
-    #define ProbePin = AUX4                 // use this input for zeroing zAxis with G38.2 gcode
     return pinCheck - 1;
 }
 

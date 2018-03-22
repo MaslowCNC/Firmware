@@ -39,7 +39,7 @@ Copyright 2014-2017 Bar Smith*/
 #define STATE_CYCLE         bit(3) // Cycle is running or motions are being executed.
 #define STATE_HOLD          bit(4) // Active feed hold
 #define STATE_SAFETY_DOOR   bit(5) // Safety door is ajar. Feed holds and de-energizes system.
-#define STATE_MOTION_CANCEL bit(6) // Motion cancel by feed hold and return to idle. 
+#define STATE_MOTION_CANCEL bit(6) // Motion cancel by feed hold and return to idle.
 
 // Define old settings flag details
 #define NEED_ENCODER_STEPS bit(0)
@@ -56,14 +56,14 @@ typedef struct {
   float xPosition;            // Cartessian position of XY axes
   float yPosition;            // Cached because calculating position is intensive
   float steps[3];             // Encoder position of axes
-  bool  useRelativeUnits;     // 
+  bool  useRelativeUnits;     //
   unsigned long lastSerialRcvd; // The millis of the last rcvd serial command, used by watchdo
   int   lastGCommand;         //Stores the value of the last command run eg: G01 -> 1
   int   lastTool;             //Stores the value of the last tool number eg: T4 -> 4
   int   nextTool;             //Stores the value of the next tool number eg: T4 -> 4
   float inchesToMMConversion; //Used to track whether to convert from inches, can probably be done in a way that doesn't require RAM
   float feedrate;             //The feedrate of the machine in mm/min
-  // THE FOLLOWING IS USED FOR IMPORTING SETTINGS FROM FIRMWARE v1.00 AND EARLIER 
+  // THE FOLLOWING IS USED FOR IMPORTING SETTINGS FROM FIRMWARE v1.00 AND EARLIER
   // It can be deleted at some point
   byte oldSettingsFlag;
 } system_t;
@@ -86,6 +86,6 @@ void systemSaveAxesPosition();
 void systemReset();
 byte systemExecuteCmdstring(String&);
 void setPWMPrescalers(int prescalerChoice);
-
-
+void configAuxLow(int A1, int A2, int A3, int A4, int A5, int A6);
+void configAuxHigh(int A7, int A8, int A9);
 #endif
