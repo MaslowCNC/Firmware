@@ -72,7 +72,7 @@ void setup(){
     Timer1.attachInterrupt(runsOnATimer);
     #endif
     
-    Serial.println(F("Grbl v1.00"));  // Why GRBL?  Apparenlty because some programs are silly and look for this as an initailization command
+    Serial.println(F("Grbl v1.00"));  // Why GRBL?  Apparently because some programs are silly and look for this as an initialization command
     Serial.println(F("ready"));
     reportStatusMessage(STATUS_OK);
 }
