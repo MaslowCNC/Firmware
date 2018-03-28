@@ -74,6 +74,9 @@ extern Axis zAxis;
 extern RingBuffer incSerialBuffer;
 extern Kinematics kinematics;
 extern byte systemRtExecAlarm;
+extern int SpindlePowerControlPin;
+extern int ProbePin;
+extern int testAUXPin;
 
 void  calibrateChainLengths(String);
 void  setupAxes();

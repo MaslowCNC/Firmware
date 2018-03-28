@@ -20,8 +20,11 @@ Copyright 2014-2017 Bar Smith*/
 #include "Maslow.h"
 
 bool TLE5206;
+
+// extern values using AUX pins defined in  configAuxLow() and configAuxHigh()
 int SpindlePowerControlPin;  // output for controlling spindle power
 int ProbePin;                // use this input for zeroing zAxis with G38.2 gcode
+int testAUXPin;              // prove it works
 
 
 void  calibrateChainLengths(String gcodeLine){
@@ -244,11 +247,21 @@ void   setupAxes(){
 }
 
 void configAuxLow(int AUX1, int AUX2, int AUX3, int AUX4, int AUX5, int AUX6) {
-  #define SpindlePowerControlPin = AUX1;  // output for controlling spindle power
-  #define ProbePin = AUX4                 // use this input for zeroing zAxis with G38.2 gcode
+  SpindlePowerControlPin = AUX1;   // output for controlling spindle power
+  ProbePin = AUX4;                 // use this input for zeroing zAxis with G38.2 gcode
+  // SpindlePowerControlPin = AUX1;
+  // ProbePin = AUX4;
+  // Serial.print(F("SpindlePowerControlPin = "));
+  // Serial.println(SpindlePowerControlPin);  // output for controlling spindle power
+  // Serial.print(F("ProbePin = "));
+  // Serial.println(ProbePin);
+
 }
 
 void configAuxHigh(int AUX7, int AUX8, int AUX9) {
+  testAUXPin = AUX9;
+  Serial.print(F("testAUXPin = "));
+  Serial.println(testAUXPin);
 }
 
 int getPCBVersion(){

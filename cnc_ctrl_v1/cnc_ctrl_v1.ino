@@ -70,6 +70,13 @@ void setup(){
     readyCommandString.reserve(INCBUFFERLENGTH);           //Allocate memory so that this string doesn't fragment the heap as it grows and shrinks
     gcodeLine.reserve(INCBUFFERLENGTH);
 
+    // Serial.print(F("SpindlePowerControlPin = "));
+    // Serial.println(SpindlePowerControlPin);  // output for controlling spindle power
+    // Serial.print(F("ProbePin = "));
+    // Serial.println(ProbePin);
+    // Serial.print(F("testAUXPin = "));
+    // Serial.println(testAUXPin);
+    //
     #ifndef SIMAVR // Using the timer will crash simavr, so we disable it.
                    // Instead, we'll run runsOnATimer periodically in loop().
     Timer1.initialize(LOOPINTERVAL);
