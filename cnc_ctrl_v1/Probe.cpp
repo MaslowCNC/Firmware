@@ -19,6 +19,8 @@ Copyright 2014-2017 Bar Smith*/
 
 #include "Maslow.h"
 
+// the variable probePin is assigned in configAuxLow() in System.cpp
+
 bool checkForProbeTouch(const int& probePin) {
   /*
       Check to see if ProbePin has gone LOW

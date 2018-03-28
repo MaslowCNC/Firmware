@@ -75,6 +75,14 @@ void setup(){
     Serial.println(F("Grbl v1.00"));  // Why GRBL?  Apparently because some programs are silly and look for this as an initialization command
     Serial.println(F("ready"));
     reportStatusMessage(STATUS_OK);
+
+		Serial.print(F("SpindlePowerControlPin = "));
+	  Serial.println(SpindlePowerControlPin);  // output for controlling spindle power
+	  Serial.print(F("ProbePin = "));
+	  Serial.println(ProbePin);
+		Serial.print(F("dummyPin = "));
+	  Serial.println(dummyPin);
+		
 }
 
 void runsOnATimer(){
