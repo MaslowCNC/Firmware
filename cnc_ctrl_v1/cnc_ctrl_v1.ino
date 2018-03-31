@@ -15,6 +15,7 @@
 	
 /* To the projects contributers:
  * it is highly recommended to activate warning output of the arduino gcc compiler. 
+ *
  * Compiler warnings are a great help to keep the codebase clean and can give clues
  * to potentally wrong code. Also, if a codebase produces too many warnings it gets 
  * more likely that possibly important warnings could be overlooked. 
