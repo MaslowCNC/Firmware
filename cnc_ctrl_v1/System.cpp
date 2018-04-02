@@ -120,12 +120,13 @@ void   setupAxes(){
         IN6 = 13;       // OUTPUT
         ENC = 5;        // PWM
 
+        //AUX pins
         AUX1 = 17;
         AUX2 = 16;
         AUX3 = 15;
         AUX4 = 14;
-        AUX5 = 0;
-        AUX6 = 1;
+        AUX5 = 0;        // warning! this is the serial TX line on the Mega2560
+        AUX6 = 1;        // warning! this is the serial RX line on the Mega2560
     }
     else if(pcbVersion == 1){
         //PCB v1.1 Detected
@@ -150,6 +151,7 @@ void   setupAxes(){
         IN6 = 11;        // OUTPUT
         ENC = 12;        // PWM
 
+        //AUX pins
         AUX1 = 17;
         AUX2 = 16;
         AUX3 = 15;
@@ -243,7 +245,7 @@ void   setupAxes(){
     configAuxLow(AUX1, AUX2, AUX3, AUX4, AUX5, AUX6);
     if(pcbVersion == 3){ // TLE5206
       configAuxHigh(AUX7, AUX8, AUX9);
-    }
+}
 }
 
 void configAuxLow(int AUX1, int AUX2, int AUX3, int AUX4, int AUX5, int AUX6) {
@@ -277,7 +279,7 @@ int getPCBVersion(){
         case 4:
             TLE5206 = true;
             break;
-    }
+}
     return pinCheck - 1;
 }
 
@@ -291,15 +293,15 @@ void setPWMPrescalers(int prescalerChoice) {
     #if defined (verboseDebug) && verboseDebug > 0
         Serial.print(F("fPWM set to "));
         switch (prescalerChoice) {
-        case 1:
+            case 1:
                 Serial.println(F("31,000Hz"));
             break;
-        case 2:
+            case 2:
                 Serial.println(F("4,100Hz"));
             break;
             case 3:
                 Serial.println(F("490Hz"));
-    }
+            }
     #endif
 // first must erase the bits in each TTCRxB register that control the timers prescaler
     int prescalerEraser = 7;      // this is 111 in binary and is used as an eraser
@@ -334,7 +336,7 @@ void setPWMPrescalers(int prescalerChoice) {
       TCCR2B |= (prescalerChoice + 1); // pins 9, 10 - change to match timers3&4
     } else {
       TCCR2B |= prescalerChoice; // pins 9, 10
-    }
+      }
     TCCR3B |= prescalerChoice;   // pins 2, 3, 5
     TCCR4B |= prescalerChoice;   // pins 6, 7, 8
 }
