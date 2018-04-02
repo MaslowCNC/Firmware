@@ -24,7 +24,6 @@ bool TLE5206;
 // extern values using AUX pins defined in  configAuxLow() and configAuxHigh()
 int SpindlePowerControlPin;  // output for controlling spindle power
 int ProbePin;                // use this input for zeroing zAxis with G38.2 gcode
-int testAUXPin;              // prove it works
 
 
 void  calibrateChainLengths(String gcodeLine){
@@ -261,9 +260,6 @@ void configAuxLow(int AUX1, int AUX2, int AUX3, int AUX4, int AUX5, int AUX6) {
 }
 
 void configAuxHigh(int AUX7, int AUX8, int AUX9) {
-  testAUXPin = AUX9;
-  Serial.print(F("testAUXPin = "));
-  Serial.println(testAUXPin);
 }
 
 int getPCBVersion(){
