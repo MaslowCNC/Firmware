@@ -9,20 +9,22 @@
     GNU General Public License for more details.
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Copyright 2014-2017 Bar Smith*/
 
 // This contains all of the Spindle commands
 
 #include "Maslow.h"
 
+// the variable SpindlePowerControlPin is assigned in configAuxLow() in System.cpp 
+
 // Globals for Spindle control, both poorly named
-Servo myservo;  // create servo object to control a servo 
+Servo myservo;  // create servo object to control a servo
 
 void  setSpindlePower(bool powerState) {
     /*
      * Turn spindle on or off depending on powerState
-     */ 
+     */
     boolean useServo = !sysSettings.spindleAutomate;
     boolean activeHigh = true;
     int delayAfterChange = 1000;  // milliseconds
@@ -30,14 +32,14 @@ void  setSpindlePower(bool powerState) {
     int servoOn   = 180;  // degrees
     int servoOff  =   0;  // degrees
     int servoDelay = 2000;  // milliseconds
-  
+
     // Now for the main code
-    #if defined (verboseDebug) && verboseDebug > 1              
+    #if defined (verboseDebug) && verboseDebug > 1
     Serial.print(F("Spindle control uses pin "));
     Serial.print(SpindlePowerControlPin);
     #endif
     if (useServo) {   // use a servo to control a standard wall switch
-        #if defined (verboseDebug) && verboseDebug > 1              
+        #if defined (verboseDebug) && verboseDebug > 1
         Serial.print(F(" with servo (idle="));
         Serial.print(servoIdle);
         Serial.print(F(", on="));
@@ -66,7 +68,7 @@ void  setSpindlePower(bool powerState) {
         myservo.detach();           // stop servo control
     }
     else {            // use a digital I/O pin to control a relay
-        #if defined (verboseDebug) && verboseDebug > 1              
+        #if defined (verboseDebug) && verboseDebug > 1
         Serial.print(F(" as digital output, active "));
         if (activeHigh) Serial.println(F("high"));
         else Serial.println(F("low"));

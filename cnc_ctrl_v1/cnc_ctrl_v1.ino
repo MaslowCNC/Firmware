@@ -14,8 +14,8 @@
 	
 	
 /* To the projects contributers:
- * 
- * it is highly recommended to activate warning output of the arduino gcc compiler. 
+ *
+ * it is highly recommended to activate warning output of the arduino gcc compiler.
  * Compiler warnings are a great help to keep the codebase clean and can give clues
  * to potentally wrong code. Also, if a codebase produces too many warnings it gets 
  * more likely that possibly important warnings could be overlooked. 
@@ -75,6 +75,7 @@ void setup(){
     Serial.println(F("Grbl v1.00"));  // Why GRBL?  Apparently because some programs are silly and look for this as an initialization command
     Serial.println(F("ready"));
     reportStatusMessage(STATUS_OK);
+
 }
 
 void runsOnATimer(){
