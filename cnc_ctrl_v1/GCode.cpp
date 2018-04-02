@@ -315,6 +315,7 @@ byte  executeBcodeLine(const String& gcodeLine){
         
         return STATUS_OK;
     }
+    return STATUS_INVALID_STATEMENT;
 }
     
 void  executeGcodeLine(const String& gcodeLine){
@@ -461,7 +462,7 @@ void  sanitizeCommandString(String& cmdString){
     */
     
     byte line_flags = 0;
-    short pos = 0;
+    size_t pos = 0;
     
     while (cmdString.length() > pos){
         if (line_flags) {
@@ -519,8 +520,8 @@ byte  interpretCommandString(String& cmdString){
     
     */
     
-    int firstG;  
-    int secondG;
+    size_t firstG;  
+    size_t secondG;
 
     if (cmdString.length() > 0) {
         if (cmdString[0] == '$') {
@@ -579,7 +580,9 @@ byte  interpretCommandString(String& cmdString){
             }
             return STATUS_OK;
         }
+        return STATUS_INVALID_STATEMENT;
     }
+    return STATUS_OK;
 }
 
 void gcodeExecuteLoop(){
@@ -595,7 +598,7 @@ void gcodeExecuteLoop(){
   }
 }
 
-int   G1(const String& readString, int G0orG1){
+void G1(const String& readString, int G0orG1){
     
     /*G1() is the function which is called to process the string if it begins with 
     'G01' or 'G00'*/
@@ -664,7 +667,7 @@ int   G1(const String& readString, int G0orG1){
     }
 }
 
-int   G2(const String& readString, int G2orG3){
+void G2(const String& readString, int G2orG3){
     /*
     
     The G2 function handles the processing of the gcode line for both the command G2 and the
@@ -688,10 +691,10 @@ int   G2(const String& readString, int G2orG3){
     sys.feedrate = constrain(sys.feedrate, 1, sysSettings.maxFeed);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     
     if (G2orG3 == 2){
-        return arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, CLOCKWISE);
+        arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, CLOCKWISE);
     }
     else {
-        return arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, COUNTERCLOCKWISE);
+        arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, COUNTERCLOCKWISE);
     }
 }
 
@@ -753,7 +756,6 @@ void  G38(const String& readString) {
         */
 
         Axis* axis = &zAxis;
-        float MMPerMin             = sys.feedrate;
         float startingPos          = axis->read();
         float endPos               = zgoto;
         float moveDist             = endPos - currentZPos; //total distance to move

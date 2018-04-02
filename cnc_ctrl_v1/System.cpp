@@ -376,7 +376,7 @@ byte systemExecuteCmdstring(String& cmdString){
     This is taken heavily from grbl.  https://github.com/grbl/grbl
     */
     byte char_counter = 1;
-    byte helper_var = 0; // Helper variable
+//    byte helper_var = 0; // Helper variable
     float parameter, value;
     if (cmdString.length() == 1){
         reportMaslowHelp();

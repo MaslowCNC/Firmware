@@ -33,13 +33,6 @@ void initMotion(){
     }
 }
 
-float calculateDelay(const float& stepSizeMM, const float& feedrateMMPerMin){
-    /*
-    Calculate the time delay in microseconds between each step for a given feedrate
-    */
-    
-    return LOOPINTERVAL;
-}
 
 float calculateFeedrate(const float& stepSizeMM, const float& usPerStep){
     /*
@@ -100,7 +93,7 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
     MMPerMin = constrain(MMPerMin, 1, sysSettings.maxFeed);   //constrain the maximum feedrate, 35ipm = 900 mmpm
     float  stepSizeMM           = computeStepSize(MMPerMin);
     float  finalNumberOfSteps   = abs(distanceToMoveInMM/stepSizeMM);
-    float  delayTime            = calculateDelay(stepSizeMM, MMPerMin);
+    float  delayTime            = LOOPINTERVAL;
     float  zFeedrate            = calculateFeedrate(abs(zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
     
     //throttle back federate if it exceeds zaxis max
