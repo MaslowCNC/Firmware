@@ -199,10 +199,10 @@ void   setupAxes(){
         ENA = 5;        // errorFlag
 
         //MP2 - Z-axis
-        ENCODER2A = 18; // INPUT
-        ENCODER2B = 19; // INPUT
-        IN3 = 9;        // OUTPUT
-        IN4 = 7;        // OUTPUT
+        ENCODER2A = 19; // INPUT
+        ENCODER2B = 18; // INPUT
+        IN3 = 7;        // OUTPUT
+        IN4 = 9;        // OUTPUT
         ENB = 8;        // errorFlag
 
         //MP3 - Left Motor
@@ -212,6 +212,7 @@ void   setupAxes(){
         IN6 = 11;        // OUTPUT
         ENC = 12;        // errorFlag
 
+        //AUX pins
         AUX1 = 40;
         AUX2 = 41;
         AUX3 = 42;
