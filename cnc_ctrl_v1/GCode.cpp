@@ -315,6 +315,20 @@ byte  executeBcodeLine(const String& gcodeLine){
         
         return STATUS_OK;
     }
+  
+    if(gcodeLine.substring(0, 3) == "B16"){
+        Serial.print("Printing encoder steps");
+      
+        Serial.print(F("Left: "));
+        Serial.print(leftAxis.steps());
+        
+        Serial.print(F("Right: "));
+        Serial.print(rightAxis.steps());
+        
+        Serial.print(F("Z: "));
+        Serial.print(zAxis.steps());
+    }
+  
     return STATUS_INVALID_STATEMENT;
 }
     
