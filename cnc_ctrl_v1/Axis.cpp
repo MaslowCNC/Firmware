@@ -263,6 +263,9 @@ void   Axis::test(){
         if (sys.stop){return;}
     }
     
+    Serial.print(F("Pos Change:  "));
+    Serial.print(encoderPos - motorGearboxEncoder.encoder.read());
+    
     //check to see if it moved
     if(encoderPos - motorGearboxEncoder.encoder.read() > 500){
         Serial.println(F("Direction 1 - Pass"));
@@ -283,6 +286,9 @@ void   Axis::test(){
         maslowDelay(1);
         if (sys.stop){return;}
     }
+    
+    Serial.print(F("Pos Change:  "));
+    Serial.print(encoderPos - motorGearboxEncoder.encoder.read());
     
     //check to see if it moved
     if(encoderPos - motorGearboxEncoder.encoder.read() < -500){
