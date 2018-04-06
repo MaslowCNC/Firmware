@@ -293,7 +293,7 @@ void  Kinematics::forward(const float& chainALength, const float& chainBLength, 
                 Serial.print(chainALength);
                 Serial.print(", ");
                 Serial.print(chainBLength);
-                Serial.println(F(" . Please calibrate chain lengths."));
+                Serial.println(F(" . Please set the chains to a known length (Actions -> Set Chain Lengths)"));
                 *xPos = 0;
                 *yPos = 0;
             }
