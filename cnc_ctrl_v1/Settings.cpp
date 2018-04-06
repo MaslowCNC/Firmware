@@ -49,8 +49,8 @@ void settingsLoadFromEEprom(){
     kinematics.recomputeGeometry();
     leftAxis.changeEncoderResolution(&sysSettings.encoderSteps);
     rightAxis.changeEncoderResolution(&sysSettings.encoderSteps);
-    leftAxis.changePitch(&sysSettings.distPerRot);
-    rightAxis.changePitch(&sysSettings.distPerRot);
+    leftAxis.changePitch(&sysSettings.distPerRotLeftChainTolerance);
+    rightAxis.changePitch(&sysSettings.distPerRotRightChainTolerance);
     zAxis.changePitch(&sysSettings.zDistPerRot);
     zAxis.changeEncoderResolution(&sysSettings.zEncoderSteps);
 }
@@ -101,6 +101,8 @@ void settingsReset() {
     sysSettings.chainSagCorrection = 0.0;  // float chainSagCorrection;
     sysSettings.chainOverSprocket = 1;   // byte chainOverSprocket;
     sysSettings.fPWM = 3;   // byte fPWM;
+    sysSettings.distPerRotLeftChainTolerance = 63.5;    // float distPerRotLeftChainTolerance;
+    sysSettings.distPerRotRightChainTolerance = 63.5;    // float distPerRotRightChainTolerance;
     sysSettings.eepromValidData = EEPROMVALIDDATA; // byte eepromValidData;
 }
 
@@ -275,8 +277,6 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               break;
         case 13: 
               sysSettings.distPerRot = value;
-              leftAxis.changePitch(&sysSettings.distPerRot);
-              rightAxis.changePitch(&sysSettings.distPerRot);
               kinematics.R = (sysSettings.distPerRot)/(2.0 * 3.14159);
               if (sys.oldSettingsFlag){
                 bit_false(sys.oldSettingsFlag, NEED_DIST_PER_ROT);
@@ -393,6 +393,16 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
         case 39:
               sysSettings.fPWM = value;
               setPWMPrescalers(value);
+              break;
+        case 40:
+              sysSettings.distPerRotLeftChainTolerance = value;
+              leftAxis.changePitch(&sysSettings.distPerRotLeftChainTolerance);
+              kinematics.RleftChainTolerance = (sysSettings.distPerRotLeftChainTolerance)/(2.0 * 3.14159);
+              break;
+        case 41:
+              sysSettings.distPerRotRightChainTolerance = value;
+              rightAxis.changePitch(&sysSettings.distPerRotRightChainTolerance);
+              kinematics.RrightChainTolerance = (sysSettings.distPerRotRightChainTolerance)/(2.0 * 3.14159);
               break;
         default:
               return(STATUS_INVALID_STATEMENT);
