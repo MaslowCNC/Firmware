@@ -703,8 +703,9 @@ void G2(const String& readString, int G2orG3){
 
 void  G4(const String& readString){
     /*
-      The G4() function handles the G4 gcode which pauses for P milliseconds or S seconds.
+      The G4() dwell function handles the G4 gcode which pauses for P milliseconds or S seconds.
       Only one of the two is accepted, the other ignored.
+      Use maslowDelay() to remain responsive to GC during the dwell time.
     */
     unsigned long dwellMS = extractGcodeValue(readString, 'P', 0);
     unsigned long dwellS  = extractGcodeValue(readString, 'S', 0);
