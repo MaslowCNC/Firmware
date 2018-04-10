@@ -345,6 +345,9 @@ void  executeGcodeLine(const String& gcodeLine){
             G2(gcodeLine, gNumber);
             sys.lastGCommand = gNumber;    // remember G number for next time
             break;
+        case 4:
+            G4(gcodeLine);
+            break;
         case 10:
             G10(gcodeLine);
             break;
@@ -696,6 +699,35 @@ void G2(const String& readString, int G2orG3){
     else {
         arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, COUNTERCLOCKWISE);
     }
+}
+
+void  G4(const String& readString){
+    /*
+      The G4() dwell function handles the G4 gcode which pauses for P milliseconds or S seconds.
+      Only one of the two is accepted, the other ignored.
+      Use maslowDelay() to remain responsive to GC during the dwell time.
+      Because maslowDelay() operates in milliseconds, round to the nearest millisecond.
+      Negative values are treated as positive (not a time machine).
+    */
+    float dwellMS = abs(extractGcodeValue(readString, 'P', 0));
+    float dwellS  = abs(extractGcodeValue(readString, 'S', 0));
+
+    if (dwellMS == 0) {
+      /*
+        ignore S parameter unless P is zero
+      */
+      dwellMS = dwellS * 1000;
+    }
+    dwellMS = long(dwellMS + .5);
+    Serial.print(F("dwell time "));
+    if (dwellS > 0) {
+      Serial.print(dwellS);
+      Serial.println(F(" seconds"));
+    } else {
+      Serial.print(dwellMS, 0);
+      Serial.println(F(" ms."));
+    }
+    maslowDelay(dwellMS);
 }
 
 void  G10(const String& readString){
