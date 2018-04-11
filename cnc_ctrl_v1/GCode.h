@@ -40,6 +40,7 @@ void  sanitizeCommandString(String&);
 byte  interpretCommandString(String&);
 void  G1(const String&, int);
 void  G2(const String&, int);
+void  G4(const String&);
 void  G10(const String&);
 void  G38(const String&);
 void  setInchesToMillimetersConversion(float);
