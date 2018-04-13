@@ -116,8 +116,15 @@ void  reportAlarmMessage(byte alarm_code) {
     Serial.println(alarm_code);
   #else
     switch (alarm_code) {
-      case ALARM_POSITION_LOST:
-      Serial.println(F("Position Lost")); break;
+      case ALARM_POSITION_LOST: {
+        Serial.println(F("Position Lost")); break;
+        }
+      case ALARM_GCODE_PARAM_ERROR: {
+        Serial.println(F("There is a parameter error in this line of Gcode - make a note of the line number. Cutting will be put on hold until you choose whether to 'Resume Cut' (skipping this line) or 'Stop'.   "));
+        pause(); //This pause() waits for user acknowledgement of message
+        pause(); //Now wait for user decision about 'Stop' or 'Resume'
+        break;
+        }
     }
   #endif
 }

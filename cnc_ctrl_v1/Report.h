@@ -58,6 +58,7 @@ Copyright 2014-2017 Bar Smith*/
 
 // Define Maslow alarm codes.
 #define ALARM_POSITION_LOST bit(0)
+#define ALARM_GCODE_PARAM_ERROR bit(1)
 
 // Define Maslow feedback message codes. Valid values (0-255).
 #define MESSAGE_CRITICAL_EVENT 1
@@ -75,6 +76,7 @@ Copyright 2014-2017 Bar Smith*/
 void  reportStatusMessage(byte);
 void  reportFeedbackMessage(byte);
 void  reportMaslowSettings();
+void  reportAlarmMessage(byte);
 void  returnError();
 void  returnPoz();
 void  reportMaslowHelp();
