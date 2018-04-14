@@ -225,6 +225,9 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     
 }
 
+// return the sign of the parameter
+int sign(double x) { return x<0 ? -1 : 1; }
+
 // why does this return anything
 int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, const float& centerX, const float& centerY, const float& MMPerMin, const float& direction){
     /*
@@ -256,6 +259,14 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
         }
     }
     
+    if (sign(theta) != sign(direction)) {
+      // There is a parameter error in this line of gcode
+      // post an alarm which will wait for user decision about 'Stop' or 'Resume'
+      // if we return, change theta to make the line inoperative and continue to cut
+      reportAlarmMessage(ALARM_GCODE_PARAM_ERROR);
+      theta = 0;
+    }
+
     float arcLengthMM            =  circumference * (theta / (2*pi) );
     
     //set up variables for movement
