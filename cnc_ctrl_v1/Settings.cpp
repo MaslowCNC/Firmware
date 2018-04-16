@@ -405,6 +405,9 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               rightAxis.changePitch(&sysSettings.distPerRotRightChainTolerance);
               kinematics.RrightChainTolerance = (sysSettings.distPerRotRightChainTolerance)/(2.0 * 3.14159);
               break;
+        case 42:
+              sysSettings.positionErrorLimit = value;
+              break;
         default:
               return(STATUS_INVALID_STATEMENT);
     }
