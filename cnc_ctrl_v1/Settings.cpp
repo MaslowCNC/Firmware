@@ -103,6 +103,7 @@ void settingsReset() {
     sysSettings.fPWM = 3;   // byte fPWM;
     sysSettings.distPerRotLeftChainTolerance = 63.5;    // float distPerRotLeftChainTolerance;
     sysSettings.distPerRotRightChainTolerance = 63.5;    // float distPerRotRightChainTolerance;
+    sysSettings.positionErrorLimit = 2.0;  // float positionErrorLimit;
     sysSettings.eepromValidData = EEPROMVALIDDATA; // byte eepromValidData;
 }
 
@@ -403,6 +404,9 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               sysSettings.distPerRotRightChainTolerance = value;
               rightAxis.changePitch(&sysSettings.distPerRotRightChainTolerance);
               kinematics.RrightChainTolerance = (sysSettings.distPerRotRightChainTolerance)/(2.0 * 3.14159);
+              break;
+        case 42:
+              sysSettings.positionErrorLimit = value;
               break;
         default:
               return(STATUS_INVALID_STATEMENT);
