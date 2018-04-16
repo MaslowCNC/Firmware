@@ -103,6 +103,7 @@ void settingsReset() {
     sysSettings.fPWM = 3;   // byte fPWM;
     sysSettings.distPerRotLeftChainTolerance = 63.5;    // float distPerRotLeftChainTolerance;
     sysSettings.distPerRotRightChainTolerance = 63.5;    // float distPerRotRightChainTolerance;
+    sysSettings.positionErrorLimit = 2.0;  // float positionErrorLimit;
     sysSettings.eepromValidData = EEPROMVALIDDATA; // byte eepromValidData;
 }
 
