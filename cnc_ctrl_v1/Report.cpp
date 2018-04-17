@@ -125,6 +125,11 @@ void  reportAlarmMessage(byte alarm_code) {
         pause(); //Now wait for user decision about 'Stop' or 'Resume'
         break;
         }
+      case ALARM_POSITION_LIMIT_ERROR: {
+        Serial.println(F("The sled is not keeping up with its expected position - make a note of the line number. Then click the 'Stop' button to clear the alarm.  "));
+        sys.stop = true;
+        break;
+        }
     }
   #endif
 }
@@ -176,6 +181,7 @@ void reportMaslowSettings() {
     Serial.print(F("$39=")); Serial.println(sysSettings.fPWM);
     Serial.print(F("$40=")); Serial.println(sysSettings.distPerRotLeftChainTolerance, 8);
     Serial.print(F("$41=")); Serial.println(sysSettings.distPerRotRightChainTolerance, 8);
+    Serial.print(F("$42=")); Serial.println(sysSettings.positionErrorLimit, 8);
     
   #else
     Serial.print(F("$0=")); Serial.print(sysSettings.machineWidth);
@@ -219,7 +225,8 @@ void reportMaslowSettings() {
     Serial.print(F(" (chain over sprocket)\r\n$39=")); Serial.print(sysSettings.fPWM);
     Serial.print(F(" (PWM frequency value 1=39,000Hz, 2=4,100Hz, 3=490Hz)\r\n$40=")); Serial.print(sysSettings.distPerRotLeftChainTolerance, 8);
     Serial.print(F(" (distance / rotation, including chain tolerance, left chain, mm)\r\n$41=")); Serial.print(sysSettings.distPerRotRightChainTolerance, 8);
-    Serial.print(F(" (distance / rotation, including chain tolerance, right chain, mm)"));
+    Serial.print(F(" (distance / rotation, including chain tolerance, right chain, mm)\r\n$42=")); Serial.print(sysSettings.positionErrorLimit, 8);
+    Serial.print(F(" (position error alarm limit, mm)"));
     Serial.println();
   #endif
 }
@@ -236,6 +243,12 @@ void  returnError(){
         Serial.print(',');
         Serial.print(incSerialBuffer.spaceAvailable());
         Serial.println(F("]"));
+        float positionErrorLimit = 1.5;
+        if (!sys.stop) {
+            if ((leftAxis.error() >= positionErrorLimit) || (rightAxis.error() >= positionErrorLimit)) {
+                reportAlarmMessage(ALARM_POSITION_LIMIT_ERROR);
+            }
+        }
 }
 
 void  returnPoz(){
