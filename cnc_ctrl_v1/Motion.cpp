@@ -263,7 +263,7 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
             theta -= 2*pi;
         }
     }
-    if ((sign(theta) != sign(direction)) || (abs(chordHeight) < .01)) {
+    if ((sign(theta) != sign(direction)) || ((abs(chordHeight) < .01) && (abs(theta) < 0.5))) {
       // There is a parameter error in this line of gcode, either in the size of the angle calculated
       //  or the chord height of the arc between the starting and ending points
       // In either case, the gcode cut was essentially a straight line, so 
