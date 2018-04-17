@@ -243,9 +243,9 @@ void  returnError(){
         Serial.print(',');
         Serial.print(incSerialBuffer.spaceAvailable());
         Serial.println(F("]"));
-        float positionErrorLimit = 1.5;
+        // float positionErrorLimit = 1.5;
         if (!sys.stop) {
-            if ((leftAxis.error() >= positionErrorLimit) || (rightAxis.error() >= positionErrorLimit)) {
+            if ((leftAxis.error() >= sysSettings.positionErrorLimit) || (rightAxis.error() >= sysSettings.positionErrorLimit)) {
                 reportAlarmMessage(ALARM_POSITION_LIMIT_ERROR);
             }
         }
