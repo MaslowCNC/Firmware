@@ -268,12 +268,6 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
       //  or the chord height of the arc between the starting and ending points
       // In either case, the gcode cut was essentially a straight line, so 
       // Replace it with a G1 cut to the endpoint
-      Serial.print("chordHeight ");
-      Serial.println(chordHeight,8);
-      Serial.print("theta ");
-      Serial.println(theta,8);
-      Serial.print("direction ");
-      Serial.println(direction,8);
       String gcodeSubstitution = "G1 X";
       gcodeSubstitution = gcodeSubstitution + String(X2 / sys.inchesToMMConversion, 3) + " Y" + String(Y2 / sys.inchesToMMConversion, 3) + " ";
       Serial.println("Oops! This gcode line has caused a calculation error, it will be replaced by: " + gcodeSubstitution);
