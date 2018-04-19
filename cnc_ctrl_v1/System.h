@@ -40,6 +40,7 @@ Copyright 2014-2017 Bar Smith*/
 #define STATE_HOLD          bit(4) // Active feed hold
 #define STATE_SAFETY_DOOR   bit(5) // Safety door is ajar. Feed holds and de-energizes system.
 #define STATE_MOTION_CANCEL bit(6) // Motion cancel by feed hold and return to idle.
+#define STATE_POS_ERR_IGNORE bit(7) // Motion not checked for position error
 
 // Define old settings flag details
 #define NEED_ENCODER_STEPS bit(0)
