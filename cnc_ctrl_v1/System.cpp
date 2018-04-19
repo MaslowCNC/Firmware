@@ -257,13 +257,15 @@ void configAuxHigh(int AUX7, int AUX8, int AUX9) {
 }
 
 int getPCBVersion(){
-    pinMode(VERS1,INPUT);
-    pinMode(VERS2,INPUT);
-    pinMode(VERS3,INPUT);
-    pinMode(VERS4,INPUT);
+    pinMode(VERS1,INPUT_PULLUP);
+    pinMode(VERS2,INPUT_PULLUP);
+    pinMode(VERS3,INPUT_PULLUP);
+    pinMode(VERS4,INPUT_PULLUP);
     int pinCheck = (8*digitalRead(VERS4) + 4*digitalRead(VERS3) + 2*digitalRead(VERS2) + 1*digitalRead(VERS1));
     switch (pinCheck) {
-        case 0: case 1: case 2: case 3: // v1.2 board
+        // case 0: case 1: case 2: case 3: // v1.2 board
+        case 12: case 13: case 14: case 15: // v1.2 board
+            pinCheck -= 12;
             TLE5206 = false;
             break;
         case 4:
