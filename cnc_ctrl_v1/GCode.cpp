@@ -161,6 +161,10 @@ byte  executeBcodeLine(const String& gcodeLine){
         zAxis.test();
         Serial.println(F("Tests complete."));
 
+        // update our position
+        leftAxis.set(leftAxis.read());
+        rightAxis.set(rightAxis.read());
+
         //clear the flag, re-enable position error limit
         sys.state = (sys.state & (!STATE_POS_ERR_IGNORE));
         return STATUS_OK;
