@@ -147,6 +147,8 @@ byte  executeBcodeLine(const String& gcodeLine){
     }
     
     if(gcodeLine.substring(0, 3) == "B04"){
+        //set flag to ignore position error limit during the tests
+        sys.state = (sys.state | STATE_POS_ERR_IGNORE);
         //Test each of the axis
         maslowDelay(500);
         if(sys.stop){return STATUS_OK;}
@@ -158,6 +160,9 @@ byte  executeBcodeLine(const String& gcodeLine){
         if(sys.stop){return STATUS_OK;}
         zAxis.test();
         Serial.println(F("Tests complete."));
+
+        //clear the flag, re-enable position error limit
+        sys.state = (sys.state & (!STATE_POS_ERR_IGNORE));
         return STATUS_OK;
     }
     
