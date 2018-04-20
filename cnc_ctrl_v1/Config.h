@@ -35,6 +35,14 @@
 
 #define LOOPINTERVAL 10000 // What is the frequency of the PID loop in microseconds
 
+// Define version detect pins
+#define VERS1 22
+#define VERS2 23
+#define VERS3 24
+#define VERS4 25
+#define VERS5 26
+#define VERS6 27
+
 // Serial variables
 #define INCBUFFERLENGTH 128 // The number of bytes(characters) allocated to the
                             // incoming buffer.
