@@ -116,8 +116,20 @@ void  reportAlarmMessage(byte alarm_code) {
     Serial.println(alarm_code);
   #else
     switch (alarm_code) {
-      case ALARM_POSITION_LOST:
-      Serial.println(F("Position Lost")); break;
+      case ALARM_POSITION_LOST: {
+        Serial.println(F("Position Lost")); break;
+        }
+      case ALARM_GCODE_PARAM_ERROR: {
+        Serial.println(F("There is a parameter error in this line of Gcode - make a note of the line number. Cutting will be put on hold until you choose whether to 'Resume Cut' (skipping this line) or 'Stop'.   "));
+        pause(); //This pause() waits for user acknowledgement of message
+        pause(); //Now wait for user decision about 'Stop' or 'Resume'
+        break;
+        }
+      case ALARM_POSITION_LIMIT_ERROR: {
+        Serial.println(F("The sled is not keeping up with its expected position - make a note of the line number. Then click the 'Stop' button to clear the alarm.  "));
+        sys.stop = true;
+        break;
+        }
     }
   #endif
 }
@@ -167,6 +179,10 @@ void reportMaslowSettings() {
     Serial.print(F("$37=")); Serial.println(sysSettings.chainSagCorrection, 8);
     Serial.print(F("$38=")); Serial.println(sysSettings.chainOverSprocket);
     Serial.print(F("$39=")); Serial.println(sysSettings.fPWM);
+    Serial.print(F("$40=")); Serial.println(sysSettings.distPerRotLeftChainTolerance, 8);
+    Serial.print(F("$41=")); Serial.println(sysSettings.distPerRotRightChainTolerance, 8);
+    Serial.print(F("$42=")); Serial.println(sysSettings.positionErrorLimit, 8);
+    
   #else
     Serial.print(F("$0=")); Serial.print(sysSettings.machineWidth);
     Serial.print(F(" (machine width, mm)\r\n$1=")); Serial.print(sysSettings.machineHeight, 8);
@@ -207,7 +223,10 @@ void reportMaslowSettings() {
     Serial.print(F(" (z axis Velocity proportional weight)\r\n$37=")); Serial.print(sysSettings.chainSagCorrection, 8);
     Serial.print(F(" (chain sag correction value)\r\n$38=")); Serial.print(sysSettings.chainOverSprocket);
     Serial.print(F(" (chain over sprocket)\r\n$39=")); Serial.print(sysSettings.fPWM);
-    Serial.print(F(" (PWM frequency value 1=39,000Hz, 2=4,100Hz, 3=490Hz)"));
+    Serial.print(F(" (PWM frequency value 1=39,000Hz, 2=4,100Hz, 3=490Hz)\r\n$40=")); Serial.print(sysSettings.distPerRotLeftChainTolerance, 8);
+    Serial.print(F(" (distance / rotation, including chain tolerance, left chain, mm)\r\n$41=")); Serial.print(sysSettings.distPerRotRightChainTolerance, 8);
+    Serial.print(F(" (distance / rotation, including chain tolerance, right chain, mm)\r\n$42=")); Serial.print(sysSettings.positionErrorLimit, 8);
+    Serial.print(F(" (position error alarm limit, mm)"));
     Serial.println();
   #endif
 }
@@ -224,6 +243,13 @@ void  returnError(){
         Serial.print(',');
         Serial.print(incSerialBuffer.spaceAvailable());
         Serial.println(F("]"));
+        if (!sys.stop) {
+          if (!(sys.state & STATE_POS_ERR_IGNORE)) {
+            if ((abs(leftAxis.error()) >= sysSettings.positionErrorLimit) || abs((rightAxis.error()) >= sysSettings.positionErrorLimit)) {
+                reportAlarmMessage(ALARM_POSITION_LIMIT_ERROR);
+            }
+          }
+        }
 }
 
 void  returnPoz(){

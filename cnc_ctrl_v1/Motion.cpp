@@ -225,6 +225,9 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
     
 }
 
+// return the sign of the parameter
+int sign(double x) { return x<0 ? -1 : 1; }
+
 // why does this return anything
 int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, const float& centerX, const float& centerY, const float& MMPerMin, const float& direction){
     /*
@@ -242,6 +245,11 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
     float startingAngle          =  atan2(Y1 - centerY, X1 - centerX);
     float endingAngle            =  atan2(Y2 - centerY, X2 - centerX);
     
+    // compute chord height of arc
+    float chordSquared           = sqrt(sq(X2 - X1) + sq(Y2 - Y1));
+    float tau                    = sqrt( sq(radius) - (chordSquared/4.0));
+    float chordHeight            = radius - tau;
+
     //compute angle between lines
     float theta                  =  endingAngle - startingAngle;
     if (direction == COUNTERCLOCKWISE){
@@ -255,7 +263,18 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
             theta -= 2*pi;
         }
     }
-    
+    if ((sign(theta) != sign(direction)) || ((abs(chordHeight) < .01) && (abs(theta) < 0.5))) {
+      // There is a parameter error in this line of gcode, either in the size of the angle calculated
+      //  or the chord height of the arc between the starting and ending points
+      // In either case, the gcode cut was essentially a straight line, so 
+      // Replace it with a G1 cut to the endpoint
+      String gcodeSubstitution = "G1 X";
+      gcodeSubstitution = gcodeSubstitution + String(X2 / sys.inchesToMMConversion, 3) + " Y" + String(Y2 / sys.inchesToMMConversion, 3) + " ";
+      Serial.println("Oops! This gcode line has caused a calculation error, it will be replaced by: " + gcodeSubstitution);
+      G1(gcodeSubstitution, 1);
+      return 1;
+    }
+
     float arcLengthMM            =  circumference * (theta / (2*pi) );
     
     //set up variables for movement

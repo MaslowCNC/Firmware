@@ -214,7 +214,25 @@ void configAuxLow(int AUX1, int AUX2, int AUX3, int AUX4, int AUX5, int AUX6) {
 
 
 int getPCBVersion(){
-    return (8*digitalRead(53) + 4*digitalRead(52) + 2*digitalRead(23) + 1*digitalRead(22)) - 1;
+    pinMode(VERS1,INPUT_PULLUP);
+    pinMode(VERS2,INPUT_PULLUP);
+    pinMode(VERS3,INPUT_PULLUP);
+    pinMode(VERS4,INPUT_PULLUP);
+    pinMode(VERS5,INPUT_PULLUP);
+    pinMode(VERS6,INPUT_PULLUP);
+    int pinCheck = (32*digitalRead(VERS6) + 16*digitalRead(VERS5) + 8*digitalRead(VERS4) + 4*digitalRead(VERS3) + 2*digitalRead(VERS2) + 1*digitalRead(VERS1));
+    switch (pinCheck) {
+        // boards v1.1, v1.2, v1.3 don't strap VERS3-6 low
+        case B111101: case B111110: case B111111: // v1.1, v1.2, v1.3
+            pinCheck -= B111100; // strip off the unstrapped bits
+            // TLE5206 = false;
+            break;
+        case B110100: // board v1.4 doesn't strap VERS5-6 low
+            pinCheck -= B110000; // strip off the unstrapped bits
+            // TLE5206 = true;
+            break;
+}
+    return pinCheck - 1;
 }
 
 //
@@ -273,32 +291,6 @@ void setPWMPrescalers(int prescalerChoice) {
     TCCR3B |= prescalerChoice;   // pins 2, 3, 5
     TCCR4B |= prescalerChoice;   // pins 6, 7, 8
 }
-
-//
-// PWM frequency change
-//  presently just sets the default value
-//  different values seem to need specific PWM tunings...
-//
-void setPWMPrescalers() {
-// first must erase the bits in each TTCRxB register that control the timers prescaler
-    int prescalerEraser = 0B0111;
-    TCCR2B &= ~prescalerEraser;
-    TCCR3B &= ~prescalerEraser;
-    TCCR4B &= ~prescalerEraser;
-// now choose how to set those same three bits
-    // prescaler = 1 ---> PWM frequency is 31000 Hz
-    // prescaler = 2 ---> PWM frequency is 4000 Hz
-    // prescaler = 3 ---> PWM frequency is 490 Hz (default value)
-    // prescaler = 4 ---> PWM frequency is 120 Hz
-    // prescaler = 5 ---> PWM frequency is 30 Hz
-    // prescaler = 6 ---> PWM frequency is <20 Hz
-    int prescalerChoice = 3;
-// and apply it
-    TCCR2B |= prescalerChoice; // pins 9, 10
-    TCCR3B |= prescalerChoice; // pins 2, 3, 5
-    TCCR4B |= prescalerChoice; // pins 6, 7, 8
-}
-
 
 // This should likely go away and be handled by setting the pause flag and then
 // pausing in the execSystemRealtime function
