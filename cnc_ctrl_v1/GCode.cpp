@@ -147,8 +147,6 @@ byte  executeBcodeLine(const String& gcodeLine){
     }
     
     if(gcodeLine.substring(0, 3) == "B04"){
-        //set flag to ignore position error limit during the tests
-        sys.state = (sys.state | STATE_POS_ERR_IGNORE);
         //Test each of the axis
         maslowDelay(500);
         if(sys.stop){return STATUS_OK;}
@@ -160,13 +158,6 @@ byte  executeBcodeLine(const String& gcodeLine){
         if(sys.stop){return STATUS_OK;}
         zAxis.test();
         Serial.println(F("Tests complete."));
-
-        // update our position
-        leftAxis.set(leftAxis.read());
-        rightAxis.set(rightAxis.read());
-
-        //clear the flag, re-enable position error limit
-        sys.state = (sys.state & (!STATE_POS_ERR_IGNORE));
         return STATUS_OK;
     }
     
@@ -324,20 +315,6 @@ byte  executeBcodeLine(const String& gcodeLine){
         
         return STATUS_OK;
     }
-  
-    if(gcodeLine.substring(0, 3) == "B16"){
-        Serial.print("Printing encoder steps");
-      
-        Serial.print(F("Left: "));
-        Serial.print(leftAxis.steps());
-        
-        Serial.print(F("Right: "));
-        Serial.print(rightAxis.steps());
-        
-        Serial.print(F("Z: "));
-        Serial.print(zAxis.steps());
-    }
-  
     return STATUS_INVALID_STATEMENT;
 }
     
