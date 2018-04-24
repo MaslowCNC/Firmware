@@ -15,6 +15,7 @@
 // This contains all of the Spindle commands
 
 #include "Maslow.h"
+#include "Settings.h"
 
 // the variable SpindlePowerControlPin is assigned in configAuxLow() in System.cpp 
 
@@ -25,8 +26,8 @@ void  setSpindlePower(bool powerState) {
     /*
      * Turn spindle on or off depending on powerState
      */
-    boolean useServo = !sysSettings.spindleAutomate;
-    boolean activeHigh = true;
+    SpindleAutomationType spindleAutomateType = sysSettings.spindleAutomateType;
+
     int delayAfterChange = 1000;  // milliseconds
     int servoIdle =  90;  // degrees
     int servoOn   = 180;  // degrees
@@ -37,8 +38,10 @@ void  setSpindlePower(bool powerState) {
     #if defined (verboseDebug) && verboseDebug > 1
     Serial.print(F("Spindle control uses pin "));
     Serial.print(SpindlePowerControlPin);
+    Serial.print(F("Spindle automation type "));
+    Serial.print(spindleAutomateType);
     #endif
-    if (useServo) {   // use a servo to control a standard wall switch
+    if (spindleAutomateType == SERVO) {   // use a servo to control a standard wall switch
         #if defined (verboseDebug) && verboseDebug > 1
         Serial.print(F(" with servo (idle="));
         Serial.print(servoIdle);
@@ -67,23 +70,35 @@ void  setSpindlePower(bool powerState) {
         if(sys.stop){return;}
         myservo.detach();           // stop servo control
     }
-    else {            // use a digital I/O pin to control a relay
+    else if (spindleAutomateType == RELAY_ACTIVE_HIGH) {
         #if defined (verboseDebug) && verboseDebug > 1
-        Serial.print(F(" as digital output, active "));
-        if (activeHigh) Serial.println(F("high"));
-        else Serial.println(F("low"));
+        Serial.print(F(" as digital output, active high"));
         #endif
         pinMode(SpindlePowerControlPin, OUTPUT);
         if (powerState) { // turn on spindle
             Serial.println(F("Turning Spindle On"));
-            if (activeHigh) digitalWrite(SpindlePowerControlPin, HIGH);
-            else digitalWrite(SpindlePowerControlPin, LOW);
+            digitalWrite(SpindlePowerControlPin, HIGH);
         }
         else {            // turn off spindle
             Serial.println(F("Turning Spindle Off"));
-            if (activeHigh) digitalWrite(SpindlePowerControlPin, LOW);
-            else digitalWrite(SpindlePowerControlPin, HIGH);
+            digitalWrite(SpindlePowerControlPin, LOW);
+        }
+     }          
+     else if (spindleAutomateType == RELAY_ACTIVE_LOW) {            // use a digital I/O pin to control a relay
+        #if defined (verboseDebug) && verboseDebug > 1
+        Serial.print(F(" as digital output, active low"));
+        #endif
+        pinMode(SpindlePowerControlPin, OUTPUT);
+        if (powerState) { // turn on spindle
+            Serial.println(F("Turning Spindle On"));
+            digitalWrite(SpindlePowerControlPin, LOW);
+        }
+        else {            // turn off spindle
+            Serial.println(F("Turning Spindle Off"));
+            digitalWrite(SpindlePowerControlPin, HIGH);
         }
     }
-    maslowDelay(delayAfterChange);
+    if (spindleAutomateType != NONE) {
+        maslowDelay(delayAfterChange);
+    }
 }
