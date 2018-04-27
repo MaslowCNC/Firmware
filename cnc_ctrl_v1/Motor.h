@@ -39,9 +39,6 @@
             int  lastSpeed();
             void additiveWrite(int speed);
             int  attached();
-            int  _convolve(const int& input);
-            void setSegment(const int& index, const float& slope, const float& intercept, const int& negativeBound, const int& positiveBound);
-            LinSegment getSegment(const int& index);
             void  directWrite(int voltage);
         private:
             int _pwmPin;
