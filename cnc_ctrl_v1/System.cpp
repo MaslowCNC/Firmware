@@ -61,31 +61,31 @@ void   setupAxes(){
 
     */
 
-    // These shouldn't be CAPS, they are not precompile defines
-    int ENCODER1A;
-    int ENCODER1B;
-    int ENCODER2A;
-    int ENCODER2B;
-    int ENCODER3A;
-    int ENCODER3B;
+    
+    int encoder1A;
+    int encoder1B;
+    int encoder2A;
+    int encoder2B;
+    int encoder3A;
+    int encoder3B;
 
-    int IN1;
-    int IN2;
-    int IN3;
-    int IN4;
-    int IN5;
-    int IN6;
+    int in1;
+    int in2;
+    int in3;
+    int in4;
+    int in5;
+    int in6;
 
-    int ENA;
-    int ENB;
-    int ENC;
+    int enA;
+    int enB;
+    int enC;
 
-    int AUX1;
-    int AUX2;
-    int AUX3;
-    int AUX4;
-    int AUX5;
-    int AUX6;
+    int aux1;
+    int aux2;
+    int aux3;
+    int aux4;
+    int aux5;
+    int aux6;
 
     //read the pins which indicate the PCB version
     int pcbVersion = getPCBVersion();
@@ -93,108 +93,108 @@ void   setupAxes(){
     if(pcbVersion == 0){
         //Beta PCB v1.0 Detected
         //MP1 - Right Motor
-        ENCODER1A = 18; // INPUT
-        ENCODER1B = 19; // INPUT
-        IN1 = 9;        // OUTPUT
-        IN2 = 8;        // OUTPUT
-        ENA = 6;        // PWM
+        encoder1A = 18; // INPUT
+        encoder1B = 19; // INPUT
+        in1 = 9;        // OUTPUT
+        in2 = 8;        // OUTPUT
+        enA = 6;        // PWM
 
         //MP2 - Z-axis
-        ENCODER2A = 2;  // INPUT
-        ENCODER2B = 3;  // INPUT
-        IN3 = 11;       // OUTPUT
-        IN4 = 10;       // OUTPUT
-        ENB = 7;        // PWM
+        encoder2A = 2;  // INPUT
+        encoder2B = 3;  // INPUT
+        in3 = 11;       // OUTPUT
+        in4 = 10;       // OUTPUT
+        enB = 7;        // PWM
 
         //MP3 - Left Motor
-        ENCODER3A = 21; // INPUT
-        ENCODER3B = 20; // INPUT
-        IN5 = 12;       // OUTPUT
-        IN6 = 13;       // OUTPUT
-        ENC = 5;        // PWM
+        encoder3A = 21; // INPUT
+        encoder3B = 20; // INPUT
+        in5 = 12;       // OUTPUT
+        in6 = 13;       // OUTPUT
+        enC = 5;        // PWM
 
         //AUX pins
-        AUX1 = 17;
-        AUX2 = 16;
-        AUX3 = 15;
-        AUX4 = 14;
-        AUX5 = 0;        // warning! this is the serial TX line on the Mega2560
-        AUX6 = 1;        // warning! this is the serial RX line on the Mega2560
+        aux1 = 17;
+        aux2 = 16;
+        aux3 = 15;
+        aux4 = 14;
+        aux5 = 0;        // warning! this is the serial TX line on the Mega2560
+        aux6 = 1;        // warning! this is the serial RX line on the Mega2560
     }
     else if(pcbVersion == 1){
         //PCB v1.1 Detected
         //MP1 - Right Motor
-        ENCODER1A = 20; // INPUT
-        ENCODER1B = 21; // INPUT
-        IN1 = 6;        // OUTPUT
-        IN2 = 4;        // OUTPUT
-        ENA = 5;        // PWM
+        encoder1A = 20; // INPUT
+        encoder1B = 21; // INPUT
+        in1 = 6;        // OUTPUT
+        in2 = 4;        // OUTPUT
+        enA = 5;        // PWM
 
         //MP2 - Z-axis
-        ENCODER2A = 19; // INPUT
-        ENCODER2B = 18; // INPUT
-        IN3 = 9;        // OUTPUT
-        IN4 = 7;        // OUTPUT
-        ENB = 8;        // PWM
+        encoder2A = 19; // INPUT
+        encoder2B = 18; // INPUT
+        in3 = 9;        // OUTPUT
+        in4 = 7;        // OUTPUT
+        enB = 8;        // PWM
 
         //MP3 - Left Motor
-        ENCODER3A = 2;   // INPUT
-        ENCODER3B = 3;   // INPUT
-        IN5 = 10;        // OUTPUT
-        IN6 = 11;        // OUTPUT
-        ENC = 12;        // PWM
+        encoder3A = 2;   // INPUT
+        encoder3B = 3;   // INPUT
+        in5 = 10;        // OUTPUT
+        in6 = 11;        // OUTPUT
+        enC = 12;        // PWM
 
         //AUX pins
-        AUX1 = 17;
-        AUX2 = 16;
-        AUX3 = 15;
-        AUX4 = 14;
-        AUX5 = A7;
-        AUX6 = A6;
+        aux1 = 17;
+        aux2 = 16;
+        aux3 = 15;
+        aux4 = 14;
+        aux5 = A7;
+        aux6 = A6;
     }
     else if(pcbVersion == 2){
         //PCB v1.2 Detected
 
         //MP1 - Right Motor
-        ENCODER1A = 20;  // INPUT
-        ENCODER1B = 21;  // INPUT
-        IN1 = 4;         // OUTPUT
-        IN2 = 6;         // OUTPUT
-        ENA = 5;         // PWM
+        encoder1A = 20;  // INPUT
+        encoder1B = 21;  // INPUT
+        in1 = 4;         // OUTPUT
+        in2 = 6;         // OUTPUT
+        enA = 5;         // PWM
 
         //MP2 - Z-axis
-        ENCODER2A = 19;  // INPUT
-        ENCODER2B = 18;  // INPUT
-        IN3 = 7;         // OUTPUT
-        IN4 = 9;         // OUTPUT
-        ENB = 8;         // PWM
+        encoder2A = 19;  // INPUT
+        encoder2B = 18;  // INPUT
+        in3 = 7;         // OUTPUT
+        in4 = 9;         // OUTPUT
+        enB = 8;         // PWM
 
         //MP3 - Left Motor
-        ENCODER3A = 2;   // INPUT
-        ENCODER3B = 3;   // INPUT
-        IN5 = 11;        // OUTPUT
-        IN6 = 12;        // OUTPUT
-        ENC = 10;        // PWM
+        encoder3A = 2;   // INPUT
+        encoder3B = 3;   // INPUT
+        in5 = 11;        // OUTPUT
+        in6 = 12;        // OUTPUT
+        enC = 10;        // PWM
 
         //AUX pins
-        AUX1 = 17;
-        AUX2 = 16;
-        AUX3 = 15;
-        AUX4 = 14;
-        AUX5 = A7;
-        AUX6 = A6;
+        aux1 = 17;
+        aux2 = 16;
+        aux3 = 15;
+        aux4 = 14;
+        aux5 = A7;
+        aux6 = A6;
     }
 
     if(sysSettings.chainOverSprocket == 1){
-        leftAxis.setup (ENC, IN6, IN5, ENCODER3B, ENCODER3A, 'L', LOOPINTERVAL);
-        rightAxis.setup(ENA, IN1, IN2, ENCODER1A, ENCODER1B, 'R', LOOPINTERVAL);
+        leftAxis.setup (enC, in6, in5, encoder3B, encoder3A, 'L', LOOPINTERVAL);
+        rightAxis.setup(enA, in1, in2, encoder1A, encoder1B, 'R', LOOPINTERVAL);
     }
     else{
-        leftAxis.setup (ENC, IN5, IN6, ENCODER3A, ENCODER3B, 'L', LOOPINTERVAL);
-        rightAxis.setup(ENA, IN2, IN1, ENCODER1B, ENCODER1A, 'R', LOOPINTERVAL);
+        leftAxis.setup (enC, in5, in6, encoder3A, encoder3B, 'L', LOOPINTERVAL);
+        rightAxis.setup(enA, in2, in1, encoder1B, encoder1A, 'R', LOOPINTERVAL);
     }
 
-    zAxis.setup    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, 'Z', LOOPINTERVAL);
+    zAxis.setup    (enB, in3, in4, encoder2B, encoder2A, 'Z', LOOPINTERVAL);
     leftAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     rightAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     zAxis.setPIDValues(&sysSettings.zKpPos, &sysSettings.zKiPos, &sysSettings.zKdPos, &sysSettings.zPropWeightPos, &sysSettings.zKpV, &sysSettings.zKiV, &sysSettings.zKdV, &sysSettings.zPropWeightV);
@@ -203,13 +203,13 @@ void   setupAxes(){
     // Using a separate function is a compiler work-around to avoid
     //  "warning: variable ‘xxxxx’ set but not used [-Wunused-but-set-variable]"
     //  for AUX pins defined but not connected
-    configAuxLow(AUX1, AUX2, AUX3, AUX4, AUX5, AUX6);
+    configAuxLow(aux1, aux2, aux3, aux4, aux5, aux6);
 }
 
 // Assign AUX pins to extern variables used by functions like Spindle and Probe
-void configAuxLow(int AUX1, int AUX2, int AUX3, int AUX4, int AUX5, int AUX6) {
-  SpindlePowerControlPin = AUX1;   // output for controlling spindle power
-  ProbePin = AUX4;                 // use this input for zeroing zAxis with G38.2 gcode
+void configAuxLow(int aux1, int aux2, int aux3, int aux4, int aux5, int aux6) {
+  SpindlePowerControlPin = aux1;   // output for controlling spindle power
+  ProbePin = aux4;                 // use this input for zeroing zAxis with G38.2 gcode
 }
 
 
