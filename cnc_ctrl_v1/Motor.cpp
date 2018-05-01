@@ -120,7 +120,8 @@ void Motor::write(int speed){
                 analogWrite(_pin1 , 255 - speed); // invert drive signals - don't alter speed
                 digitalWrite(_pin2 , HIGH );
                 digitalWrite(_pwmPin, HIGH);
-            } else {
+            }
+            else {
                 analogWrite(_pin2 , speed);
                 digitalWrite(_pin1 , LOW );
                 digitalWrite(_pwmPin, HIGH);
