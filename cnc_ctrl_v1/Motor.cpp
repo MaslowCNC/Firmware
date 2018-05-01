@@ -90,29 +90,42 @@ void Motor::write(int speed){
         
         bool usePin1 = ((_pin1 != 4) && (_pin1 != 13) && (_pin1 != 11) && (_pin1 != 12)); // avoid PWM using timer0 or timer1
         bool usePin2 = ((_pin2 != 4) && (_pin2 != 13) && (_pin2 != 11) && (_pin2 != 12)); // avoid PWM using timer0 or timer1
-        if (forward) {
-            if (speed > 0) {
-              if (usePin2) {
+        bool usepwmPin = ((_pwmPin != 4) && (_pwmPin != 13) && (_pwmPin != 11) && (_pwmPin != 12)); // avoid PWM using timer0 or timer1
+        
+        
+        if (forward){
+            if (usepwmPin){
+                digitalWrite(_pin1 , HIGH );
+                digitalWrite(_pin2 ,  LOW  );
+                analogWrite(_pwmPin, speed);
+            }
+            else if (usePin2) {
                 digitalWrite(_pin1 , HIGH );
                 analogWrite(_pin2 , 255 - speed); // invert drive signals - don't alter speed
-              } else {
+                digitalWrite(_pwmPin, HIGH);
+            }
+            else{
                 analogWrite(_pin1 , speed);
                 digitalWrite(_pin2 , LOW );
-              }
-            } else {
-              digitalWrite(_pin1 , LOW );
-              digitalWrite(_pin2 , LOW );
+                digitalWrite(_pwmPin, HIGH);
             }
-        } else{
-            if (usePin1) {
-              analogWrite(_pin1 , 255 - speed); // invert drive signals - don't alter speed
-              digitalWrite(_pin2 , HIGH );
+        }
+        else{
+            if (usepwmPin){
+                digitalWrite(_pin2 , HIGH);
+                digitalWrite(_pin1 , LOW );
+                analogWrite(_pwmPin, speed);
+            }
+            else if (usePin1) {
+                analogWrite(_pin1 , 255 - speed); // invert drive signals - don't alter speed
+                digitalWrite(_pin2 , HIGH );
+                digitalWrite(_pwmPin, HIGH);
             } else {
                 analogWrite(_pin2 , speed);
                 digitalWrite(_pin1 , LOW );
+                digitalWrite(_pwmPin, HIGH);
             }
-        }  
-        digitalWrite(_pwmPin, HIGH);
+        }
     }
 }
 
