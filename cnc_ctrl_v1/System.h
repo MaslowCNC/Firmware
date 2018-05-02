@@ -83,7 +83,6 @@ void  setupAxes();
 int   getPCBVersion();
 void pause();
 void maslowDelay(unsigned long);
-void  _watchDog();
 void execSystemRealtime();
 void systemSaveAxesPosition();
 void systemReset();
