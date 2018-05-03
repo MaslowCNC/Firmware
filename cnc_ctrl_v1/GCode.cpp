@@ -232,7 +232,12 @@ byte  executeBcodeLine(const String& gcodeLine){
     if(gcodeLine.substring(0, 3) == "B10"){
         //measure the left axis chain length
         Serial.print(F("[Measure: "));
-        Serial.print(leftAxis.read());
+        if (gcodeLine.indexOf('L') != -1){
+            Serial.print(leftAxis.read());
+        }
+        else{
+            Serial.print(rightAxis.read());
+        }
         Serial.println(F("]"));
         return STATUS_OK;
     }
