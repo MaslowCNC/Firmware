@@ -78,11 +78,11 @@ void Motor::additiveWrite(int speed){
     write(_lastSpeed + speed);
 }
 
-void Motor::write(int speed){
+void Motor::write(int speed, bool force){
     /*
-    Sets motor speed from input. Speed = 0 is stopped, -255 is full reverse, 255 is full ahead.
+    Sets motor speed from input. Speed = 0 is stopped, -255 is full reverse, 255 is full ahead. If force is true 
     */
-    if (_attachedState == 1){
+    if (_attachedState == 1 or force){
         speed = constrain(speed, -255, 255);
         _lastSpeed = speed; //saves speed for use in additive write
         bool forward = (speed > 0);
@@ -134,21 +134,7 @@ void Motor::directWrite(int voltage){
     /*
     Write directly to the motor, ignoring if the axis is attached or any applied calibration.
     */
-    bool forward = (voltage >= 0);
-    if (forward) {
-        if (voltage > 0) {
-          digitalWrite(_pin1 , HIGH );
-          analogWrite(_pin2 , 255 - abs(voltage)); // invert drive signals - don't alter speed
-        } else {
-          digitalWrite(_pin1 , LOW );
-          digitalWrite(_pin2 , LOW );
-        }
-    }
-    else{
-        analogWrite(_pin1 , 255 - abs(voltage)); // invert drive signals - don't alter speed
-        digitalWrite(_pin2 , HIGH );
-    }
-    digitalWrite(_pwmPin, HIGH);
+    write(voltage, true);
 }
 
 int  Motor::attached(){

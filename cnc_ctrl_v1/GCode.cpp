@@ -252,7 +252,13 @@ byte  executeBcodeLine(const String& gcodeLine){
         
         int i = 0;
         while (millis() - begin < ms){
-            leftAxis.motorGearboxEncoder.motor.directWrite(speed);
+            if (gcodeLine.indexOf('L') != -1){
+                leftAxis.motorGearboxEncoder.motor.directWrite(speed);
+            }
+            else{
+                rightAxis.motorGearboxEncoder.motor.directWrite(speed);
+            }
+            
             if (i % 10000 == 0){
                 Serial.println(F("pulling"));                              //Keep the connection from timing out
             }
@@ -261,6 +267,7 @@ byte  executeBcodeLine(const String& gcodeLine){
             if (sys.stop){return STATUS_OK;}
         }
         leftAxis.set(leftAxis.read());
+        rightAxis.set(rightAxis.read());
         return STATUS_OK;
     }
     
