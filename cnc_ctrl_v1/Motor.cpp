@@ -80,7 +80,7 @@ void Motor::additiveWrite(int speed){
 
 void Motor::write(int speed, bool force){
     /*
-    Sets motor speed from input. Speed = 0 is stopped, -255 is full reverse, 255 is full ahead. If force is true 
+    Sets motor speed from input. Speed = 0 is stopped, -255 is full reverse, 255 is full ahead. If force is true the motor attached state will be ignored
     */
     if (_attachedState == 1 or force){
         speed = constrain(speed, -255, 255);
