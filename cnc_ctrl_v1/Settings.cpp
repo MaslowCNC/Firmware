@@ -382,6 +382,7 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               sysSettings.chainSagCorrection = value;
               break;
         case 38:
+              settingsSaveStepstoEEprom();
               sysSettings.chainOverSprocket = value;
               setupAxes();
               settingsLoadStepsFromEEprom();
