@@ -232,7 +232,12 @@ byte  executeBcodeLine(const String& gcodeLine){
     if(gcodeLine.substring(0, 3) == "B10"){
         //measure the left axis chain length
         Serial.print(F("[Measure: "));
-        Serial.print(leftAxis.read());
+        if (gcodeLine.indexOf('L') != -1){
+            Serial.print(leftAxis.read());
+        }
+        else{
+            Serial.print(rightAxis.read());
+        }
         Serial.println(F("]"));
         return STATUS_OK;
     }
@@ -247,15 +252,17 @@ byte  executeBcodeLine(const String& gcodeLine){
         
         int i = 0;
         while (millis() - begin < ms){
-            leftAxis.motorGearboxEncoder.motor.directWrite(speed);
-            if (i % 10000 == 0){
-                Serial.println(F("pulling"));                              //Keep the connection from timing out
+            if (gcodeLine.indexOf('L') != -1){
+                leftAxis.motorGearboxEncoder.motor.directWrite(speed);
             }
+            else{
+                rightAxis.motorGearboxEncoder.motor.directWrite(speed);
+            }
+            
             i++;
             execSystemRealtime();
             if (sys.stop){return STATUS_OK;}
         }
-        leftAxis.set(leftAxis.read());
         return STATUS_OK;
     }
     
