@@ -1,0 +1,3 @@
+ModerationLevel = communityManaged
+
+ Facilitator: barboursmith
