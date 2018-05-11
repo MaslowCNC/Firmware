@@ -64,34 +64,34 @@ void   setupAxes(){
 
     */
 
-    // These shouldn't be CAPS, they are not precompile defines
-    int ENCODER1A;
-    int ENCODER1B;
-    int ENCODER2A;
-    int ENCODER2B;
-    int ENCODER3A;
-    int ENCODER3B;
+    
+    int encoder1A;
+    int encoder1B;
+    int encoder2A;
+    int encoder2B;
+    int encoder3A;
+    int encoder3B;
 
-    int IN1;
-    int IN2;
-    int IN3;
-    int IN4;
-    int IN5;
-    int IN6;
+    int in1;
+    int in2;
+    int in3;
+    int in4;
+    int in5;
+    int in6;
 
-    int ENA;
-    int ENB;
-    int ENC;
+    int enA;
+    int enB;
+    int enC;
 
-    int AUX1;
-    int AUX2;
-    int AUX3;
-    int AUX4;
-    int AUX5;
-    int AUX6;
-    int AUX7;
-    int AUX8;
-    int AUX9;
+    int aux1;
+    int aux2;
+    int aux3;
+    int aux4;
+    int aux5;
+    int aux6;
+    int aux7;
+    int aux8;
+    int aux9;
 
     //read the pins which indicate the PCB version
     int pcbVersion = getPCBVersion();
@@ -99,161 +99,163 @@ void   setupAxes(){
     if(pcbVersion == 0){
         //Beta PCB v1.0 Detected
         //MP1 - Right Motor
-        ENCODER1A = 18; // INPUT
-        ENCODER1B = 19; // INPUT
-        IN1 = 9;        // OUTPUT
-        IN2 = 8;        // OUTPUT
-        ENA = 6;        // PWM
+        encoder1A = 18; // INPUT
+        encoder1B = 19; // INPUT
+        in1 = 9;        // OUTPUT
+        in2 = 8;        // OUTPUT
+        enA = 6;        // PWM
 
         //MP2 - Z-axis
-        ENCODER2A = 2;  // INPUT
-        ENCODER2B = 3;  // INPUT
-        IN3 = 11;       // OUTPUT
-        IN4 = 10;       // OUTPUT
-        ENB = 7;        // PWM
+        encoder2A = 2;  // INPUT
+        encoder2B = 3;  // INPUT
+        in3 = 11;       // OUTPUT
+        in4 = 10;       // OUTPUT
+        enB = 7;        // PWM
 
         //MP3 - Left Motor
-        ENCODER3A = 21; // INPUT
-        ENCODER3B = 20; // INPUT
-        IN5 = 12;       // OUTPUT
-        IN6 = 13;       // OUTPUT
-        ENC = 5;        // PWM
+        encoder3A = 21; // INPUT
+        encoder3B = 20; // INPUT
+        in5 = 12;       // OUTPUT
+        in6 = 13;       // OUTPUT
+        enC = 5;        // PWM
 
         //AUX pins
-        AUX1 = 17;
-        AUX2 = 16;
-        AUX3 = 15;
-        AUX4 = 14;
-        AUX5 = 0;        // warning! this is the serial TX line on the Mega2560
-        AUX6 = 1;        // warning! this is the serial RX line on the Mega2560
+        aux1 = 17;
+        aux2 = 16;
+        aux3 = 15;
+        aux4 = 14;
+        aux5 = 0;        // warning! this is the serial TX line on the Mega2560
+        aux6 = 1;        // warning! this is the serial RX line on the Mega2560
     }
     else if(pcbVersion == 1){
         //PCB v1.1 Detected
         //MP1 - Right Motor
-        ENCODER1A = 20; // INPUT
-        ENCODER1B = 21; // INPUT
-        IN1 = 6;        // OUTPUT
-        IN2 = 4;        // OUTPUT
-        ENA = 5;        // PWM
+        encoder1A = 20; // INPUT
+        encoder1B = 21; // INPUT
+        in1 = 6;        // OUTPUT
+        in2 = 4;        // OUTPUT
+        enA = 5;        // PWM
 
         //MP2 - Z-axis
-        ENCODER2A = 19; // INPUT
-        ENCODER2B = 18; // INPUT
-        IN3 = 9;        // OUTPUT
-        IN4 = 7;        // OUTPUT
-        ENB = 8;        // PWM
+        encoder2A = 19; // INPUT
+        encoder2B = 18; // INPUT
+        in3 = 9;        // OUTPUT
+        in4 = 7;        // OUTPUT
+        enB = 8;        // PWM
 
         //MP3 - Left Motor
-        ENCODER3A = 2;   // INPUT
-        ENCODER3B = 3;   // INPUT
-        IN5 = 10;        // OUTPUT
-        IN6 = 11;        // OUTPUT
-        ENC = 12;        // PWM
+        encoder3A = 2;   // INPUT
+        encoder3B = 3;   // INPUT
+        in5 = 10;        // OUTPUT
+        in6 = 11;        // OUTPUT
+        enC = 12;        // PWM
 
         //AUX pins
-        AUX1 = 17;
-        AUX2 = 16;
-        AUX3 = 15;
-        AUX4 = 14;
-        AUX5 = A7;
-        AUX6 = A6;
+        aux1 = 17;
+        aux2 = 16;
+        aux3 = 15;
+        aux4 = 14;
+        aux5 = A7;
+        aux6 = A6;
     }
     else if(pcbVersion == 2){
         //PCB v1.2 Detected
 
         //MP1 - Right Motor
-        ENCODER1A = 20;  // INPUT
-        ENCODER1B = 21;  // INPUT
-        IN1 = 4;         // OUTPUT
-        IN2 = 6;         // OUTPUT
-        ENA = 5;         // PWM
+        encoder1A = 20;  // INPUT
+        encoder1B = 21;  // INPUT
+        in1 = 4;         // OUTPUT
+        in2 = 6;         // OUTPUT
+        enA = 5;         // PWM
 
         //MP2 - Z-axis
-        ENCODER2A = 19;  // INPUT
-        ENCODER2B = 18;  // INPUT
-        IN3 = 7;         // OUTPUT
-        IN4 = 9;         // OUTPUT
-        ENB = 8;         // PWM
+        encoder2A = 19;  // INPUT
+        encoder2B = 18;  // INPUT
+        in3 = 7;         // OUTPUT
+        in4 = 9;         // OUTPUT
+        enB = 8;         // PWM
 
         //MP3 - Left Motor
-        ENCODER3A = 2;   // INPUT
-        ENCODER3B = 3;   // INPUT
-        IN5 = 11;        // OUTPUT
-        IN6 = 12;        // OUTPUT
-        ENC = 10;        // PWM
+        encoder3A = 2;   // INPUT
+        encoder3B = 3;   // INPUT
+        in5 = 11;        // OUTPUT
+        in6 = 12;        // OUTPUT
+        enC = 10;        // PWM
 
-        AUX1 = 17;
-        AUX2 = 16;
-        AUX3 = 15;
-        AUX4 = 14;
-        AUX5 = 61; // A7;
-        AUX6 = 60; // A6;
+        //AUX pins
+        aux1 = 17;
+        aux2 = 16;
+        aux3 = 15;
+        aux4 = 14;
+        aux5 = A7;
+        aux6 = A6;
     }
     else if(pcbVersion == 3){ // TLE5206
         //TLE5206 PCB v1.3 Detected
         //MP1 - Right Motor
-        ENCODER1A = 20; // INPUT
-        ENCODER1B = 21; // INPUT
-        IN1 = 6;        // OUTPUT
-        IN2 = 4;        // OUTPUT
-        ENA = 5;        // errorFlag
+        encoder1A = 20; // INPUT
+        encoder1B = 21; // INPUT
+        in1 = 6;        // OUTPUT
+        in2 = 4;        // OUTPUT
+        enA = 5;        // errorFlag
 
         //MP2 - Z-axis
-        ENCODER2A = 19; // INPUT
-        ENCODER2B = 18; // INPUT
-        IN3 = 7;        // OUTPUT
-        IN4 = 9;        // OUTPUT
-        ENB = 8;        // errorFlag
+        encoder2A = 19; // INPUT
+        encoder2B = 18; // INPUT
+        in3 = 7;        // OUTPUT
+        in4 = 9;        // OUTPUT
+        enB = 8;        // errorFlag
 
         //MP3 - Left Motor
-        ENCODER3A = 2;   // INPUT
-        ENCODER3B = 3;   // INPUT
-        IN5 = 10;        // OUTPUT
-        IN6 = 11;        // OUTPUT
-        ENC = 12;        // errorFlag
+        encoder3A = 2;   // INPUT
+        encoder3B = 3;   // INPUT
+        in5 = 10;        // OUTPUT
+        in6 = 11;        // OUTPUT
+        enC = 12;        // errorFlag
 
         //AUX pins
-        AUX1 = 40;
-        AUX2 = 41;
-        AUX3 = 42;
-        AUX4 = 43;
-        AUX5 = 68;
-        AUX6 = 69;
-        AUX7 = 45;
-        AUX8 = 46;
-        AUX9 = 47;
+        aux1 = 40;
+        aux2 = 41;
+        aux3 = 42;
+        aux4 = 43;
+        aux5 = 68;
+        aux6 = 69;
+        aux7 = 45;
+        aux8 = 46;
+        aux9 = 47;
     }
 
     if(sysSettings.chainOverSprocket == 1){
-        leftAxis.setup (ENC, IN6, IN5, ENCODER3B, ENCODER3A, 'L', LOOPINTERVAL);
-        rightAxis.setup(ENA, IN1, IN2, ENCODER1A, ENCODER1B, 'R', LOOPINTERVAL);
+        leftAxis.setup (enC, in6, in5, encoder3B, encoder3A, 'L', LOOPINTERVAL);
+        rightAxis.setup(enA, in1, in2, encoder1A, encoder1B, 'R', LOOPINTERVAL);
     }
     else{
-        leftAxis.setup (ENC, IN5, IN6, ENCODER3A, ENCODER3B, 'L', LOOPINTERVAL);
-        rightAxis.setup(ENA, IN2, IN1, ENCODER1B, ENCODER1A, 'R', LOOPINTERVAL);
+        leftAxis.setup (enC, in5, in6, encoder3A, encoder3B, 'L', LOOPINTERVAL);
+        rightAxis.setup(enA, in2, in1, encoder1B, encoder1A, 'R', LOOPINTERVAL);
     }
 
-    zAxis.setup    (ENB, IN3, IN4, ENCODER2B, ENCODER2A, 'Z', LOOPINTERVAL);
+    zAxis.setup    (enB, in3, in4, encoder2B, encoder2A, 'Z', LOOPINTERVAL);
     leftAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     rightAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     zAxis.setPIDValues(&sysSettings.zKpPos, &sysSettings.zKiPos, &sysSettings.zKdPos, &sysSettings.zPropWeightPos, &sysSettings.zKpV, &sysSettings.zKiV, &sysSettings.zKdV, &sysSettings.zPropWeightV);
 
-// implement the AUXx values that are 'used'. This accomplishes setting their values at runtime.
-// Using a function is a compiler work-around to avoid
-//  "warning: variable ‘xxxxx’ set but not used [-Wunused-but-set-variable]"
-//  for AUX pins defined but not connected
-    configAuxLow(AUX1, AUX2, AUX3, AUX4, AUX5, AUX6);
+    // implement the AUXx values that are 'used'. This accomplishes setting their values at runtime.
+    // Using a separate function is a compiler work-around to avoid
+    //  "warning: variable ‘xxxxx’ set but not used [-Wunused-but-set-variable]"
+    //  for AUX pins defined but not connected
+    configAuxLow(aux1, aux2, aux3, aux4, aux5, aux6);
     if(pcbVersion == 3){ // TLE5206
-      configAuxHigh(AUX7, AUX8, AUX9);
-}
-}
-
-void configAuxLow(int AUX1, int AUX2, int AUX3, int AUX4, int AUX5, int AUX6) {
-  SpindlePowerControlPin = AUX1;   // output for controlling spindle power
-  ProbePin = AUX4;                 // use this input for zeroing zAxis with G38.2 gcode
+      configAuxHigh(aux7, aux8, aux9);
+    }
 }
 
-void configAuxHigh(int AUX7, int AUX8, int AUX9) {
+// Assign AUX pins to extern variables used by functions like Spindle and Probe
+void configAuxLow(int aux1, int aux2, int aux3, int aux4, int aux5, int aux6) {
+  SpindlePowerControlPin = aux1;   // output for controlling spindle power
+  ProbePin = aux4;                 // use this input for zeroing zAxis with G38.2 gcode
+}
+
+void configAuxHigh(int aux7, int aux8, int aux9) {
 }
 
 int getPCBVersion(){
@@ -261,14 +263,17 @@ int getPCBVersion(){
     pinMode(VERS2,INPUT_PULLUP);
     pinMode(VERS3,INPUT_PULLUP);
     pinMode(VERS4,INPUT_PULLUP);
-    int pinCheck = (8*digitalRead(VERS4) + 4*digitalRead(VERS3) + 2*digitalRead(VERS2) + 1*digitalRead(VERS1));
+    pinMode(VERS5,INPUT_PULLUP);
+    pinMode(VERS6,INPUT_PULLUP);
+    int pinCheck = (32*digitalRead(VERS6) + 16*digitalRead(VERS5) + 8*digitalRead(VERS4) + 4*digitalRead(VERS3) + 2*digitalRead(VERS2) + 1*digitalRead(VERS1));
     switch (pinCheck) {
-        // case 0: case 1: case 2: case 3: // v1.2 board
-        case 12: case 13: case 14: case 15: // v1.2 board
-            pinCheck -= 12;
+        // boards v1.1, v1.2, v1.3 don't strap VERS3-6 low
+        case B111101: case B111110: case B111111: // v1.1, v1.2, v1.3
+            pinCheck &= B000011; // strip off the unstrapped bits
             TLE5206 = false;
             break;
-        case 4:
+        case B110100: case B000100: // some versions of board v1.4 don't strap VERS5-6 low
+            pinCheck &= B000111; // strip off the unstrapped bits
             TLE5206 = true;
             break;
 }
@@ -403,36 +408,6 @@ void systemSaveAxesPosition(){
     */
     if (!leftAxis.attached() && !rightAxis.attached() && !zAxis.attached()){
         settingsSaveStepstoEEprom();
-    }
-}
-
-// This should be the ultimate fallback, it would be best if we didn't even need
-// something like this at all
-// TODO delete this function, we are not even using it anymore
-void  _watchDog(){
-    /*
-    If:
-      No incoming serial in 5 seconds
-      Motors are detached
-      Nothing in Serial buffer
-      Watchdog has not run in 5 seconds
-    Then:
-      Send an ok message
-
-    This fixes the issue where the machine is ready, but Ground Control doesn't know the machine is ready and the system locks up.
-    */
-    static unsigned long lastRan = millis();
-
-    if ( millis() - sys.lastSerialRcvd > 5000 &&
-        (millis() - lastRan) > 5000 &&
-        !leftAxis.attached() and !rightAxis.attached() and !zAxis.attached() &&
-        incSerialBuffer.length() == 0
-       ){
-          #if defined (verboseDebug) && verboseDebug > 0
-            Serial.println(F("_watchDog requesting new code"));
-          #endif
-          reportStatusMessage(STATUS_OK);
-          lastRan = millis();
     }
 }
 
