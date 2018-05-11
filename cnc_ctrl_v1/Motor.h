@@ -35,7 +35,7 @@
             void attach();
             int  setupMotor(const int& pwmPin, const int& pin1, const int& pin2);
             void detach();
-            void write(int speed);
+            void write(int speed, bool force = false);
             int  lastSpeed();
             void additiveWrite(int speed);
             int  attached();
