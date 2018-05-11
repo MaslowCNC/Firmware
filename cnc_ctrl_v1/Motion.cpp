@@ -270,7 +270,7 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
       // Replace it with a G1 cut to the endpoint
       String gcodeSubstitution = "G1 X";
       gcodeSubstitution = gcodeSubstitution + String(X2 / sys.inchesToMMConversion, 3) + " Y" + String(Y2 / sys.inchesToMMConversion, 3) + " ";
-      Serial.println("Large arc replaced by straight line to improve accuracy: " + gcodeSubstitution);
+      Serial.println("Large-radius arc replaced by straight line to improve accuracy: " + gcodeSubstitution);
       G1(gcodeSubstitution, 1);
       return 1;
     }
