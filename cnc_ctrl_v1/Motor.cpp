@@ -161,36 +161,3 @@ int  Motor::attached(){
     return _attachedState;
 }
 
-int  Motor::_convolve(const int& input){
-    /*
-    This function distorts the input signal in a manner which is the inverse of the way
-    the mechanics of the motor distort it to give a linear response.
-    */
-
-    int output = input;
-
-    int arrayLen = sizeof(_linSegments)/sizeof(_linSegments[1]);
-    for (int i = 0; i <= arrayLen - 1; i++){
-        if (input > _linSegments[i].negativeBound and input < _linSegments[i].positiveBound){
-            output = (input + _linSegments[i].intercept)/_linSegments[i].slope;
-            break;
-        }
-    }
-
-    return output;
-}
-
-void Motor::setSegment(const int& index, const float& slope, const float& intercept, const int& negativeBound, const int& positiveBound){
-
-    //Adds a linearizion segment to the linSegments object in location index
-
-    _linSegments[index].slope          =          slope;
-    _linSegments[index].intercept      =      intercept;
-    _linSegments[index].positiveBound  =  positiveBound;
-    _linSegments[index].negativeBound  =  negativeBound;
-
-}
-
-LinSegment Motor::getSegment(const int& index){
-    return _linSegments[index];
-}
