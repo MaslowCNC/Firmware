@@ -78,7 +78,7 @@ void settingsReset() {
     sysSettings.distPerRot = 63.5;   // float distPerRot;
     sysSettings.maxFeed = 700;   // int maxFeed;
     sysSettings.zAxisAttached = true;   // zAxisAttached;
-    sysSettings.spindleAutomate = false;  // bool spindleAutomate;
+    sysSettings.spindleAutomateType = NONE;  // bool spindleAutomate;
     sysSettings.maxZRPM = 12.60;  // float maxZRPM;
     sysSettings.zDistPerRot = 3.17;   // float zDistPerRot;
     sysSettings.zEncoderSteps = 7560.0; // float zEncoderSteps;
@@ -293,8 +293,8 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
         case 16:
               sysSettings.zAxisAttached = value;
               break;
-        case 17:
-              sysSettings.spindleAutomate = value;
+        case 17: 
+              sysSettings.spindleAutomateType = static_cast<SpindleAutomationType>(value);
               break;
         case 18:
               sysSettings.maxZRPM = value;
@@ -382,6 +382,7 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               sysSettings.chainSagCorrection = value;
               break;
         case 38:
+              settingsSaveStepstoEEprom();
               sysSettings.chainOverSprocket = value;
               setupAxes();
               settingsLoadStepsFromEEprom();

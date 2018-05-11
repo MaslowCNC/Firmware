@@ -147,6 +147,8 @@ byte  executeBcodeLine(const String& gcodeLine){
     }
 
     if(gcodeLine.substring(0, 3) == "B04"){
+        //set flag to ignore position error limit during the tests
+        sys.state = (sys.state | STATE_POS_ERR_IGNORE);
         //Test each of the axis
         maslowDelay(500);
         if(sys.stop){return STATUS_OK;}
@@ -158,6 +160,13 @@ byte  executeBcodeLine(const String& gcodeLine){
         if(sys.stop){return STATUS_OK;}
         zAxis.test();
         Serial.println(F("Tests complete."));
+
+        // update our position
+        leftAxis.set(leftAxis.read());
+        rightAxis.set(rightAxis.read());
+
+        //clear the flag, re-enable position error limit
+        sys.state = (sys.state & (!STATE_POS_ERR_IGNORE));
         return STATUS_OK;
     }
 
@@ -223,7 +232,12 @@ byte  executeBcodeLine(const String& gcodeLine){
     if(gcodeLine.substring(0, 3) == "B10"){
         //measure the left axis chain length
         Serial.print(F("[Measure: "));
-        Serial.print(leftAxis.read());
+        if (gcodeLine.indexOf('L') != -1){
+            Serial.print(leftAxis.read());
+        }
+        else{
+            Serial.print(rightAxis.read());
+        }
         Serial.println(F("]"));
         return STATUS_OK;
     }
@@ -238,15 +252,17 @@ byte  executeBcodeLine(const String& gcodeLine){
 
         int i = 0;
         while (millis() - begin < ms){
-            leftAxis.motorGearboxEncoder.motor.directWrite(speed);
-            if (i % 10000 == 0){
-                Serial.println(F("pulling"));                              //Keep the connection from timing out
+            if (gcodeLine.indexOf('L') != -1){
+                leftAxis.motorGearboxEncoder.motor.directWrite(speed);
             }
+            else{
+                rightAxis.motorGearboxEncoder.motor.directWrite(speed);
+            }
+            
             i++;
             execSystemRealtime();
             if (sys.stop){return STATUS_OK;}
         }
-        leftAxis.set(leftAxis.read());
         return STATUS_OK;
     }
 

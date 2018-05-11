@@ -180,7 +180,6 @@ void Motor::directWrite(int voltage){
 }
 
 int  Motor::attached(){
-
+    
     return _attachedState;
 }
-
