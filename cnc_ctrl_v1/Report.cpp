@@ -126,7 +126,7 @@ void  reportAlarmMessage(byte alarm_code) {
         break;
         }
       case ALARM_POSITION_LIMIT_ERROR: {
-        Serial.println(F("The sled is not keeping up with its expected position - make a note of the line number. Then click the 'Stop' button to clear the alarm.  "));
+        Serial.println(F("The sled is not keeping up with its expected position and has halted. Click the 'Stop' button to clear the alarm. More information at: https://github.com/MaslowCNC/Firmware/wiki/Keeping-Up  "));
         sys.stop = true;
         break;
         }
