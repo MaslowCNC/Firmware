@@ -245,7 +245,7 @@ void  returnError(){
         Serial.println(F("]"));
         if (!sys.stop) {
           if (!(sys.state & STATE_POS_ERR_IGNORE)) {
-            if ((abs(leftAxis.error()) >= sysSettings.positionErrorLimit) || abs((rightAxis.error()) >= sysSettings.positionErrorLimit)) {
+            if ((abs(leftAxis.error()) >= sysSettings.positionErrorLimit) || (abs(rightAxis.error()) >= sysSettings.positionErrorLimit)) {
                 reportAlarmMessage(ALARM_POSITION_LIMIT_ERROR);
             }
           }
