@@ -12,7 +12,7 @@
 
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Copyright 2014-2017 Bar Smith*/
 
 /*
@@ -24,30 +24,39 @@ to be a drop in replacement for a continuous rotation servo.
 #include "Maslow.h"
 
 Motor::Motor(){
-  
+
   _attachedState = 0;
-  
-  
+
+
 }
 
 int  Motor::setupMotor(const int& pwmPin, const int& pin1, const int& pin2){
-  
+
   //store pin numbers as private variables
   _pwmPin = pwmPin;
   _pin1  = pin1;
   _pin2  = pin2;
   _attachedState = 0;
-  
+
+  if (TLE5206 == false) {
   //set pinmodes
-  pinMode(_pwmPin,   OUTPUT); 
-  pinMode(_pin1,     OUTPUT); 
-  pinMode(_pin2,     OUTPUT);
-  
-  //stop the motor
-  digitalWrite(_pin1,    HIGH);
-  digitalWrite(_pin2,    LOW) ;
-  digitalWrite(_pwmPin,  LOW);
-  
+    pinMode(_pwmPin,   OUTPUT);
+    pinMode(_pin1,     OUTPUT);
+    pinMode(_pin2,     OUTPUT);
+
+    //stop the motor
+    digitalWrite(_pin1,    HIGH);
+    digitalWrite(_pin2,    LOW) ;
+    digitalWrite(_pwmPin,  LOW);
+  } else {
+    pinMode(_pwmPin,   INPUT);
+    pinMode(_pin1,     OUTPUT);
+    pinMode(_pin2,     OUTPUT);
+
+    //stop the motor
+    digitalWrite(_pin1,    LOW);
+    digitalWrite(_pin2,    LOW) ;
+  }
   return 1;
 }
 
@@ -57,11 +66,17 @@ void Motor::attach(){
 
 void Motor::detach(){
     _attachedState = 0;
-    
+
+  if (TLE5206 == false) {
     //stop the motor
     digitalWrite(_pin1,    HIGH);
     digitalWrite(_pin2,    LOW) ;
     digitalWrite(_pwmPin,  LOW);
+  } else {
+    //stop the motor
+    digitalWrite(_pin1,    LOW);
+    digitalWrite(_pin2,    LOW) ;
+  }
 }
 
 int Motor::lastSpeed(){
@@ -86,45 +101,72 @@ void Motor::write(int speed, bool force){
         speed = constrain(speed, -255, 255);
         _lastSpeed = speed; //saves speed for use in additive write
         bool forward = (speed > 0);
-        speed = abs(speed); //remove sign from input because direction is set by control pins on H-bridge   
-        
+        speed = abs(speed); //remove sign from input because direction is set by control pins on H-bridge
+
         bool usePin1 = ((_pin1 != 4) && (_pin1 != 13) && (_pin1 != 11) && (_pin1 != 12)); // avoid PWM using timer0 or timer1
         bool usePin2 = ((_pin2 != 4) && (_pin2 != 13) && (_pin2 != 11) && (_pin2 != 12)); // avoid PWM using timer0 or timer1
-        bool usepwmPin = ((_pwmPin != 4) && (_pwmPin != 13) && (_pwmPin != 11) && (_pwmPin != 12)); // avoid PWM using timer0 or timer1
-        
-        
-        if (forward){
-            if (usepwmPin){
-                digitalWrite(_pin1 , HIGH );
-                digitalWrite(_pin2 ,  LOW  );
-                analogWrite(_pwmPin, speed);
+        bool usepwmPin = ((TLE5206 == false) && (_pwmPin != 4) && (_pwmPin != 13) && (_pwmPin != 11) && (_pwmPin != 12)); // avoid PWM using timer0 or timer1       
+        if (!TLE5206) {
+            if (forward){
+                if (usepwmPin){
+                    digitalWrite(_pin1 , HIGH );
+                    digitalWrite(_pin2 ,  LOW  );
+                    analogWrite(_pwmPin, speed);
+                }
+                else if (usePin2) {
+                    digitalWrite(_pin1 , HIGH );
+                    analogWrite(_pin2 , 255 - speed); // invert drive signals - don't alter speed
+                    digitalWrite(_pwmPin, HIGH);
+                }
+                else{
+                    analogWrite(_pin1 , speed);
+                    digitalWrite(_pin2 , LOW );
+                    digitalWrite(_pwmPin, HIGH);
+                }
             }
-            else if (usePin2) {
-                digitalWrite(_pin1 , HIGH );
-                analogWrite(_pin2 , 255 - speed); // invert drive signals - don't alter speed
-                digitalWrite(_pwmPin, HIGH);
+            else { // reverse or zero speed
+                if (usepwmPin){
+                    digitalWrite(_pin2 , HIGH);
+                    digitalWrite(_pin1 , LOW );
+                    analogWrite(_pwmPin, speed);
+                }
+                else if (usePin1) {
+                    analogWrite(_pin1 , 255 - speed); // invert drive signals - don't alter speed
+                    digitalWrite(_pin2 , HIGH );
+                    digitalWrite(_pwmPin, HIGH);
+                }
+                else {
+                    analogWrite(_pin2 , speed);
+                    digitalWrite(_pin1 , LOW );
+                    digitalWrite(_pwmPin, HIGH);
+                }
             }
-            else{
-                analogWrite(_pin1 , speed);
-                digitalWrite(_pin2 , LOW );
-                digitalWrite(_pwmPin, HIGH);
-            }
-        }
-        else{
-            if (usepwmPin){
-                digitalWrite(_pin2 , HIGH);
-                digitalWrite(_pin1 , LOW );
-                analogWrite(_pwmPin, speed);
-            }
-            else if (usePin1) {
-                analogWrite(_pin1 , 255 - speed); // invert drive signals - don't alter speed
-                digitalWrite(_pin2 , HIGH );
-                digitalWrite(_pwmPin, HIGH);
-            }
-            else {
-                analogWrite(_pin2 , speed);
-                digitalWrite(_pin1 , LOW );
-                digitalWrite(_pwmPin, HIGH);
+        } 
+        else { // TLE5206
+            if (forward) {
+                if (speed > 0) {
+                    if (usePin2) {
+                        digitalWrite(_pin1 , HIGH );
+                        analogWrite(_pin2 , 255 - speed); // invert drive signals - don't alter speed
+                    } 
+                    else {
+                        analogWrite(_pin1 , speed);
+                        digitalWrite(_pin2 , LOW );
+                    }
+                } 
+                else { // speed = 0 so put on the brakes
+                    digitalWrite(_pin1 , LOW );
+                    digitalWrite(_pin2 , LOW );
+                }
+            } 
+            else { // reverse
+                if (usePin1) {
+                    analogWrite(_pin1 , 255 - speed); // invert drive signals - don't alter speed
+                    digitalWrite(_pin2 , HIGH );
+                } else {
+                    analogWrite(_pin2 , speed);
+                    digitalWrite(_pin1 , LOW );
+                }
             }
         }
     }

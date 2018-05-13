@@ -30,6 +30,9 @@
  * and restart the IDE.
  */
     
+
+// TLE5206 version
+
 #include "Maslow.h"
 
 // Define system global state structure
@@ -54,7 +57,9 @@ void setup(){
     Serial.begin(57600);
     Serial.print(F("PCB v1."));
     Serial.print(getPCBVersion());
+    if (TLE5206 == true) { Serial.print(F(" TLE5206 ")); }
     Serial.println(F(" Detected"));
+		Serial.println(F("TLE5206-release firmware"));
     sys.inchesToMMConversion = 1;
     settingsLoadFromEEprom();
     setupAxes();

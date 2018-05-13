@@ -19,9 +19,12 @@ Copyright 2014-2017 Bar Smith*/
 
 #include "Maslow.h"
 
+bool TLE5206;
+
 // extern values using AUX pins defined in  configAuxLow() and configAuxHigh()
 int SpindlePowerControlPin;  // output for controlling spindle power
 int ProbePin;                // use this input for zeroing zAxis with G38.2 gcode
+
 
 void  calibrateChainLengths(String gcodeLine){
     /*
@@ -86,6 +89,9 @@ void   setupAxes(){
     int aux4;
     int aux5;
     int aux6;
+    int aux7;
+    int aux8;
+    int aux9;
 
     //read the pins which indicate the PCB version
     int pcbVersion = getPCBVersion();
@@ -184,6 +190,40 @@ void   setupAxes(){
         aux5 = A7;
         aux6 = A6;
     }
+    else if(pcbVersion == 3){ // TLE5206
+        //TLE5206 PCB v1.3 Detected
+        //MP1 - Right Motor
+        encoder1A = 20; // INPUT
+        encoder1B = 21; // INPUT
+        in1 = 6;        // OUTPUT
+        in2 = 4;        // OUTPUT
+        enA = 5;        // errorFlag
+
+        //MP2 - Z-axis
+        encoder2A = 19; // INPUT
+        encoder2B = 18; // INPUT
+        in3 = 7;        // OUTPUT
+        in4 = 9;        // OUTPUT
+        enB = 8;        // errorFlag
+
+        //MP3 - Left Motor
+        encoder3A = 2;   // INPUT
+        encoder3B = 3;   // INPUT
+        in5 = 10;        // OUTPUT
+        in6 = 11;        // OUTPUT
+        enC = 12;        // errorFlag
+
+        //AUX pins
+        aux1 = 40;
+        aux2 = 41;
+        aux3 = 42;
+        aux4 = 43;
+        aux5 = 68;
+        aux6 = 69;
+        aux7 = 45;
+        aux8 = 46;
+        aux9 = 47;
+    }
 
     if(sysSettings.chainOverSprocket == 1){
         leftAxis.setup (enC, in6, in5, encoder3B, encoder3A, 'L', LOOPINTERVAL);
@@ -204,6 +244,9 @@ void   setupAxes(){
     //  "warning: variable ‘xxxxx’ set but not used [-Wunused-but-set-variable]"
     //  for AUX pins defined but not connected
     configAuxLow(aux1, aux2, aux3, aux4, aux5, aux6);
+    if(pcbVersion == 3){ // TLE5206
+      configAuxHigh(aux7, aux8, aux9);
+    }
 }
 
 // Assign AUX pins to extern variables used by functions like Spindle and Probe
@@ -212,6 +255,8 @@ void configAuxLow(int aux1, int aux2, int aux3, int aux4, int aux5, int aux6) {
   ProbePin = aux4;                 // use this input for zeroing zAxis with G38.2 gcode
 }
 
+void configAuxHigh(int aux7, int aux8, int aux9) {
+}
 
 int getPCBVersion(){
     pinMode(VERS1,INPUT_PULLUP);
@@ -224,16 +269,17 @@ int getPCBVersion(){
     switch (pinCheck) {
         // boards v1.1, v1.2, v1.3 don't strap VERS3-6 low
         case B111101: case B111110: case B111111: // v1.1, v1.2, v1.3
-            pinCheck -= B111100; // strip off the unstrapped bits
-            // TLE5206 = false;
+            pinCheck &= B000011; // strip off the unstrapped bits
+            TLE5206 = false;
             break;
-        case B110100: // board v1.4 doesn't strap VERS5-6 low
-            pinCheck -= B110000; // strip off the unstrapped bits
-            // TLE5206 = true;
+        case B110100: case B000100: // some versions of board v1.4 don't strap VERS5-6 low
+            pinCheck &= B000111; // strip off the unstrapped bits
+            TLE5206 = true;
             break;
 }
     return pinCheck - 1;
 }
+
 
 //
 // PWM frequency change
@@ -291,6 +337,7 @@ void setPWMPrescalers(int prescalerChoice) {
     TCCR3B |= prescalerChoice;   // pins 2, 3, 5
     TCCR4B |= prescalerChoice;   // pins 6, 7, 8
 }
+
 
 // This should likely go away and be handled by setting the pause flag and then
 // pausing in the execSystemRealtime function
