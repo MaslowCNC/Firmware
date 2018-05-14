@@ -59,7 +59,6 @@ void setup(){
     Serial.print(getPCBVersion());
     if (TLE5206 == true) { Serial.print(F(" TLE5206 ")); }
     Serial.println(F(" Detected"));
-		Serial.println(F("TLE5206-release firmware"));
     sys.inchesToMMConversion = 1;
     settingsLoadFromEEprom();
     setupAxes();
