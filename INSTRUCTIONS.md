@@ -12,27 +12,27 @@ Download and install the last Arduino IDE from [https://www.arduino.cc/en/Main/S
 
 Note - For Windows there are three options: "Windows Installer", "Windows Zip", and "Windows App".
        Some users have reported problems with the "Windows App" version. 
-![Download IDE](https://github.com/MaslowCNC/Firmware/blob/master/Documentation/Download%20IDE.jpg)
+![Download IDE](https://raw.githubusercontent.com/MaslowCNC/Firmware/master/Documentation/Download%20IDE.jpg)
 
 ### Step 3: Download The Latest Maslow Firmware
 You can do this at https://github.com/MaslowCNC/Firmware/releases. Click the zip file for the most recent release to download it. Extract the files from the zip folder.
-![Download Firmware](https://github.com/MaslowCNC/Firmware/blob/master/Documentation/Download%20Firmware.jpg)
+![Download Firmware](https://raw.githubusercontent.com/MaslowCNC/Firmware/master/Documentation/Download%20Firmware.jpg)
 
 ### Step 4: Open Firmware
 Click **File -> Open** and then open the firmware by selecting cnc_ctrl_v1.ino
-![Open Firmware](https://github.com/MaslowCNC/Firmware/blob/master/Documentation/Open%20Firmware.jpg)
+![Open Firmware](https://raw.githubusercontent.com/MaslowCNC/Firmware/master/Documentation/Open%20Firmware.jpg)
 
 ### Step 5: Select The Board Type
 Select the board type by clicking **Tools -> Board -> Arduino/Genuino Mega or Mega 2560**
-![Select Board Type](https://github.com/MaslowCNC/Firmware/blob/master/Documentation/Select%20Board.jpg)
+![Select Board Type](https://raw.githubusercontent.com/MaslowCNC/Firmware/master/Documentation/Select%20Board.jpg)
 
 ### Step 6: Select The Serial Port 
 Select the correct port to connect to by clicking **Tools -> Port -> Your Port**. On Windows this will be something like COM3, on Mac and Linux computers it will be something like dev/tty/. You can find the right one by plugging and unplugging your Arduino compatible board and checking which option disappears. 
-![Select Serial Port](https://github.com/MaslowCNC/Firmware/blob/master/Documentation/Select%20COM%20Port.jpg)
+![Select Serial Port](https://raw.githubusercontent.com/MaslowCNC/Firmware/master/Documentation/Select%20COM%20Port.jpg)
 
 ### Step 7: Upload The Firmware
 Upload the newest firmware to your machine by clicking the upload button in the top left corner. The arrow looks disabled until you hover over it!  _Linux users_: if you are getting timeout or permissions errors, you may need to add your username to the `dialout` group and then logout and back in.  [Instructions here.](https://askubuntu.com/questions/112568/how-do-i-allow-a-non-default-user-to-use-serial-device-ttyusb0)
-![Upload Firmware](https://github.com/MaslowCNC/Firmware/blob/master/Documentation/Upload.jpg)
+![Upload Firmware](https://raw.githubusercontent.com/MaslowCNC/Firmware/master/Documentation/Upload.jpg)
 
 ### Step 8: Finish
 You are now running the latest firmware. *Great Job!* Make sure you close the Arduino IDE before proceeding.
