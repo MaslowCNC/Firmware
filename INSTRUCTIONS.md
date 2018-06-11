@@ -38,4 +38,4 @@ Upload the newest firmware to your machine by clicking the upload button in the 
 You are now running the latest firmware. *Great Job!* Make sure you close the Arduino IDE before proceeding.
 
 ### Step 9: Proceed
-You have finished setting up the Maslow firmware. Proceed to the [next step](https://github.com/MaslowCNC/GroundControl/wiki/Installing-Ground-Control) to install Ground Control on your OS.
+You have finished setting up the Maslow firmware. Proceed to the [next step](http://maslowcommunitygarden.org/GroundControl.html?instructions=true) to install Ground Control on your OS.
