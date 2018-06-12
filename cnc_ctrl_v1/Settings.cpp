@@ -70,7 +70,8 @@ void settingsReset() {
     sysSettings.sledWidth = 310.0;  // float sledWidth;
     sysSettings.sledHeight = 139.0;  // float sledHeight;
     sysSettings.sledCG = 79.0;   // float sledCG;
-    sysSettings.kinematicType = KIN_QUADRILATERAL; // KinematicsType kinematicType;
+    //sysSettings.kinematicType = KIN_QUADRILATERAL; // KinematicsType kinematicType;
+    sysSettings.kinematicType = KIN_XY; // KinematicsType kinematicType;
     sysSettings.rotationDiskRadius = 250.0;  // float rotationDiskRadius;
     sysSettings.axisDetachTime = 2000;   // int axisDetachTime;
     sysSettings.originalChainLength = 1650;   // int originalChainLength;
