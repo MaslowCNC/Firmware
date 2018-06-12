@@ -147,7 +147,7 @@ void reportMaslowSettings() {
     Serial.print(F("$4=")); Serial.println(sysSettings.sledWidth, 8);
     Serial.print(F("$5=")); Serial.println(sysSettings.sledHeight, 8);
     Serial.print(F("$6=")); Serial.println(sysSettings.sledCG, 8);
-    Serial.print(F("$7=")); Serial.println(sysSettings.kinematicsType);
+    Serial.print(F("$7=")); Serial.println(sysSettings.kinematicType);
     Serial.print(F("$8=")); Serial.println(sysSettings.rotationDiskRadius, 8);
     Serial.print(F("$9=")); Serial.println(sysSettings.axisDetachTime);
     Serial.print(F("$10=")); Serial.println(sysSettings.chainLength);
@@ -191,7 +191,7 @@ void reportMaslowSettings() {
     Serial.print(F(" (motor height, mm)\r\n$4=")); Serial.print(sysSettings.sledWidth, 8);
     Serial.print(F(" (sled width, mm)\r\n$5=")); Serial.print(sysSettings.sledHeight, 8);
     Serial.print(F(" (sled height, mm)\r\n$6=")); Serial.print(sysSettings.sledCG, 8);
-    Serial.print(F(" (sled cg, mm)\r\n$7=")); Serial.print(sysSettings.kinematicsType);
+    Serial.print(F(" (sled cg, mm)\r\n$7=")); Serial.print(sysSettings.kinematicType);
     Serial.print(F(" (Kinematics Type 1=Quadrilateral, 2=Triangular)\r\n$8=")); Serial.print(sysSettings.rotationDiskRadius, 8);
     Serial.print(F(" (rotation radius, mm)\r\n$9=")); Serial.print(sysSettings.axisDetachTime);
     Serial.print(F(" (axis idle before detach, ms)\r\n$10=")); Serial.print(sysSettings.chainLength);

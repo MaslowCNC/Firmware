@@ -70,7 +70,7 @@ void settingsReset() {
     sysSettings.sledWidth = 310.0;  // float sledWidth;
     sysSettings.sledHeight = 139.0;  // float sledHeight;
     sysSettings.sledCG = 79.0;   // float sledCG;
-    sysSettings.kinematicsType = 1;      // byte kinematicsType;
+    sysSettings.kinematicType = KIN_QUADRILATERAL; // KinematicsType kinematicType;
     sysSettings.rotationDiskRadius = 250.0;  // float rotationDiskRadius;
     sysSettings.axisDetachTime = 2000;   // int axisDetachTime;
     sysSettings.originalChainLength = 1650;   // int originalChainLength;
@@ -247,7 +247,8 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
                       sysSettings.sledCG = value;
                       break;
                 case 7:
-                      sysSettings.kinematicsType = value;
+                      // if ((value >= 0) && (value < KIN_MAX_N)) basic check if the kinematic value is supported
+                      sysSettings.kinematicType = static_cast<KinematicsType>(value);
                       break;
                 case 8:
                       sysSettings.rotationDiskRadius = value;

@@ -65,17 +65,16 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     /*
     
     This function works as a switch to call either the quadrilateralInverse kinematic function 
-    or the triangularInverse kinematic function
+    or the triangularInverse kinematic function, or the xyInverse kinematic function
     
     */
     
-    if(sysSettings.kinematicsType == 1){
-        quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);
+    switch (sysSettings.kinematicType) {        
+        default:
+        case KIN_TRIANGULAR:        triangularInverse(xTarget, yTarget, aChainLength, bChainLength);        break;
+        case KIN_QUADRILATERAL:     quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);     break;
+        case KIN_XY:                xyInverse(xTarget, yTarget, aChainLength, bChainLength);                break;
     }
-    else{
-        triangularInverse(xTarget, yTarget, aChainLength, bChainLength);
-    }
-    
 }
 
 void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
@@ -197,6 +196,58 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     meeting at a point.
     
     */
+    
+    //Confirm that the coordinates are on the wood
+    _verifyValidTarget(&xTarget, &yTarget);
+
+    //Set up variables
+    float Chain1Angle = 0;
+    float Chain2Angle = 0;
+    float Chain1AroundSprocket = 0;
+    float Chain2AroundSprocket = 0;
+
+    //Calculate motor axes length to the bit
+    float Motor1Distance = sqrt(pow((-1*_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
+    float Motor2Distance = sqrt(pow((_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
+
+    //Calculate the chain angles from horizontal, based on if the chain connects to the sled from the top or bottom of the sprocket
+    if(sysSettings.chainOverSprocket == 1){
+        Chain1Angle = asin((_yCordOfMotor - yTarget)/Motor1Distance) + asin(RleftChainTolerance/Motor1Distance);
+        Chain2Angle = asin((_yCordOfMotor - yTarget)/Motor2Distance) + asin(RrightChainTolerance/Motor2Distance);
+
+        Chain1AroundSprocket = RleftChainTolerance * Chain1Angle;
+        Chain2AroundSprocket = RrightChainTolerance * Chain2Angle;
+    }
+    else{
+        Chain1Angle = asin((_yCordOfMotor - yTarget)/Motor1Distance) - asin(RleftChainTolerance/Motor1Distance);
+        Chain2Angle = asin((_yCordOfMotor - yTarget)/Motor2Distance) - asin(RrightChainTolerance/Motor2Distance);
+
+        Chain1AroundSprocket = RleftChainTolerance * (3.14159 - Chain1Angle);
+        Chain2AroundSprocket = RrightChainTolerance * (3.14159 - Chain2Angle);
+    }
+
+    //Calculate the straight chain length from the sprocket to the bit
+    float Chain1Straight = sqrt(pow(Motor1Distance,2)-pow(RleftChainTolerance,2));
+    float Chain2Straight = sqrt(pow(Motor2Distance,2)-pow(RrightChainTolerance,2));
+
+    //Correct the straight chain lengths to account for chain sag
+    Chain1Straight *= (1 + ((sysSettings.chainSagCorrection / 1000000000000) * pow(cos(Chain1Angle),2) * pow(Chain1Straight,2) * pow((tan(Chain2Angle) * cos(Chain1Angle)) + sin(Chain1Angle),2)));
+    Chain2Straight *= (1 + ((sysSettings.chainSagCorrection / 1000000000000) * pow(cos(Chain2Angle),2) * pow(Chain2Straight,2) * pow((tan(Chain1Angle) * cos(Chain2Angle)) + sin(Chain2Angle),2)));
+
+    //Calculate total chain lengths accounting for sprocket geometry and chain sag
+    float Chain1 = Chain1AroundSprocket + Chain1Straight;
+    float Chain2 = Chain2AroundSprocket + Chain2Straight;
+
+    //Subtract of the virtual length which is added to the chain by the rotation mechanism
+    Chain1 = Chain1 - sysSettings.rotationDiskRadius;
+    Chain2 = Chain2 - sysSettings.rotationDiskRadius;
+    
+    *aChainLength = Chain1;
+    *bChainLength = Chain2;
+}
+
+void  Kinematics::xyInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    // Convert XY into XY chain lengths
     
     //Confirm that the coordinates are on the wood
     _verifyValidTarget(&xTarget, &yTarget);

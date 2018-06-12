@@ -37,6 +37,12 @@ enum SpindleAutomationType {
   SERVO,
   RELAY_ACTIVE_HIGH,
   RELAY_ACTIVE_LOW };
+ 
+enum KinematicsType {
+	KIN_TRIANGULAR = 0,
+	KIN_QUADRILATERAL,
+    KIN_XY,
+	KIN_MAX_N };
 
 typedef struct {  // I think this is about ~128 bytes in size if I counted correctly
   float machineWidth;
@@ -46,7 +52,7 @@ typedef struct {  // I think this is about ~128 bytes in size if I counted corre
   float sledWidth;
   float sledHeight;
   float sledCG;
-  byte kinematicsType;
+  KinematicsType kinematicType;
   float rotationDiskRadius;
   unsigned int axisDetachTime;
   unsigned int chainLength;
