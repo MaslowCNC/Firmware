@@ -65,17 +65,16 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     /*
     
     This function works as a switch to call either the quadrilateralInverse kinematic function 
-    or the triangularInverse kinematic function
+    or the triangularInverse kinematic function, or the xyInverse kinematic function
     
     */
     
-    if(sysSettings.kinematicsType == 1){
-        quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);
+    switch (sysSettings.kinematicType) {        
+        default:
+        case KIN_TRIANGULAR:        triangularInverse(xTarget, yTarget, aChainLength, bChainLength);        break;
+        case KIN_QUADRILATERAL:     quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);     break;
+        case KIN_XY:                xyInverse(xTarget, yTarget, aChainLength, bChainLength);                break;
     }
-    else{
-        triangularInverse(xTarget, yTarget, aChainLength, bChainLength);
-    }
-    
 }
 
 void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
@@ -245,6 +244,16 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     
     *aChainLength = Chain1;
     *bChainLength = Chain2;
+}
+
+void  Kinematics::xyInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    // Convert XY into XY chain lengths
+    
+    //Confirm that the coordinates are on the wood
+    _verifyValidTarget(&xTarget, &yTarget);
+
+    *aChainLength = xTarget;
+    *bChainLength = yTarget;
 }
 
 void  Kinematics::forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos, float xGuess, float yGuess){

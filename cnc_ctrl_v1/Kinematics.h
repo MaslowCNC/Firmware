@@ -33,6 +33,7 @@
             void  inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  quadrilateralInverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  triangularInverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
+            void  xyInverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  recomputeGeometry();
             void  forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos, float xGuess, float yGuess);
             //geometry
