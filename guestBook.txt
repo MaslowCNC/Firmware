@@ -38,3 +38,5 @@ I'm Batman.
 Tanju B - Hello! we finally making cuts down at the Maker Station makerspace in Marietta, GA. Finally! 18-Feb-2018
 
 Maslow Bahrain (GeroBH) made it into the guestBook ;-) 21 Feb 2018
+
+Ned was here 12/06/2018! Testing out commits/pull requests etc before messing with the code too much :)
