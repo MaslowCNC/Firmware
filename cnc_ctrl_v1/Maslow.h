@@ -18,7 +18,7 @@
 #define maslow_h
 
 // Maslow Firmware Version tracking
-#define VERSIONNUMBER 1.15
+#define VERSIONNUMBER 1.16
 
 // Define standard libraries used by maslow.
 #include <avr/io.h>
