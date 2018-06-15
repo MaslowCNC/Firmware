@@ -373,6 +373,8 @@ void  executeGcodeLine(const String& gcodeLine){
         case 21:
             setInchesToMillimetersConversion(MILLIMETERS);
             break;
+        case 40:
+            break; //the G40 command turns off cutter compensation which is already off so it is safe to ignore
         case 38:
             G38(gcodeLine);
             break;
