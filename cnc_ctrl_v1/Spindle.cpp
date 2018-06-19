@@ -17,7 +17,7 @@
 #include "Maslow.h"
 #include "Settings.h"
 
-// the variable SpindlePowerControlPin is assigned in configAuxLow() in System.cpp 
+// the variable SpindlePowerControlPin and LaserPowerPin are assigned in configAuxLow() in System.cpp 
 
 // Globals for Spindle control, both poorly named
 Servo myservo;  // create servo object to control a servo
@@ -101,4 +101,12 @@ void  setSpindlePower(bool powerState) {
     if (spindleAutomateType != NONE) {
         maslowDelay(delayAfterChange);
     }
+}
+
+void laserOn() {
+    Serial.println("Laser on");
+}
+
+void laserOff(){
+    Serial.println("Laser off");
 }

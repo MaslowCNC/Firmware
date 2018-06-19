@@ -427,6 +427,14 @@ void  executeMcodeLine(const String& gcodeLine){
                 pause();
             }
             break;
+        case 106:
+            //Turn laser on
+            laserOn();
+            break;
+        case 107:
+            //Turn laser off
+            laserOff();
+            break;
         default:
             Serial.print(F("Command M"));
             Serial.print(mNumber);

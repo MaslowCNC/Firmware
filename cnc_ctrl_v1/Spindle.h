@@ -18,5 +18,7 @@
 #define spindle_h
 
 void  setSpindlePower(bool powerState);
+void  laserOn();
+void  laserOff();
 
 #endif
