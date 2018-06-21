@@ -76,6 +76,7 @@ extern RingBuffer incSerialBuffer;
 extern Kinematics kinematics;
 extern byte systemRtExecAlarm;
 extern int SpindlePowerControlPin;
+extern int LaserPowerPin;
 extern int ProbePin;
 
 void  calibrateChainLengths(String);

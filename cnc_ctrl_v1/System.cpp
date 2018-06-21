@@ -24,6 +24,7 @@ bool TLE5206;
 // extern values using AUX pins defined in  configAuxLow() and configAuxHigh()
 int SpindlePowerControlPin;  // output for controlling spindle power
 int ProbePin;                // use this input for zeroing zAxis with G38.2 gcode
+int LaserPowerPin;           // Use this output to turn on and off a laser diode
 
 
 void  calibrateChainLengths(String gcodeLine){
@@ -253,6 +254,9 @@ void   setupAxes(){
 void configAuxLow(int aux1, int aux2, int aux3, int aux4, int aux5, int aux6) {
   SpindlePowerControlPin = aux1;   // output for controlling spindle power
   ProbePin = aux4;                 // use this input for zeroing zAxis with G38.2 gcode
+  LaserPowerPin = aux2;            // output for controlling a laser diode
+  pinMode(LaserPowerPin, OUTPUT);
+  digitalWrite(LaserPowerPin, LOW);
 }
 
 void configAuxHigh(int aux7, int aux8, int aux9) {
