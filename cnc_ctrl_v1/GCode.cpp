@@ -251,6 +251,7 @@ byte  executeBcodeLine(const String& gcodeLine){
         double begin = millis();
 
         int i = 0;
+        sys.state = (sys.state | STATE_POS_ERR_IGNORE);
         while (millis() - begin < ms){
             if (gcodeLine.indexOf('L') != -1){
                 leftAxis.motorGearboxEncoder.motor.directWrite(speed);
@@ -263,6 +264,7 @@ byte  executeBcodeLine(const String& gcodeLine){
             execSystemRealtime();
             if (sys.stop){return STATUS_OK;}
         }
+        sys.state = (sys.state | (!STATE_POS_ERR_IGNORE));
         return STATUS_OK;
     }
 
