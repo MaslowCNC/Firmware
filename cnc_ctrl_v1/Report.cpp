@@ -265,7 +265,10 @@ void  returnPoz(){
         
         
         Serial.print(F("<"));
-        if (sys.pause){
+        if (sys.stop){
+            Serial.print(F("Stop,MPos:"));
+        }
+        else if (sys.pause){
             Serial.print(F("Pause,MPos:"));
         }
         else{
