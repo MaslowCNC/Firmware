@@ -264,13 +264,20 @@ void  returnPoz(){
     if (millis() - lastRan > POSITIONTIMEOUT){
         
         
-        Serial.print(F("<Idle,MPos:"));
+        Serial.print(F("<"));
+        if (sys.pause){
+            Serial.print(F("Pause,MPos:"));
+        }
+        else{
+            Serial.print(F("Idle,MPos:"));
+        }
         Serial.print(sys.xPosition/sys.inchesToMMConversion);
         Serial.print(F(","));
         Serial.print(sys.yPosition/sys.inchesToMMConversion);
         Serial.print(F(","));
         Serial.print(zAxis.read()/sys.inchesToMMConversion);
         Serial.println(F(",WPos:0.000,0.000,0.000>"));
+        
         
         returnError();
         
