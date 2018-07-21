@@ -49,7 +49,7 @@ Copyright 2014-2017 Bar Smith*/
 #define NEED_Z_DIST_PER_ROT bit(3)
 
 // Storage for global system states
-// Some of this could be more appropiately moved to the gcode parser
+// Some of this could be more appropriately moved to the gcode parser
 typedef struct {
   bool stop;                  // Stop flag.
   byte state;                 // State tracking flag

@@ -101,7 +101,7 @@ void loop(){
         initMotion();            // on USB disconnect.  Might consider removing 
         setSpindlePower(false);  // this restriction for safety if we are 
     }                            // comfortable that USB disconnects are
-                                 // not a common occurence anymore
+                                 // not a common occurrence anymore
     kinematics.init();
     
     // Let's go!
