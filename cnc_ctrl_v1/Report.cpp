@@ -21,12 +21,12 @@ Copyright 2014-2017 Bar Smith*/
 
 void  reportStatusMessage(byte status_code){
     /*
-    
+
     Sends confirmation protocol response for commands. For every incoming line,
     this method responds with an 'ok' for a successful command or an 'error:'
     to indicate some error event with the line or some critical system error during
     operation.
-    
+
     Taken from Grbl http://github.com/grbl/grbl
     */
     if (status_code == 0) { // STATUS_OK
@@ -182,7 +182,8 @@ void reportMaslowSettings() {
     Serial.print(F("$40=")); Serial.println(sysSettings.distPerRotLeftChainTolerance, 8);
     Serial.print(F("$41=")); Serial.println(sysSettings.distPerRotRightChainTolerance, 8);
     Serial.print(F("$42=")); Serial.println(sysSettings.positionErrorLimit, 8);
-    
+    Serial.print(F("$43=")); Serial.println(sysSettings.topBeamTilt, 8);
+
   #else
     Serial.print(F("$0=")); Serial.print(sysSettings.machineWidth);
     Serial.print(F(" (machine width, mm)\r\n$1=")); Serial.print(sysSettings.machineHeight, 8);
@@ -226,14 +227,20 @@ void reportMaslowSettings() {
     Serial.print(F(" (PWM frequency value 1=39,000Hz, 2=4,100Hz, 3=490Hz)\r\n$40=")); Serial.print(sysSettings.distPerRotLeftChainTolerance, 8);
     Serial.print(F(" (distance / rotation, including chain tolerance, left chain, mm)\r\n$41=")); Serial.print(sysSettings.distPerRotRightChainTolerance, 8);
     Serial.print(F(" (distance / rotation, including chain tolerance, right chain, mm)\r\n$42=")); Serial.print(sysSettings.positionErrorLimit, 8);
-    Serial.print(F(" (position error alarm limit, mm)"));
+    Serial.print(F(" (position error alarm limit, mm\r\n$43=)")); Serial.print(sysSettings.topBeamTilt, 8);
+    Serial.print(F(" (top beam tilt, degrees)\r\n"));
+    Serial.print(F(" (right chain tolerance, degrees)\r\n")); Serial.print(kinematics.leftMotorX,8);
+    Serial.print(F(" (left Motor X, mm)\r\n")); Serial.print(kinematics.leftMotorY,8);
+    Serial.print(F(" (left Motor Y, mm)\r\n")); Serial.print(kinematics.rightMotorX,8);
+    Serial.print(F(" (right Motor X, mm)\r\n")); Serial.print(kinematics.rightMotorY,8);
+    Serial.print(F(" (right Motor Y, mm)\r\n"));
     Serial.println();
   #endif
 }
 
 void  returnError(){
     /*
-    Prints the machine's positional error and the amount of space available in the 
+    Prints the machine's positional error and the amount of space available in the
     gcode buffer
     */
         Serial.print(F("[PE:"));
@@ -255,15 +262,15 @@ void  returnError(){
 void  returnPoz(){
     /*
     Causes the machine's position (x,y) to be sent over the serial connection updated on the UI
-    in Ground Control. Also causes the error report to be sent. Only executes 
+    in Ground Control. Also causes the error report to be sent. Only executes
     if hasn't been called in at least POSITIONTIMEOUT ms.
     */
-    
+
     static unsigned long lastRan = millis();
-    
+
     if (millis() - lastRan > POSITIONTIMEOUT){
-        
-        
+
+
         Serial.print(F("<"));
         if (sys.stop){
             Serial.print(F("Stop,MPos:"));
@@ -280,13 +287,13 @@ void  returnPoz(){
         Serial.print(F(","));
         Serial.print(zAxis.read()/sys.inchesToMMConversion);
         Serial.println(F(",WPos:0.000,0.000,0.000>"));
-        
-        
+
+
         returnError();
-        
+
         lastRan = millis();
     }
-    
+
 }
 
 void  reportMaslowHelp(){
