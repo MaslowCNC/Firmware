@@ -59,6 +59,8 @@ void Kinematics::recomputeGeometry(){
     _xCordOfMotor = sysSettings.distBetweenMotors/2;
     _yCordOfMotor = halfHeight + sysSettings.motorOffsetY;
 
+    leftChainTolerance = sysSettings.distPerRot/sysSettings.distPerRotLeftChainTolerance;
+    rightChainTolerance = sysSettings.distPerRot/sysSettings.distPerRotRightChainTolerance;
 }
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
@@ -213,31 +215,31 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
 
     //Calculate the chain angles from horizontal, based on if the chain connects to the sled from the top or bottom of the sprocket
     if(sysSettings.chainOverSprocket == 1){
-        Chain1Angle = asin((_yCordOfMotor - yTarget)/Motor1Distance) + asin(RleftChainTolerance/Motor1Distance);
-        Chain2Angle = asin((_yCordOfMotor - yTarget)/Motor2Distance) + asin(RrightChainTolerance/Motor2Distance);
+        Chain1Angle = asin((_yCordOfMotor - yTarget)/Motor1Distance) + asin(R/Motor1Distance);
+        Chain2Angle = asin((_yCordOfMotor - yTarget)/Motor2Distance) + asin(R/Motor2Distance);
 
-        Chain1AroundSprocket = RleftChainTolerance * Chain1Angle;
-        Chain2AroundSprocket = RrightChainTolerance * Chain2Angle;
+        Chain1AroundSprocket = R * Chain1Angle;
+        Chain2AroundSprocket = R * Chain2Angle;
     }
     else{
-        Chain1Angle = asin((_yCordOfMotor - yTarget)/Motor1Distance) - asin(RleftChainTolerance/Motor1Distance);
-        Chain2Angle = asin((_yCordOfMotor - yTarget)/Motor2Distance) - asin(RrightChainTolerance/Motor2Distance);
+        Chain1Angle = asin((_yCordOfMotor - yTarget)/Motor1Distance) - asin(R/Motor1Distance);
+        Chain2Angle = asin((_yCordOfMotor - yTarget)/Motor2Distance) - asin(R/Motor2Distance);
 
-        Chain1AroundSprocket = RleftChainTolerance * (3.14159 - Chain1Angle);
-        Chain2AroundSprocket = RrightChainTolerance * (3.14159 - Chain2Angle);
+        Chain1AroundSprocket = R * (3.14159 - Chain1Angle);
+        Chain2AroundSprocket = R * (3.14159 - Chain2Angle);
     }
 
     //Calculate the straight chain length from the sprocket to the bit
-    float Chain1Straight = sqrt(pow(Motor1Distance,2)-pow(RleftChainTolerance,2));
-    float Chain2Straight = sqrt(pow(Motor2Distance,2)-pow(RrightChainTolerance,2));
+    float Chain1Straight = sqrt(pow(Motor1Distance,2)-pow(R,2));
+    float Chain2Straight = sqrt(pow(Motor2Distance,2)-pow(R,2));
 
     //Correct the straight chain lengths to account for chain sag
     Chain1Straight *= (1 + ((sysSettings.chainSagCorrection / 1000000000000) * pow(cos(Chain1Angle),2) * pow(Chain1Straight,2) * pow((tan(Chain2Angle) * cos(Chain1Angle)) + sin(Chain1Angle),2)));
     Chain2Straight *= (1 + ((sysSettings.chainSagCorrection / 1000000000000) * pow(cos(Chain2Angle),2) * pow(Chain2Straight,2) * pow((tan(Chain1Angle) * cos(Chain2Angle)) + sin(Chain2Angle),2)));
 
     //Calculate total chain lengths accounting for sprocket geometry and chain sag
-    float Chain1 = Chain1AroundSprocket + Chain1Straight;
-    float Chain2 = Chain2AroundSprocket + Chain2Straight;
+    float Chain1 = Chain1AroundSprocket + Chain1Straight * leftChainTolerance;
+    float Chain2 = Chain2AroundSprocket + Chain2Straight * rightChainTolerance;
 
     //Subtract of the virtual length which is added to the chain by the rotation mechanism
     Chain1 = Chain1 - sysSettings.rotationDiskRadius;

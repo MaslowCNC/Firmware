@@ -20,7 +20,7 @@ Copyright 2014-2017 Bar Smith*/
 #ifndef settings_h
 #define settings_h
 
-#define SETTINGSVERSION 4      // The current version of settings, if this doesn't
+#define SETTINGSVERSION 5      // The current version of settings, if this doesn't
                                // match what is in EEPROM then settings on
                                // machine are reset to defaults
 #define EEPROMVALIDDATA 56     // This is just a random byte value that is used 

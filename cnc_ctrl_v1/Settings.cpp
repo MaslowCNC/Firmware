@@ -49,8 +49,8 @@ void settingsLoadFromEEprom(){
     kinematics.recomputeGeometry();
     leftAxis.changeEncoderResolution(&sysSettings.encoderSteps);
     rightAxis.changeEncoderResolution(&sysSettings.encoderSteps);
-    leftAxis.changePitch(&sysSettings.distPerRotLeftChainTolerance);
-    rightAxis.changePitch(&sysSettings.distPerRotRightChainTolerance);
+    leftAxis.changePitch(&sysSettings.distPerRot);
+    rightAxis.changePitch(&sysSettings.distPerRot);
     zAxis.changePitch(&sysSettings.zDistPerRot);
     zAxis.changeEncoderResolution(&sysSettings.zEncoderSteps);
 }
@@ -399,13 +399,11 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               break;
         case 40:
               sysSettings.distPerRotLeftChainTolerance = value;
-              leftAxis.changePitch(&sysSettings.distPerRotLeftChainTolerance);
-              kinematics.RleftChainTolerance = (sysSettings.distPerRotLeftChainTolerance)/(2.0 * 3.14159);
+              kinematics.recomputeGeometry();
               break;
         case 41:
               sysSettings.distPerRotRightChainTolerance = value;
-              rightAxis.changePitch(&sysSettings.distPerRotRightChainTolerance);
-              kinematics.RrightChainTolerance = (sysSettings.distPerRotRightChainTolerance)/(2.0 * 3.14159);
+              kinematics.recomputeGeometry();
               break;
         case 42:
               sysSettings.positionErrorLimit = value;
