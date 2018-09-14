@@ -15,19 +15,21 @@ along with the Maslow Control Software.  If not, see <http://www.gnu.org/license
 
 Copyright 2014-2017 Bar Smith*/
 
-// This file contains helper functions that are used throughout
+// This file contains the machine settings that are saved to eeprom
 
-#ifndef nutsandbolts_h
-#define nutsandbolts_h
+#ifndef calibration_h
+#define calibration_h
 
-// These are nifty functions from Grbl
-#define bit_true(x,mask) (x) |= (mask)
-#define bit_false(x,mask) (x) &= ~(mask)
-#define bit_istrue(x,mask) ((x & mask) != 0)
-#define bit_isfalse(x,mask) ((x & mask) == 0)
+typedef struct {
+  int xError[31][15]; // these are ints to save memory.  each represent 0.001 mm so maximum error is +/~32 mm which is crazy high still
+  int yError[31][15]; // these are ints to save memory.  each represent 0.001 mm so maximum error is +/~32 mm which is crazy high still
+  //float leftLength[31][15]; //Need more memory
+  //float rightLength[31][15]; //Need more memory
+} calibration_t;
+extern calibration_t calibration;
 
-float readFloat(const String&, byte&, float&);
-float readFullFloat(const String&, byte&, float&);
-float readArrayValue(const String&, byte&, int&, int&, int&, int&);
 
-#endif 
+void initializeCalibration();
+byte calibrationUpdateMatrix(const int, const int, const int, const int);
+
+#endif

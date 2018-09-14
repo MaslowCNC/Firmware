@@ -41,6 +41,9 @@ system_t sys;
 // Define the global settings storage - treat as readonly
 settings_t sysSettings;
 
+// Define the calibration values
+calibration_t calibration;
+
 // Global realtime executor bitflag variable for setting various alarms.
 byte systemRtExecAlarm;  
 

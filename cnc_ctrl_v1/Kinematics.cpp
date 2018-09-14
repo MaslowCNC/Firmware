@@ -59,6 +59,17 @@ void Kinematics::recomputeGeometry(){
     _xCordOfMotor = sysSettings.distBetweenMotors/2;
     _yCordOfMotor = halfHeight + sysSettings.motorOffsetY;
 
+    float xOffset = 0.0;
+    float yOffset = 0.0;
+    if (sysSettings.enableOpticalCalibration==true){
+        if (sysSettings.useInterpolationOrCurve==true){
+            xOffset = (float)calibration.xError[15][7]/1000.0;
+            yOffset = (float)calibration.yError[15][7]/1000.0;
+        } else {
+            xOffset = (float)sysSettings.calX0;
+            yOffset = (float)sysSettings.calY0;
+        }
+    }
 }
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
@@ -189,6 +200,58 @@ void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChai
 
 }
 
+void Kinematics::_adjustTarget(float* xTarget,float* yTarget){
+    if (sysSettings.useInterpolationOrCurve) {
+        // shift target to 0,0 being top left corner to match array and convert to inches because array is based on inches.. divide by 3 because array is 3 inches apart and subtact 1 because array starts at 3 inch, 3 inch
+        float x = (*xTarget + sysSettings.machineWidth/2.0)/25.4/3.0-1.0;
+        float y = (sysSettings.machineHeight/2.0 - *yTarget)/25.4/3.0-1.0;
+        // get x1,y1 and x2, y2 for interpolation
+        int x1 = (int)(x);
+        int y1 = (int)(y);
+        int x2 = x1+1;
+        int y2 = y1+1;
+        // limit x1,y1 and x2,y2 within bounds of array, currently 31,15
+        x1 = (x1 < 0) ? 0 : (x1 > 31) ? 31 : x1;
+        y1 = (y1 < 0) ? 0 : (y1 > 15) ? 15 : y1;
+        x2 = (x2 < 0) ? 0 : (x2 > 31) ? 31 : x2;
+        y2 = (y2 < 0) ? 0 : (y2 > 15) ? 15 : y2;
+        // interpolate but catch for divide by zeroes
+        float xOffset = 0.0;
+        float yOffset = 0.0;
+
+        float xR1, xR2, yR1, yR2;
+        if (x2 == x1) {
+            xR1 = (float)calibration.xError[x1][y1];
+            xR2 = (float)calibration.xError[x1][y2];
+            yR1 = (float)calibration.yError[x1][y1];
+            yR2 = (float)calibration.yError[x1][y2];
+        } else {
+            xR1 = (x2 - x) / (x2 - x1) * (float)calibration.xError[x1][y1] + (x - x1) / (x2 - x1) * (float)calibration.xError[x2][y1];
+            xR2 = (x2 - x) / (x2 - x1) * (float)calibration.xError[x1][y2] + (x - x1) / (x2 - x1) * (float)calibration.xError[x2][y2];
+            yR1 = (x2 - x) / (x2 - x1) * (float)calibration.yError[x1][y1] + (x - x1) / (x2 - x1) * (float)calibration.yError[x2][y1];
+            yR2 = (x2 - x) / (x2 - x1) * (float)calibration.yError[x1][y2] + (x - x1) / (x2 - x1) * (float)calibration.yError[x2][y2];
+        }
+
+        if (y2 == y1) {
+            xOffset = (xR1 + xR2) / 2;
+            yOffset = (yR1 + yR2) / 2;
+        } else {
+            xOffset = (y2 - y) / (y2 - y1) * xR1 + (y - y1) / (y2 - y1) * xR2;
+            yOffset = (y2 - y) / (y2 - y1) * yR1 + (y - y1) / (y2 - y1) * yR2;
+        }
+
+        *xTarget += ((float)(xOffset-calibration.xError[15][7]))/1000.0;
+        *yTarget += ((float)(yOffset-calibration.yError[15][7]))/1000.0;
+    } else {
+        // use curvefitting
+        float xT = *xTarget;
+        float yT = *yTarget;
+        // I removed the constant term because I adjust center by that amount. I would have just had to subtract it out if I had left it in.
+        *xTarget += sysSettings.calX4*xT*xT + sysSettings.calX5*yT*yT + sysSettings.calX3*xT*yT + sysSettings.calX1*xT + sysSettings.calX2*yT;
+        *yTarget += sysSettings.calY4*xT*xT + sysSettings.calY5*yT*yT + sysSettings.calY3*xT*yT + sysSettings.calY1*xT + sysSettings.calY2*yT;
+    }
+}
+
 void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     /*
     
@@ -200,6 +263,11 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     
     //Confirm that the coordinates are on the wood
     _verifyValidTarget(&xTarget, &yTarget);
+
+    if (sysSettings.enableOpticalCalibration){
+      _adjustTarget(&xTarget, &yTarget);
+      _verifyValidTarget(&xTarget, &yTarget);
+    }
 
     //Set up variables
     float Chain1Angle = 0;
