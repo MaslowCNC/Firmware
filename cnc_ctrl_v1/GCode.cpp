@@ -781,8 +781,9 @@ void  G38(const String& readString) {
 
 
       float currentZPos = zAxis.read();
+      int   zDirection = sysSettings.zEncoderSteps<0 ? -1 : 1;
 
-      zgoto      = sys.inchesToMMConversion * extractGcodeValue(readString, 'Z', currentZPos / sys.inchesToMMConversion);
+      zgoto = zDirection * sys.inchesToMMConversion * extractGcodeValue(readString, 'Z', currentZPos / sys.inchesToMMConversion);
       sys.feedrate   = sys.inchesToMMConversion * extractGcodeValue(readString, 'F', sys.feedrate / sys.inchesToMMConversion);
       sys.feedrate = constrain(sys.feedrate, 1, sysSettings.maxZRPM * abs(zAxis.getPitch()));
 
