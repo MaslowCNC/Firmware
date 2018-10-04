@@ -73,6 +73,7 @@ void settingsReset() {
     sysSettings.kinematicsType = 1;      // byte kinematicsType;
     sysSettings.rotationDiskRadius = 250.0;  // float rotationDiskRadius;
     sysSettings.axisDetachTime = 2000;   // int axisDetachTime;
+    sysSettings.chainLength = 3360;   // int maximum length of chain;
     sysSettings.originalChainLength = 1650;   // int originalChainLength;
     sysSettings.encoderSteps = 8113.7; // float encoderSteps;
     sysSettings.distPerRot = 63.5;   // float distPerRot;
