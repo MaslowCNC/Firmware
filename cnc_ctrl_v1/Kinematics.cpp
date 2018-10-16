@@ -57,10 +57,10 @@ void Kinematics::recomputeGeometry(){
     halfWidth = sysSettings.machineWidth / 2.0;
     halfHeight = sysSettings.machineHeight / 2.0;
 
-    leftMotorX = cos(sysSettings.topBeamTilt*0.0174532925199433)*sysSettings.distBetweenMotors/-2.0;
-    leftMotorY = sin(sysSettings.topBeamTilt*0.0174532925199433)*sysSettings.distBetweenMotors/-2.0 + (sysSettings.motorOffsetY+sysSettings.machineHeight/2.0);
-    rightMotorX = cos(sysSettings.topBeamTilt*0.0174532925199433)*sysSettings.distBetweenMotors+leftMotorX;
-    rightMotorY = sin(sysSettings.topBeamTilt*0.0174532925199433)*sysSettings.distBetweenMotors/2.0 + (sysSettings.motorOffsetY+sysSettings.machineHeight/2.0);
+    leftMotorX = cos(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors/-2.0;
+    leftMotorY = sin(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors/-2.0 + (sysSettings.motorOffsetY+sysSettings.machineHeight/2.0);
+    rightMotorX = cos(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors+leftMotorX;
+    rightMotorY = sin(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors/2.0 + (sysSettings.motorOffsetY+sysSettings.machineHeight/2.0);
 }
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
