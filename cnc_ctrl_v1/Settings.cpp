@@ -232,6 +232,7 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
                       break;
                 case 1:
                       sysSettings.machineHeight = value;
+                      kinematics.recomputeGeometry();
                       break;
                 case 2:
                       sysSettings.distBetweenMotors = value;

@@ -56,8 +56,6 @@ void Kinematics::recomputeGeometry(){
 
     halfWidth = sysSettings.machineWidth / 2.0;
     halfHeight = sysSettings.machineHeight / 2.0;
-    _xCordOfMotor = sysSettings.distBetweenMotors/2;
-    _yCordOfMotor = halfHeight + sysSettings.motorOffsetY;
 
     leftMotorX = cos(sysSettings.topBeamTilt*0.0174532925199433)*sysSettings.distBetweenMotors/-2.0;
     leftMotorY = sin(sysSettings.topBeamTilt*0.0174532925199433)*sysSettings.distBetweenMotors/-2.0 + (sysSettings.motorOffsetY+sysSettings.machineHeight/2.0);

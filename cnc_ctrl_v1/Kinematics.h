@@ -57,8 +57,6 @@
             //target router bit coordinates.
             float x = 0;
             float y = 0;
-            float _xCordOfMotor;
-            float _yCordOfMotor;
 
             //utility variables
             boolean Mirror;
