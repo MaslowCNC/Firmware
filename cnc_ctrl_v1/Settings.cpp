@@ -298,7 +298,7 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
         case 16:
               sysSettings.zAxisAttached = value;
               break;
-        case 17:
+        case 17: 
               sysSettings.spindleAutomateType = static_cast<SpindleAutomationType>(value);
               break;
         case 18:

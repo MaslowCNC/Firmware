@@ -12,9 +12,9 @@
 
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
-
+    
     Copyright 2014-2017 Bar Smith*/
-
+    
     #ifndef Kinematics_h
     #define Kinematics_h
 
@@ -63,7 +63,7 @@
 
             //Criterion Computation Variables
             float Phi = -0.2;
-            float TanGamma;
+            float TanGamma; 
             float TanLambda;
             float Y1Plus ;
             float Y2Plus;
@@ -97,7 +97,7 @@
             float Motor2Distance; //right motor axis distance to sled
 
             // output = chain lengths measured from 12 o'clock
-            float Chain1; //left chain length
+            float Chain1; //left chain length 
             float Chain2; //right chain length
     };
 

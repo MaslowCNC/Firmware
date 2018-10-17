@@ -53,7 +53,7 @@ void Kinematics::recomputeGeometry(){
     Theta = atan(2*sysSettings.sledHeight/sysSettings.sledWidth);
     Psi1 = Theta - Phi;
     Psi2 = Theta + Phi;
-
+  
     halfWidth = sysSettings.machineWidth / 2.0;
     halfHeight = sysSettings.machineHeight / 2.0;
 
@@ -65,19 +65,19 @@ void Kinematics::recomputeGeometry(){
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     /*
-
-    This function works as a switch to call either the quadrilateralInverse kinematic function
+    
+    This function works as a switch to call either the quadrilateralInverse kinematic function 
     or the triangularInverse kinematic function
-
+    
     */
-
+    
     if(sysSettings.kinematicsType == 1){
         quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);
     }
     else{
         triangularInverse(xTarget, yTarget, aChainLength, bChainLength);
     }
-
+    
 }
 
 void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
@@ -193,13 +193,13 @@ void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChai
 
 void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     /*
-
+    
     The inverse kinematics (relating an xy coordinate pair to the required chain lengths to hit that point)
-    function for a triangular set up where the chains meet at a point, or are arranged so that they simulate
+    function for a triangular set up where the chains meet at a point, or are arranged so that they simulate 
     meeting at a point.
-
+    
     */
-
+    
     //Confirm that the coordinates are on the wood
     _verifyValidTarget(&xTarget, &yTarget);
 
@@ -244,15 +244,15 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     //Subtract of the virtual length which is added to the chain by the rotation mechanism
     Chain1 = Chain1 - sysSettings.rotationDiskRadius;
     Chain2 = Chain2 - sysSettings.rotationDiskRadius;
-
+    
     *aChainLength = Chain1;
     *bChainLength = Chain2;
 }
 
 void  Kinematics::forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos, float xGuess, float yGuess){
-
+  
     Serial.println(F("[Forward Calculating Position]"));
-
+    
 
     float guessLengthA;
     float guessLengthB;
@@ -272,10 +272,10 @@ void  Kinematics::forward(const float& chainALength, const float& chainBLength, 
         //adjust the guess based on the result
         xGuess = xGuess + .1*aChainError - .1*bChainError;
         yGuess = yGuess - .1*aChainError - .1*bChainError;
-
+        
         guessCount++;
 
-        #if defined (KINEMATICSDBG) && KINEMATICSDBG > 0
+        #if defined (KINEMATICSDBG) && KINEMATICSDBG > 0 
           Serial.print(F("[PEk:"));
           Serial.print(aChainError);
           Serial.print(',');
