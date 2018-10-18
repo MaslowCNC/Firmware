@@ -75,7 +75,7 @@ void settingsReset() {
     sysSettings.axisDetachTime = 2000;   // int axisDetachTime;
     sysSettings.chainLength = 3360;   // int maximum length of chain;
     sysSettings.originalChainLength = 1650;   // int originalChainLength;
-    sysSettings.encoderSteps = 8113.7; // float encoderSteps;
+    sysSettings.encoderSteps = 8113.73; // float encoderSteps;
     sysSettings.distPerRot = 63.5;   // float distPerRot;
     sysSettings.maxFeed = 700;   // int maxFeed;
     sysSettings.zAxisAttached = true;   // zAxisAttached;
