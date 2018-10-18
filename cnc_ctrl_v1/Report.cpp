@@ -182,7 +182,6 @@ void reportMaslowSettings() {
     Serial.print(F("$40=")); Serial.println(sysSettings.distPerRotLeftChainTolerance, 8);
     Serial.print(F("$41=")); Serial.println(sysSettings.distPerRotRightChainTolerance, 8);
     Serial.print(F("$42=")); Serial.println(sysSettings.positionErrorLimit, 8);
-    Serial.print(F("$43=")); Serial.println(sysSettings.topBeamTilt, 8);
     
   #else
     Serial.print(F("$0=")); Serial.print(sysSettings.machineWidth);
@@ -227,13 +226,7 @@ void reportMaslowSettings() {
     Serial.print(F(" (PWM frequency value 1=39,000Hz, 2=4,100Hz, 3=490Hz)\r\n$40=")); Serial.print(sysSettings.distPerRotLeftChainTolerance, 8);
     Serial.print(F(" (distance / rotation, including chain tolerance, left chain, mm)\r\n$41=")); Serial.print(sysSettings.distPerRotRightChainTolerance, 8);
     Serial.print(F(" (distance / rotation, including chain tolerance, right chain, mm)\r\n$42=")); Serial.print(sysSettings.positionErrorLimit, 8);
-    Serial.print(F(" (position error alarm limit, mm\r\n$43=)")); Serial.print(sysSettings.topBeamTilt, 8);
-    Serial.print(F(" (top beam tilt, degrees)\r\n"));
-    Serial.print(F(" (right chain tolerance, degrees)\r\n")); Serial.print(kinematics.leftMotorX,8);
-    Serial.print(F(" (left Motor X, mm)\r\n")); Serial.print(kinematics.leftMotorY,8);
-    Serial.print(F(" (left Motor Y, mm)\r\n")); Serial.print(kinematics.rightMotorX,8);
-    Serial.print(F(" (right Motor X, mm)\r\n")); Serial.print(kinematics.rightMotorY,8);
-    Serial.print(F(" (right Motor Y, mm)\r\n"));
+    Serial.print(F(" (position error alarm limit, mm)"));
     Serial.println();
   #endif
 }

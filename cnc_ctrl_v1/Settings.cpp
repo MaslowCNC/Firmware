@@ -105,7 +105,6 @@ void settingsReset() {
     sysSettings.distPerRotLeftChainTolerance = 63.5;    // float distPerRotLeftChainTolerance;
     sysSettings.distPerRotRightChainTolerance = 63.5;    // float distPerRotRightChainTolerance;
     sysSettings.positionErrorLimit = 2.0;  // float positionErrorLimit;
-    sysSettings.topBeamTilt = 0.0;
     sysSettings.eepromValidData = EEPROMVALIDDATA; // byte eepromValidData;
 }
 
@@ -232,15 +231,12 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
                       break;
                 case 1:
                       sysSettings.machineHeight = value;
-                      kinematics.recomputeGeometry();
                       break;
                 case 2:
                       sysSettings.distBetweenMotors = value;
-                      kinematics.recomputeGeometry();
                       break;
                 case 3:
                       sysSettings.motorOffsetY = value;
-                      kinematics.recomputeGeometry();
                       break;
                 case 4:
                       sysSettings.sledWidth = value;
@@ -413,10 +409,6 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               break;
         case 42:
               sysSettings.positionErrorLimit = value;
-              break;
-        case 43:
-              sysSettings.topBeamTilt = value;
-              kinematics.recomputeGeometry();
               break;
         default:
               return(STATUS_INVALID_STATEMENT);
