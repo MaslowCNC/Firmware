@@ -59,8 +59,6 @@ void Kinematics::recomputeGeometry(){
     _xCordOfMotor = sysSettings.distBetweenMotors/2;
     _yCordOfMotor = halfHeight + sysSettings.motorOffsetY;
 
-    leftChainTolerance = sysSettings.distPerRot/sysSettings.distPerRotLeftChainTolerance;
-    rightChainTolerance = sysSettings.distPerRot/sysSettings.distPerRotRightChainTolerance;
 }
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
@@ -238,8 +236,8 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     Chain2Straight *= (1 + ((sysSettings.chainSagCorrection / 1000000000000) * pow(cos(Chain2Angle),2) * pow(Chain2Straight,2) * pow((tan(Chain1Angle) * cos(Chain2Angle)) + sin(Chain2Angle),2)));
 
     //Calculate total chain lengths accounting for sprocket geometry and chain sag
-    float Chain1 = Chain1AroundSprocket + Chain1Straight * leftChainTolerance;
-    float Chain2 = Chain2AroundSprocket + Chain2Straight * rightChainTolerance;
+    float Chain1 = Chain1AroundSprocket + Chain1Straight * (1.0f + sysSettings.leftChainTolerance / 100.0f);
+    float Chain2 = Chain2AroundSprocket + Chain2Straight * (1.0f + sysSettings.rightChainTolerance / 100.0f);
 
     //Subtract of the virtual length which is added to the chain by the rotation mechanism
     Chain1 = Chain1 - sysSettings.rotationDiskRadius;

@@ -39,8 +39,8 @@
             float h; //distance between sled attach point and bit
             float R             = 10.1;                                //sprocket radius
 
-            float leftChainTolerance = 1;
-            float rightChainTolerance = 1;
+            float leftChainTolerance = 0;
+            float rightChainTolerance = 0;
 
             float halfWidth;                      //Half the machine width
             float halfHeight;                    //Half the machine height

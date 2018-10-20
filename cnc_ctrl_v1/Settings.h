@@ -78,8 +78,8 @@ typedef struct {  // I think this is about ~128 bytes in size if I counted corre
   float chainSagCorrection;
   byte chainOverSprocket;
   byte fPWM;
-  float distPerRotLeftChainTolerance;
-  float distPerRotRightChainTolerance;
+  float leftChainTolerance;
+  float rightChainTolerance;
   float positionErrorLimit;
   byte eepromValidData;  // This should always be last, that way if an error
                          // happens in writing, it will not be written and we
