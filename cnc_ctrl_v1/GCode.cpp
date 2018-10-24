@@ -709,9 +709,11 @@ void G2(const String& readString, int G2orG3){
 
     float X1 = sys.xPosition; //does this work if units are inches? (It seems to)
     float Y1 = sys.yPosition;
+    float Z1 = zAxis.read();  // I don't know why we treat the zaxis differently
 
     float X2      = sys.inchesToMMConversion*extractGcodeValue(readString, 'X', X1/sys.inchesToMMConversion);
     float Y2      = sys.inchesToMMConversion*extractGcodeValue(readString, 'Y', Y1/sys.inchesToMMConversion);
+    float Z2      = sys.inchesToMMConversion*extractGcodeValue(readString, 'Z', Z1/sys.inchesToMMConversion);
     float I       = sys.inchesToMMConversion*extractGcodeValue(readString, 'I', 0.0);
     float J       = sys.inchesToMMConversion*extractGcodeValue(readString, 'J', 0.0);
     sys.feedrate      = sys.inchesToMMConversion*extractGcodeValue(readString, 'F', sys.feedrate/sys.inchesToMMConversion);
@@ -722,10 +724,10 @@ void G2(const String& readString, int G2orG3){
     sys.feedrate = constrain(sys.feedrate, 1, sysSettings.maxFeed);   //constrain the maximum feedrate, 35ipm = 900 mmpm
 
     if (G2orG3 == 2){
-        arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, CLOCKWISE);
+        arc(X1, Y1, Z1, X2, Y2, Z2, centerX, centerY, sys.feedrate, CLOCKWISE);
     }
     else {
-        arc(X1, Y1, X2, Y2, centerX, centerY, sys.feedrate, COUNTERCLOCKWISE);
+        arc(X1, Y1, Z1, X2, Y2, Z2, centerX, centerY, sys.feedrate, COUNTERCLOCKWISE);
     }
 }
 
