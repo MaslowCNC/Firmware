@@ -49,8 +49,8 @@ void settingsLoadFromEEprom(){
     kinematics.recomputeGeometry();
     leftAxis.changeEncoderResolution(&sysSettings.encoderSteps);
     rightAxis.changeEncoderResolution(&sysSettings.encoderSteps);
-    leftAxis.changePitch(&sysSettings.distPerRotLeftChainTolerance);
-    rightAxis.changePitch(&sysSettings.distPerRotRightChainTolerance);
+    leftAxis.changePitch(&sysSettings.distPerRot);
+    rightAxis.changePitch(&sysSettings.distPerRot);
     zAxis.changePitch(&sysSettings.zDistPerRot);
     zAxis.changeEncoderResolution(&sysSettings.zEncoderSteps);
 }
@@ -102,8 +102,8 @@ void settingsReset() {
     sysSettings.chainSagCorrection = 0.0;  // float chainSagCorrection;
     sysSettings.chainOverSprocket = 1;   // byte chainOverSprocket;
     sysSettings.fPWM = 3;   // byte fPWM;
-    sysSettings.distPerRotLeftChainTolerance = 63.5;    // float distPerRotLeftChainTolerance;
-    sysSettings.distPerRotRightChainTolerance = 63.5;    // float distPerRotRightChainTolerance;
+    sysSettings.leftChainTolerance = 0.0;    // float leftChainTolerance;
+    sysSettings.rightChainTolerance = 0.0;    // float rightChainTolerance;
     sysSettings.positionErrorLimit = 2.0;  // float positionErrorLimit;
     sysSettings.eepromValidData = EEPROMVALIDDATA; // byte eepromValidData;
 }
@@ -398,14 +398,10 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               setPWMPrescalers(value);
               break;
         case 40:
-              sysSettings.distPerRotLeftChainTolerance = value;
-              leftAxis.changePitch(&sysSettings.distPerRotLeftChainTolerance);
-              kinematics.RleftChainTolerance = (sysSettings.distPerRotLeftChainTolerance)/(2.0 * 3.14159);
+              sysSettings.leftChainTolerance = value;
               break;
         case 41:
-              sysSettings.distPerRotRightChainTolerance = value;
-              rightAxis.changePitch(&sysSettings.distPerRotRightChainTolerance);
-              kinematics.RrightChainTolerance = (sysSettings.distPerRotRightChainTolerance)/(2.0 * 3.14159);
+              sysSettings.rightChainTolerance = value;
               break;
         case 42:
               sysSettings.positionErrorLimit = value;

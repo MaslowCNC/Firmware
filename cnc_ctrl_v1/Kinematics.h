@@ -38,10 +38,6 @@
             //geometry
             float h; //distance between sled attach point and bit
             float R             = 10.1;                                //sprocket radius
-            float RleftChainTolerance = 10.1;    // Left sprocket radius including chain tolerance
-            float RrightChainTolerance = 10.1;    // Right sprocket radius including chain tolerance
-            
-
 
             float halfWidth;                      //Half the machine width
             float halfHeight;                    //Half the machine height
