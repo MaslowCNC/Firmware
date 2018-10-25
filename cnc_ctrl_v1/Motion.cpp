@@ -293,6 +293,7 @@ int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, co
     float  zStepSizeMM            = zDistanceToMoveInMM/finalNumberOfSteps;
 
     if (zFeedRate > zMaxFeed){
+      zStepSizeMM                 = computeStepSize(zMaxFeed);
       finalNumberOfSteps          = fabs(zDistanceToMoveInMM/zStepSizeMM);
       stepSizeMM                  = arcLengthMM/finalNumberOfSteps;
       feedMMPerMin                = calculateFeedrate(stepSizeMM, delayTime);
