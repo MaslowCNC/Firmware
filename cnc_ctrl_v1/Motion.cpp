@@ -299,6 +299,8 @@ int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, co
       feedMMPerMin                = calculateFeedrate(stepSizeMM, delayTime);
     }
     
+    zStepSizeMM = zDistanceToMoveInMM/finalNumberOfSteps;
+
     //Compute the starting position
     float angleNow = startingAngle;
     float degreeComplete = 0.0;
