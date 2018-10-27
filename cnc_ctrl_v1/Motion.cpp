@@ -94,7 +94,7 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
     float  stepSizeMM           = computeStepSize(MMPerMin);
     float  finalNumberOfSteps   = abs(distanceToMoveInMM/stepSizeMM);
     float  delayTime            = LOOPINTERVAL;
-    float  zFeedrate            = calculateFeedrate(abs(zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
+    float  zFeedrate            = calculateFeedrate(fabs(zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
     
     //throttle back federate if it exceeds zaxis max
     if (zFeedrate > zMaxFeed){
@@ -229,7 +229,7 @@ void  singleAxisMove(Axis* axis, const float& endPos, const float& MMPerMin){
 int sign(double x) { return x<0 ? -1 : 1; }
 
 // why does this return anything
-int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, const float& centerX, const float& centerY, const float& MMPerMin, const float& direction){
+int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, const float& Y2, const float& Z2, const float& centerX, const float& centerY, const float& MMPerMin, const float& direction){
     /*
     
     Move the machine through an arc from point (X1, Y1) to point (X2, Y2) along the 
@@ -269,33 +269,52 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
       // In either case, the gcode cut was essentially a straight line, so 
       // Replace it with a G1 cut to the endpoint
       String gcodeSubstitution = "G1 X";
-      gcodeSubstitution = gcodeSubstitution + String(X2 / sys.inchesToMMConversion, 3) + " Y" + String(Y2 / sys.inchesToMMConversion, 3) + " ";
+      gcodeSubstitution = gcodeSubstitution + String(X2 / sys.inchesToMMConversion, 3) + " Y" + String(Y2 / sys.inchesToMMConversion, 3) + " Z" + String(Z2 / sys.inchesToMMConversion, 3) + " ";
       Serial.println("Large-radius arc replaced by straight line to improve accuracy: " + gcodeSubstitution);
       G1(gcodeSubstitution, 1);
       return 1;
     }
 
-    float arcLengthMM            =  circumference * (theta / (2*pi) );
+    float arcLengthMM             = fabs(circumference * (theta / (2*pi) ));
+    float zDistanceToMoveInMM     = Z2 - Z1;
     
     //set up variables for movement
     long numberOfStepsTaken       =  0;
     
-    float stepSizeMM             =  computeStepSize(MMPerMin);
+    float feedMMPerMin            = constrain(MMPerMin, 1, sysSettings.maxFeed);   
+    float stepSizeMM              = computeStepSize(feedMMPerMin);
 
-    //the argument to abs should only be a variable -- splitting calc into 2 lines
-    long   finalNumberOfSteps     =  arcLengthMM/stepSizeMM;
-    //finalNumberOfSteps = abs(finalNumberOfSteps);
+    long   finalNumberOfSteps     = arcLengthMM/stepSizeMM;
+    float  delayTime              = LOOPINTERVAL;
+
+    float  zFeedRate              = calculateFeedrate(fabs(zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
+    float  zMaxFeed               = sysSettings.maxZRPM * abs(zAxis.getPitch());
+    // float  zStepSizeMM            = computeStepSize(zMaxFeed);
+    float  zStepSizeMM            = zDistanceToMoveInMM/finalNumberOfSteps;
+
+    if (zFeedRate > zMaxFeed){
+      zStepSizeMM                 = computeStepSize(zMaxFeed);
+      finalNumberOfSteps          = fabs(zDistanceToMoveInMM/zStepSizeMM);
+      stepSizeMM                  = arcLengthMM/finalNumberOfSteps;
+      feedMMPerMin                = calculateFeedrate(stepSizeMM, delayTime);
+    }
     
+    zStepSizeMM = zDistanceToMoveInMM/finalNumberOfSteps;
+
     //Compute the starting position
     float angleNow = startingAngle;
     float degreeComplete = 0.0;
     
     float aChainLength;
     float bChainLength;
+    float zPosition      = Z1 + zStepSizeMM;
     
     //attach the axes
     leftAxis.attach();
     rightAxis.attach();
+    if (sysSettings.zAxisAttached) {
+      zAxis.attach();
+    }
     
     while(numberOfStepsTaken < abs(finalNumberOfSteps)){
         #if misloopDebug > 0
@@ -311,11 +330,14 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
             
             sys.xPosition = radius * cos(angleNow) + centerX;
             sys.yPosition = radius * sin(angleNow) + centerY;
-            
+    
             kinematics.inverse(sys.xPosition,sys.yPosition,&aChainLength,&bChainLength);
             
             leftAxis.write(aChainLength);
             rightAxis.write(bChainLength); 
+            if(sysSettings.zAxisAttached){
+              zAxis.write(zPosition);
+            }
             movementUpdate();
             
             // Run realtime commands
@@ -323,6 +345,7 @@ int   arc(const float& X1, const float& Y1, const float& X2, const float& Y2, co
             if (sys.stop){return 1;}
 
             numberOfStepsTaken++;
+            zPosition += zStepSizeMM;
         }
     }
     #if misloopDebug > 0
