@@ -61,8 +61,8 @@ void Kinematics::recomputeGeometry(){
 
     float xOffset = 0.0;
     float yOffset = 0.0;
-    if (sysSettings.enableOpticalCalibration==true){
-        if (sysSettings.useInterpolationOrCurve==true){
+    if (sysSettings.enableOpticalCalibration) {
+        if (sysSettings.useInterpolationOrCurve) {
             xOffset = (float)calibration.xError[15][7]/1000.0;
             yOffset = (float)calibration.yError[15][7]/1000.0;
         } else {
@@ -200,11 +200,11 @@ void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChai
 
 }
 
-void Kinematics::_adjustTarget(float* xTarget,float* yTarget){
+void Kinematics::_adjustTarget(float* xTarget,float* yTarget) {
     if (sysSettings.useInterpolationOrCurve) {
         // shift target to 0,0 being top left corner to match array and convert to inches because array is based on inches.. divide by 3 because array is 3 inches apart and subtact 1 because array starts at 3 inch, 3 inch
-        float x = (*xTarget + sysSettings.machineWidth/2.0)/25.4/3.0-1.0;
-        float y = (sysSettings.machineHeight/2.0 - *yTarget)/25.4/3.0-1.0;
+        float x = (*xTarget + sysSettings.machineWidth/2.0) / 25.4 / 3.0 - 1.0;
+        float y = (sysSettings.machineHeight/2.0 - *yTarget) / 25.4 / 3.0 - 1.0;
         // get x1,y1 and x2, y2 for interpolation
         int x1 = (int)(x);
         int y1 = (int)(y);

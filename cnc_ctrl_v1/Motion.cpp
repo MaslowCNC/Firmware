@@ -77,13 +77,6 @@ int   coordinatedMove(const float& xEnd, const float& yEnd, const float& zEnd, f
     the speed moveSpeed. Movements are correlated so that regardless of the distances moved in each 
     direction, the tool moves to the target in a straight line. This function is used by the G00 
     and G01 commands. The units at this point should all be in mm or mm per minute*/
-    if (sysSettings.enableOpticalCalibration){
-        if (sysSettings.useInterpolationOrCurve) {
-            Serial.println("move adjusted by interpolation");
-        } else {
-            Serial.println("move adjusted by curve");
-        }
-    }
     
     float  xStartingLocation = sys.xPosition;
     float  yStartingLocation = sys.yPosition;

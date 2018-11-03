@@ -35,7 +35,7 @@ void settingsLoadFromEEprom(){
     settingsReset(); // Load default values first
     EEPROM.get(300, settingsVersionStruct);
     EEPROM.get(340, tempSettings);
-    EEPROM.get(2048, calibration);  // error check this?
+    EEPROM.get(2048, calibration);
     if (settingsVersionStruct.settingsVersion == SETTINGSVERSION &&
         settingsVersionStruct.eepromValidData == EEPROMVALIDDATA &&
         tempSettings.eepromValidData == EEPROMVALIDDATA){
@@ -140,7 +140,7 @@ void settingsWipe(byte resetType){
       EEPROM.write(i, 0);
     }
   }
-  else if (bit_istrue(resetType, SETTINGS_RESTORE_CALIBRATION)){
+  else if (bit_istrue(resetType, SETTINGS_RESTORE_CALIBRATION)) {
     for (size_t i = 2048 ; i < sizeof(calibration) + 2048; i++) {
       EEPROM.write(i, 0);
     }

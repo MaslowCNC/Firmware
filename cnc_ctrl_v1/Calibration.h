@@ -15,21 +15,21 @@ along with the Maslow Control Software.  If not, see <http://www.gnu.org/license
 
 Copyright 2014-2017 Bar Smith*/
 
-// This file contains the machine settings that are saved to eeprom
-
 #ifndef calibration_h
 #define calibration_h
 
 typedef struct {
-  int xError[31][15]; // these are ints to save memory.  each represent 0.001 mm so maximum error is +/~32 mm which is crazy high still
-  int yError[31][15]; // these are ints to save memory.  each represent 0.001 mm so maximum error is +/~32 mm which is crazy high still
-  //float leftLength[31][15]; //Need more memory
-  //float rightLength[31][15]; //Need more memory
+  // These are int to save memory. Each represents 0.001 mm so maximum error is +/~32 mm
+  int xError[31][15];
+  int yError[31][15];
 } calibration_t;
 extern calibration_t calibration;
 
-
+/*
+initializes the data to zero
+*/
 void initializeCalibration();
-byte calibrationUpdateMatrix(const int, const int, const int, const int);
+
+byte calibrationUpdateMatrix(const int x, const int y, const int xValue, const int yValue);
 
 #endif
