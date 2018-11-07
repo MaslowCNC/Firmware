@@ -326,7 +326,7 @@ int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, co
             
             degreeComplete = float(numberOfStepsTaken)/float(finalNumberOfSteps);
             
-            angleNow = startingAngle + theta*direction*degreeComplete;
+            angleNow = startingAngle + theta*degreeComplete;
             
             sys.xPosition = radius * cos(angleNow) + centerX;
             sys.yPosition = radius * sin(angleNow) + centerY;
