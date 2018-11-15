@@ -39,6 +39,11 @@
             float h; //distance between sled attach point and bit
             float R             = 10.1;                                //sprocket radius
 
+            float leftMotorX = -1800.0;
+            float leftMotorY = -1200.0;
+            float rightMotorX = 1800.0;
+            float rightMotorY = -1200.0;
+
             float halfWidth;                      //Half the machine width
             float halfHeight;                    //Half the machine height
         private:
@@ -50,8 +55,6 @@
             //target router bit coordinates.
             float x = 0;
             float y = 0;
-            float _xCordOfMotor;
-            float _yCordOfMotor;
 
             //utility variables
             boolean Mirror;

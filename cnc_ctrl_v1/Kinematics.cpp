@@ -56,9 +56,11 @@ void Kinematics::recomputeGeometry(){
   
     halfWidth = sysSettings.machineWidth / 2.0;
     halfHeight = sysSettings.machineHeight / 2.0;
-    _xCordOfMotor = sysSettings.distBetweenMotors/2;
-    _yCordOfMotor = halfHeight + sysSettings.motorOffsetY;
 
+    leftMotorX = cos(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors/-2.0;
+    leftMotorY = sin(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors/-2.0 + (sysSettings.motorOffsetY+sysSettings.machineHeight/2.0);
+    rightMotorX = cos(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors+leftMotorX;
+    rightMotorY = sin(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors/2.0 + (sysSettings.motorOffsetY+sysSettings.machineHeight/2.0);
 }
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
@@ -208,20 +210,20 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     float Chain2AroundSprocket = 0;
 
     //Calculate motor axes length to the bit
-    float Motor1Distance = sqrt(pow((-1*_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
-    float Motor2Distance = sqrt(pow((_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
+    float Motor1Distance = sqrt(pow((leftMotorX - xTarget),2)+pow((leftMotorY - yTarget),2));
+    float Motor2Distance = sqrt(pow((rightMotorX - xTarget),2)+pow((rightMotorY - yTarget),2));
 
     //Calculate the chain angles from horizontal, based on if the chain connects to the sled from the top or bottom of the sprocket
     if(sysSettings.chainOverSprocket == 1){
-        Chain1Angle = asin((_yCordOfMotor - yTarget)/Motor1Distance) + asin(R/Motor1Distance);
-        Chain2Angle = asin((_yCordOfMotor - yTarget)/Motor2Distance) + asin(R/Motor2Distance);
+        Chain1Angle = asin((leftMotorY - yTarget)/Motor1Distance) + asin(R/Motor1Distance);
+        Chain2Angle = asin((rightMotorY - yTarget)/Motor2Distance) + asin(R/Motor2Distance);
 
         Chain1AroundSprocket = R * Chain1Angle;
         Chain2AroundSprocket = R * Chain2Angle;
     }
     else{
-        Chain1Angle = asin((_yCordOfMotor - yTarget)/Motor1Distance) - asin(R/Motor1Distance);
-        Chain2Angle = asin((_yCordOfMotor - yTarget)/Motor2Distance) - asin(R/Motor2Distance);
+        Chain1Angle = asin((leftMotorY - yTarget)/Motor1Distance) - asin(R/Motor1Distance);
+        Chain2Angle = asin((rightMotorY - yTarget)/Motor2Distance) - asin(R/Motor2Distance);
 
         Chain1AroundSprocket = R * (3.14159 - Chain1Angle);
         Chain2AroundSprocket = R * (3.14159 - Chain2Angle);
