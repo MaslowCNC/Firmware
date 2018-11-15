@@ -15,19 +15,21 @@ along with the Maslow Control Software.  If not, see <http://www.gnu.org/license
 
 Copyright 2014-2017 Bar Smith*/
 
-// This file contains helper functions that are used throughout
+#ifndef calibration_h
+#define calibration_h
 
-#ifndef nutsandbolts_h
-#define nutsandbolts_h
+typedef struct {
+  // These are int to save memory. Each represents 0.001 mm so maximum error is +/~32 mm
+  int xError[31][15];
+  int yError[31][15];
+} calibration_t;
+extern calibration_t calibration;
 
-// These are nifty functions from Grbl
-#define bit_true(x,mask) (x) |= (mask)
-#define bit_false(x,mask) (x) &= ~(mask)
-#define bit_istrue(x,mask) ((x & mask) != 0)
-#define bit_isfalse(x,mask) ((x & mask) == 0)
+/*
+initializes the data to zero
+*/
+void initializeCalibration();
 
-float readFloat(const String&, byte&, float&);
-float readFullFloat(const String&, byte&, float&);
-float readArrayValue(const String&, byte&, int&, int&, int&, int&);
+byte calibrationUpdateMatrix(const int x, const int y, const int xValue, const int yValue);
 
-#endif 
+#endif

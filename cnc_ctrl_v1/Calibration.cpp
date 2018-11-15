@@ -15,19 +15,32 @@ along with the Maslow Control Software.  If not, see <http://www.gnu.org/license
 
 Copyright 2014-2017 Bar Smith*/
 
-// This file contains helper functions that are used throughout
+#include "Maslow.h"
+#include <EEPROM.h>
 
-#ifndef nutsandbolts_h
-#define nutsandbolts_h
+void initializeCalibration() {
+  Serial.print(F("Zeroing Calibration\r\n"));
+  for (int x=0; x<31; x++) {
+    for (int y=0; y<15; y++) {
+      calibration.xError[x][y] = 0;
+      calibration.yError[x][y] = 0;
+    }
+  }
+}
 
-// These are nifty functions from Grbl
-#define bit_true(x,mask) (x) |= (mask)
-#define bit_false(x,mask) (x) &= ~(mask)
-#define bit_istrue(x,mask) ((x & mask) != 0)
-#define bit_isfalse(x,mask) ((x & mask) == 0)
-
-float readFloat(const String&, byte&, float&);
-float readFullFloat(const String&, byte&, float&);
-float readArrayValue(const String&, byte&, int&, int&, int&, int&);
-
-#endif 
+byte calibrationUpdateMatrix(int x, int y, int xValue, int yValue) {
+  if ((x==31) && (y==15)) {
+    settingsSaveToEEprom();
+    return(STATUS_OK);
+  } else {
+    if (((x>=0) && (x<31)) && ((y>=0) && (y<15))) {
+      calibration.xError[x][y] = xValue;
+      calibration.yError[x][y] = yValue;
+      if ((x==15) && (y==7)) {
+        kinematics.init();
+      }
+      return(STATUS_OK);
+    }
+    return(STATUS_INVALID_STATEMENT);
+  }
+}

@@ -52,6 +52,7 @@
             void  _MatSolv();
             void  _MyTrig();
             void _verifyValidTarget(float* xTarget,float* yTarget);
+            void _adjustTarget(float* xTarget,float* yTarget);
             //target router bit coordinates.
             float x = 0;
             float y = 0;

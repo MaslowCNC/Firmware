@@ -35,6 +35,7 @@ void settingsLoadFromEEprom(){
     settingsReset(); // Load default values first
     EEPROM.get(300, settingsVersionStruct);
     EEPROM.get(340, tempSettings);
+    EEPROM.get(2048, calibration);
     if (settingsVersionStruct.settingsVersion == SETTINGSVERSION &&
         settingsVersionStruct.eepromValidData == EEPROMVALIDDATA &&
         tempSettings.eepromValidData == EEPROMVALIDDATA){
@@ -107,6 +108,22 @@ void settingsReset() {
     sysSettings.positionErrorLimit = 2.0;  // float positionErrorLimit;
     sysSettings.topBeamTilt = 0.0;
     sysSettings.eepromValidData = EEPROMVALIDDATA; // byte eepromValidData;
+    sysSettings.enableOpticalCalibration = false;
+    sysSettings.useInterpolationOrCurve = true;
+    sysSettings.calX0 = 0.0;
+    sysSettings.calX1 = 0.0;
+    sysSettings.calX2 = 0.0;
+    sysSettings.calX3 = 0.0;
+    sysSettings.calX4 = 0.0;
+    sysSettings.calX5 = 0.0;
+    sysSettings.calY0 = 0.0;
+    sysSettings.calY1 = 0.0;
+    sysSettings.calY2 = 0.0;
+    sysSettings.calY3 = 0.0;
+    sysSettings.calY4 = 0.0;
+    sysSettings.calY5 = 0.0;
+
+    initializeCalibration();
 }
 
 void settingsWipe(byte resetType){
@@ -124,6 +141,12 @@ void settingsWipe(byte resetType){
       EEPROM.write(i, 0);
     }
   }
+  else if (bit_istrue(resetType, SETTINGS_RESTORE_CALIBRATION)) {
+    for (size_t i = 2048 ; i < sizeof(calibration) + 2048; i++) {
+      EEPROM.write(i, 0);
+    }
+    initializeCalibration();
+  }
   else if (bit_istrue(resetType, SETTINGS_RESTORE_ALL)){
     for (size_t i = 0 ; i < EEPROM.length() ; i++) {
       EEPROM.write(i, 0);
@@ -140,6 +163,7 @@ void settingsSaveToEEprom(){
     settingsVersion_t settingsVersionStruct = {SETTINGSVERSION, EEPROMVALIDDATA};
     EEPROM.put(300, settingsVersionStruct);
     EEPROM.put(340, sysSettings);
+    EEPROM.put(2048, calibration);
 }
 
 void settingsSaveStepstoEEprom(){
@@ -414,6 +438,53 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               sysSettings.topBeamTilt = value;
               kinematics.recomputeGeometry();
               break;
+        case 44: case 46: case 47: case 48: case 49: case 50: case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58:
+            switch(parameter) {
+                case 44:
+                      sysSettings.enableOpticalCalibration = value;
+                      break;
+                case 46:
+                      sysSettings.useInterpolationOrCurve = value;
+                      break;
+                case 47:
+                      sysSettings.calX0 = value;
+                      break;
+                case 48:
+                      sysSettings.calX1 = value;
+                      break;
+                case 49:
+                      sysSettings.calX2 = value;
+                      break;
+                case 50:
+                      sysSettings.calX3 = value;
+                      break;
+                case 51:
+                      sysSettings.calX4 = value;
+                      break;
+                case 52:
+                      sysSettings.calX5 = value;
+                      break;
+                case 53:
+                      sysSettings.calY0 = value;
+                      break;
+                case 54:
+                      sysSettings.calY1 = value;
+                      break;
+                case 55:
+                      sysSettings.calY2 = value;
+                      break;
+                case 56:
+                      sysSettings.calY3 = value;
+                      break;
+                case 57:
+                      sysSettings.calY4 = value;
+                      break;
+                case 58:
+                      sysSettings.calY5 = value;
+                      break;
+           }
+           kinematics.init();
+           break;
         default:
               return(STATUS_INVALID_STATEMENT);
     }

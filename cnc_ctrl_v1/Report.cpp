@@ -183,6 +183,20 @@ void reportMaslowSettings() {
     Serial.print(F("$41=")); Serial.println(sysSettings.rightChainTolerance, 8);
     Serial.print(F("$42=")); Serial.println(sysSettings.positionErrorLimit, 8);
     Serial.print(F("$43=")); Serial.println(sysSettings.topBeamTilt, 8);
+    Serial.print(F("$44=")); Serial.println(sysSettings.enableOpticalCalibration, 8);
+    Serial.print(F("$46=")); Serial.println(sysSettings.useInterpolationOrCurve, 8);
+    Serial.print(F("$47=")); Serial.println(sysSettings.calX0, 8);
+    Serial.print(F("$48=")); Serial.println(sysSettings.calX1, 8);
+    Serial.print(F("$49=")); Serial.println(sysSettings.calX2, 8);
+    Serial.print(F("$50=")); Serial.println(sysSettings.calX3, 8);
+    Serial.print(F("$51=")); Serial.println(sysSettings.calX4, 8);
+    Serial.print(F("$52=")); Serial.println(sysSettings.calX5, 8);
+    Serial.print(F("$53=")); Serial.println(sysSettings.calY0, 8);
+    Serial.print(F("$54=")); Serial.println(sysSettings.calY1, 8);
+    Serial.print(F("$55=")); Serial.println(sysSettings.calY2, 8);
+    Serial.print(F("$56=")); Serial.println(sysSettings.calY3, 8);
+    Serial.print(F("$57=")); Serial.println(sysSettings.calY4, 8);
+    Serial.print(F("$58=")); Serial.println(sysSettings.calY5, 8);
     
   #else
     Serial.print(F("$0=")); Serial.print(sysSettings.machineWidth);
@@ -232,7 +246,23 @@ void reportMaslowSettings() {
     Serial.print(F(" (left Motor X, mm)\r\n")); Serial.print(kinematics.leftMotorY,8);
     Serial.print(F(" (left Motor Y, mm)\r\n")); Serial.print(kinematics.rightMotorX,8);
     Serial.print(F(" (right Motor X, mm)\r\n")); Serial.print(kinematics.rightMotorY,8);
-    Serial.print(F(" (right Motor Y, mm)\r\n"));
+    Serial.print(F(" (right Motor Y, mm)\r\n")); Serial.print(calibration.xError[15][7]);
+    Serial.print(F(" (Center X Error, mm)\r\n")); Serial.print(calibration.yError[15][7]);
+    Serial.print(F(" (Center Y Error, mm)\r\n")); Serial.print(sysSettings.enableOpticalCalibration);
+    Serial.print(F(" (enable calibration)\r\n")); Serial.print(sysSettings.useInterpolationOrCurve);
+    Serial.print(F(" (use interp or curve)\r\n")); Serial.print(sysSettings.calX0);
+    Serial.print(F(" (calX0)\r\n")); Serial.print(sysSettings.calX1,8);
+    Serial.print(F(" (calX1)\r\n")); Serial.print(sysSettings.calX2,8);
+    Serial.print(F(" (calX2)\r\n")); Serial.print(sysSettings.calX3,8);
+    Serial.print(F(" (calX3)\r\n")); Serial.print(sysSettings.calX4,8);
+    Serial.print(F(" (calX4)\r\n")); Serial.print(sysSettings.calX5,8);
+    Serial.print(F(" (calX5)\r\n")); Serial.print(sysSettings.calY0,8);
+    Serial.print(F(" (calY0)\r\n")); Serial.print(sysSettings.calY1,8);
+    Serial.print(F(" (calY1)\r\n")); Serial.print(sysSettings.calY2,8);
+    Serial.print(F(" (calY2)\r\n")); Serial.print(sysSettings.calY3,8);
+    Serial.print(F(" (calY3)\r\n")); Serial.print(sysSettings.calY4,8);
+    Serial.print(F(" (calY4)\r\n")); Serial.print(sysSettings.calY5,8);
+    Serial.print(F(" (calY5)\r\n"));
     Serial.println();
   #endif
 }

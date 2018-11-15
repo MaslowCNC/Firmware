@@ -65,3 +65,57 @@ float readFloat(const String& str, byte& index, float& retVal){
 
     return true;
 }
+
+float readArrayValue(const String& str, byte& index, int& x, int& y, int& xValue, int& yValue) {
+    // Don't mind scientific notation here..  no big whoop
+
+    // Remove any spaces or eqals before start of parsing
+    while (((str[index] == ' ') || (str[index] == '=')) && index < str.length()) {
+      index++;
+    }
+
+    // parse out based upon commands
+    // make it easy.. parse xS, parse yS, parse xValueS, parse yValueS
+    String xS = "";
+    while ((index < str.length()) && (str[index] != ',')) {
+      xS.concat(str[index]);
+      index++;
+    }
+    index++; // get past the comma
+
+    String yS = "";
+    while ((index < str.length()) && (str[index] != ',')) {
+      yS.concat(str[index]);
+      index++;
+    }
+    index++; // get past the comma
+
+    String xValueS = "";
+    while ((index < str.length()) && (str[index] != ',')) {
+      xValueS.concat(str[index]);
+      index++;
+    }
+    index++; // get past the comma
+
+    String yValueS = "";
+    while ((index < str.length()) && (str[index] != ',')) {
+      yValueS.concat(str[index]);
+      index++;
+    }
+    index++; // get past the comma
+
+    // now convert to Values
+    x = xS.toInt();
+    y = yS.toInt();
+    xValue = xValueS.toInt();
+    yValue = yValueS.toInt();
+
+    return true;
+}
+
+float readFullFloat(const String& str, byte& index, float& retVal) {
+    String sub = str.substring(index);
+    sub.trim();
+    retVal = sub.toFloat();
+    return true;
+}

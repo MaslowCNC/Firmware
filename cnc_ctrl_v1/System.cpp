@@ -545,6 +545,7 @@ byte systemExecuteCmdstring(String& cmdString){
                   case '$': settingsWipe(SETTINGS_RESTORE_SETTINGS); break;
                   case '#': settingsWipe(SETTINGS_RESTORE_MASLOW); break;
                   case '*': settingsWipe(SETTINGS_RESTORE_ALL); break;
+                  case '^': settingsWipe(SETTINGS_RESTORE_CALIBRATION); break;
                   default: return(STATUS_INVALID_STATEMENT);
                 }
                 reportFeedbackMessage(MESSAGE_RESTORE_DEFAULTS);
@@ -565,6 +566,10 @@ byte systemExecuteCmdstring(String& cmdString){
           //         helper_var = true;  // Set helper_var to flag storing method.
           //         // No break. Continues into default: to read remaining command characters.
           //       }
+              case 'O' : // Here's were we can send customized data that doesn't fit the firmwareKey/floating
+                int x, y, xValue, yValue;
+                if (!readArrayValue(cmdString, ++char_counter, x, y, xValue, yValue)) { return(STATUS_BAD_NUMBER_FORMAT); }
+                return(calibrationUpdateMatrix(x, y, xValue, yValue));
               default :  // Storing setting methods [IDLE/ALARM]
                 if(!readFloat(cmdString, char_counter, parameter)) { return(STATUS_BAD_NUMBER_FORMAT); }
                 if(cmdString[char_counter++] != '=') { return(STATUS_INVALID_STATEMENT); }
@@ -582,9 +587,13 @@ byte systemExecuteCmdstring(String& cmdString){
                 //     settings_store_startup_line(helper_var,line);
                 //   }
                 // } else { // Store global setting.
-                  if(!readFloat(cmdString, char_counter, value)) { return(STATUS_BAD_NUMBER_FORMAT); }
-                  if((cmdString[char_counter] != 0) || (parameter > 255)) { return(STATUS_INVALID_STATEMENT); }
-                  return(settingsStoreGlobalSetting((byte)parameter, value));
+                if ((parameter>=47) && (parameter<=58)) {
+                    if (!readFullFloat(cmdString, char_counter, value)) { return(STATUS_BAD_NUMBER_FORMAT); }
+                } else {
+                    if (!readFloat(cmdString, char_counter, value)) { return(STATUS_BAD_NUMBER_FORMAT); }
+                    if ((cmdString[char_counter] != 0) || (parameter > 255)) { return(STATUS_INVALID_STATEMENT); }
+                }
+                return(settingsStoreGlobalSetting((byte)parameter, value));
                 // }
             }
         }
