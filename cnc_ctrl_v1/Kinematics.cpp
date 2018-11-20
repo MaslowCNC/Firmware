@@ -57,11 +57,6 @@ void Kinematics::recomputeGeometry(){
     halfWidth = sysSettings.machineWidth / 2.0;
     halfHeight = sysSettings.machineHeight / 2.0;
 
-    leftMotorX = cos(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors/-2.0;
-    leftMotorY = sin(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors/-2.0 + (sysSettings.motorOffsetY+sysSettings.machineHeight/2.0);
-    rightMotorX = cos(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors+leftMotorX;
-    rightMotorY = sin(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors/2.0 + (sysSettings.motorOffsetY+sysSettings.machineHeight/2.0);
-
     float xOffset = 0.0;
     float yOffset = 0.0;
     if (sysSettings.enableOpticalCalibration) {
@@ -73,6 +68,11 @@ void Kinematics::recomputeGeometry(){
             yOffset = (float)sysSettings.calY0;
         }
     }
+
+    leftMotorX = cos(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors/-2.0 - xOffset;
+    leftMotorY = sin(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors/-2.0 + (sysSettings.motorOffsetY+sysSettings.machineHeight/2.0) - yOffset;
+    rightMotorX = cos(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors/2.0 - xOffset;
+    rightMotorY = sin(sysSettings.topBeamTilt*DEG_TO_RAD)*sysSettings.distBetweenMotors/2.0 + (sysSettings.motorOffsetY+sysSettings.machineHeight/2.0) - yOffset;
 }
 
 void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
