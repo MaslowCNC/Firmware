@@ -69,6 +69,9 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     
     */
     
+    //Confirm that the coordinates are on the wood
+    _verifyValidTarget(&xTarget, &yTarget);
+    
     if(sysSettings.kinematicsType == 1){
         quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);
     }
@@ -79,9 +82,6 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
 }
 
 void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
-
-    //Confirm that the coordinates are on the wood
-    _verifyValidTarget(&xTarget, &yTarget);
 
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
     y = (halfHeight) + sysSettings.motorOffsetY  - yTarget;
@@ -197,9 +197,6 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     meeting at a point.
     
     */
-    
-    //Confirm that the coordinates are on the wood
-    _verifyValidTarget(&xTarget, &yTarget);
 
     //Set up variables
     float Chain1Angle = 0;
