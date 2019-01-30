@@ -182,7 +182,11 @@ void reportMaslowSettings() {
     Serial.print(F("$40=")); Serial.println(sysSettings.leftChainTolerance, 8);
     Serial.print(F("$41=")); Serial.println(sysSettings.rightChainTolerance, 8);
     Serial.print(F("$42=")); Serial.println(sysSettings.positionErrorLimit, 8);
-    
+    Serial.print(F("$43=")); Serial.println(sysSettings.reserved1, 8);
+    Serial.print(F("$44=")); Serial.println(sysSettings.reserved2, 8);
+    Serial.print(F("$45=")); Serial.println(sysSettings.chainElongationFactor, 8);
+    Serial.print(F("$46=")); Serial.println(sysSettings.sledWeight, 8);
+        
   #else
     Serial.print(F("$0=")); Serial.print(sysSettings.machineWidth);
     Serial.print(F(" (machine width, mm)\r\n$1=")); Serial.print(sysSettings.machineHeight, 8);
@@ -226,7 +230,11 @@ void reportMaslowSettings() {
     Serial.print(F(" (PWM frequency value 1=39,000Hz, 2=4,100Hz, 3=490Hz)\r\n$40=")); Serial.print(sysSettings.leftChainTolerance, 8);
     Serial.print(F(" (chain tolerance, left chain, mm)\r\n$41=")); Serial.print(sysSettings.rightChainTolerance, 8);
     Serial.print(F(" (chain tolerance, right chain, mm)\r\n$42=")); Serial.print(sysSettings.positionErrorLimit, 8);
-    Serial.print(F(" (position error alarm limit, mm)"));
+    Serial.print(F(" (position error alarm limit, mm)\r\n$43="));  Serial.print(sysSettings.reserved1,8);
+    Serial.print(F(" (reserved1, deg)\r\n$44="));Serial.print(sysSettings.reserved2,8);
+    Serial.print(F(" (reserved2, mm)\r\n$45=")); Serial.print(sysSettings.chainElongationFactor,8);
+    Serial.print(F(" (chain stretch factor, m/m/N)\r\n$46=")); Serial.print(sysSettings.sledWeight,8);
+    Serial.print(F(" (Sled Weight, N)\r\n"));
     Serial.println();
   #endif
 }
