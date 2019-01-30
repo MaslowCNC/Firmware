@@ -289,8 +289,8 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     float Chain2=sqrt(pow(2*a2*sinh((xTangent2-xTarget)/(2*a2)),2)+pow(yTangent2-yTarget,2));
     
     //Calculate total chain lengths accounting for sprocket geometry, chain tolerance, and chain elasticity
-    Chain1=Chain1AroundSprocket + Chain1*(1.0f+sysSettings.leftChainTolerance/100.0f)/(1.0f+Tension1*chainElasticity);
-    Chain2=Chain2AroundSprocket + Chain2*(1.0f+sysSettings.rightChainTolerance/100.0f)/(1.0f+Tension2*chainElasticity);
+    Chain1=Chain1AroundSprocket + Chain1/(1.0f+sysSettings.leftChainTolerance/100.0f)/(1.0f+Tension1*chainElasticity);
+    Chain2=Chain2AroundSprocket + Chain2/(1.0f+sysSettings.rightChainTolerance/100.0f)/(1.0f+Tension2*chainElasticity);
     
     //Subtract of the virtual length which is added to the chain by the rotation mechanism
     Chain1 = Chain1 - sysSettings.rotationDiskRadius;
