@@ -73,15 +73,15 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     _verifyValidTarget(&xTarget, &yTarget);
     
     if(sysSettings.kinematicsType == 1){
-        quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);
+        _quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);
     }
     else{
-        triangularInverse(xTarget, yTarget, aChainLength, bChainLength);
+        _triangularInverse(xTarget, yTarget, aChainLength, bChainLength);
     }
     
 }
 
-void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  Kinematics::_quadrilateralInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
 
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
     y = (halfHeight) + sysSettings.motorOffsetY  - yTarget;
@@ -189,7 +189,7 @@ void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChai
 
 }
 
-void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  Kinematics::_triangularInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     /*
     
     The inverse kinematics (relating an xy coordinate pair to the required chain lengths to hit that point)
