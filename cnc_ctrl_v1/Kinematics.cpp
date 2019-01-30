@@ -249,7 +249,7 @@ void  Kinematics::_triangularInverse(float xTarget,float yTarget, float* aChainL
     float Chain1Straight = sqrt(pow(Motor1Distance,2)-pow(R,2));
     float Chain2Straight = sqrt(pow(Motor2Distance,2)-pow(R,2));
 
-    //Calculate total weight held by both sprockets
+    //Calculate total weight held by both sprockets (but only half of chains weight?) Check with Joshua...
     float totalWeight=sledWeight+0.5*chainDensity*(Chain1Straight+Chain2Straight); // Newtons
 
     //    TensionDenominator= d(x_l       y_r-      x_r       y_l-      x_l      y_t     +x_t    y_l      +x_r       y_t    -x_t     y_r)
