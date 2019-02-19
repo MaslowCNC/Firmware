@@ -69,19 +69,19 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     
     */
     
+    //Confirm that the coordinates are on the wood
+    _verifyValidTarget(&xTarget, &yTarget);
+    
     if(sysSettings.kinematicsType == 1){
-        quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);
+        _quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);
     }
     else{
-        triangularInverse(xTarget, yTarget, aChainLength, bChainLength);
+        _triangularInverse(xTarget, yTarget, aChainLength, bChainLength);
     }
     
 }
 
-void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
-
-    //Confirm that the coordinates are on the wood
-    _verifyValidTarget(&xTarget, &yTarget);
+void  Kinematics::_quadrilateralInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
 
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
     y = (halfHeight) + sysSettings.motorOffsetY  - yTarget;
@@ -189,7 +189,7 @@ void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChai
 
 }
 
-void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  Kinematics::_triangularInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     /*
     
     The inverse kinematics (relating an xy coordinate pair to the required chain lengths to hit that point)
@@ -197,27 +197,35 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     meeting at a point.
     
     */
-    
-    //Confirm that the coordinates are on the wood
-    _verifyValidTarget(&xTarget, &yTarget);
 
     //Set up variables
     float Chain1Angle = 0;
     float Chain2Angle = 0;
     float Chain1AroundSprocket = 0;
     float Chain2AroundSprocket = 0;
+    float xTangent1 = 0;
+    float yTangent1 = 0;
+    float xTangent2 = 0;
+    float yTangent2 = 0;
 
     //Calculate motor axes length to the bit
-    float Motor1Distance = sqrt(pow((-1*_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
+    float Motor1Distance = sqrt(pow((-1.0*_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
     float Motor2Distance = sqrt(pow((_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
 
     //Calculate the chain angles from horizontal, based on if the chain connects to the sled from the top or bottom of the sprocket
+    //Calculate the sprockets tangent contact points location
     if(sysSettings.chainOverSprocket == 1){
         Chain1Angle = asin((_yCordOfMotor - yTarget)/Motor1Distance) + asin(R/Motor1Distance);
         Chain2Angle = asin((_yCordOfMotor - yTarget)/Motor2Distance) + asin(R/Motor2Distance);
 
         Chain1AroundSprocket = R * Chain1Angle;
         Chain2AroundSprocket = R * Chain2Angle;
+        
+        xTangent1=-1.0*_xCordOfMotor+R*sin(Chain1Angle);
+        yTangent1=_yCordOfMotor+R*cos(Chain1Angle);
+
+        xTangent2=_xCordOfMotor-R*sin(Chain2Angle);
+        yTangent2=_yCordOfMotor+R*cos(Chain2Angle);
     }
     else{
         Chain1Angle = asin((_yCordOfMotor - yTarget)/Motor1Distance) - asin(R/Motor1Distance);
@@ -225,19 +233,43 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
 
         Chain1AroundSprocket = R * (3.14159 - Chain1Angle);
         Chain2AroundSprocket = R * (3.14159 - Chain2Angle);
-    }
+        
+        xTangent1=-1.0*_xCordOfMotor-R*sin(Chain1Angle);
+        yTangent1=_yCordOfMotor-R*cos(Chain1Angle);
 
+        xTangent2=_xCordOfMotor+R*sin(Chain2Angle);
+        yTangent2=_yCordOfMotor-R*cos(Chain2Angle);
+    }
+    // introducing chain density, sled weight, chain stretch (AKA elasticity or elongation factor)
+    float sledWeight = sysSettings.sledWeight; //Newtons
+    float chainDensity = 0.14*9.8/1000; // N/mm
+    float chainElasticity = sysSettings.chainElongationFactor; // mm/mm/Newton typically between 5x10E-6 and 8 x10E-6
+    
     //Calculate the straight chain length from the sprocket to the bit
     float Chain1Straight = sqrt(pow(Motor1Distance,2)-pow(R,2));
     float Chain2Straight = sqrt(pow(Motor2Distance,2)-pow(R,2));
+
+    //Calculate total weight held by both sprockets (but only half of chains weight?) Check with Joshua...
+    float totalWeight=sledWeight+0.5*chainDensity*(Chain1Straight+Chain2Straight); // Newtons
+
+    //    TensionDenominator= d(x_l       y_r-      x_r       y_l-      x_l      y_t     +x_t    y_l      +x_r       y_t    -x_t     y_r)
+    float TensionDenominator= (xTangent1*yTangent2-xTangent2*yTangent1-xTangent1*yTarget+xTarget*yTangent1+xTangent2*yTarget-xTarget*yTangent2);
+    
+    //      T_l     = -(w         *sqrt(pow(x_l      -x_t    ,2.0)+pow(y_l      -y_t    ,2.0)) (x_r      -x_t))    /TensionDenominator
+    float Tension1 = - (totalWeight*sqrt(pow(xTangent1-xTarget,2.0)+pow(yTangent1-yTarget,2.0))*(xTangent2-xTarget))/TensionDenominator;
+
+    //     T_r     = (w         *sqrt(pow(x_r      -x_t    ,2.0)+pow(y_r      -y_t    ,2.0)) (x_l      -x_t))/(x_ly_r-x_ry_l-x_ly_t+x_ty_l+x_ry_t-x_ty_r)
+    float Tension2 = (totalWeight*sqrt(pow(xTangent2-xTarget,2.0)+pow(yTangent2-yTarget,2.0))*(xTangent1-xTarget))/TensionDenominator;
+    
+    // float HorizontalTension=Tension1*(xTarget-xTangent1)/Chain1Straight; // ready for future catenary equation computation
 
     //Correct the straight chain lengths to account for chain sag
     Chain1Straight *= (1 + ((sysSettings.chainSagCorrection / 1000000000000) * pow(cos(Chain1Angle),2) * pow(Chain1Straight,2) * pow((tan(Chain2Angle) * cos(Chain1Angle)) + sin(Chain1Angle),2)));
     Chain2Straight *= (1 + ((sysSettings.chainSagCorrection / 1000000000000) * pow(cos(Chain2Angle),2) * pow(Chain2Straight,2) * pow((tan(Chain1Angle) * cos(Chain2Angle)) + sin(Chain2Angle),2)));
 
-    //Calculate total chain lengths accounting for sprocket geometry and chain sag
-    float Chain1 = Chain1AroundSprocket + Chain1Straight / (1.0f + sysSettings.leftChainTolerance / 100.0f);
-    float Chain2 = Chain2AroundSprocket + Chain2Straight / (1.0f + sysSettings.rightChainTolerance / 100.0f);
+    //Calculate total chain lengths accounting for sprocket geometry, chain sag, chain tolerance, and chain elasticity
+    float Chain1 = Chain1AroundSprocket + Chain1Straight / ((1.0f + sysSettings.leftChainTolerance / 100.0f)*(1.0f+Tension1*chainElasticity));
+    float Chain2 = Chain2AroundSprocket + Chain2Straight / ((1.0f + sysSettings.rightChainTolerance / 100.0f)*(1.0f+Tension2*chainElasticity));
 
     //Subtract of the virtual length which is added to the chain by the rotation mechanism
     Chain1 = Chain1 - sysSettings.rotationDiskRadius;
