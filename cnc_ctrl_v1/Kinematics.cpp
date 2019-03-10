@@ -69,19 +69,19 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     
     */
     
+    //Confirm that the coordinates are on the wood
+    _verifyValidTarget(&xTarget, &yTarget);
+    
     if(sysSettings.kinematicsType == 1){
-        quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);
+        _quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);
     }
     else{
-        triangularInverse(xTarget, yTarget, aChainLength, bChainLength);
+        _triangularInverse(xTarget, yTarget, aChainLength, bChainLength);
     }
     
 }
 
-void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
-
-    //Confirm that the coordinates are on the wood
-    _verifyValidTarget(&xTarget, &yTarget);
+void  Kinematics::_quadrilateralInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
 
     //coordinate shift to put (0,0) in the center of the plywood from the left sprocket
     y = (halfHeight) + sysSettings.motorOffsetY  - yTarget;
@@ -189,7 +189,7 @@ void  Kinematics::quadrilateralInverse(float xTarget,float yTarget, float* aChai
 
 }
 
-void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+void  Kinematics::_triangularInverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
     /*
     
     The inverse kinematics (relating an xy coordinate pair to the required chain lengths to hit that point)
@@ -197,14 +197,7 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     meeting at a point.
     
     */
-    
-    //Confirm that the coordinates are on the wood
-    _verifyValidTarget(&xTarget, &yTarget);
-    //Serial.print("xTarget ");
-    //Serial.println(xTarget);
-    //Serial.print("yTarget ");
-    //Serial.println(yTarget);
-    
+
     //Set up variables
     float Chain1Angle = 0;
     float Chain2Angle = 0;
@@ -216,21 +209,18 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     float yTangent2 = 0;
 
     //Calculate motor axes length to the bit
-    float Motor1Distance = sqrt(pow((-1*_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
+    float Motor1Distance = sqrt(pow((-1.0*_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
     float Motor2Distance = sqrt(pow((_xCordOfMotor - xTarget),2)+pow((_yCordOfMotor - yTarget),2));
-    //Serial.print("Motor1Distance ");
-    //Serial.println(Motor1Distance);
-    //Serial.print("Motor2Distance ");
-    //Serial.println(Motor2Distance);
-    
+
     //Calculate the chain angles from horizontal, based on if the chain connects to the sled from the top or bottom of the sprocket
+    //Calculate the sprockets tangent contact points location
     if(sysSettings.chainOverSprocket == 1){
         Chain1Angle = asin((_yCordOfMotor - yTarget)/Motor1Distance) + asin(R/Motor1Distance);
         Chain2Angle = asin((_yCordOfMotor - yTarget)/Motor2Distance) + asin(R/Motor2Distance);
 
         Chain1AroundSprocket = R * Chain1Angle;
         Chain2AroundSprocket = R * Chain2Angle;
-
+        
         xTangent1=-1.0*_xCordOfMotor+R*sin(Chain1Angle);
         yTangent1=_yCordOfMotor+R*cos(Chain1Angle);
 
@@ -243,26 +233,25 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
 
         Chain1AroundSprocket = R * (3.14159 - Chain1Angle);
         Chain2AroundSprocket = R * (3.14159 - Chain2Angle);
-
+        
         xTangent1=-1.0*_xCordOfMotor-R*sin(Chain1Angle);
         yTangent1=_yCordOfMotor-R*cos(Chain1Angle);
 
         xTangent2=_xCordOfMotor+R*sin(Chain2Angle);
         yTangent2=_yCordOfMotor-R*cos(Chain2Angle);
     }
-
-    float sledWeight = sysSettings.chainSagCorrection;
-    float chainWeight = 0.09/304.8;
-    float chainElasticity = 0.000023;
+    // introducing chain density, sled weight, chain stretch (AKA elasticity or elongation factor)
+    float sledWeight = sysSettings.sledWeight; //Newtons
+    float chainDensity = 0.14*9.8/1000; // N/mm
+    float chainElasticity = sysSettings.chainElongationFactor; // mm/mm/Newton typically between 5x10E-6 and 8 x10E-6
     
     //Calculate the straight chain length from the sprocket to the bit
     float Chain1Straight = sqrt(pow(Motor1Distance,2)-pow(R,2));
     float Chain2Straight = sqrt(pow(Motor2Distance,2)-pow(R,2));
 
-    float totalWeight=sledWeight+0.5*chainWeight*(Chain1Straight+Chain2Straight);
-    //Serial.print("Total Weight ");
-    //Serial.println(totalWeight);
-    
+    //Calculate total weight held by both sprockets (but only half of chains weight?) Check with Joshua...
+    float totalWeight=sledWeight+0.5*chainDensity*(Chain1Straight+Chain2Straight); // Newtons
+
     //    TensionDenominator= d(x_l       y_r-      x_r       y_l-      x_l      y_t     +x_t    y_l      +x_r       y_t    -x_t     y_r)
     float TensionDenominator= (xTangent1*yTangent2-xTangent2*yTangent1-xTangent1*yTarget+xTarget*yTangent1+xTangent2*yTarget-xTarget*yTangent2);
     
@@ -291,18 +280,13 @@ void  Kinematics::triangularInverse(float xTarget,float yTarget, float* aChainLe
     //Calculate total chain lengths accounting for sprocket geometry, chain tolerance, and chain elasticity
     Chain1=Chain1AroundSprocket + Chain1/(1.0f+sysSettings.leftChainTolerance/100.0f)/(1.0f+Tension1*chainElasticity);
     Chain2=Chain2AroundSprocket + Chain2/(1.0f+sysSettings.rightChainTolerance/100.0f)/(1.0f+Tension2*chainElasticity);
-    
+
     //Subtract of the virtual length which is added to the chain by the rotation mechanism
     Chain1 = Chain1 - sysSettings.rotationDiskRadius;
     Chain2 = Chain2 - sysSettings.rotationDiskRadius;
-    //Serial.print("Chain1 After RotationRadius");
-    //Serial.println(Chain1);
-    //Serial.print("Chain2 After RotationRadius");
-    //Serial.println(Chain2);
     
     *aChainLength = Chain1;
     *bChainLength = Chain2;
-
 }
 
 void  Kinematics::forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos, float xGuess, float yGuess){

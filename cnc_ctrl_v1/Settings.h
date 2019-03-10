@@ -20,7 +20,7 @@ Copyright 2014-2017 Bar Smith*/
 #ifndef settings_h
 #define settings_h
 
-#define SETTINGSVERSION 5      // The current version of settings, if this doesn't
+#define SETTINGSVERSION 6      // The current version of settings, if this doesn't
                                // match what is in EEPROM then settings on
                                // machine are reset to defaults
 #define EEPROMVALIDDATA 56     // This is just a random byte value that is used 
@@ -81,6 +81,10 @@ typedef struct {  // I think this is about ~128 bytes in size if I counted corre
   float leftChainTolerance;
   float rightChainTolerance;
   float positionErrorLimit;
+  float reserved1;
+  float reserved2;
+  float chainElongationFactor; // m/m/N. This is the ratio of chain length increase due to chain tension. typically 8x10E-6; // m/m/N
+  float sledWeight; // Newtons. simply multiply kg by 9.8 or pounds by 2.2*9.8  
   byte eepromValidData;  // This should always be last, that way if an error
                          // happens in writing, it will not be written and we
 } settings_t;            // will know to reset the settings
