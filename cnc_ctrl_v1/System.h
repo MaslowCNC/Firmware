@@ -39,7 +39,8 @@ Copyright 2014-2017 Bar Smith*/
 #define STATE_CYCLE         bit(3) // Cycle is running or motions are being executed.
 #define STATE_HOLD          bit(4) // Active feed hold
 #define STATE_SAFETY_DOOR   bit(5) // Safety door is ajar. Feed holds and de-energizes system.
-#define STATE_MOTION_CANCEL bit(6) // Motion cancel by feed hold and return to idle. 
+#define STATE_MOTION_CANCEL bit(6) // Motion cancel by feed hold and return to idle.
+#define STATE_POS_ERR_IGNORE bit(7) // Motion not checked for position error
 
 // Define old settings flag details
 #define NEED_ENCODER_STEPS bit(0)
@@ -48,7 +49,7 @@ Copyright 2014-2017 Bar Smith*/
 #define NEED_Z_DIST_PER_ROT bit(3)
 
 // Storage for global system states
-// Some of this could be more appropiately moved to the gcode parser
+// Some of this could be more appropriately moved to the gcode parser
 typedef struct {
   bool stop;                  // Stop flag.
   byte state;                 // State tracking flag
@@ -56,7 +57,7 @@ typedef struct {
   float xPosition;            // Cartessian position of XY axes
   float yPosition;            // Cached because calculating position is intensive
   float steps[3];             // Encoder position of axes
-  bool  useRelativeUnits;     // 
+  bool  useRelativeUnits;     //
   unsigned long lastSerialRcvd; // The millis of the last rcvd serial command, used by watchdo
   int   lastGCommand;         //Stores the value of the last command run eg: G01 -> 1
   int   lastTool;             //Stores the value of the last tool number eg: T4 -> 4
@@ -74,15 +75,20 @@ extern Axis zAxis;
 extern RingBuffer incSerialBuffer;
 extern Kinematics kinematics;
 extern byte systemRtExecAlarm;
+extern int SpindlePowerControlPin;
+extern int LaserPowerPin;
+extern int ProbePin;
 
 void  calibrateChainLengths(String);
 void  setupAxes();
 int   getPCBVersion();
 void pause();
 void maslowDelay(unsigned long);
-void  _watchDog();
 void execSystemRealtime();
 void systemSaveAxesPosition();
+void systemReset();
 byte systemExecuteCmdstring(String&);
-
+void setPWMPrescalers(int prescalerChoice);
+void configAuxLow(int A1, int A2, int A3, int A4, int A5, int A6);
+void configAuxHigh(int A7, int A8, int A9);
 #endif

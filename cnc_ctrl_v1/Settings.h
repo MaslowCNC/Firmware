@@ -20,7 +20,7 @@ Copyright 2014-2017 Bar Smith*/
 #ifndef settings_h
 #define settings_h
 
-#define SETTINGSVERSION 2      // The current version of settings, if this doesn't
+#define SETTINGSVERSION 6      // The current version of settings, if this doesn't
                                // match what is in EEPROM then settings on
                                // machine are reset to defaults
 #define EEPROMVALIDDATA 56     // This is just a random byte value that is used 
@@ -31,6 +31,12 @@ Copyright 2014-2017 Bar Smith*/
 #define SETTINGS_RESTORE_SETTINGS bit(0)
 #define SETTINGS_RESTORE_MASLOW bit(1)
 #define SETTINGS_RESTORE_ALL bit(2)
+
+enum SpindleAutomationType {
+  NONE,
+  SERVO,
+  RELAY_ACTIVE_HIGH,
+  RELAY_ACTIVE_LOW };
 
 typedef struct {  // I think this is about ~128 bytes in size if I counted correctly
   float machineWidth;
@@ -43,12 +49,13 @@ typedef struct {  // I think this is about ~128 bytes in size if I counted corre
   byte kinematicsType;
   float rotationDiskRadius;
   unsigned int axisDetachTime;
+  unsigned int chainLength;
   unsigned int originalChainLength;
   float encoderSteps;
   float distPerRot;
   unsigned int maxFeed;
   bool zAxisAttached;
-  bool zAxisAuto;
+  SpindleAutomationType spindleAutomateType;
   float maxZRPM;
   float zDistPerRot;
   float zEncoderSteps;
@@ -69,6 +76,15 @@ typedef struct {  // I think this is about ~128 bytes in size if I counted corre
   float zKdV;
   float zPropWeightV;
   float chainSagCorrection;
+  byte chainOverSprocket;
+  byte fPWM;
+  float leftChainTolerance;
+  float rightChainTolerance;
+  float positionErrorLimit;
+  float reserved1;
+  float reserved2;
+  float chainElongationFactor; // m/m/N. This is the ratio of chain length increase due to chain tension. typically 8x10E-6; // m/m/N
+  float sledWeight; // Newtons. simply multiply kg by 9.8 or pounds by 2.2*9.8  
   byte eepromValidData;  // This should always be last, that way if an error
                          // happens in writing, it will not be written and we
 } settings_t;            // will know to reset the settings
@@ -86,7 +102,6 @@ typedef struct {
   byte eepromValidData;
 } settingsStepsV1_t;
 
-void settingsInit();
 void settingsLoadFromEEprom();
 void settingsReset();
 void settingsWipe(byte);

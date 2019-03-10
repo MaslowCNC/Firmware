@@ -38,10 +38,13 @@ void  executeOtherCodeLine(const String&);
 int   findNextGM(const String&, const int&);
 void  sanitizeCommandString(String&);
 byte  interpretCommandString(String&);
-int   G1(const String&, int);
-int   G2(const String&, int);
+void  G1(const String&, int);
+void  G2(const String&, int);
+void  G4(const String&);
 void  G10(const String&);
 void  G38(const String&);
 void  setInchesToMillimetersConversion(float);
+extern int SpindlePowerControlPin;
+extern int ProbePin;
 
 #endif

@@ -31,25 +31,24 @@
             Kinematics();
             void init  ();
             void  inverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
-            void  quadrilateralInverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
-            void  triangularInverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
             void  recomputeGeometry();
-            void  forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos);
+            void  forward(const float& chainALength, const float& chainBLength, float* xPos, float* yPos, float xGuess, float yGuess);
             //geometry
             float h; //distance between sled attach point and bit
             float R             = 10.1;                                //sprocket radius
 
-
             float halfWidth;                      //Half the machine width
             float halfHeight;                    //Half the machine height
         private:
-            float _moment(const float& Y1Plus, const float& Y2Plus, const float& Phi, const float& MSinPhi, const float& MSinPsi1, const float& MCosPsi1, const float& MSinPsi2, const float& MCosPsi2);
+            void  _quadrilateralInverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
+            void  _triangularInverse   (float xTarget,float yTarget, float* aChainLength, float* bChainLength);
+            void  _verifyValidTarget(float* xTarget,float* yTarget);
+            // quadrilateral specific
+            float _moment(const float& Y1Plus, const float& Y2Plus, const float& MSinPhi, const float& MSinPsi1, const float& MCosPsi1, const float& MSinPsi2, const float& MCosPsi2);
             float _YOffsetEqn(const float& YPlus, const float& Denominator, const float& Psi);
             void  _MatSolv();
             void  _MyTrig();
-            void _verifyValidTarget(float* xTarget,float* yTarget);
-            //target router bit coordinates.
-            float x = 0;
+            float x = 0; //target router bit coordinates.
             float y = 0;
             float _xCordOfMotor;
             float _yCordOfMotor;

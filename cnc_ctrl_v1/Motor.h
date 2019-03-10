@@ -35,13 +35,10 @@
             void attach();
             int  setupMotor(const int& pwmPin, const int& pin1, const int& pin2);
             void detach();
-            void write(int speed);
+            void write(int speed, bool force = false);
             int  lastSpeed();
             void additiveWrite(int speed);
             int  attached();
-            int  _convolve(const int& input);
-            void setSegment(const int& index, const float& slope, const float& intercept, const int& negativeBound, const int& positiveBound);
-            LinSegment getSegment(const int& index);
             void  directWrite(int voltage);
         private:
             int _pwmPin;
@@ -52,5 +49,5 @@
             int _lastSpeed  = 0;
             
     };
-
+    extern bool TLE5206;
     #endif

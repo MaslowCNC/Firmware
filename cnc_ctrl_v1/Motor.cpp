@@ -12,7 +12,7 @@
 
     You should have received a copy of the GNU General Public License
     along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Copyright 2014-2017 Bar Smith*/
 
 /*
@@ -24,30 +24,39 @@ to be a drop in replacement for a continuous rotation servo.
 #include "Maslow.h"
 
 Motor::Motor(){
-  
+
   _attachedState = 0;
-  
-  
+
+
 }
 
 int  Motor::setupMotor(const int& pwmPin, const int& pin1, const int& pin2){
-  
+
   //store pin numbers as private variables
   _pwmPin = pwmPin;
   _pin1  = pin1;
   _pin2  = pin2;
   _attachedState = 0;
-  
+
+  if (TLE5206 == false) {
   //set pinmodes
-  pinMode(_pwmPin,   OUTPUT); 
-  pinMode(_pin1,     OUTPUT); 
-  pinMode(_pin2,     OUTPUT);
-  
-  //stop the motor
-  digitalWrite(_pin1,    HIGH);
-  digitalWrite(_pin2,    LOW) ;
-  digitalWrite(_pwmPin,  LOW);
-  
+    pinMode(_pwmPin,   OUTPUT);
+    pinMode(_pin1,     OUTPUT);
+    pinMode(_pin2,     OUTPUT);
+
+    //stop the motor
+    digitalWrite(_pin1,    HIGH);
+    digitalWrite(_pin2,    LOW) ;
+    digitalWrite(_pwmPin,  LOW);
+  } else {
+    pinMode(_pwmPin,   INPUT);
+    pinMode(_pin1,     OUTPUT);
+    pinMode(_pin2,     OUTPUT);
+
+    //stop the motor
+    digitalWrite(_pin1,    LOW);
+    digitalWrite(_pin2,    LOW) ;
+  }
   return 1;
 }
 
@@ -57,11 +66,17 @@ void Motor::attach(){
 
 void Motor::detach(){
     _attachedState = 0;
-    
+
+  if (TLE5206 == false) {
     //stop the motor
     digitalWrite(_pin1,    HIGH);
     digitalWrite(_pin2,    LOW) ;
     digitalWrite(_pwmPin,  LOW);
+  } else {
+    //stop the motor
+    digitalWrite(_pin1,    LOW);
+    digitalWrite(_pin2,    LOW) ;
+  }
 }
 
 int Motor::lastSpeed(){
@@ -78,47 +93,82 @@ void Motor::additiveWrite(int speed){
     write(_lastSpeed + speed);
 }
 
-void Motor::write(int speed){
+void Motor::write(int speed, bool force){
     /*
-    Sets motor speed from input. Speed = 0 is stopped, -255 is full reverse, 255 is full ahead.
+    Sets motor speed from input. Speed = 0 is stopped, -255 is full reverse, 255 is full ahead. If force is true the motor attached state will be ignored
     */
-    if (_attachedState == 1){
-        
-        //linearize the motor
-        //speed = _convolve(speed);
-        
-        //set direction range is 0-180
-        if (speed > 0){
-            digitalWrite(_pin1 , HIGH);
-            digitalWrite(_pin2 , LOW );
-            speed = speed;
-        }
-        else if (speed == 0){
-            speed = speed;
-        }
-        else{
-            digitalWrite(_pin1 , LOW);
-            digitalWrite(_pin2 , HIGH );
-            speed = speed;
-        }
-        
-        //enforce range
+    if (_attachedState == 1 or force){
         speed = constrain(speed, -255, 255);
-        
         _lastSpeed = speed; //saves speed for use in additive write
-        
+        bool forward = (speed > 0);
         speed = abs(speed); //remove sign from input because direction is set by control pins on H-bridge
-        
-        int pwmFrequency = round(speed);
-        
-        if(_pwmPin == 12){
-            pwmFrequency = map(pwmFrequency, 0, 255, 0, 1023);  //Scales 0-255 to 0-1023
-            Timer1.pwm(2, pwmFrequency);  //Special case for pin 12 due to timer blocking analogWrite()
+
+        bool usePin1 = ((_pin1 != 4) && (_pin1 != 13) && (_pin1 != 11) && (_pin1 != 12)); // avoid PWM using timer0 or timer1
+        bool usePin2 = ((_pin2 != 4) && (_pin2 != 13) && (_pin2 != 11) && (_pin2 != 12)); // avoid PWM using timer0 or timer1
+        bool usepwmPin = ((TLE5206 == false) && (_pwmPin != 4) && (_pwmPin != 13) && (_pwmPin != 11) && (_pwmPin != 12)); // avoid PWM using timer0 or timer1       
+        if (!TLE5206) {
+            if (forward){
+                if (usepwmPin){
+                    digitalWrite(_pin1 , HIGH );
+                    digitalWrite(_pin2 ,  LOW  );
+                    analogWrite(_pwmPin, speed);
+                }
+                else if (usePin2) {
+                    digitalWrite(_pin1 , HIGH );
+                    analogWrite(_pin2 , 255 - speed); // invert drive signals - don't alter speed
+                    digitalWrite(_pwmPin, HIGH);
+                }
+                else{
+                    analogWrite(_pin1 , speed);
+                    digitalWrite(_pin2 , LOW );
+                    digitalWrite(_pwmPin, HIGH);
+                }
+            }
+            else { // reverse or zero speed
+                if (usepwmPin){
+                    digitalWrite(_pin2 , HIGH);
+                    digitalWrite(_pin1 , LOW );
+                    analogWrite(_pwmPin, speed);
+                }
+                else if (usePin1) {
+                    analogWrite(_pin1 , 255 - speed); // invert drive signals - don't alter speed
+                    digitalWrite(_pin2 , HIGH );
+                    digitalWrite(_pwmPin, HIGH);
+                }
+                else {
+                    analogWrite(_pin2 , speed);
+                    digitalWrite(_pin1 , LOW );
+                    digitalWrite(_pwmPin, HIGH);
+                }
+            }
+        } 
+        else { // TLE5206
+            if (forward) {
+                if (speed > 0) {
+                    if (usePin2) {
+                        digitalWrite(_pin1 , HIGH );
+                        analogWrite(_pin2 , 255 - speed); // invert drive signals - don't alter speed
+                    } 
+                    else {
+                        analogWrite(_pin1 , speed);
+                        digitalWrite(_pin2 , LOW );
+                    }
+                } 
+                else { // speed = 0 so put on the brakes
+                    digitalWrite(_pin1 , LOW );
+                    digitalWrite(_pin2 , LOW );
+                }
+            } 
+            else { // reverse
+                if (usePin1) {
+                    analogWrite(_pin1 , 255 - speed); // invert drive signals - don't alter speed
+                    digitalWrite(_pin2 , HIGH );
+                } else {
+                    analogWrite(_pin2 , speed);
+                    digitalWrite(_pin1 , LOW );
+                }
+            }
         }
-        else{
-            analogWrite(_pwmPin, pwmFrequency);
-        }
-        
     }
 }
 
@@ -126,64 +176,10 @@ void Motor::directWrite(int voltage){
     /*
     Write directly to the motor, ignoring if the axis is attached or any applied calibration.
     */
-    
-    if (voltage > 0){
-        digitalWrite(_pin1 , HIGH);
-        digitalWrite(_pin2 , LOW );
-    }
-    else if (voltage == 0){
-        voltage = voltage;
-    }
-    else{
-        digitalWrite(_pin1 , LOW);
-        digitalWrite(_pin2 , HIGH );
-    }
-    
-    if(_pwmPin == 12){
-        voltage = abs(voltage);
-        voltage = map(voltage, 0, 255, 0, 1023);  //Scales 0-255 to 0-1023
-        Timer1.pwm(2, voltage);  //Special case for pin 12 due to timer blocking analogWrite()
-    }
-    else{
-        analogWrite(_pwmPin, abs(voltage));
-    }
+    write(voltage, true);
 }
 
 int  Motor::attached(){
     
     return _attachedState;
-}
-
-int  Motor::_convolve(const int& input){
-    /*
-    This function distorts the input signal in a manner which is the inverse of the way
-    the mechanics of the motor distort it to give a linear response.
-    */
-    
-    int output = input;
-    
-    int arrayLen = sizeof(_linSegments)/sizeof(_linSegments[1]);
-    for (int i = 0; i <= arrayLen - 1; i++){
-        if (input > _linSegments[i].negativeBound and input < _linSegments[i].positiveBound){
-            output = (input + _linSegments[i].intercept)/_linSegments[i].slope;
-            break;
-        }
-    }
-    
-    return output;
-}
-
-void Motor::setSegment(const int& index, const float& slope, const float& intercept, const int& negativeBound, const int& positiveBound){
-    
-    //Adds a linearizion segment to the linSegments object in location index
-    
-    _linSegments[index].slope          =          slope;
-    _linSegments[index].intercept      =      intercept;
-    _linSegments[index].positiveBound  =  positiveBound;
-    _linSegments[index].negativeBound  =  negativeBound;
-    
-}
-
-LinSegment Motor::getSegment(const int& index){
-    return _linSegments[index];
 }

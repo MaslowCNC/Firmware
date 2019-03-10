@@ -50,7 +50,7 @@
             // calculation would have to be done at a much higher level and 
             // passed through each axis for it to have a single pointer to 
             // both main motors
-            float      _encoderStepsToRPMScaleFactor = 7394.9;   //6*10^7 us per minute divided by 8113.7 steps per revolution
+            float      _encoderStepsToRPMScaleFactor = 7394.87;  //6*10^7 us per minute divided by 8113.73 steps per revolution
     };
 
     #endif
