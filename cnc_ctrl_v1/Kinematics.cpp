@@ -270,8 +270,8 @@ void  Kinematics::_triangularInverse(float xTarget,float yTarget, float* aChainL
     //Calculation of vertical force due to tension, to validate tension calculation
     //VerticalForce=Tension1*(yTangent1-yTarget)/Chain1Straight+Tension2*(yTangent2-yTarget)/Chain2Straight;
 
-    float a1=HorizontalTension/chainWeight;
-    float a2=HorizontalTension/chainWeight;
+    float a1=HorizontalTension/chainDensity;
+    float a2=HorizontalTension/chainDensity;
     
     //Catenary Equation, total chain length excluding sprocket geometry, chain tolerance, and chain elasticity
     float Chain1=sqrt(pow(2*a1*sinh((xTarget-xTangent1)/(2*a1)),2)+pow(yTangent1-yTarget,2));
