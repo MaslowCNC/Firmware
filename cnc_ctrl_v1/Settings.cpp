@@ -161,6 +161,7 @@ void settingsSaveStepstoEEprom(){
         EEPROMVALIDDATA
       };
       EEPROM.put(310, sysSteps);
+      sys.writeStepsToEEPROM = false;
     }
 }
 
