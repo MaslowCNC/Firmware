@@ -64,6 +64,7 @@ typedef struct {
   int   nextTool;             //Stores the value of the next tool number eg: T4 -> 4
   float inchesToMMConversion; //Used to track whether to convert from inches, can probably be done in a way that doesn't require RAM
   float feedrate;             //The feedrate of the machine in mm/min
+  bool writeStepsToEEPROM;    // Flag to determine when need to write encoder steps to EEPROM.. used in execSystemRealtime and axis.attach
   // THE FOLLOWING IS USED FOR IMPORTING SETTINGS FROM FIRMWARE v1.00 AND EARLIER 
   // It can be deleted at some point
   byte oldSettingsFlag;
