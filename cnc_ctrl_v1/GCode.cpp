@@ -167,6 +167,10 @@ byte  executeBcodeLine(const String& gcodeLine){
 
         //clear the flag, re-enable position error limit
         sys.state = (sys.state & (!STATE_POS_ERR_IGNORE));
+      
+        //set flag to write current encoder steps to EEPROM
+        sys.writeStepsToEEPROM = true;
+      
         return STATUS_OK;
     }
 
