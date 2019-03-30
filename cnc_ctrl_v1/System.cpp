@@ -410,7 +410,7 @@ void systemSaveAxesPosition(){
     /*
     Save steps of axes to EEPROM if they are all detached
     */
-    if (!leftAxis.attached() && !rightAxis.attached() && !zAxis.attached()){
+    if (sys.writeStepsToEEPROM && !leftAxis.attached() && !rightAxis.attached() && !zAxis.attached()){
         settingsSaveStepstoEEprom();
     }
 }

@@ -197,6 +197,7 @@ int    Axis::detach(){
 
 int    Axis::attach(){
      motorGearboxEncoder.motor.attach();
+     sys.writeStepsToEEPROM = true;
      return 1;
 }
 
