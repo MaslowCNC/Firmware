@@ -72,6 +72,18 @@ void  Kinematics::inverse(float xTarget,float yTarget, float* aChainLength, floa
     //Confirm that the coordinates are on the wood
     _verifyValidTarget(&xTarget, &yTarget);
     
+    _inverse(xTarget,yTarget,aChainLength,bChainLength);
+    
+}
+
+void  Kinematics::_inverse(float xTarget,float yTarget, float* aChainLength, float* bChainLength){
+    /*
+    
+    This function works as a switch to call either the quadrilateralInverse kinematic function 
+    or the triangularInverse kinematic function
+    
+    */
+    
     if(sysSettings.kinematicsType == 1){
         _quadrilateralInverse(xTarget, yTarget, aChainLength, bChainLength);
     }
@@ -303,7 +315,7 @@ void  Kinematics::forward(const float& chainALength, const float& chainBLength, 
 
 
         //check our guess
-        inverse(xGuess, yGuess, &guessLengthA, &guessLengthB);
+        _inverse(xGuess, yGuess, &guessLengthA, &guessLengthB);
 
         float aChainError = chainALength - guessLengthA;
         float bChainError = chainBLength - guessLengthB;
