@@ -347,7 +347,21 @@ void  Kinematics::forward(const float& chainALength, const float& chainBLength, 
                 Serial.print(chainALength);
                 Serial.print(", ");
                 Serial.print(chainBLength);
-                Serial.println(F(" . Please set the chains to a known length (Actions -> Set Chain Lengths)"));
+                if (guessCount>KINEMATICSMAXGUESS){
+                  Serial.println(F(" Number of guesses exceeds KINEMATICSMAXGUESS "));
+                }
+                else{
+                  if (guessLengthA>sysSettings.chainLength){
+                    Serial.print(F(" Left Chain Length Greater than System Settings Chain Length LeftChainLength: "));
+                    Serial.print(guessLengthA);
+                  }
+                  else{
+                    Serial.print(F(" Right Chain Length Greater than System Settings Chain Length LeftChainLength: "));
+                    Serial.print(guessLengthB);
+                  }
+                  Serial.print(F(" System Chain Length: "));
+                  Serial.println(sysSettings.chainLength);
+                }
                 *xPos = 0;
                 *yPos = 0;
             }
