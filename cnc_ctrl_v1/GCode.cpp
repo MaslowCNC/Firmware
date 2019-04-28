@@ -268,7 +268,7 @@ byte  executeBcodeLine(const String& gcodeLine){
             execSystemRealtime();
             if (sys.stop){return STATUS_OK;}
         }
-        sys.state = (sys.state | (!STATE_POS_ERR_IGNORE));
+        sys.state = (sys.state & (~STATE_POS_ERR_IGNORE));
         return STATUS_OK;
     }
 
