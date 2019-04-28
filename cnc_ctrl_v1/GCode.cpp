@@ -148,7 +148,7 @@ byte  executeBcodeLine(const String& gcodeLine){
 
     if(gcodeLine.substring(0, 3) == "B04"){
         //set flag to ignore position error limit during the tests
-        sys.state = (sys.state | STATE_POS_ERR_IGNORE);
+        bit_true(sys.state,STATE_POS_ERR_IGNORE);
         //Test each of the axis
         maslowDelay(500);
         if(sys.stop){return STATUS_OK;}
@@ -166,7 +166,7 @@ byte  executeBcodeLine(const String& gcodeLine){
         rightAxis.set(rightAxis.read());
 
         //clear the flag, re-enable position error limit
-        sys.state = (sys.state & (!STATE_POS_ERR_IGNORE));
+        bit_false(sys.state,STATE_POS_ERR_IGNORE);
       
         //set flag to write current encoder steps to EEPROM
         sys.writeStepsToEEPROM = true;
@@ -255,7 +255,7 @@ byte  executeBcodeLine(const String& gcodeLine){
         double begin = millis();
 
         int i = 0;
-        sys.state = (sys.state | STATE_POS_ERR_IGNORE);
+        bit_true(sys.state,STATE_POS_ERR_IGNORE);
         while (millis() - begin < ms){
             if (gcodeLine.indexOf('L') != -1){
                 leftAxis.motorGearboxEncoder.motor.directWrite(speed);
@@ -268,7 +268,7 @@ byte  executeBcodeLine(const String& gcodeLine){
             execSystemRealtime();
             if (sys.stop){return STATUS_OK;}
         }
-        sys.state = (sys.state | (!STATE_POS_ERR_IGNORE));
+        bit_false(sys.state,STATE_POS_ERR_IGNORE);
         return STATUS_OK;
     }
 
@@ -505,7 +505,7 @@ void  sanitizeCommandString(String& cmdString){
             if (cmdString[pos] == ')') {
                 // End of '()' comment. Resume line allowed.
                 cmdString.remove(pos, 1);
-                if (line_flags & LINE_FLAG_COMMENT_PARENTHESES) { line_flags &= ~(LINE_FLAG_COMMENT_PARENTHESES); }
+                if (bit_istrue(line_flags,LINE_FLAG_COMMENT_PARENTHESES) { bit_false(line_flags,LINE_FLAG_COMMENT_PARENTHESES); }
             }
         }
         else {
