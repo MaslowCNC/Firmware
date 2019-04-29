@@ -505,7 +505,7 @@ void  sanitizeCommandString(String& cmdString){
             if (cmdString[pos] == ')') {
                 // End of '()' comment. Resume line allowed.
                 cmdString.remove(pos, 1);
-		if (line_flags & LINE_FLAG_COMMENT_PARENTHESES) { line_flags &= ~(LINE_FLAG_COMMENT_PARENTHESES); }
+                if (line_flags & LINE_FLAG_COMMENT_PARENTHESES) { line_flags &= ~(LINE_FLAG_COMMENT_PARENTHESES); }
             }
         }
         else {
