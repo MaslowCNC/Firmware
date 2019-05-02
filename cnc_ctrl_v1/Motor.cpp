@@ -77,7 +77,7 @@ void Motor::detach(){
         digitalWrite(_pin2,    LOW) ;
       }
     }
-    attachedState = 0;
+    _attachedState = 0;
 }
 
 int Motor::lastSpeed(){
