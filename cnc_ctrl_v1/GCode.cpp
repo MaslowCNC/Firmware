@@ -505,7 +505,13 @@ void  sanitizeCommandString(String& cmdString){
             if (cmdString[pos] == ')') {
                 // End of '()' comment. Resume line allowed.
                 cmdString.remove(pos, 1);
-                if (line_flags & LINE_FLAG_COMMENT_PARENTHESES) { line_flags &= ~(LINE_FLAG_COMMENT_PARENTHESES); }
+                if (line_flags & LINE_FLAG_COMMENT_PARENTHESES) { 
+                    // End of comments
+                    line_flags &= ~(LINE_FLAG_COMMENT_PARENTHESES); 
+                }else{
+                    // Didn't see the opening parenthesis
+                    Serial.println(F("warning: missing ‘(’ before ‘)’\n"));
+                }
             }
         }
         else {
