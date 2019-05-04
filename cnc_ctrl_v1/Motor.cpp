@@ -65,18 +65,19 @@ void Motor::attach(){
 }
 
 void Motor::detach(){
+    if (_attachedState != 0) {
+      if (TLE5206 == false) {
+        //stop the motor
+        digitalWrite(_pin1,    HIGH);
+        digitalWrite(_pin2,    LOW) ;
+        digitalWrite(_pwmPin,  LOW);
+      } else {
+        //stop the motor
+        digitalWrite(_pin1,    LOW);
+        digitalWrite(_pin2,    LOW) ;
+      }
+    }
     _attachedState = 0;
-
-  if (TLE5206 == false) {
-    //stop the motor
-    digitalWrite(_pin1,    HIGH);
-    digitalWrite(_pin2,    LOW) ;
-    digitalWrite(_pwmPin,  LOW);
-  } else {
-    //stop the motor
-    digitalWrite(_pin1,    LOW);
-    digitalWrite(_pin2,    LOW) ;
-  }
 }
 
 int Motor::lastSpeed(){
