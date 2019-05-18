@@ -224,6 +224,17 @@ void   setupAxes(){
         aux7 = 45;
         aux8 = 46;
         aux9 = 47;
+    }else{  // default values to keep compiler from complaining
+        //AUX pins
+        aux1 = -1;
+        aux2 = -1;
+        aux3 = -1;
+        aux4 = -1;
+        aux5 = -1;
+        aux6 = -1;
+        aux7 = -1;
+        aux8 = -1;
+        aux9 = -1;
     }
 
     if(sysSettings.chainOverSprocket == 1){
@@ -239,27 +250,26 @@ void   setupAxes(){
     leftAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     rightAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     zAxis.setPIDValues(&sysSettings.zKpPos, &sysSettings.zKiPos, &sysSettings.zKdPos, &sysSettings.zPropWeightPos, &sysSettings.zKpV, &sysSettings.zKiV, &sysSettings.zKdV, &sysSettings.zPropWeightV);
+    
+    // Assign AUX pins to extern variables used by functions like Spindle and Probe
+    SpindlePowerControlPin = aux1;   // output for controlling spindle power
+    LaserPowerPin = aux2;            // output for controlling a laser diode
+    ProbePin = aux4;                 // use this input for zeroing zAxis with G38.2 gcode
+    pinMode(LaserPowerPin, OUTPUT);
+    digitalWrite(LaserPowerPin, LOW);
 
     // implement the AUXx values that are 'used'. This accomplishes setting their values at runtime.
-    // Using a separate function is a compiler work-around to avoid
+    // Using a dummy action is a compiler work-around to avoid
     //  "warning: variable ‘xxxxx’ set but not used [-Wunused-but-set-variable]"
     //  for AUX pins defined but not connected
-    configAuxLow(aux1, aux2, aux3, aux4, aux5, aux6);
+    if (aux3 > 0) pinMode(aux3,INPUT_PULLUP); // dummy action to avoid compiler warnings
+    if (aux5 > 0) pinMode(aux3,INPUT_PULLUP);
+    if (aux6 > 0) pinMode(aux3,INPUT_PULLUP);
     if(pcbVersion == 3){ // TLE5206
-      configAuxHigh(aux7, aux8, aux9);
+        if (aux7 > 0) pinMode(aux7,INPUT_PULLUP); // dummy action to avoid compiler warnings
+        if (aux8 > 0) pinMode(aux8,INPUT_PULLUP);
+        if (aux9 > 0) pinMode(aux9,INPUT_PULLUP);
     }
-}
-
-// Assign AUX pins to extern variables used by functions like Spindle and Probe
-void configAuxLow(int aux1, int aux2, int aux3, int aux4, int aux5, int aux6) {
-  SpindlePowerControlPin = aux1;   // output for controlling spindle power
-  ProbePin = aux4;                 // use this input for zeroing zAxis with G38.2 gcode
-  LaserPowerPin = aux2;            // output for controlling a laser diode
-  pinMode(LaserPowerPin, OUTPUT);
-  digitalWrite(LaserPowerPin, LOW);
-}
-
-void configAuxHigh(int aux7, int aux8, int aux9) {
 }
 
 int getPCBVersion(){
