@@ -127,6 +127,10 @@ void   setupAxes(){
         aux4 = 14;
         aux5 = 0;        // warning! this is the serial TX line on the Mega2560
         aux6 = 1;        // warning! this is the serial RX line on the Mega2560
+
+        aux7 = -1;       // unused
+        aux8 = -1;       // unused
+        aux9 = -1;       // unused
     }
     else if(pcbVersion == 1){
         //PCB v1.1 Detected
@@ -158,6 +162,10 @@ void   setupAxes(){
         aux4 = 14;
         aux5 = A7;
         aux6 = A6;
+
+        aux7 = -1;       // unused
+        aux8 = -1;       // unused
+        aux9 = -1;       // unused
     }
     else if(pcbVersion == 2){
         //PCB v1.2 Detected
@@ -190,8 +198,12 @@ void   setupAxes(){
         aux4 = 14;
         aux5 = A7;
         aux6 = A6;
+
+        aux7 = -1;       // unused
+        aux8 = -1;       // unused
+        aux9 = -1;       // unused
     }
-    else if(pcbVersion == 3){ // TLE5206
+    else { // (pcbVersion == 3) // TLE5206
         //TLE5206 PCB v1.3 Detected
         //MP1 - Right Motor
         encoder1A = 20; // INPUT
@@ -224,17 +236,6 @@ void   setupAxes(){
         aux7 = 45;
         aux8 = 46;
         aux9 = 47;
-    }else{  // default values to keep compiler from complaining
-        //AUX pins
-        aux1 = -1;
-        aux2 = -1;
-        aux3 = -1;
-        aux4 = -1;
-        aux5 = -1;
-        aux6 = -1;
-        aux7 = -1;
-        aux8 = -1;
-        aux9 = -1;
     }
 
     if(sysSettings.chainOverSprocket == 1){
@@ -262,10 +263,11 @@ void   setupAxes(){
     // Using a dummy action is a compiler work-around to avoid
     //  "warning: variable ‘xxxxx’ set but not used [-Wunused-but-set-variable]"
     //  for AUX pins defined but not connected
-    if (aux3 > 0) pinMode(aux3,INPUT); // dummy actions to avoid compiler warnings
+    // dummy actions to avoid compiler warnings
+    if (aux3 > 0) pinMode(aux3,INPUT);	// defined auxX are inputs by default
     if (aux5 > 0) pinMode(aux5,INPUT);
     if (aux6 > 0) pinMode(aux6,INPUT);
-    if(pcbVersion == 3){ // TLE5206
+    if(pcbVersion >= 3){ // TLE5206 
         if (aux7 > 0) pinMode(aux7,INPUT);
         if (aux8 > 0) pinMode(aux8,INPUT);
         if (aux9 > 0) pinMode(aux9,INPUT);
