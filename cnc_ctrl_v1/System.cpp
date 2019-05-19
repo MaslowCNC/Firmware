@@ -128,9 +128,9 @@ void   setupAxes(){
         aux5 = 0;        // warning! this is the serial TX line on the Mega2560
         aux6 = 1;        // warning! this is the serial RX line on the Mega2560
 
-        aux7 = -1;       // unused
-        aux8 = -1;       // unused
-        aux9 = -1;       // unused
+        aux7 = -1;       // unconnected
+        aux8 = -1;       // unconnected
+        aux9 = -1;       // unconnected
     }
     else if(pcbVersion == 1){
         //PCB v1.1 Detected
@@ -163,9 +163,9 @@ void   setupAxes(){
         aux5 = A7;
         aux6 = A6;
 
-        aux7 = -1;       // unused
-        aux8 = -1;       // unused
-        aux9 = -1;       // unused
+        aux7 = -1;       // unconnected
+        aux8 = -1;       // unconnected
+        aux9 = -1;       // unconnected
     }
     else if(pcbVersion == 2){
         //PCB v1.2 Detected
@@ -199,9 +199,9 @@ void   setupAxes(){
         aux5 = A7;
         aux6 = A6;
 
-        aux7 = -1;       // unused
-        aux8 = -1;       // unused
-        aux9 = -1;       // unused
+        aux7 = -1;       // unconnected
+        aux8 = -1;       // unconnected
+        aux9 = -1;       // unconnected
     }
     else { // (pcbVersion == 3) // TLE5206
         //TLE5206 PCB v1.3 Detected
