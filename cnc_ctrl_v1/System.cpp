@@ -21,7 +21,7 @@ Copyright 2014-2017 Bar Smith*/
 
 bool TLE5206;
 
-// extern values using AUX pins defined in  configAuxLow() and configAuxHigh()
+// extern values using AUX pins defined in  setupAxes()
 int SpindlePowerControlPin;  // output for controlling spindle power
 int ProbePin;                // use this input for zeroing zAxis with G38.2 gcode
 int LaserPowerPin;           // Use this output to turn on and off a laser diode
@@ -260,18 +260,17 @@ void   setupAxes(){
     digitalWrite(LaserPowerPin, LOW);
 
     // implement the AUXx values that are 'used'. This accomplishes setting their values at runtime.
-    // Using a dummy action is a compiler work-around to avoid
+    // Using these variables in a test permits to avoid warnings like
     //  "warning: variable ‘xxxxx’ set but not used [-Wunused-but-set-variable]"
     //  for AUX pins defined but not connected
-    // dummy actions to avoid compiler warnings
-    if (aux3 > 0) pinMode(aux3,INPUT);	// defined auxX are inputs by default
+
+    // defined auxX are inputs by default
+    if (aux3 > 0) pinMode(aux3,INPUT);
     if (aux5 > 0) pinMode(aux5,INPUT);
     if (aux6 > 0) pinMode(aux6,INPUT);
-    if(pcbVersion >= 3){ // TLE5206
-        if (aux7 > 0) pinMode(aux7,INPUT);
-        if (aux8 > 0) pinMode(aux8,INPUT);
-        if (aux9 > 0) pinMode(aux9,INPUT);
-    }
+    if (aux7 > 0) pinMode(aux7,INPUT);
+    if (aux8 > 0) pinMode(aux8,INPUT);
+    if (aux9 > 0) pinMode(aux9,INPUT);
 }
 
 int getPCBVersion(){
