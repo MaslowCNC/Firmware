@@ -262,13 +262,13 @@ void   setupAxes(){
     // Using a dummy action is a compiler work-around to avoid
     //  "warning: variable ‘xxxxx’ set but not used [-Wunused-but-set-variable]"
     //  for AUX pins defined but not connected
-    if (aux3 > 0) pinMode(aux3,INPUT_PULLUP); // dummy action to avoid compiler warnings
-    if (aux5 > 0) pinMode(aux3,INPUT_PULLUP);
-    if (aux6 > 0) pinMode(aux3,INPUT_PULLUP);
+    if (aux3 > 0) pinMode(aux3,INPUT); // dummy actions to avoid compiler warnings
+    if (aux5 > 0) pinMode(aux5,INPUT);
+    if (aux6 > 0) pinMode(aux6,INPUT);
     if(pcbVersion == 3){ // TLE5206
-        if (aux7 > 0) pinMode(aux7,INPUT_PULLUP); // dummy action to avoid compiler warnings
-        if (aux8 > 0) pinMode(aux8,INPUT_PULLUP);
-        if (aux9 > 0) pinMode(aux9,INPUT_PULLUP);
+        if (aux7 > 0) pinMode(aux7,INPUT);
+        if (aux8 > 0) pinMode(aux8,INPUT);
+        if (aux9 > 0) pinMode(aux9,INPUT);
     }
 }
 
