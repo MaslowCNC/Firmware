@@ -65,7 +65,7 @@ void   setupAxes(){
 
     */
 
-    
+
     int encoder1A;
     int encoder1B;
     int encoder2A;
@@ -251,7 +251,7 @@ void   setupAxes(){
     leftAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     rightAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     zAxis.setPIDValues(&sysSettings.zKpPos, &sysSettings.zKiPos, &sysSettings.zKdPos, &sysSettings.zPropWeightPos, &sysSettings.zKpV, &sysSettings.zKiV, &sysSettings.zKdV, &sysSettings.zPropWeightV);
-    
+
     // Assign AUX pins to extern variables used by functions like Spindle and Probe
     SpindlePowerControlPin = aux1;   // output for controlling spindle power
     LaserPowerPin = aux2;            // output for controlling a laser diode
@@ -267,7 +267,7 @@ void   setupAxes(){
     if (aux3 > 0) pinMode(aux3,INPUT);	// defined auxX are inputs by default
     if (aux5 > 0) pinMode(aux5,INPUT);
     if (aux6 > 0) pinMode(aux6,INPUT);
-    if(pcbVersion >= 3){ // TLE5206 
+    if(pcbVersion >= 3){ // TLE5206
         if (aux7 > 0) pinMode(aux7,INPUT);
         if (aux8 > 0) pinMode(aux8,INPUT);
         if (aux9 > 0) pinMode(aux9,INPUT);
