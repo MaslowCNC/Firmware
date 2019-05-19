@@ -225,6 +225,39 @@ void   setupAxes(){
         aux8 = 46;
         aux9 = 47;
     }
+    else if(pcbVersion == 4){
+    //https://easyeda.com/polaski/maslow-cnc-shield-v2
+        //MP1 - Right Motor
+        encoder1A = 20; // INPUT
+        encoder1B = 21; // INPUT
+        in1 = 7;        // OUTPUT
+        in2 = 6;        // OUTPUT
+        enA = 5;        // errorFlag
+        //MP2 - Z-axis
+        encoder2A = 19; // INPUT
+        encoder2B = 18; // INPUT
+        in3 = 10;        // OUTPUT
+        in4 = 9;        // OUTPUT
+        enB = 8;        // errorFlag
+        //MP3 - Left Motor
+        encoder3A = 2;   // INPUT
+        encoder3B = 3;   // INPUT
+        in5 = 13;        // OUTPUT
+        in6 = 12;        // OUTPUT
+        enC = 12;        // errorFlag
+
+        //AUX pins
+        aux1 = 52;
+        aux2 = 50;
+        aux3 = 48;
+        aux4 = 44;
+        aux5 = 40;
+        aux6 = 36;
+        aux7 = 32;
+        aux8 = 30;
+        aux9 = 28;
+}
+
 
     if(sysSettings.chainOverSprocket == 1){
         leftAxis.setup (enC, in6, in5, encoder3B, encoder3A, 'L', LOOPINTERVAL);
