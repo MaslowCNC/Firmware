@@ -233,19 +233,19 @@ void   setupAxes(){
         encoder1B = 21; // INPUT
         in1 = 7;        // OUTPUT
         in2 = 6;        // OUTPUT
-        enA = 5;        // errorFlag
+        enA = 5;        // PWM
         //MP2 - Z-axis
         encoder2A = 19; // INPUT
         encoder2B = 18; // INPUT
         in3 = 10;        // OUTPUT
         in4 = 9;        // OUTPUT
-        enB = 8;        // errorFlag
+        enB = 8;        // PWM
         //MP3 - Left Motor
         encoder3A = 2;   // INPUT
         encoder3B = 3;   // INPUT
         in5 = 13;        // OUTPUT
         in6 = 12;        // OUTPUT
-        enC = 12;        // errorFlag
+        enC = 11;        // PWM
 
         //AUX pins
         aux1 = 52;
@@ -257,7 +257,7 @@ void   setupAxes(){
         aux7 = 32;
         aux8 = 30;
         aux9 = 28;
-}
+     }
 
 
     if(sysSettings.chainOverSprocket == 1){
