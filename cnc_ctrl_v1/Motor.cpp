@@ -49,7 +49,7 @@ int  Motor::setupMotor(const int& pwmPin, const int& pin1, const int& pin2){
     digitalWrite(_pin2,    LOW) ;
     digitalWrite(_pwmPin,  LOW);
   } else {
-    pinMode(_pwmPin,   INPUT);
+    pinMode(_pwmPin,   INPUT_PULLUP);
     pinMode(_pin1,     OUTPUT);
     pinMode(_pin2,     OUTPUT);
 

@@ -278,6 +278,11 @@ void   Axis::test(){
     encoderPos = motorGearboxEncoder.encoder.read();
     Serial.print(F("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>"));
     
+    if (TLE5206) {
+        // let the motor coast to a stop
+        maslowDelay(100);
+    }
+
     //move the motor in the other direction
     i = 0;
     motorGearboxEncoder.motor.directWrite(-255);
