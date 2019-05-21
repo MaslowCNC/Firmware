@@ -144,6 +144,7 @@ void Motor::write(int speed, bool force){
             }
         } 
         else { // TLE5206
+            speed = constrain(speed, 0, 254); // avoid issue when PWM value is 255
             if (forward) {
                 if (speed > 0) {
                     if (usePin2) {
