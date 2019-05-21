@@ -17,7 +17,7 @@
 #include "Maslow.h"
 #include "Settings.h"
 
-// the variables SpindlePowerControlPin and LaserPowerPin are assigned in configAuxLow() in System.cpp 
+// the variables SpindlePowerControlPin and LaserPowerPin are assigned in setupAxes() in System.cpp
 
 // Globals for Spindle control, both poorly named
 Servo myservo;  // create servo object to control a servo
