@@ -225,8 +225,9 @@ void   setupAxes(){
         aux8 = 46;
         aux9 = 47;
     }
-    else if(pcbVersion == 4){
-    //https://easyeda.com/polaski/maslow-cnc-shield-v2
+    else if(pcbVersion == 4){//version not assigned
+        //DIY motor shield for external H bridges.  
+        //https://easyeda.com/polaski/maslow-cnc-shield-v2
         //MP1 - Right Motor
         encoder1A = 20; // INPUT
         encoder1B = 21; // INPUT
@@ -313,6 +314,12 @@ int getPCBVersion(){
             pinCheck &= B000111; // strip off the unstrapped bits
             TLE5206 = true;
             break;
+        case B111011: // DIY board for external h bridges v1.4 don't strap VERS5-6 low //Please correct it if wrong
+                      // https://forums.maslowcnc.com/t/managing-motors-with-dual-l298n/9896/7
+            pinCheck &= B000111; // strip off the unstrapped bits
+            TLE5206 = false;
+            break;
+        
 }
     return pinCheck - 1;
 }
