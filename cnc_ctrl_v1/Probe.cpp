@@ -19,7 +19,7 @@ Copyright 2014-2017 Bar Smith*/
 
 #include "Maslow.h"
 
-// the variable probePin is assigned in configAuxLow() in System.cpp
+// the variable probePin is assigned in setupAxes() in System.cpp
 
 bool checkForProbeTouch(const int& probePin) {
   /*
