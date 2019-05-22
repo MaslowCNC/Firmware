@@ -1,18 +1,14 @@
 /*This file is part of the Maslow Control Software.
-
 The Maslow Control Software is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 Maslow Control Software is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with the Maslow Control Software.  If not, see <http://www.gnu.org/licenses/>.
-
 Copyright 2014-2017 Bar Smith*/
 
 // This file contains system level functions and states
@@ -58,11 +54,8 @@ void  calibrateChainLengths(String gcodeLine){
 
 void   setupAxes(){
     /*
-
     Detect the version of the Arduino shield connected, and use the appropriate pins
-
     This function runs before the serial port is open so the version is not printed here
-
     */
 
 
@@ -203,7 +196,7 @@ void   setupAxes(){
         aux8 = -1;       // unconnected
         aux9 = -1;       // unconnected
     }
-    else if{ // (pcbVersion == 3) // TLE5206
+    else { // (pcbVersion == 3) // TLE5206
         //TLE5206 PCB v1.3 Detected
         //MP1 - Right Motor
         encoder1A = 20; // INPUT
@@ -237,8 +230,6 @@ void   setupAxes(){
         aux8 = 46;
         aux9 = 47;
     }
-    
-
 
     if(sysSettings.chainOverSprocket == 1){
         leftAxis.setup (enC, in6, in5, encoder3B, encoder3A, 'L', LOOPINTERVAL);
@@ -293,7 +284,6 @@ int getPCBVersion(){
             pinCheck &= B000111; // strip off the unstrapped bits
             TLE5206 = true;
             break;
-       
 }
     return pinCheck - 1;
 }
@@ -325,7 +315,7 @@ void setPWMPrescalers(int prescalerChoice) {
     TCCR4B &= ~prescalerEraser;   // this operation sets the three bits in TCCR4B to 0
     // now set those same three bits
 // ————————————————————————————–
-// TIMER 2       (Pin 9, 10)
+// TIMER 2       (Pin 9, 10)
 // Value  Divisor  Frequency
 // 0x01   1        31.374 KHz
 // 0x02   8        3.921 KHz
@@ -341,7 +331,7 @@ void setPWMPrescalers(int prescalerChoice) {
 // Value  Divisor  Frequency
 // 0x01   1        31.374 KHz
 // 0x02   8        3.921 Khz
-// 0x03   64       490.1 Hz        // default
+// 0x03   64       490.1 Hz        // default
 // 0x04   256      122.5 Hz
 // 0x05   1024     30.63 Hz
 // Code:  TCCR3B = (TCCR3B & 0xF8) | value ;
@@ -362,13 +352,10 @@ void setPWMPrescalers(int prescalerChoice) {
 // Need to check if all returns from this subsequently look to sys.stop
 void pause(){
     /*
-
     The pause command pauses the machine in place without flushing the lines stored in the machine's
     buffer.
-
     When paused the machine enters a while() loop and doesn't exit until the '~' cycle resume command
     is issued from Ground Control.
-
     */
 
     bit_true(sys.pause, PAUSE_FLAG_USER_PAUSE);
@@ -445,7 +432,6 @@ void systemReset(){
 byte systemExecuteCmdstring(String& cmdString){
     /*
     This function processes the $ system commands
-
     This is taken heavily from grbl.  https://github.com/grbl/grbl
     */
     byte char_counter = 1;
