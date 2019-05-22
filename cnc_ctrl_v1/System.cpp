@@ -203,7 +203,7 @@ void   setupAxes(){
         aux8 = -1;       // unconnected
         aux9 = -1;       // unconnected
     }
-    else { // (pcbVersion == 3) // TLE5206
+    else if{ // (pcbVersion == 3) // TLE5206
         //TLE5206 PCB v1.3 Detected
         //MP1 - Right Motor
         encoder1A = 20; // INPUT
@@ -237,39 +237,7 @@ void   setupAxes(){
         aux8 = 46;
         aux9 = 47;
     }
-    else{//if(pcbVersion == 4) //version not assigned
-        //DIY motor shield for external H bridges.  
-        //https://easyeda.com/polaski/maslow-cnc-shield-v2
-        //MP1 - Right Motor
-        encoder1A = 20; // INPUT
-        encoder1B = 21; // INPUT
-        in1 = 7;        // OUTPUT
-        in2 = 6;        // OUTPUT
-        enA = 5;        // PWM
-        //MP2 - Z-axis
-        encoder2A = 19; // INPUT
-        encoder2B = 18; // INPUT
-        in3 = 10;        // OUTPUT
-        in4 = 9;        // OUTPUT
-        enB = 8;        // PWM
-        //MP3 - Left Motor
-        encoder3A = 2;   // INPUT
-        encoder3B = 3;   // INPUT
-        in5 = 13;        // OUTPUT
-        in6 = 12;        // OUTPUT
-        enC = 11;        // PWM
-
-        //AUX pins
-        aux1 = 52;
-        aux2 = 50;
-        aux3 = 48;
-        aux4 = 44;
-        aux5 = 40;
-        aux6 = 36;
-        aux7 = 32;
-        aux8 = 30;
-        aux9 = 28;
-     }
+    
 
 
     if(sysSettings.chainOverSprocket == 1){
@@ -325,12 +293,7 @@ int getPCBVersion(){
             pinCheck &= B000111; // strip off the unstrapped bits
             TLE5206 = true;
             break;
-        case B111011: // DIY board for external h bridges v1.4 don't strap VERS5-6 low //Please correct it if wrong
-                      // https://forums.maslowcnc.com/t/managing-motors-with-dual-l298n/9896/7
-            pinCheck &= B000111; // strip off the unstrapped bits
-            TLE5206 = false;
-            break;
-        
+       
 }
     return pinCheck - 1;
 }
