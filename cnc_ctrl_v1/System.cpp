@@ -225,7 +225,7 @@ void   setupAxes(){
         aux8 = 46;
         aux9 = 47;
     }
-    else if(pcbVersion == 4){//version not assigned
+    else{//if(pcbVersion == 4) //version not assigned
         //DIY motor shield for external H bridges.  
         //https://easyeda.com/polaski/maslow-cnc-shield-v2
         //MP1 - Right Motor
