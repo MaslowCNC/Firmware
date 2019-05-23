@@ -274,6 +274,31 @@ void   setupAxes(){
 }
 
 int getPCBVersion(){
+/*
+*     On the original Maslow L298P boards, 
+*     D22-D23 and D52-D53 on XIO were used to 
+*     indicate the board revision number in binary. 
+*     The software read these pins and detect the 
+*     shield version. 
+*     Note that value returned by this function is zero-based,
+*     but the binary version code is 1-based. This avoids 
+*     a valid version id of 0, which would be the same as
+*     a missing board.
+*     
+*     #53-#52           #23-#22
+*     -------           -------
+*     GND-GND           GND-5V  -> rev.0001  beta release board
+*     GND-GND           5V-GND  -> rev.0002  PCB v1.1
+*     GND-GND           5V-5V   -> rev.0003  PCB v1.2
+*     
+*     Because D52 and D53 are used for SPI signals
+*     SS and SCK, newer boards should use D22-D27.
+*     
+*     #27-#26  #25-#24  #23-#22
+*     -------  -------  -------
+*     GND-GND  GND-5V   GND-GND -> PCB v1.3 TLE5206
+*     GND-GND  GND-5V   GND-5V  -> reserved for PCB v1.4
+*/
     pinMode(VERS1,INPUT_PULLUP);
     pinMode(VERS2,INPUT_PULLUP);
     pinMode(VERS3,INPUT_PULLUP);
@@ -291,8 +316,8 @@ int getPCBVersion(){
             pinCheck &= B000111; // strip off the unstrapped bits
             TLE5206 = true;
             break;
-}
-    return pinCheck - 1;
+    }
+    return pinCheck - 1; // board version is zero-based
 }
 
 
