@@ -278,12 +278,10 @@ int getPCBVersion(){
 *     On the original Maslow L298P boards, 
 *     D22-D23 and D52-D53 on XIO were used to 
 *     indicate the board revision number in binary. 
-*     The software uses INPUT_PULLUP read these pins 
+*     The software uses INPUT_PULLUP to read these pins 
 *     and detect the shield version. 
 *     Note that value returned by this function is zero-based,
-*     but the binary version code is 1-based. This avoids 
-*     a valid version id of 0, which would be the same as
-*     a missing board.
+*     but the binary version code is 1-based.
 *     
 *     #53-#52           #23-#22
 *     -------           -------
