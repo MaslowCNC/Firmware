@@ -290,7 +290,8 @@ int getPCBVersion(){
 *     GND GND     PU PU     PU  PU    PU  GND -> rev.0002  PCB v1.1
 *     GND GND     PU PU     PU  PU    PU  PU  -> rev.0003  PCB v1.2
 *      x   x      x   x     GND PU    GND GND -> PCB v1.3 and 1.4 TLE5206
-*     GND GND     GND GND   GND PU    GND PU  -> reserved for PCB v1.5
+*     GND GND     GND GND   GND PU    GND PU  -> unused or reserved for v1.4 TLE5206 
+*     GND GND     GND GND   GND PU    PU  GND -> reserved for PCB v1.5
 */  
     pinMode(VERS1,INPUT_PULLUP);
     pinMode(VERS2,INPUT_PULLUP);
