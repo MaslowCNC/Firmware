@@ -73,7 +73,7 @@ extern system_t sys;
 extern Axis leftAxis;
 extern Axis rightAxis;
 extern Axis zAxis;
-extern RingBuffer incSerialBuffer;
+extern maslowRingBuffer incSerialBuffer;
 extern Kinematics kinematics;
 extern byte systemRtExecAlarm;
 extern int SpindlePowerControlPin;

@@ -16,16 +16,16 @@
     Copyright 2014-2017 Bar Smith*/
 
 /*
-The RingBuffer module creates a circular character buffer used for storing incoming
+The maslowRingBuffer module creates a circular character buffer used for storing incoming
 serial data.
 */
 
 #include "Maslow.h"
 
-RingBuffer::RingBuffer(){
+maslowRingBuffer::maslowRingBuffer(){
 
 }
-int RingBuffer::write(char letter){
+int maslowRingBuffer::write(char letter){
     /*
 
     Write one character into the ring buffer.
@@ -41,7 +41,7 @@ int RingBuffer::write(char letter){
     return 0;
 }
 
-char RingBuffer::read(){
+char maslowRingBuffer::read(){
     /*
 
     Read one character from the ring buffer.
@@ -61,7 +61,7 @@ char RingBuffer::read(){
     return letter;
 }
 
-int RingBuffer::numberOfLines() {
+int maslowRingBuffer::numberOfLines() {
     /*
 
     Return the number of full lines (as determined by \n terminations) in the buffer
@@ -81,7 +81,7 @@ int RingBuffer::numberOfLines() {
     return lineCount;
 }
 
-void RingBuffer::readLine(String &lineToReturn){
+void maslowRingBuffer::readLine(String &lineToReturn){
     /*
 
     Return one line (terminated with \n) from the buffer
@@ -99,7 +99,7 @@ void RingBuffer::readLine(String &lineToReturn){
     }
 }
 
-void RingBuffer::prettyReadLine(String &lineToReturn){
+void maslowRingBuffer::prettyReadLine(String &lineToReturn){
     /*
 
     Return one line (terminated with \n) from the buffer, but in all uppercase
@@ -111,7 +111,7 @@ void RingBuffer::prettyReadLine(String &lineToReturn){
     lineToReturn.toUpperCase();
 }
 
-void RingBuffer::print(){
+void maslowRingBuffer::print(){
     Serial.print(F("Buffer Used: "));
     Serial.println(length());
     Serial.print(F("Buffer Number of Lines: "));
@@ -143,7 +143,7 @@ void RingBuffer::print(){
 
 }
 
-void RingBuffer::_incrementBeginning(){
+void maslowRingBuffer::_incrementBeginning(){
     /*
 
     Increment the pointer to the beginning of the ring buffer by one.
@@ -156,7 +156,7 @@ void RingBuffer::_incrementBeginning(){
         _beginningOfString = (_beginningOfString + 1) % INCBUFFERLENGTH;    //move the beginning up one and wrap to zero based upon INCBUFFERLENGTH
 }
 
-int RingBuffer::_incrementEnd(){
+int maslowRingBuffer::_incrementEnd(){
     /*
 
     Increment the pointer to the end of the ring buffer by one.
@@ -172,21 +172,21 @@ int RingBuffer::_incrementEnd(){
         return 0;
  }
 
-void RingBuffer::_incrementVariable(int* variable){
+void maslowRingBuffer::_incrementVariable(int* variable){
     /*
     Increment the target variable.
     */
     *variable = (*variable + 1 ) % INCBUFFERLENGTH;
    }
 
-int  RingBuffer::spaceAvailable(){
+int  maslowRingBuffer::spaceAvailable(){
     /*
     Returns the number of characters available in the buffer
     */
   return  INCBUFFERLENGTH - length() - 1;
 }
 
-int RingBuffer::length(void)
+int maslowRingBuffer::length(void)
     /*
     Returns the number of characters held in the buffer
     */
@@ -198,7 +198,7 @@ int RingBuffer::length(void)
 }
 
 
-void RingBuffer::empty(){
+void maslowRingBuffer::empty(){
     /*
     Empty the contents of the ring buffer
     */

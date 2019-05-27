@@ -37,7 +37,7 @@
 #include "MotorGearboxEncoder.h"
 #include "Axis.h"
 #include "Kinematics.h"
-#include "RingBuffer.h"
+#include "maslowRingBuffer.h"
 #include "GCode.h"
 #include "Testing.h"
 #include "Motion.h"
