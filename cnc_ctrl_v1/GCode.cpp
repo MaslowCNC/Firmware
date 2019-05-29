@@ -20,7 +20,7 @@ Copyright 2014-2017 Bar Smith*/
 
 #include "Maslow.h"
 
-RingBuffer incSerialBuffer;
+maslowRingBuffer incSerialBuffer;
 String readyCommandString = "";  //KRK why is this a global?
 String gcodeLine          = "";  //Our use of this is a bit sloppy, at times,
                                  //we pass references to this global and then
