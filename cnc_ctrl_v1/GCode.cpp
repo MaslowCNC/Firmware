@@ -44,7 +44,24 @@ void readSerialCommands(){
     if (Serial.available() > 0) {
         while (Serial.available() > 0) {
             char c = Serial.read();
-            if (c == '!'){
+            if ((c == CMD_RESET) || (c == CMD_RESET2)){      // immediate soft reset
+                // stop the motors and save the position
+                sys.stop = true;
+                quickCommandFlag = true;
+                bit_false(sys.pause, PAUSE_FLAG_USER_PAUSE);
+                sys.writeStepsToEEPROM = true;
+                // report the command 
+                Serial.println(F("\n\nsoft reset commanded\n\n"));
+                // mimic the firmware reset response sequence so GC thinks we've just reset
+                Serial.print(F("\nPCB v1."));
+                Serial.print(getPCBVersion());
+                if (TLE5206 == true) { Serial.print(F(" TLE5206 ")); }
+                Serial.println(F(" Detected"));
+                Serial.println(F("Grbl v1.00"));  
+                Serial.println(F("ready"));
+                reportStatusMessage(STATUS_OK);
+            }
+            else if (c == '!'){
                 sys.stop = true;
                 quickCommandFlag = true;
                 bit_false(sys.pause, PAUSE_FLAG_USER_PAUSE);
