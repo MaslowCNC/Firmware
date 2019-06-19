@@ -130,6 +130,12 @@ void  reportAlarmMessage(byte alarm_code) {
         sys.stop = true;
         break;
         }
+      case ALARM_BOARD_VERSION_INVALID: {
+        Serial.println(F("The Board version number from this Motor Control board is invalid,\nquit and make sure it is properly seated\nand that the correct version of firmware is loaded... "));
+        sys.stop = true;
+        while(1); // 
+        break;
+        }
     }
   #endif
 }
