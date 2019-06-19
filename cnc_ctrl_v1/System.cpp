@@ -274,6 +274,27 @@ void   setupAxes(){
 }
 
 int getPCBVersion(){
+/*
+*       On the original Maslow L298P boards, 
+*     D22-D23 and D52-D53 on XIO were used to 
+*     indicate the board revision number in binary. 
+*     The software uses INPUT_PULLUP to read these pins 
+*     and detect the shield version. 
+*       Note that value returned by the binary version code is 1-based
+*     but the value returned by this function is zero-based.
+*       This is done so that the board version number reported by the 
+*     firmware matches the number silkscreened on the boards.
+*     
+*     "x" = not used
+*     #53-#52    #27-#26    #25-#24   #23-#22
+*     -------    -------    -------   -------
+*     GND GND     PU PU     PU  PU    GND PU  -> rev.0001  PCB v1.0 aka beta release board
+*     GND GND     PU PU     PU  PU    PU  GND -> rev.0002  PCB v1.1
+*     GND GND     PU PU     PU  PU    PU  PU  -> rev.0003  PCB v1.2
+*      x   x      x   x     GND PU    GND GND -> PCB v1.3 and 1.4 TLE5206
+*      x   x      GND GND   GND PU    GND PU  -> unused or reserved for v1.4 TLE5206 
+*      x   x      GND GND   GND PU    PU  GND -> reserved for PCB v1.5
+*/  
     pinMode(VERS1,INPUT_PULLUP);
     pinMode(VERS2,INPUT_PULLUP);
     pinMode(VERS3,INPUT_PULLUP);
@@ -282,16 +303,19 @@ int getPCBVersion(){
     pinMode(VERS6,INPUT_PULLUP);
     int pinCheck = (32*digitalRead(VERS6) + 16*digitalRead(VERS5) + 8*digitalRead(VERS4) + 4*digitalRead(VERS3) + 2*digitalRead(VERS2) + 1*digitalRead(VERS1));
     switch (pinCheck) {
-        // boards v1.1, v1.2, v1.3 don't strap VERS3-6 low
-        case B111101: case B111110: case B111111: // v1.1, v1.2, v1.3
+        case B111101: case B111110: case B111111: // PCB v1.0 (beta), PCB v1.1, PCB v1.2
+        // boards v1.0, v1.1, v1.2 don't strap VERS3-6 low
             pinCheck &= B000011; // strip off the unstrapped bits
             TLE5206 = false;
             break;
-        case B110100: case B000100: // some versions of board v1.4 don't strap VERS5-6 low
+        case B110100: case B000100: case B110101: case B000101: 
+        // some boards strapped Bxx0100 are silkscreened in error as "PCB v1.4"
+        // so all boards strapped Bxx0010x will all enumerate as "PCB v1.3"
+        // some versions of board silkscreened "PCB v1.4" don't strap VERS5-6 low,
             pinCheck &= B000111; // strip off the unstrapped bits
             TLE5206 = true;
             break;
-}
+    }
     return pinCheck - 1;
 }
 
