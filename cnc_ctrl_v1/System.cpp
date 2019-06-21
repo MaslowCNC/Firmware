@@ -274,6 +274,32 @@ void   setupAxes(){
 }
 
 int getPCBVersion(){
+/*
+*       On the original Maslow L298P boards, 
+*     D22-D23 and D52-D53 on XIO were used to 
+*     indicate the board revision number in binary. 
+*     The software uses INPUT_PULLUP to read these pins 
+*     and detect the shield version. TLE5206 boards
+*     expanded the XIO pins to allow more board numbers.
+*       The value read from the gpio pins is/was 1-based,
+*     but the board version number silkscreened on those boards
+*     and reported by the firmware was zero-based - a source of
+*     confusion when creating new boards. 
+*       Beginning with board v1.6, the value from the gpio pins for new boards
+*     will be zero-based to match the number reported by the firmware
+*     and the silkscreen.
+*     
+*     
+*     "x" = not used
+*     #53-#52    #27-#26    #25-#24   #23-#22
+*     -------    -------    -------   -------
+*     GND GND     PU PU     PU  PU    GND PU  -> rev.0001  PCB v1.0 aka beta release board
+*     GND GND     PU PU     PU  PU    PU  GND -> rev.0002  PCB v1.1
+*     GND GND     PU PU     PU  PU    PU  PU  -> rev.0003  PCB v1.2
+*      x   x      x   x     GND PU    GND GND -> PCB v1.3 and 1.4 TLE5206
+*      x   x      GND GND   GND PU    GND PU  -> reserved for v1.4 TLE5206, v1.5 is unused
+*      x   x      GND GND   GND PU    PU  GND -> reserved for PCB v1.6
+*/  
     pinMode(VERS1,INPUT_PULLUP);
     pinMode(VERS2,INPUT_PULLUP);
     pinMode(VERS3,INPUT_PULLUP);
@@ -292,7 +318,7 @@ int getPCBVersion(){
             TLE5206 = true;
             break;
 }
-    return pinCheck - 1;
+    return pinCheck<6 ? pinCheck-1 : pinCheck;
 }
 
 
