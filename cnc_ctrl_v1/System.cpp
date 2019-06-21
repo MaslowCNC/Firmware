@@ -203,7 +203,7 @@ void   setupAxes(){
         aux8 = -1;       // unconnected
         aux9 = -1;       // unconnected
     }
-    else { // (pcbVersion == 3) // TLE5206
+    else if ((pcbVersion == 3) || (pcbVersion == 4)) { // TLE5206
         //TLE5206 PCB v1.3 Detected
         //MP1 - Right Motor
         encoder1A = 20; // INPUT
@@ -236,6 +236,40 @@ void   setupAxes(){
         aux7 = 45;
         aux8 = 46;
         aux9 = 47;
+    }
+    else { // board not recognized
+        reportAlarmMessage(ALARM_BOARD_VERSION_INVALID);
+        // Do we need to assure that no gpio pins are activated?
+        encoder1A = 0;
+        encoder1B = 0;
+        in1 = 0;
+        in2 = 0;
+        enA = 0;
+
+        //MP2 - Z-axis
+        encoder2A = 0;
+        encoder2B = 0;
+        in3 = 0;
+        in4 = 0;
+        enB = 0;
+
+        //MP3 - Left Motor
+        encoder3A = 0;
+        encoder3B = 0;
+        in5 = 0;
+        in6 = 0;
+        enC = 0;
+
+        //AUX pins
+        aux1 = 0;
+        aux2 = 0;
+        aux3 = 0;
+        aux4 = 0;
+        aux5 = 0;
+        aux6 = 0;
+        aux7 = 0;
+        aux8 = 0;
+        aux9 = 0;
     }
 
     if(sysSettings.chainOverSprocket == 1){
