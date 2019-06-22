@@ -61,4 +61,8 @@
                             // smooth.  This is only a minimum, and the actual
                             // timeout could be significantly larger.
 
+#define CMD_RESET 0x18      // ctrl-x., if received the program should do a soft reset
+                            // if received the program should do a soft reset
+#define CMD_RESET2 '`'      // alternate char because GC won't use control characters in a macro
+
 #endif
