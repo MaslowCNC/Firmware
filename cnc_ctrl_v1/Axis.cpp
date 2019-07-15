@@ -197,6 +197,7 @@ int    Axis::detach(){
 
 int    Axis::attach(){
      motorGearboxEncoder.motor.attach();
+     sys.writeStepsToEEPROM = true;
      return 1;
 }
 
@@ -256,12 +257,14 @@ void   Axis::test(){
     double encoderPos = motorGearboxEncoder.encoder.read(); //record the position now
     
     //move the motor
+    motorGearboxEncoder.motor.directWrite(255);
     while (i < 1000){
-        motorGearboxEncoder.motor.directWrite(255);
         i++;
         maslowDelay(1);
         if (sys.stop){return;}
     }
+    //stop the motor
+    motorGearboxEncoder.motor.directWrite(0);
     
     //check to see if it moved
     if(encoderPos - motorGearboxEncoder.encoder.read() > 500){
@@ -277,12 +280,14 @@ void   Axis::test(){
     
     //move the motor in the other direction
     i = 0;
+    motorGearboxEncoder.motor.directWrite(-255);
     while (i < 1000){
-        motorGearboxEncoder.motor.directWrite(-255);
         i++;
         maslowDelay(1);
         if (sys.stop){return;}
     }
+    //stop the motor
+    motorGearboxEncoder.motor.directWrite(0);
     
     //check to see if it moved
     if(encoderPos - motorGearboxEncoder.encoder.read() < -500){
@@ -292,8 +297,6 @@ void   Axis::test(){
         Serial.println(F("Direction 2 - Fail"));
     }
     
-    //stop the motor
-    motorGearboxEncoder.motor.directWrite(0);
     Serial.print(F("<Idle,MPos:0,0,0,WPos:0.000,0.000,0.000>"));
 }
 

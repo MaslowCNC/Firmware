@@ -15,12 +15,12 @@
     
     Copyright 2014-2017 Bar Smith*/
     
-    #ifndef RingBuffer_h
-    #define RingBuffer_h
+    #ifndef maslowRingBuffer_h
+    #define maslowRingBuffer_h
 
-    class RingBuffer{
+    class maslowRingBuffer{
         public:
-            RingBuffer();
+            maslowRingBuffer();
             int   write(char letter);
             void  print();
             char  read();

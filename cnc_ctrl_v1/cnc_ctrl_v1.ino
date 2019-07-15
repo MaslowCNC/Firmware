@@ -60,6 +60,7 @@ void setup(){
     if (TLE5206 == true) { Serial.print(F(" TLE5206 ")); }
     Serial.println(F(" Detected"));
     sys.inchesToMMConversion = 1;
+    sys.writeStepsToEEPROM = false;
     settingsLoadFromEEprom();
     setupAxes();
     settingsLoadStepsFromEEprom();

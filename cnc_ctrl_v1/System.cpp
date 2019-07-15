@@ -21,7 +21,7 @@ Copyright 2014-2017 Bar Smith*/
 
 bool TLE5206;
 
-// extern values using AUX pins defined in  configAuxLow() and configAuxHigh()
+// extern values using AUX pins defined in  setupAxes()
 int SpindlePowerControlPin;  // output for controlling spindle power
 int ProbePin;                // use this input for zeroing zAxis with G38.2 gcode
 int LaserPowerPin;           // Use this output to turn on and off a laser diode
@@ -65,7 +65,7 @@ void   setupAxes(){
 
     */
 
-    
+
     int encoder1A;
     int encoder1B;
     int encoder2A;
@@ -127,6 +127,10 @@ void   setupAxes(){
         aux4 = 14;
         aux5 = 0;        // warning! this is the serial TX line on the Mega2560
         aux6 = 1;        // warning! this is the serial RX line on the Mega2560
+
+        aux7 = -1;       // unconnected
+        aux8 = -1;       // unconnected
+        aux9 = -1;       // unconnected
     }
     else if(pcbVersion == 1){
         //PCB v1.1 Detected
@@ -158,6 +162,10 @@ void   setupAxes(){
         aux4 = 14;
         aux5 = A7;
         aux6 = A6;
+
+        aux7 = -1;       // unconnected
+        aux8 = -1;       // unconnected
+        aux9 = -1;       // unconnected
     }
     else if(pcbVersion == 2){
         //PCB v1.2 Detected
@@ -190,8 +198,12 @@ void   setupAxes(){
         aux4 = 14;
         aux5 = A7;
         aux6 = A6;
+
+        aux7 = -1;       // unconnected
+        aux8 = -1;       // unconnected
+        aux9 = -1;       // unconnected
     }
-    else if(pcbVersion == 3){ // TLE5206
+    else if ((pcbVersion == 3) || (pcbVersion == 4)) { // TLE5206
         //TLE5206 PCB v1.3 Detected
         //MP1 - Right Motor
         encoder1A = 20; // INPUT
@@ -225,6 +237,40 @@ void   setupAxes(){
         aux8 = 46;
         aux9 = 47;
     }
+    else { // board not recognized
+        reportAlarmMessage(ALARM_BOARD_VERSION_INVALID);
+        // Do we need to assure that no gpio pins are activated?
+        encoder1A = 0;
+        encoder1B = 0;
+        in1 = 0;
+        in2 = 0;
+        enA = 0;
+
+        //MP2 - Z-axis
+        encoder2A = 0;
+        encoder2B = 0;
+        in3 = 0;
+        in4 = 0;
+        enB = 0;
+
+        //MP3 - Left Motor
+        encoder3A = 0;
+        encoder3B = 0;
+        in5 = 0;
+        in6 = 0;
+        enC = 0;
+
+        //AUX pins
+        aux1 = 0;
+        aux2 = 0;
+        aux3 = 0;
+        aux4 = 0;
+        aux5 = 0;
+        aux6 = 0;
+        aux7 = 0;
+        aux8 = 0;
+        aux9 = 0;
+    }
 
     if(sysSettings.chainOverSprocket == 1){
         leftAxis.setup (enC, in6, in5, encoder3B, encoder3A, 'L', LOOPINTERVAL);
@@ -240,29 +286,54 @@ void   setupAxes(){
     rightAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     zAxis.setPIDValues(&sysSettings.zKpPos, &sysSettings.zKiPos, &sysSettings.zKdPos, &sysSettings.zPropWeightPos, &sysSettings.zKpV, &sysSettings.zKiV, &sysSettings.zKdV, &sysSettings.zPropWeightV);
 
+    // Assign AUX pins to extern variables used by functions like Spindle and Probe
+    SpindlePowerControlPin = aux1;   // output for controlling spindle power
+    LaserPowerPin = aux2;            // output for controlling a laser diode
+    ProbePin = aux4;                 // use this input for zeroing zAxis with G38.2 gcode
+    pinMode(LaserPowerPin, OUTPUT);
+    digitalWrite(LaserPowerPin, LOW);
+
     // implement the AUXx values that are 'used'. This accomplishes setting their values at runtime.
-    // Using a separate function is a compiler work-around to avoid
+    // Using these variables in a test permits to avoid warnings like
     //  "warning: variable ‘xxxxx’ set but not used [-Wunused-but-set-variable]"
     //  for AUX pins defined but not connected
-    configAuxLow(aux1, aux2, aux3, aux4, aux5, aux6);
-    if(pcbVersion == 3){ // TLE5206
-      configAuxHigh(aux7, aux8, aux9);
-    }
-}
 
-// Assign AUX pins to extern variables used by functions like Spindle and Probe
-void configAuxLow(int aux1, int aux2, int aux3, int aux4, int aux5, int aux6) {
-  SpindlePowerControlPin = aux1;   // output for controlling spindle power
-  ProbePin = aux4;                 // use this input for zeroing zAxis with G38.2 gcode
-  LaserPowerPin = aux2;            // output for controlling a laser diode
-  pinMode(LaserPowerPin, OUTPUT);
-  digitalWrite(LaserPowerPin, LOW);
-}
-
-void configAuxHigh(int aux7, int aux8, int aux9) {
+    // defined auxX are inputs by default
+    if (aux3 > 0) pinMode(aux3,INPUT);
+    if (aux5 > 0) pinMode(aux5,INPUT);
+    if (aux6 > 0) pinMode(aux6,INPUT);
+    if (aux7 > 0) pinMode(aux7,INPUT);
+    if (aux8 > 0) pinMode(aux8,INPUT);
+    if (aux9 > 0) pinMode(aux9,INPUT);
 }
 
 int getPCBVersion(){
+/*
+*       On the original Maslow L298P boards, 
+*     D22-D23 and D52-D53 on XIO were used to 
+*     indicate the board revision number in binary. 
+*     The software uses INPUT_PULLUP to read these pins 
+*     and detect the shield version. TLE5206 boards
+*     expanded the XIO pins to allow more board numbers.
+*       The value read from the gpio pins is/was 1-based,
+*     but the board version number silkscreened on those boards
+*     and reported by the firmware was zero-based - a source of
+*     confusion when creating new boards. 
+*       Beginning with board v1.6, the value from the gpio pins for new boards
+*     will be zero-based to match the number reported by the firmware
+*     and the silkscreen.
+*     
+*     
+*     "x" = not used
+*     #53-#52    #27-#26    #25-#24   #23-#22
+*     -------    -------    -------   -------
+*     GND GND     PU PU     PU  PU    GND PU  -> rev.0001  PCB v1.0 aka beta release board
+*     GND GND     PU PU     PU  PU    PU  GND -> rev.0002  PCB v1.1
+*     GND GND     PU PU     PU  PU    PU  PU  -> rev.0003  PCB v1.2
+*      x   x      x   x     GND PU    GND GND -> PCB v1.3 and 1.4 TLE5206
+*      x   x      GND GND   GND PU    GND PU  -> reserved for v1.4 TLE5206, v1.5 is unused
+*      x   x      GND GND   GND PU    PU  GND -> reserved for PCB v1.6
+*/  
     pinMode(VERS1,INPUT_PULLUP);
     pinMode(VERS2,INPUT_PULLUP);
     pinMode(VERS3,INPUT_PULLUP);
@@ -281,7 +352,7 @@ int getPCBVersion(){
             TLE5206 = true;
             break;
 }
-    return pinCheck - 1;
+    return pinCheck<6 ? pinCheck-1 : pinCheck;
 }
 
 
@@ -410,7 +481,7 @@ void systemSaveAxesPosition(){
     /*
     Save steps of axes to EEPROM if they are all detached
     */
-    if (!leftAxis.attached() && !rightAxis.attached() && !zAxis.attached()){
+    if (sys.writeStepsToEEPROM && !leftAxis.attached() && !rightAxis.attached() && !zAxis.attached()){
         settingsSaveStepstoEEprom();
     }
 }

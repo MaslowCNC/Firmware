@@ -64,6 +64,7 @@ typedef struct {
   int   nextTool;             //Stores the value of the next tool number eg: T4 -> 4
   float inchesToMMConversion; //Used to track whether to convert from inches, can probably be done in a way that doesn't require RAM
   float feedrate;             //The feedrate of the machine in mm/min
+  bool writeStepsToEEPROM;    // Flag to determine when need to write encoder steps to EEPROM.. used in execSystemRealtime and axis.attach
   // THE FOLLOWING IS USED FOR IMPORTING SETTINGS FROM FIRMWARE v1.00 AND EARLIER 
   // It can be deleted at some point
   byte oldSettingsFlag;
@@ -72,7 +73,7 @@ extern system_t sys;
 extern Axis leftAxis;
 extern Axis rightAxis;
 extern Axis zAxis;
-extern RingBuffer incSerialBuffer;
+extern maslowRingBuffer incSerialBuffer;
 extern Kinematics kinematics;
 extern byte systemRtExecAlarm;
 extern int SpindlePowerControlPin;
@@ -89,6 +90,4 @@ void systemSaveAxesPosition();
 void systemReset();
 byte systemExecuteCmdstring(String&);
 void setPWMPrescalers(int prescalerChoice);
-void configAuxLow(int A1, int A2, int A3, int A4, int A5, int A6);
-void configAuxHigh(int A7, int A8, int A9);
 #endif
