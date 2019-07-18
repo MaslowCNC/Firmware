@@ -358,23 +358,39 @@ int getPCBVersion(){
 
 //
 // PWM frequency change
-//  presently just sets the default value
-//  different values seem to need specific PWM tunings...
+//  constrain choices to valid values
+//  tailor the PWM frequency to less than the driver chip upper limit
 //
 void setPWMPrescalers(int prescalerChoice) {
+    // limit prescalerChoice to valid values 1..3
+    prescalerChoice = constrain(abs(prescalerChoice),1,3);
     #if defined (verboseDebug) && verboseDebug > 0
         Serial.print(F("fPWM set to "));
         switch (prescalerChoice) {
             case 1:
-                Serial.println(F("31,000Hz"));
+                if (TLE5206) {
+                    Serial.println(F("490Hz - TLE5206 upper limit"));
+                } else { // L298 works at 31,000Hz
+                    Serial.println(F("31,000Hz"));
+                }
             break;
             case 2:
-                Serial.println(F("4,100Hz"));
+                if (TLE5206) {
+                    Serial.println(F("490Hz - TLE5206 upper limit"));
+                } else {
+                    Serial.println(F("4,100Hz"));
+                }
             break;
             case 3:
                 Serial.println(F("490Hz"));
             }
     #endif
+    // tailor the PWM frequency to the chip
+    if (TLE5206) {
+    // The upper limit to PWM frequency for TLE5206 is 1,000Hz
+    //  so only '3' is valid
+        prescalerChoice = 3;
+    }
 // first must erase the bits in each TTCRxB register that control the timers prescaler
     int prescalerEraser = 7;      // this is 111 in binary and is used as an eraser
     TCCR2B &= ~prescalerEraser;   // this operation sets the three bits in TCCR2B to 0
