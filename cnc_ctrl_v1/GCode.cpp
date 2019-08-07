@@ -285,6 +285,12 @@ byte  executeBcodeLine(const String& gcodeLine){
             execSystemRealtime();
             if (sys.stop){return STATUS_OK;}
         }
+        if (gcodeLine.indexOf('L') != -1){
+            leftAxis.motorGearboxEncoder.motor.directWrite(0);
+        }
+        else{
+            rightAxis.motorGearboxEncoder.motor.directWrite(0);
+        }
         bit_false(sys.state,STATE_POS_ERR_IGNORE);
         return STATUS_OK;
     }
