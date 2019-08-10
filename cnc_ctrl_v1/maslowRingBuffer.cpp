@@ -169,7 +169,7 @@ int maslowRingBuffer::_incrementEnd(){
         }
     else
         _endOfString = (_endOfString+1) % INCBUFFERLENGTH;
-        return 0;
+    return 0;
  }
 
 void maslowRingBuffer::_incrementVariable(int* variable){
