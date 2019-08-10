@@ -259,6 +259,17 @@ void  returnError(){
         Serial.println(F("]"));
         if (!sys.stop) {
           if (!(sys.state & STATE_POS_ERR_IGNORE)) {
+            #ifdef alarmsTLE9201
+                if ((digitalRead(SO1) == HIGH) && (digitalRead(ENA) == LOW)) {
+                    reportAlarmMessage(ALARM_MOTOR1_CURRENT_TEMPERATURE_ERROR);
+                }
+                if ((digitalRead(SO2) == HIGH) && (digitalRead(ENB) == LOW)) {
+                    reportAlarmMessage(ALARM_MOTOR2_CURRENT_TEMPERATURE_ERROR);
+                }
+                if ((digitalRead(SO3) == HIGH) && (digitalRead(ENC) == LOW)) {
+                    reportAlarmMessage(ALARM_MOTOR3_CURRENT_TEMPERATURE_ERROR);
+                }
+            #endif
             if ((abs(leftAxis.error()) >= sysSettings.positionErrorLimit) || (abs(rightAxis.error()) >= sysSettings.positionErrorLimit)) {
                 reportAlarmMessage(ALARM_POSITION_LIMIT_ERROR);
             }
