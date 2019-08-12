@@ -20,12 +20,20 @@ Copyright 2014-2017 Bar Smith*/
 #include "Maslow.h"
 
 bool TLE5206;
+bool TLE9201;
 
 // extern values using AUX pins defined in  setupAxes()
 int SpindlePowerControlPin;  // output for controlling spindle power
 int ProbePin;                // use this input for zeroing zAxis with G38.2 gcode
 int LaserPowerPin;           // Use this output to turn on and off a laser diode
 
+// external values used to identify TLE9201 Current/Temperature alarms
+int SO1;
+int SO2;
+int SO3;
+int ENA;
+int ENB;
+int ENC;
 
 void  calibrateChainLengths(String gcodeLine){
     /*
@@ -203,7 +211,7 @@ void   setupAxes(){
         aux8 = -1;       // unconnected
         aux9 = -1;       // unconnected
     }
-    else if ((pcbVersion == 3) || (pcbVersion == 4)) { // TLE5206
+    else if((pcbVersion == 3) || (pcbVersion == 4)) { // TLE5206
         //TLE5206 PCB v1.3 Detected
         //MP1 - Right Motor
         encoder1A = 20; // INPUT
@@ -225,6 +233,43 @@ void   setupAxes(){
         in5 = 10;        // OUTPUT
         in6 = 11;        // OUTPUT
         enC = 12;        // errorFlag
+
+        //AUX pins
+        aux1 = 40;
+        aux2 = 41;
+        aux3 = 42;
+        aux4 = 43;
+        aux5 = 68;
+        aux6 = 69;
+        aux7 = 45;
+        aux8 = 46;
+        aux9 = 47;
+    }
+    else if (pcbVersion == 6){ // TLE9201
+        //TLE9201 PCB v1.6 Detected
+        //MP1 - Right Motor
+        encoder1A = 20;  // INPUT
+        encoder1B = 21;  // INPUT
+        in1 = 4;         // OUTPUT - TLE9201 DIR
+        in2 = 5;         // OUTPUT - TLE9201 ENABLE
+        enA = 6;         // OUTPUT - TLE9201 PWM
+        ENA = enA;
+
+        //MP2 - Z-axis
+        encoder2A = 19;  // INPUT
+        encoder2B = 18;  // INPUT
+        in3 = 7;         // OUTPUT - TLE9201 DIR
+        in4 = 8;         // OUTPUT - TLE9201 ENABLE
+        enB = 9;         // OUTPUT - TLE9201 PWM
+        ENB = enB;
+
+        //MP3 - Left Motor
+        encoder3A = 2;   // INPUT
+        encoder3B = 3;   // INPUT
+        in5 = 11;        // OUTPUT - TLE9201 DIR
+        in6 = 12;        // OUTPUT - TLE9201 ENABLE
+        enC = 10;        // OUTPUT - TLE9201 PWM
+        ENC = enC;
 
         //AUX pins
         aux1 = 40;
@@ -272,16 +317,38 @@ void   setupAxes(){
         aux9 = 0;
     }
 
+    /*
+    * Set motor directions - Left and Right must turn in opposite directions, and 
+    * the setting chainOverSprocket reverses their directions. The Z motor is not
+    * affected by chainOverSprocket.
+    * The TLE9201 uses dedicated DIR, PWM and DISable pins,
+    * so logic from previous chips won't work. 
+    * The direction logic for the TLE9201 is handled in Motor::write()
+    */
     if(sysSettings.chainOverSprocket == 1){
-        leftAxis.setup (enC, in6, in5, encoder3B, encoder3A, 'L', LOOPINTERVAL);
-        rightAxis.setup(enA, in1, in2, encoder1A, encoder1B, 'R', LOOPINTERVAL);
+        if (!TLE9201) {
+            leftAxis.setup (enC, in6, in5, encoder3B, encoder3A, 'L', LOOPINTERVAL);
+            rightAxis.setup(enA, in1, in2, encoder1A, encoder1B, 'R', LOOPINTERVAL);
+        } 
+        else { // TLE9201 
+        // TLE9201 values: (pwm, enable, direction, encoderB, encoderA, name, LOOPINTERVAL)
+            leftAxis.setup (enC, in5, in6, encoder3B, encoder3A, 'L', LOOPINTERVAL);
+            rightAxis.setup(enA, in1, in2, encoder1A, encoder1B, 'R', LOOPINTERVAL);
+        }
     }
-    else{
-        leftAxis.setup (enC, in5, in6, encoder3A, encoder3B, 'L', LOOPINTERVAL);
-        rightAxis.setup(enA, in2, in1, encoder1B, encoder1A, 'R', LOOPINTERVAL);
+    else{ // chain Under Sprocket...
+        if (!TLE9201) {
+            leftAxis.setup (enC, in5, in6, encoder3A, encoder3B, 'L', LOOPINTERVAL);
+            rightAxis.setup(enA, in2, in1, encoder1B, encoder1A, 'R', LOOPINTERVAL);
+        }
+        else {
+            leftAxis.setup (enC, in5, in6, encoder3A, encoder3B, 'L', LOOPINTERVAL);
+            rightAxis.setup(enA, in1, in2, encoder1B, encoder1A, 'R', LOOPINTERVAL);
+        }
     }
 
     zAxis.setup    (enB, in3, in4, encoder2B, encoder2A, 'Z', LOOPINTERVAL);
+
     leftAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     rightAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     zAxis.setPIDValues(&sysSettings.zKpPos, &sysSettings.zKiPos, &sysSettings.zKdPos, &sysSettings.zPropWeightPos, &sysSettings.zKpV, &sysSettings.zKiV, &sysSettings.zKdV, &sysSettings.zPropWeightV);
@@ -332,8 +399,8 @@ int getPCBVersion(){
 *     GND GND     PU PU     PU  PU    PU  PU  -> rev.0003  PCB v1.2
 *      x   x      x   x     GND PU    GND GND -> PCB v1.3 and 1.4 TLE5206
 *      x   x      GND GND   GND PU    GND PU  -> reserved for v1.4 TLE5206, v1.5 is unused
-*      x   x      GND GND   GND PU    PU  GND -> reserved for PCB v1.6
-*/  
+*      x   x      GND GND   GND PU    PU  GND -> PCB v1.6 TLE9201
+*/
     pinMode(VERS1,INPUT_PULLUP);
     pinMode(VERS2,INPUT_PULLUP);
     pinMode(VERS3,INPUT_PULLUP);
@@ -346,12 +413,18 @@ int getPCBVersion(){
         case B111101: case B111110: case B111111: // v1.1, v1.2, v1.3
             pinCheck &= B000011; // strip off the unstrapped bits
             TLE5206 = false;
+            TLE9201 = false;
             break;
         case B110100: case B000100: // some versions of board v1.4 don't strap VERS5-6 low
-            pinCheck &= B000111; // strip off the unstrapped bits
+            pinCheck &= B000111;    // strip off the unstrapped bits
             TLE5206 = true;
+            TLE9201 = false;
             break;
-}
+        case B000110:
+            TLE5206 = false;
+            TLE9201 = true;
+            break;
+    }
     return pinCheck<6 ? pinCheck-1 : pinCheck;
 }
 
@@ -370,6 +443,8 @@ void setPWMPrescalers(int prescalerChoice) {
             case 1:
                 if (TLE5206) {
                     Serial.println(F("490Hz - TLE5206 upper limit"));
+                } else if (TLE9201) {
+                    Serial.println(F("4,100Hz - TLE9201 upper limit"));
                 } else { // L298 works at 31,000Hz
                     Serial.println(F("31,000Hz"));
                 }
@@ -390,6 +465,9 @@ void setPWMPrescalers(int prescalerChoice) {
     // The upper limit to PWM frequency for TLE5206 is 1,000Hz
     //  so only '3' is valid
         prescalerChoice = 3;
+    } else if (TLE9201) { 
+    // The upper limit to PWM frequency for TLE9201 is 20,000Hz
+        prescalerChoice = constrain(prescalerChoice,2,3);
     }
 // first must erase the bits in each TTCRxB register that control the timers prescaler
     int prescalerEraser = 7;      // this is 111 in binary and is used as an eraser

@@ -38,7 +38,26 @@ int  Motor::setupMotor(const int& pwmPin, const int& pin1, const int& pin2){
   _pin2  = pin2;
   _attachedState = 0;
 
-  if (TLE5206 == false) {
+  if (TLE5206 == true) {
+  //set pinmodes
+    pinMode(_pwmPin,   INPUT);   // TLE5206 'Error Flag' pin
+    pinMode(_pin1,     OUTPUT);
+    pinMode(_pin2,     OUTPUT);
+    
+ //stop the motor
+    digitalWrite(_pin1,    LOW);
+    digitalWrite(_pin2,    LOW) ;
+    
+  } else if (TLE9201 == true) {
+  //set pinmodes
+    pinMode(_pwmPin,   OUTPUT);
+    pinMode(_pin1,     OUTPUT);   // TLE9201 DIR pin
+    pinMode(_pin2,     OUTPUT);   // TLE9201 ENABLE pin
+    
+  //stop the motor
+    digitalWrite(_pin2,    HIGH); // TLE9201 ENABLE pin, LOW = on
+    
+  } else {
   //set pinmodes
     pinMode(_pwmPin,   OUTPUT);
     pinMode(_pin1,     OUTPUT);
@@ -48,14 +67,6 @@ int  Motor::setupMotor(const int& pwmPin, const int& pin1, const int& pin2){
     digitalWrite(_pin1,    HIGH);
     digitalWrite(_pin2,    LOW) ;
     digitalWrite(_pwmPin,  LOW);
-  } else {
-    pinMode(_pwmPin,   INPUT);
-    pinMode(_pin1,     OUTPUT);
-    pinMode(_pin2,     OUTPUT);
-
-    //stop the motor
-    digitalWrite(_pin1,    LOW);
-    digitalWrite(_pin2,    LOW) ;
   }
   return 1;
 }
@@ -66,16 +77,20 @@ void Motor::attach(){
 
 void Motor::detach(){
     if (_attachedState != 0) {
-      if (TLE5206 == false) {
+        if (TLE5206 == true) {
+          //stop the motor
+          digitalWrite(_pin1,    LOW);
+          digitalWrite(_pin2,    LOW) ;
+        } else if (TLE9201 == true) {
         //stop the motor
-        digitalWrite(_pin1,    HIGH);
-        digitalWrite(_pin2,    LOW) ;
-        digitalWrite(_pwmPin,  LOW);
-      } else {
-        //stop the motor
-        digitalWrite(_pin1,    LOW);
-        digitalWrite(_pin2,    LOW) ;
-      }
+          digitalWrite(_pin2,    HIGH); // TLE9201 ENABLE pin, LOW = on
+          analogWrite(_pwmPin,   0);
+        } else {
+          //stop the motor
+          digitalWrite(_pin1,    HIGH);
+          digitalWrite(_pin2,    LOW) ;
+          digitalWrite(_pwmPin,  LOW);
+        }
     }
     _attachedState = 0;
 }
@@ -107,7 +122,7 @@ void Motor::write(int speed, bool force){
         bool usePin1 = ((_pin1 != 4) && (_pin1 != 13) && (_pin1 != 11) && (_pin1 != 12)); // avoid PWM using timer0 or timer1
         bool usePin2 = ((_pin2 != 4) && (_pin2 != 13) && (_pin2 != 11) && (_pin2 != 12)); // avoid PWM using timer0 or timer1
         bool usepwmPin = ((TLE5206 == false) && (_pwmPin != 4) && (_pwmPin != 13) && (_pwmPin != 11) && (_pwmPin != 12)); // avoid PWM using timer0 or timer1       
-        if (!TLE5206) {
+        if (!(TLE5206 || TLE9201)) { // L298 boards
             if (forward){
                 if (usepwmPin){
                     digitalWrite(_pin1 , HIGH );
@@ -143,7 +158,7 @@ void Motor::write(int speed, bool force){
                 }
             }
         } 
-        else { // TLE5206
+        else if (TLE5206)  {
             speed = constrain(speed, 0, 254); // avoid issue when PWM value is 255
             if (forward) {
                 if (speed > 0) {
@@ -171,6 +186,50 @@ void Motor::write(int speed, bool force){
                 }
             }
         }
+        else if (TLE9201) {
+            int dirPin     = _pin1;
+            int enablePin  = _pin2;
+            const int TOP  = 1;
+            /*
+            * The TLE9201 uses dedicated DIR, PWM and DISable pins,
+            * so logic from previous chips won't work. In addition, 
+            * the left and right motors are affected by chainOverSprocket 
+            * but the Z motor is not.
+            */
+
+            uint8_t dirCMD;
+            uint8_t extend = HIGH;
+            uint8_t retract = LOW;
+            if (_pwmPin == ENB) { // Z motor unaffected by chainOverSprocket
+                if (forward) {
+                    dirCMD = retract;
+                } 
+                else {
+                    dirCMD = extend;
+                } 
+            } else { // L and R motor affected by chainOverSprocket
+                if(sysSettings.chainOverSprocket == TOP) {
+                    if (forward) {
+                        dirCMD = extend;
+                    } 
+                    else {
+                        dirCMD = retract;
+                    } 
+                } else {
+                    if (forward) {
+                        dirCMD = retract;
+                    } 
+                    else {
+                        dirCMD = extend;
+                    }
+                }
+            }
+
+            digitalWrite(dirPin, dirCMD); // TLE9201 DIR pin
+            analogWrite (_pwmPin, speed); // TLE9201 PWM pin
+            digitalWrite(enablePin, LOW); // TLE9201 ENABLE pin, HIGH = disable
+        }
+    else {} // add new boards here
     }
 }
 

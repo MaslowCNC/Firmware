@@ -50,4 +50,8 @@
             
     };
     extern bool TLE5206;
+    extern bool TLE9201;
+    extern int ENA;
+    extern int ENB;
+    extern int ENC;
     #endif

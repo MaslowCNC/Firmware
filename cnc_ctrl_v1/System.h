@@ -79,6 +79,12 @@ extern byte systemRtExecAlarm;
 extern int SpindlePowerControlPin;
 extern int LaserPowerPin;
 extern int ProbePin;
+extern int SO1;
+extern int SO2;
+extern int SO3;
+extern int ENA;
+extern int ENB;
+extern int ENC;
 
 void  calibrateChainLengths(String);
 void  setupAxes();

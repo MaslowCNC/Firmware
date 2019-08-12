@@ -33,6 +33,11 @@
                            // simulator. Normally, you would not define this directly, but
                            // use PlatformIO to build the simavr environment.
 
+// #define alarmsTLE9201   // Uncomment this to make TLE9201 over-current/over-temp alarms active
+                           // Note that in normal operation these alarms are often triggered by 
+                           // abrupt direction change. Until acceleration control is available,
+                           // the alarms aren't useful.
+
 #define LOOPINTERVAL 10000 // What is the frequency of the PID loop in microseconds
 
 // Define version detect pins
