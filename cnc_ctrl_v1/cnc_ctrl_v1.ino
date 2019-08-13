@@ -63,6 +63,7 @@ void setup(){
     Serial.println(F(" Detected"));
     sys.inchesToMMConversion = 1;
     sys.writeStepsToEEPROM = false;
+    sys.feedrate = 400;
     settingsLoadFromEEprom();
     setupAxes();
     settingsLoadStepsFromEEprom();
