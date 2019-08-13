@@ -63,8 +63,8 @@ void setup(){
     Serial.println(F(" Detected"));
     sys.inchesToMMConversion = 1;
     sys.writeStepsToEEPROM = false;
-    sys.feedrate = 400;
     settingsLoadFromEEprom();
+    sys.feedrate = sysSettings.maxFeed / 2.0;
     setupAxes();
     settingsLoadStepsFromEEprom();
     // Set initial desired position of the machine to its current position
