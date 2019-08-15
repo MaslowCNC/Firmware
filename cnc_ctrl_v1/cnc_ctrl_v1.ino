@@ -64,6 +64,7 @@ void setup(){
     sys.inchesToMMConversion = 1;
     sys.writeStepsToEEPROM = false;
     settingsLoadFromEEprom();
+    sys.feedrate = sysSettings.maxFeed / 2.0;
     setupAxes();
     settingsLoadStepsFromEEprom();
     // Set initial desired position of the machine to its current position
