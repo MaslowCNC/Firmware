@@ -206,6 +206,7 @@ byte  executeBcodeLine(const String& gcodeLine){
         Serial.print(rightAxis.read());
         Serial.println(F("mm"));
       
+        kinematics.forward(leftAxis.read(), rightAxis.read(), &sys.xPosition, &sys.yPosition, 0, 0);
         //set flag to write current encoder steps to EEPROM
         sys.writeStepsToEEPROM = true;
 
