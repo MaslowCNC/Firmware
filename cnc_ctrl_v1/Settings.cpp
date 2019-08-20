@@ -382,6 +382,7 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
             break;
         case 37:
               sysSettings.chainSagCorrection = value;
+              kinematics.init();
               break;
         case 38:
               settingsSaveStepstoEEprom();
@@ -400,9 +401,11 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
               break;
         case 40:
               sysSettings.leftChainTolerance = value;
+              kinematics.init();
               break;
         case 41:
               sysSettings.rightChainTolerance = value;
+              kinematics.init();
               break;
         case 42:
               sysSettings.positionErrorLimit = value;
