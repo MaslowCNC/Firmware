@@ -35,6 +35,7 @@
 // TLE5206 version
 
 #include "Maslow.h"
+#include <EEPROM.h>
 
 // Define system global state structure
 system_t sys;
@@ -44,6 +45,9 @@ settings_t sysSettings;
 
 // Global realtime executor bitflag variable for setting various alarms.
 byte systemRtExecAlarm;  
+
+// Define global flag for FAKE_SERVO state
+int FAKE_SERVO_STATE = 0;
 
 // Define axes, it might be tighter to define these within the sys struct
 Axis leftAxis;
@@ -63,6 +67,12 @@ void setup(){
     Serial.println(F(" Detected"));
     sys.inchesToMMConversion = 1;
     sys.writeStepsToEEPROM = false;
+    FAKE_SERVO_STATE = EEPROM[ FAKE_SERVO ] & B00000001;
+   if (FAKE_SERVO_STATE == 0) {
+       Serial.println(F("FAKE_SERVO off"));
+   } else {
+       Serial.println(F("FAKE_SERVO on"));
+   }
     settingsLoadFromEEprom();
     sys.feedrate = sysSettings.maxFeed / 2.0;
     setupAxes();

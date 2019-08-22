@@ -19,6 +19,7 @@ Copyright 2014-2017 Bar Smith*/
 // commands
 
 #include "Maslow.h"
+#include <EEPROM.h>
 
 maslowRingBuffer incSerialBuffer;
 String readyCommandString = "";  //KRK why is this a global?
@@ -367,7 +368,35 @@ byte  executeBcodeLine(const String& gcodeLine){
 
         return STATUS_OK;
     }
-    return STATUS_INVALID_STATEMENT;
+
+        // Use 'B99 ON' to set FAKE_SERVO mode on,
+        // 'B99' with no parameter, or any parameter other than 'ON' 
+        // turns FAKE_SERVO mode off.
+        // FAKE_SERVO mode causes the Firmware to mimic a servo,
+        // updating the encoder steps even if no servo is connected.
+        // Useful for testing on an arduino only (e.g. without motors).
+        // The status of FAKE_SERVO mode is stored in EEPROM[ 4095 ] 
+        // to persist between resets. Tthat byte is set to '1' when FAKE_SERVO
+        // is on, '0' when off. settingsWipe(SETTINGS_RESTORE_ALL) clears the
+        // EEPROM to '0', sothat stores '0' at EEPROM[ 4095 ] as well.
+        if(gcodeLine.substring(0, 3) == "B99") {
+        int letterO = gcodeLine.indexOf('O');
+        int letterN = gcodeLine.indexOf('N');
+        if ((letterO != -1) && (letterN != -1)) {
+          EEPROM[ FAKE_SERVO ] = 1;
+          FAKE_SERVO_STATE = 1;
+        } else {
+          EEPROM[ FAKE_SERVO ] = 0;
+          FAKE_SERVO_STATE = 0;
+        }
+        if (FAKE_SERVO_STATE == 0) {
+          Serial.println(F("FAKE_SERVO off"));
+        } else {
+          Serial.println(F("FAKE_SERVO on"));
+        }
+        return(STATUS_OK);
+     }
+   return STATUS_INVALID_STATEMENT;
 }
 
 void  executeGcodeLine(const String& gcodeLine){

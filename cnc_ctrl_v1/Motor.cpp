@@ -113,7 +113,7 @@ void Motor::write(int speed, bool force){
     /*
     Sets motor speed from input. Speed = 0 is stopped, -255 is full reverse, 255 is full ahead. If force is true the motor attached state will be ignored
     */
-    if (_attachedState == 1 or force){
+    if ((_attachedState == 1 or force) and (FAKE_SERVO_STATE == 0)){
         speed = constrain(speed, -255, 255);
         _lastSpeed = speed; //saves speed for use in additive write
         bool forward = (speed > 0);
