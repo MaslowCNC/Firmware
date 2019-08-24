@@ -46,5 +46,6 @@ void  G38(const String&);
 void  setInchesToMillimetersConversion(float);
 extern int SpindlePowerControlPin;
 extern int ProbePin;
+extern int FAKE_SERVO_STATE;
 
 #endif

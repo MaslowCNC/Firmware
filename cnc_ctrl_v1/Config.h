@@ -25,9 +25,12 @@
                            // LOOPINTERVAL tuning
 #define KINEMATICSDBG 0    // set to 1 for additional kinematics debug messaging
 
-// #define FAKE_SERVO      // Uncomment this line to cause the Firmware to mimic
-                           // a servo updating the encoder steps even if no servo
-                           // is connected.  Useful for testing on an arduino only
+#define FAKE_SERVO 4095    // store the state of FAKE_SERVO in EEPROM[ 4095 ] to preserve
+                           // the state of FAKE_SERVO mode over resets.
+                           // Use 'B99 ON' to turn FAKE_SERVO mode on and set EEPROM[ 4095 ] to '1',
+                           // 'B99' with no parameter, or any parameter other than 'ON' 
+                           // puts a '0' in that location and turns FAKE_SERVO mode off.
+                           // Useful for testing on an arduino only (e.g. without motors).
 
 // #define SIMAVR          // Uncomment this if you plan to run the Firmware in the simavr
                            // simulator. Normally, you would not define this directly, but

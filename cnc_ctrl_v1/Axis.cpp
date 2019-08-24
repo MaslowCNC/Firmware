@@ -17,6 +17,7 @@
 
 
 #include "Maslow.h"
+// #include <EEPROM.h>
 
 void Axis::setup(const int& pwmPin, const int& directionPin1, const int& directionPin2, const int& encoderPin1, const int& encoderPin2, const char& axisName, const unsigned long& loopInterval)
 {
@@ -84,14 +85,14 @@ void   Axis::setSteps(const long& steps){
 
 void   Axis::computePID(){
     
-    #ifdef FAKE_SERVO
-      if (motorGearboxEncoder.motor.attached()){
-        // Adds up to 10% error just to simulate servo noise
-        double rpm = (-1 * _pidOutput) * random(90, 110) / 100;
-        unsigned long steps = motorGearboxEncoder.encoder.read() + round( rpm * *_encoderSteps * LOOPINTERVAL)/(60 * 1000000);
-        motorGearboxEncoder.encoder.write(steps);
+      if (FAKE_SERVO_STATE != 0) {
+          if (motorGearboxEncoder.motor.attached()){
+            // Adds up to 10% error just to simulate servo noise
+            double rpm = (-1 * _pidOutput) * random(90, 110) / 100;
+            unsigned long steps = motorGearboxEncoder.encoder.read() + round( rpm * *_encoderSteps * LOOPINTERVAL)/(60 * 1000000);
+            motorGearboxEncoder.encoder.write(steps);
+          }
       }
-    #endif
 
     if (_disableAxisForTesting || !motorGearboxEncoder.motor.attached()){
         return;
