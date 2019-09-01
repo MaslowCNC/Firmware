@@ -67,12 +67,13 @@ void setup(){
     Serial.println(F(" Detected"));
     sys.inchesToMMConversion = 1;
     sys.writeStepsToEEPROM = false;
-    FAKE_SERVO_STATE = EEPROM[ FAKE_SERVO ] & B00000001;
-   if (FAKE_SERVO_STATE == 0) {
-       Serial.println(F("FAKE_SERVO off"));
-   } else {
-       Serial.println(F("FAKE_SERVO on"));
-   }
+    FAKE_SERVO_STATE = EEPROM[ FAKE_SERVO ];
+    if (FAKE_SERVO_STATE == FAKE_SERVO_PERMITTED) { // only this value is accepted
+        Serial.println(F("FAKE_SERVO on"));         // to turn this on
+    } else {
+        Serial.println(F("FAKE_SERVO off"));        // otherwise 
+        EEPROM[ FAKE_SERVO ] = 0;                   // force it to the 'off' value
+    }
     settingsLoadFromEEprom();
     sys.feedrate = sysSettings.maxFeed / 2.0;
     setupAxes();

@@ -376,23 +376,23 @@ byte  executeBcodeLine(const String& gcodeLine){
         // updating the encoder steps even if no servo is connected.
         // Useful for testing on an arduino only (e.g. without motors).
         // The status of FAKE_SERVO mode is stored in EEPROM[ 4095 ] 
-        // to persist between resets. Tthat byte is set to '1' when FAKE_SERVO
+        // to persist between resets. That byte is set to 'FAKE_SERVO_PERMITTED' when FAKE_SERVO
         // is on, '0' when off. settingsWipe(SETTINGS_RESTORE_ALL) clears the
         // EEPROM to '0', sothat stores '0' at EEPROM[ 4095 ] as well.
         if(gcodeLine.substring(0, 3) == "B99") {
         int letterO = gcodeLine.indexOf('O');
         int letterN = gcodeLine.indexOf('N');
         if ((letterO != -1) && (letterN != -1)) {
-          EEPROM[ FAKE_SERVO ] = 1;
-          FAKE_SERVO_STATE = 1;
+          EEPROM[ FAKE_SERVO ] = FAKE_SERVO_PERMITTED;
+          FAKE_SERVO_STATE = FAKE_SERVO_PERMITTED;
         } else {
           EEPROM[ FAKE_SERVO ] = 0;
           FAKE_SERVO_STATE = 0;
         }
-        if (FAKE_SERVO_STATE == 0) {
-          Serial.println(F("FAKE_SERVO off"));
-        } else {
+        if (FAKE_SERVO_STATE == FAKE_SERVO_PERMITTED) {
           Serial.println(F("FAKE_SERVO on"));
+        } else {
+          Serial.println(F("FAKE_SERVO off"));
         }
         return(STATUS_OK);
      }

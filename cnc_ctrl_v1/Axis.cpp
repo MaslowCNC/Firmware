@@ -85,7 +85,7 @@ void   Axis::setSteps(const long& steps){
 
 void   Axis::computePID(){
     
-      if (FAKE_SERVO_STATE != 0) {
+      if (FAKE_SERVO_STATE == FAKE_SERVO_PERMITTED) {
           if (motorGearboxEncoder.motor.attached()){
             // Adds up to 10% error just to simulate servo noise
             double rpm = (-1 * _pidOutput) * random(90, 110) / 100;
