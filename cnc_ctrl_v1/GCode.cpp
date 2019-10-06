@@ -566,6 +566,9 @@ void  sanitizeCommandString(String& cmdString){
                 cmdString.remove(pos, 1);
                 if (line_flags & LINE_FLAG_COMMENT_PARENTHESES) { line_flags &= ~(LINE_FLAG_COMMENT_PARENTHESES); }
             }
+           else {
+                cmdString.remove(pos, 1);
+            }
         }
         else {
             if (cmdString[pos] < ' ') {
