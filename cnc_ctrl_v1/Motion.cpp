@@ -237,7 +237,7 @@ int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, co
     
     */
     
-    //compute geometry 
+    // Compute geometry.
     float pi                     =  3.1415;
     float radius                 =  sqrt( sq(centerX - X1) + sq(centerY - Y1) ); 
     float circumference          =  2.0*pi*radius;
@@ -245,12 +245,18 @@ int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, co
     float startingAngle          =  atan2(Y1 - centerY, X1 - centerX);
     float endingAngle            =  atan2(Y2 - centerY, X2 - centerX);
     
-    // compute chord height of arc
+    // Compute chord height of arc.
     float chordSquared           = sqrt(sq(X2 - X1) + sq(Y2 - Y1));
     float tau                    = sqrt( sq(radius) - (chordSquared/4.0));
     float chordHeight            = radius - tau;
 
-    //compute angle between lines
+    // Determine if Z axis will be used.
+    bool useZ = true;
+    if (isnan(Z1) || isnan(Z2) || !sysSettings.zAxisAttached) {
+      useZ = false;
+    }
+
+    // Compute angle between lines.
     float theta                  =  endingAngle - startingAngle;
     if (direction == COUNTERCLOCKWISE){
         if (theta <= 0){
@@ -269,7 +275,10 @@ int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, co
       // In either case, the gcode cut was essentially a straight line, so 
       // Replace it with a G1 cut to the endpoint
       String gcodeSubstitution = "G1 X";
-      gcodeSubstitution = gcodeSubstitution + String(X2 / sys.inchesToMMConversion, 3) + " Y" + String(Y2 / sys.inchesToMMConversion, 3) + " Z" + String(Z2 / sys.inchesToMMConversion, 3) + " ";
+      gcodeSubstitution += String(X2 / sys.inchesToMMConversion, 3) + " Y" + String(Y2 / sys.inchesToMMConversion, 3);
+      if (useZ) {
+        gcodeSubstitution += " Z" + String(Z2 / sys.inchesToMMConversion, 3) + " ";
+      }
       Serial.println("Large-radius arc replaced by straight line to improve accuracy: " + gcodeSubstitution);
       G1(gcodeSubstitution, 1);
       return 1;
@@ -287,32 +296,37 @@ int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, co
     long   finalNumberOfSteps     = arcLengthMM/stepSizeMM;
     float  delayTime              = LOOPINTERVAL;
 
-    float  zFeedRate              = calculateFeedrate(fabs(zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
-    float  zMaxFeed               = sysSettings.maxZRPM * abs(zAxis.getPitch());
-    // float  zStepSizeMM            = computeStepSize(zMaxFeed);
-    float  zStepSizeMM            = zDistanceToMoveInMM/finalNumberOfSteps;
+    float zFeedRate, zMaxFeed, zStepSizeMM;
 
-    if (zFeedRate > zMaxFeed){
-      zStepSizeMM                 = computeStepSize(zMaxFeed);
-      finalNumberOfSteps          = fabs(zDistanceToMoveInMM/zStepSizeMM);
-      stepSizeMM                  = arcLengthMM/finalNumberOfSteps;
-      feedMMPerMin                = calculateFeedrate(stepSizeMM, delayTime);
+    if (useZ) {
+      zFeedRate              = calculateFeedrate(fabs(zDistanceToMoveInMM/finalNumberOfSteps), delayTime);
+      zMaxFeed               = sysSettings.maxZRPM * abs(zAxis.getPitch());
+      // zStepSizeMM            = computeStepSize(zMaxFeed);
+      zStepSizeMM            = zDistanceToMoveInMM/finalNumberOfSteps;
+
+      if (zFeedRate > zMaxFeed){
+        // Recalculate all movement to fit within zMaxFeed parameter.
+        zStepSizeMM                 = computeStepSize(zMaxFeed);
+        finalNumberOfSteps          = fabs(zDistanceToMoveInMM/zStepSizeMM);
+        stepSizeMM                  = arcLengthMM/finalNumberOfSteps;
+        feedMMPerMin                = calculateFeedrate(stepSizeMM, delayTime);
+      }
+
+      zStepSizeMM = zDistanceToMoveInMM/finalNumberOfSteps;
     }
-    
-    zStepSizeMM = zDistanceToMoveInMM/finalNumberOfSteps;
 
-    //Compute the starting position
+    // Compute the starting position.
     float angleNow = startingAngle;
     float degreeComplete = 0.0;
     
     float aChainLength;
     float bChainLength;
-    float zPosition      = Z1 + zStepSizeMM;
+    float zPosition = Z1;
     
-    //attach the axes
+    // Attach the axes.
     leftAxis.attach();
     rightAxis.attach();
-    if (sysSettings.zAxisAttached) {
+    if (useZ) {
       zAxis.attach();
     }
     
@@ -335,17 +349,16 @@ int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, co
             
             leftAxis.write(aChainLength);
             rightAxis.write(bChainLength); 
-            if(sysSettings.zAxisAttached){
+            if(useZ){
+              zPosition += zStepSizeMM;
               zAxis.write(zPosition);
             }
             movementUpdate();
             
-            // Run realtime commands
+            // Run real-time commands.
             execSystemRealtime();
             if (sys.stop){return 1;}
-
             numberOfStepsTaken++;
-            zPosition += zStepSizeMM;
         }
     }
     #if misloopDebug > 0
@@ -355,6 +368,9 @@ int   arc(const float& X1, const float& Y1, const float& Z1, const float& X2, co
     kinematics.inverse(X2,Y2,&aChainLength,&bChainLength);
     leftAxis.endMove(aChainLength);
     rightAxis.endMove(bChainLength);
+    if (useZ) {
+      zAxis.endMove(Z2);
+    }
     
     sys.xPosition = X2;
     sys.yPosition = Y2;
