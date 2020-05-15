@@ -782,12 +782,43 @@ void G2(const String& readString, int G2orG3){
     float Y2      = sys.inchesToMMConversion*extractGcodeValue(readString, 'Y', Y1/sys.inchesToMMConversion);
     // Read target Z position from gcode. If it is not specified then set it to NAN so it will not be used.
     float Z2      = sys.inchesToMMConversion*extractGcodeValue(readString, 'Z', NAN);
+    float R       = sys.inchesToMMConversion*extractGcodeValue(readString, 'R', NAN);
     float I       = sys.inchesToMMConversion*extractGcodeValue(readString, 'I', 0.0);
     float J       = sys.inchesToMMConversion*extractGcodeValue(readString, 'J', 0.0);
     sys.feedrate      = sys.inchesToMMConversion*extractGcodeValue(readString, 'F', sys.feedrate/sys.inchesToMMConversion);
 
     float centerX = X1 + I;
     float centerY = Y1 + J;
+
+    // Calculate center point using radius R if it is provided.
+    if (!isnan(R) && R && (X2 != X1 || Y2 != Y1)) {
+      // e: clockwise -1, counterclockwise 1
+      const float e = (G2orG3 == 2) ? -1 : 1,
+          // X and Y differences
+          dx = X2 - X1,
+          dy = Y2 - Y1,
+          // Linear distance between the points.
+          d = hypot(dx, dy),
+          // Distance to the arc pivot-point.
+          h = sqrt(sq(R) - sq(d * 0.5)),
+          // Point between the two points.
+          mx = (X1 + X2) * 0.5,
+          my = (Y1 + Y2) * 0.5,
+          // Slope of the perpendicular bisector.
+          sx = -dy / d,
+          sy = dx / d;
+      // Pivot-point of the arc.
+      centerX = mx + e * h * sx;
+      centerY = my + e * h * sy;
+      #if defined (verboseDebug) && verboseDebug > 0
+        Serial.print(F("G0"));
+        Serial.print(G2orG3);
+        Serial.print(F(" Radius center: "));
+        Serial.print(centerX);
+        Serial.print(F(","));
+        Serial.println(centerY);
+      #endif
+    }
 
     sys.feedrate = constrain(sys.feedrate, 1, sysSettings.maxFeed);   //constrain the maximum feedrate, 35ipm = 900 mmpm
 
