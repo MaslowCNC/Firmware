@@ -105,6 +105,8 @@ void settingsReset() {
     sysSettings.leftChainTolerance = 0.0;    // float leftChainTolerance;
     sysSettings.rightChainTolerance = 0.0;    // float rightChainTolerance;
     sysSettings.positionErrorLimit = 2.0;  // float positionErrorLimit;
+    sysSettings.zAxisUpperLimit = NAN; // float zAxisUpperLimit
+    sysSettings.zAxisLowerLimit = NAN;  // float zAxisLowerLimit
     sysSettings.eepromValidData = EEPROMVALIDDATA; // byte eepromValidData;
 }
 

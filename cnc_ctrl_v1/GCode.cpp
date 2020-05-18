@@ -370,6 +370,56 @@ byte  executeBcodeLine(const String& gcodeLine){
         return STATUS_OK;
     }
 
+    if(gcodeLine.substring(0, 3) == "B17"){
+        //The B17 sets the current Z position as Upper Limit for zAxis
+
+        sysSettings.zAxisUpperLimit = zAxis.read();
+        settingsSaveToEEprom();
+
+        Serial.print("Upper limit set to: ");
+        Serial.print(isnan(sysSettings.zAxisUpperLimit) ? "   ": String(sysSettings.zAxisUpperLimit / sys.inchesToMMConversion));
+        Serial.println(" ");
+        
+    
+        return STATUS_OK;
+    }
+ 
+       if(gcodeLine.substring(0, 3) == "B18"){
+        //The B18 sets the current Z position as Lower Limit for zAxis
+
+        sysSettings.zAxisLowerLimit = zAxis.read();
+        settingsSaveToEEprom();
+
+        Serial.print("Lower limit set to: ");
+        Serial.print(isnan(sysSettings.zAxisLowerLimit) ? "   ": String(sysSettings.zAxisLowerLimit / sys.inchesToMMConversion));
+        Serial.println(" ");        
+    
+        return STATUS_OK;
+    }
+       if(gcodeLine.substring(0, 3) == "B19"){
+        //The B19 clears limits for zAxis
+
+        sysSettings.zAxisUpperLimit = NAN;
+        sysSettings.zAxisLowerLimit = NAN;
+        settingsSaveToEEprom();
+
+        Serial.println(F("Z Axis Limits Cleared"));
+        
+    
+        return STATUS_OK;
+    }
+       if(gcodeLine.substring(0, 3) == "B20"){
+        //The B19 echoes limits for zAxis
+
+        Serial.print(F("Z Axis Upper Limit: "));
+        Serial.print(isnan(sysSettings.zAxisUpperLimit) ? String("   ") : String(sysSettings.zAxisUpperLimit / sys.inchesToMMConversion));
+        Serial.print(F(" Lower Limit: "));
+        Serial.print(isnan(sysSettings.zAxisLowerLimit) ? String("   "): String(sysSettings.zAxisLowerLimit / sys.inchesToMMConversion));
+        Serial.println(" ");
+    
+        return STATUS_OK;
+    }
+
         // Use 'B99 ON' to set FAKE_SERVO mode on,
         // 'B99' with no parameter, or any parameter other than 'ON' 
         // turns FAKE_SERVO mode off.
@@ -839,7 +889,7 @@ void  G10(const String& readString){
 
     zAxis.set(zgoto);
     zAxis.endMove(zgoto);
-    zAxis.attach();
+    zAxis.attach();    
 }
 
 void  G38(const String& readString) {

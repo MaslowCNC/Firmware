@@ -44,9 +44,25 @@ void   Axis::initializePID(const unsigned long& loopInterval){
 }
 
 void    Axis::write(const float& targetPosition){
-    _timeLastMoved = millis();
-    _pidSetpoint   =  targetPosition/ *_mmPerRotation;
-    return;
+
+   // Check that the Z axis position is withing limits stecified in Settings
+
+   if(_axisName == 'Z'){
+      if(!isnan(sysSettings.zAxisUpperLimit) && targetPosition > sysSettings.zAxisUpperLimit){
+        _pidSetpoint   =  sysSettings.zAxisUpperLimit/ *_mmPerRotation;
+        return;
+      }
+      
+      if(!isnan(sysSettings.zAxisLowerLimit) && targetPosition < sysSettings.zAxisLowerLimit){
+        _pidSetpoint   =  sysSettings.zAxisLowerLimit/ *_mmPerRotation;
+        return;
+      }
+   }
+
+   // update target position
+   _timeLastMoved = millis();
+   _pidSetpoint   =  targetPosition/ *_mmPerRotation;
+   return;
 }
 
 float  Axis::read(){
@@ -62,9 +78,27 @@ float  Axis::setpoint(){
 
 void   Axis::set(const float& newAxisPosition){
     
+   // update the zAxis upper and lower limits relative to the new axis position
+
+   if(_axisName == 'Z'){
+      if(!isnan(sysSettings.zAxisUpperLimit)){
+        sysSettings.zAxisUpperLimit += newAxisPosition - read();
+      }
+      
+      if(!isnan(sysSettings.zAxisLowerLimit)){
+        sysSettings.zAxisLowerLimit += newAxisPosition - read();
+      }
+  
+      if(!isnan(sysSettings.zAxisUpperLimit) || !isnan(sysSettings.zAxisLowerLimit)){
+        settingsSaveToEEprom();
+      }
+   }
+
     //reset everything to the new value
     _pidSetpoint  =  newAxisPosition/ *_mmPerRotation;
     motorGearboxEncoder.encoder.write((newAxisPosition * *_encoderSteps)/ *_mmPerRotation);
+
+
     
 }
 
@@ -225,10 +259,26 @@ void   Axis::detachIfIdle(){
 
 void   Axis::endMove(const float& finalTarget){
     
+    
+   // Check that the Z axis position is withing limits stecified in Settings
+
+   if(_axisName == 'Z'){
+      if(!isnan(sysSettings.zAxisUpperLimit) && finalTarget > sysSettings.zAxisUpperLimit){
+        _pidSetpoint   =  sysSettings.zAxisUpperLimit/ *_mmPerRotation;
+        return;
+      }
+      
+      if(!isnan(sysSettings.zAxisLowerLimit) && finalTarget < sysSettings.zAxisLowerLimit){
+        _pidSetpoint   =  sysSettings.zAxisLowerLimit/ *_mmPerRotation;
+        return;
+      }
+   }
+
     _timeLastMoved = millis();
     _pidSetpoint    = finalTarget/ *_mmPerRotation;
     
 }
+
 
 void   Axis::stop(){
     /*
