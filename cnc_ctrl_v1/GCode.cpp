@@ -373,51 +373,63 @@ byte  executeBcodeLine(const String& gcodeLine){
     if(gcodeLine.substring(0, 3) == "B17"){
         //The B17 sets the current Z position as Upper Limit for zAxis
 
-        sysSettings.zAxisUpperLimit = zAxis.read();
-        settingsSaveToEEprom();
+        if(!isnan(zAxis.read())){
 
-        Serial.print("Upper limit set to: ");
-        Serial.print(isnan(sysSettings.zAxisUpperLimit) ? "   ": String(sysSettings.zAxisUpperLimit / sys.inchesToMMConversion));
-        Serial.println(" ");
-        
+          settingsStoreGlobalSetting(byte(43), zAxis.read());
+
+          Serial.print(F("Upper limit set to: "));
+          Serial.println(isnan(sysSettings.zAxisUpperLimit) ? F("   "): String(sysSettings.zAxisUpperLimit / sys.inchesToMMConversion));
     
-        return STATUS_OK;
+          return STATUS_OK;
+          
+        } else {
+          
+          Serial.println(F("Error setting limit"));
+
+          return STATUS_GCODE_INVALID_TARGET;
+
+        }
     }
  
-       if(gcodeLine.substring(0, 3) == "B18"){
-        //The B18 sets the current Z position as Lower Limit for zAxis
+        if(gcodeLine.substring(0, 3) == "B18"){
+          //The B18 sets the current Z position as Lower Limit for zAxis
 
-        sysSettings.zAxisLowerLimit = zAxis.read();
-        settingsSaveToEEprom();
+          if(!isnan(zAxis.read())){
+            settingsStoreGlobalSetting(byte(44), zAxis.read());
 
-        Serial.print("Lower limit set to: ");
-        Serial.print(isnan(sysSettings.zAxisLowerLimit) ? "   ": String(sysSettings.zAxisLowerLimit / sys.inchesToMMConversion));
-        Serial.println(" ");        
+            Serial.print(F("Lower limit set to: "));
+            Serial.println(isnan(sysSettings.zAxisLowerLimit) ? F("   "): String(sysSettings.zAxisLowerLimit / sys.inchesToMMConversion));
     
-        return STATUS_OK;
+            return STATUS_OK;
+
+          } else {
+
+          Serial.println(F("Error setting limit"));
+
+          return STATUS_GCODE_INVALID_TARGET;
+
+        }
     }
-       if(gcodeLine.substring(0, 3) == "B19"){
-        //The B19 clears limits for zAxis
+        if(gcodeLine.substring(0, 3) == "B19"){
+          //The B19 clears limits for zAxis
 
-        sysSettings.zAxisUpperLimit = NAN;
-        sysSettings.zAxisLowerLimit = NAN;
-        settingsSaveToEEprom();
+          settingsStoreGlobalSetting(byte(43), NAN);
+          settingsStoreGlobalSetting(byte(44), NAN);
 
-        Serial.println(F("Z Axis Limits Cleared"));
-        
+          
+          Serial.println(F("Z Axis Limits Cleared"));
+          
+          return STATUS_OK;
+        }
+        if(gcodeLine.substring(0, 3) == "B20"){
+          //The B20 echoes limits for zAxis
+
+          Serial.print(F("Z Axis Upper Limit: "));
+          Serial.print(isnan(sysSettings.zAxisUpperLimit) ? F("NAN") : String(sysSettings.zAxisUpperLimit / sys.inchesToMMConversion));
+          Serial.print(F(" Lower Limit: "));
+          Serial.println(isnan(sysSettings.zAxisLowerLimit) ? F("NAN"): String(sysSettings.zAxisLowerLimit / sys.inchesToMMConversion));
     
-        return STATUS_OK;
-    }
-       if(gcodeLine.substring(0, 3) == "B20"){
-        //The B19 echoes limits for zAxis
-
-        Serial.print(F("Z Axis Upper Limit: "));
-        Serial.print(isnan(sysSettings.zAxisUpperLimit) ? String("   ") : String(sysSettings.zAxisUpperLimit / sys.inchesToMMConversion));
-        Serial.print(F(" Lower Limit: "));
-        Serial.print(isnan(sysSettings.zAxisLowerLimit) ? String("   "): String(sysSettings.zAxisLowerLimit / sys.inchesToMMConversion));
-        Serial.println(" ");
-    
-        return STATUS_OK;
+          return STATUS_OK;
     }
 
         // Use 'B99 ON' to set FAKE_SERVO mode on,
@@ -889,7 +901,7 @@ void  G10(const String& readString){
 
     zAxis.set(zgoto);
     zAxis.endMove(zgoto);
-    zAxis.attach();    
+    zAxis.attach();
 }
 
 void  G38(const String& readString) {

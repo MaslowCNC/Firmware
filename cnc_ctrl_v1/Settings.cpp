@@ -412,6 +412,12 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
         case 42:
               sysSettings.positionErrorLimit = value;
               break;
+        case 43:
+              sysSettings.zAxisUpperLimit = value;
+              break;
+        case 44:
+              sysSettings.zAxisLowerLimit = value;
+              break;        
         default:
               return(STATUS_INVALID_STATEMENT);
     }
