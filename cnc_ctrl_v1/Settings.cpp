@@ -105,6 +105,8 @@ void settingsReset() {
     sysSettings.leftChainTolerance = 0.0;    // float leftChainTolerance;
     sysSettings.rightChainTolerance = 0.0;    // float rightChainTolerance;
     sysSettings.positionErrorLimit = 2.0;  // float positionErrorLimit;
+    sysSettings.zAxisUpperLimit = NAN; // float zAxisUpperLimit
+    sysSettings.zAxisLowerLimit = NAN;  // float zAxisLowerLimit
     sysSettings.eepromValidData = EEPROMVALIDDATA; // byte eepromValidData;
 }
 
@@ -410,6 +412,12 @@ byte settingsStoreGlobalSetting(const byte& parameter,const float& value){
         case 42:
               sysSettings.positionErrorLimit = value;
               break;
+        case 43:
+              sysSettings.zAxisUpperLimit = value;
+              break;
+        case 44:
+              sysSettings.zAxisLowerLimit = value;
+              break;        
         default:
               return(STATUS_INVALID_STATEMENT);
     }
