@@ -46,8 +46,17 @@ int  Motor::setupMotor(const int& pwmPin, const int& pin1, const int& pin2){
     
  //stop the motor
     digitalWrite(_pin1,    LOW);
-    digitalWrite(_pin2,    LOW) ;
+    digitalWrite(_pin2,    LOW);
     
+ } else if (TB6643 == true){
+  //set pinmodes
+    pinMode(_pin1,     OUTPUT);
+    pinMode(_pin2,     OUTPUT);
+
+  //stop the motor
+    digitalWrite(_pin1,    HIGH);
+    digitalWrite(_pin2,    HIGH);
+      
   } else if (TLE9201 == true) {
   //set pinmodes
     pinMode(_pwmPin,   OUTPUT);
@@ -78,6 +87,10 @@ void Motor::attach(){
 void Motor::detach(){
     if (_attachedState != 0) {
         if (TLE5206 == true) {
+          //stop the motor
+          digitalWrite(_pin1,    LOW);
+          digitalWrite(_pin2,    LOW) ; 
+        } else if (TB6643 == true){
           //stop the motor
           digitalWrite(_pin1,    LOW);
           digitalWrite(_pin2,    LOW) ;
@@ -116,13 +129,13 @@ void Motor::write(int speed, bool force){
     if ((_attachedState == 1 or force) and (FAKE_SERVO_STATE != FAKE_SERVO_PERMITTED)){
         speed = constrain(speed, -255, 255);
         _lastSpeed = speed; //saves speed for use in additive write
-        bool forward = (speed > 0);
+        bool forward = (speed >= 0);
         speed = abs(speed); //remove sign from input because direction is set by control pins on H-bridge
 
         bool usePin1 = ((_pin1 != 4) && (_pin1 != 13) && (_pin1 != 11) && (_pin1 != 12)); // avoid PWM using timer0 or timer1
         bool usePin2 = ((_pin2 != 4) && (_pin2 != 13) && (_pin2 != 11) && (_pin2 != 12)); // avoid PWM using timer0 or timer1
         bool usepwmPin = ((TLE5206 == false) && (_pwmPin != 4) && (_pwmPin != 13) && (_pwmPin != 11) && (_pwmPin != 12)); // avoid PWM using timer0 or timer1       
-        if (!(TLE5206 || TLE9201)) { // L298 boards
+        if (!(TLE5206 || TLE9201 || TB6643)) { // L298 boards
             if (forward){
                 if (usepwmPin){
                     digitalWrite(_pin1 , HIGH );
@@ -159,7 +172,7 @@ void Motor::write(int speed, bool force){
             }
         } 
         else if (TLE5206)  {
-            speed = constrain(speed, 0, 254); // avoid issue when PWM value is 255
+            //speed = constrain(speed, 0, 254); // avoid issue when PWM value is 255
             if (forward) {
                 if (speed > 0) {
                     if (usePin2) {
@@ -186,7 +199,21 @@ void Motor::write(int speed, bool force){
                 }
             }
         }
-        else if (TLE9201) {
+        else if (TB6643){ // EBS v1.5
+             if (forward) {
+                if (speed > 0) {
+                        analogWrite(_pin1 , speed);
+                        digitalWrite(_pin2 , LOW); 
+                } else { // speed = 0 brake
+                    digitalWrite(_pin1 , HIGH);
+                    digitalWrite(_pin2 , HIGH);
+                }
+            } else { // reverse     
+                    digitalWrite(_pin1 , LOW);
+                    analogWrite(_pin2 , speed);   
+                  
+            }
+        } else if (TLE9201) {
             int dirPin     = _pin1;
             int enablePin  = _pin2;
             const int TOP  = 1;

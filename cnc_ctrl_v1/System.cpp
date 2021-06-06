@@ -21,6 +21,7 @@ Copyright 2014-2017 Bar Smith*/
 
 bool TLE5206;
 bool TLE9201;
+bool TB6643;
 
 // extern values using AUX pins defined in  setupAxes()
 int SpindlePowerControlPin;  // output for controlling spindle power
@@ -245,6 +246,36 @@ void   setupAxes(){
         aux8 = 46;
         aux9 = 47;
     }
+    else if(pcbVersion == 5){ // EBS PCB v1.5b Detected
+        
+        //MP1 - Right Motor
+        encoder1A = 2;  // INPUT
+        encoder1B = 3;  // INPUT
+        in1 = 9;        // OUTPUT
+        in2 = 10;       // OUTPUT
+      
+
+        //MP2 - Z-axis
+        encoder2A = 18; // INPUT
+        encoder2B = 19; // INPUT
+        in3 = 7;        // OUTPUT
+        in4 = 8;        // OUTPUT
+       
+
+        //MP3 - Left Motor
+        encoder3A = 21; // INPUT
+        encoder3B = 20; // INPUT
+        in5 = 6;        // OUTPUT
+        in6 = 5;        // OUTPUT
+       
+        //AUX pins
+        aux1 = 48;      // Router ON pin->HIGH
+        aux2 = 49;      // Probe INPUT
+        aux3 = 51;      // NC
+        aux4 = 50;      // Laser ON pin->HIGH
+        aux5 = 43;      // NC
+        aux6 = 44;      // NC
+    }
     else if (pcbVersion == 6){ // TLE9201
         //TLE9201 PCB v1.6 Detected
         //MP1 - Right Motor
@@ -352,11 +383,19 @@ void   setupAxes(){
     leftAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     rightAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     zAxis.setPIDValues(&sysSettings.zKpPos, &sysSettings.zKiPos, &sysSettings.zKdPos, &sysSettings.zPropWeightPos, &sysSettings.zKpV, &sysSettings.zKiV, &sysSettings.zKdV, &sysSettings.zPropWeightV);
-
     // Assign AUX pins to extern variables used by functions like Spindle and Probe
-    SpindlePowerControlPin = aux1;   // output for controlling spindle power
-    LaserPowerPin = aux2;            // output for controlling a laser diode
-    ProbePin = aux4;                 // use this input for zeroing zAxis with G38.2 gcode
+    if (pcbVersion == 5){
+        SpindlePowerControlPin = aux1;   // output for controlling spindle power
+        LaserPowerPin = aux4;            // output for controlling a laser diode
+        ProbePin = aux2;  
+    } 
+    else {
+        SpindlePowerControlPin = aux1;   // output for controlling spindle power
+        LaserPowerPin = aux2;            // output for controlling a laser diode
+        ProbePin = aux4; 
+    }
+    
+    // use this input for zeroing zAxis with G38.2 gcode
     pinMode(LaserPowerPin, OUTPUT);
     digitalWrite(LaserPowerPin, LOW);
 
@@ -414,18 +453,28 @@ int getPCBVersion(){
             pinCheck &= B000011; // strip off the unstrapped bits
             TLE5206 = false;
             TLE9201 = false;
+            TB6643 = false;
             break;
         case B110100: case B000100: // some versions of board v1.4 don't strap VERS5-6 low
             pinCheck &= B000111;    // strip off the unstrapped bits
+            TB6643 = false;            
             TLE5206 = true;
             TLE9201 = false;
             break;
-        case B000110:
+        case B000110: //  v 5
+            pinCheck &= B000110; // 110 for 6 
+            TB6643 = true;
+            TLE5206 = false;
+            TLE9201 = false;
+            break;
+        case B000111:  //v 1.6 AND V 1.7 (1.7 is a place holder and will not exist because 1.6 uses the same pins)
+            pinCheck &= B000111;
+            TB6643 = false;
             TLE5206 = false;
             TLE9201 = true;
             break;
     }
-    return pinCheck<6 ? pinCheck-1 : pinCheck;
+    return pinCheck<8 ? pinCheck-1 : pinCheck;
 }
 
 
@@ -461,7 +510,7 @@ void setPWMPrescalers(int prescalerChoice) {
             }
     #endif
     // tailor the PWM frequency to the chip
-    if (TLE5206) {
+    if (TLE5206 || TB6643) {
     // The upper limit to PWM frequency for TLE5206 is 1,000Hz
     //  so only '3' is valid
         prescalerChoice = 3;
@@ -588,6 +637,7 @@ void systemReset(){
     rightAxis.detach();
     zAxis.detach();
     setSpindlePower(false);
+    laserOff();
     // Reruns the initial setup function and calls stop to re-init state
     sys.stop = true;
     setup();

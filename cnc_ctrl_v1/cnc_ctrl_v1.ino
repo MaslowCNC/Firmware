@@ -33,6 +33,7 @@
 
 // TLE9201 version
 // TLE5206 version
+// TB6643 version
 
 #include "Maslow.h"
 #include <EEPROM.h>
@@ -64,6 +65,7 @@ void setup(){
     Serial.print(getPCBVersion());
     if (TLE5206 == true) { Serial.print(F(" TLE5206 ")); }
     if (TLE9201 == true) { Serial.print(F(" TLE9201 ")); }
+    if (TB6643 == true)  { Serial.print(F(" TB6643 ")); }
     Serial.println(F(" Detected"));
     sys.inchesToMMConversion = 1;
     sys.writeStepsToEEPROM = false;
@@ -114,9 +116,10 @@ void loop(){
     initGCode();
     if (sys.stop){               // only called on sys.stop to prevent stopping
         initMotion();            // on USB disconnect.  Might consider removing 
-        setSpindlePower(false);  // this restriction for safety if we are 
-    }                            // comfortable that USB disconnects are
-                                 // not a common occurrence anymore
+        setSpindlePower(false);  // this restriction for safety if we are comfortable that USB disconnects are not a common occurrence anymore
+        laserOff();          // 
+    }                             
+                                 
     kinematics.init();
     
     // Let's go!
