@@ -310,12 +310,14 @@ void   Axis::test(){
     for (int ramp = 0 ; ramp <= 255; ramp += 1) {
     motorGearboxEncoder.motor.directWrite(ramp);
     maslowDelay(2);
+    if (sys.stop){return;}
     }
     maslowDelay(2000);
     //ramp down
     for (int ramp = 255 ; ramp >= 0; ramp += -1) {
     motorGearboxEncoder.motor.directWrite(ramp);
     maslowDelay(2);
+    if (sys.stop){return;}
     }
  
     //check to see if it moved
@@ -333,12 +335,14 @@ void   Axis::test(){
     //move the motor in the other direction
     for (int ramp = 0 ; ramp >= -255; ramp += -1) {
     motorGearboxEncoder.motor.directWrite(ramp);
-    maslowDelay(2);  
+    maslowDelay(2);
+    if (sys.stop){return;}  
     }
     maslowDelay(2000); 
     for (int ramp = -255 ; ramp <= 0; ramp += 1) {
     motorGearboxEncoder.motor.directWrite(ramp);
     maslowDelay(2);
+    if (sys.stop){return;}
     }
     //check to see if it moved
     if(encoderPos - motorGearboxEncoder.encoder.read() < -500){
