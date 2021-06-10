@@ -77,7 +77,7 @@ void settingsReset() {
     sysSettings.originalChainLength = 1651;   // int originalChainLength;
     sysSettings.encoderSteps = 8113.73; // float encoderSteps;
     sysSettings.distPerRot = 63.5;   // float distPerRot;
-    sysSettings.maxFeed = 700;   // int maxFeed;
+    sysSettings.maxFeed = 900;   // int maxFeed;
     sysSettings.zAxisAttached = true;   // zAxisAttached;
     sysSettings.spindleAutomateType = NONE;  // bool spindleAutomate;
     sysSettings.maxZRPM = 12.60;  // float maxZRPM;
