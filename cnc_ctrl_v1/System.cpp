@@ -313,6 +313,39 @@ void   setupAxes(){
         aux8 = 46;
         aux9 = 47;
     }
+	else if (pcbVersion == 8) { // CG_PCB TB6643 Detected
+        //MP1 - Right Motor
+        encoder1A = 20; // INPUT
+        encoder1B = 21; // INPUT
+        in1 = 6;        // OUTPUT
+        in2 = 4;        // OUTPUT
+        enA = 5;        // errorFlag (not used)
+
+        //MP2 - Z-axis
+        encoder2A = 19; // INPUT
+        encoder2B = 18; // INPUT
+        in3 = 7;        // OUTPUT
+        in4 = 9;        // OUTPUT
+        enB = 8;        // errorFlag (not used)
+
+        //MP3 - Left Motor
+        encoder3A = 2;   // INPUT
+        encoder3B = 3;   // INPUT
+        in5 = 11;        // OUTPUT
+        in6 = 10;        // OUTPUT
+        enC = 12;        // errorFlag (not used)
+
+        //AUX pins
+        aux1 = 40;
+        aux2 = 41;
+        aux3 = 42;
+        aux4 = 43;
+        aux5 = 68;
+        aux6 = 69;
+        aux7 = 45;
+        aux8 = 46;
+        aux9 = 47;
+    }
     else { // board not recognized
         reportAlarmMessage(ALARM_BOARD_VERSION_INVALID);
         // Do we need to assure that no gpio pins are activated?
@@ -473,7 +506,13 @@ int getPCBVersion(){
             TLE5206 = false;
             TLE9201 = true;
             break;
-    }
+    	case B001000:  //v 1.8
+            pinCheck &= B001000;
+            TB6643 = true;
+            TLE5206 = false;
+            TLE9201 = false;
+            break;
+	}
     return pinCheck<8 ? pinCheck-1 : pinCheck;
 }
 
