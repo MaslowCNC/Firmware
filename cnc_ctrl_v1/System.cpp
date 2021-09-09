@@ -566,8 +566,6 @@ void setPWMPrescalers(int prescalerChoice) {
         prescalerChoice = constrain(prescalerChoice,2,3);
     } else if (TB6643) {
         prescalerChoice = constrain(prescalerChoice,1,3); // upper limit PWM frequency for TB6643 is 100kHz
-	} else if (TB6643) {
-        prescalerChoice = constrain(prescalerChoice,1,3); // upper limit PWM frequency for TB6643 is 100kHz
     }
 // first must erase the bits in each TTCRxB register that control the timers prescaler
     int prescalerEraser = 7;      // this is 111 in binary and is used as an eraser
