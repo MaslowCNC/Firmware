@@ -490,35 +490,35 @@ int getPCBVersion(){
             TLE5206 = false;
             TLE9201 = false;
             TB6643 = false;
-			OSLEAP = false;
+            OSLEAP = false;
             break;
         case B110100: case B000100: // some versions of board v1.4 don't strap VERS5-6 low
             pinCheck &= B000111;    // strip off the unstrapped bits
             TB6643 = false;            
             TLE5206 = true;
             TLE9201 = false;
-			OSLEAP = false;
+            OSLEAP = false;
             break;
         case B000110: //  v 5
             pinCheck &= B000110; // 110 for 6 
             TB6643 = true;
             TLE5206 = false;
             TLE9201 = false;
-			OSLEAP = false;
+            OSLEAP = false;
             break;
         case B000111:  //v 1.6 AND V 1.7 (1.7 is a place holder and will not exist because 1.6 uses the same pins)
             pinCheck &= B000111;
             TB6643 = false;
             TLE5206 = false;
             TLE9201 = true;
-			OSLEAP = false;
+            OSLEAP = false;
             break;
     	case B001000:  //v 1.8
             pinCheck &= B001000;
             TB6643 = false;
             TLE5206 = false;
             TLE9201 = false;
-			OSLEAP = true;
+            OSLEAP = true;
             break;
 	}
     return pinCheck<8 ? pinCheck-1 : pinCheck;
