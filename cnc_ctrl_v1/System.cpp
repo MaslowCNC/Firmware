@@ -22,6 +22,7 @@ Copyright 2014-2017 Bar Smith*/
 bool TLE5206;
 bool TLE9201;
 bool TB6643;
+bool OSLEAP;
 
 // extern values using AUX pins defined in  setupAxes()
 int SpindlePowerControlPin;  // output for controlling spindle power
@@ -313,7 +314,7 @@ void   setupAxes(){
         aux8 = 46;
         aux9 = 47;
     }
-	else if (pcbVersion == 8) { // CG_PCB TB6643 Detected
+	else if (pcbVersion == 8) { // OSLEAP Detected
         //MP1 - Right Motor
         encoder1A = 20; // INPUT
         encoder1B = 21; // INPUT
@@ -416,6 +417,7 @@ void   setupAxes(){
     leftAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     rightAxis.setPIDValues(&sysSettings.KpPos, &sysSettings.KiPos, &sysSettings.KdPos, &sysSettings.propWeightPos, &sysSettings.KpV, &sysSettings.KiV, &sysSettings.KdV, &sysSettings.propWeightV);
     zAxis.setPIDValues(&sysSettings.zKpPos, &sysSettings.zKiPos, &sysSettings.zKdPos, &sysSettings.zPropWeightPos, &sysSettings.zKpV, &sysSettings.zKiV, &sysSettings.zKdV, &sysSettings.zPropWeightV);
+	
     // Assign AUX pins to extern variables used by functions like Spindle and Probe
     if (pcbVersion == 5){
         SpindlePowerControlPin = aux1;   // output for controlling spindle power
@@ -472,6 +474,7 @@ int getPCBVersion(){
 *      x   x      x   x     GND PU    GND GND -> PCB v1.3 and 1.4 TLE5206
 *      x   x      GND GND   GND PU    GND PU  -> reserved for v1.4 TLE5206, v1.5 is unused
 *      x   x      GND GND   GND PU    PU  GND -> PCB v1.6 TLE9201
+*      x   x      GND GND   PU GND    GND GND -> PCB v1.8  PCB v1.8 OSLEAP
 */
     pinMode(VERS1,INPUT_PULLUP);
     pinMode(VERS2,INPUT_PULLUP);
@@ -487,30 +490,35 @@ int getPCBVersion(){
             TLE5206 = false;
             TLE9201 = false;
             TB6643 = false;
+			OSLEAP = false;
             break;
         case B110100: case B000100: // some versions of board v1.4 don't strap VERS5-6 low
             pinCheck &= B000111;    // strip off the unstrapped bits
             TB6643 = false;            
             TLE5206 = true;
             TLE9201 = false;
+			OSLEAP = false;
             break;
         case B000110: //  v 5
             pinCheck &= B000110; // 110 for 6 
             TB6643 = true;
             TLE5206 = false;
             TLE9201 = false;
+			OSLEAP = false;
             break;
         case B000111:  //v 1.6 AND V 1.7 (1.7 is a place holder and will not exist because 1.6 uses the same pins)
             pinCheck &= B000111;
             TB6643 = false;
             TLE5206 = false;
             TLE9201 = true;
+			OSLEAP = false;
             break;
     	case B001000:  //v 1.8
             pinCheck &= B001000;
-            TB6643 = true;
+            TB6643 = false;
             TLE5206 = false;
             TLE9201 = false;
+			OSLEAP = true;
             break;
 	}
     return pinCheck<8 ? pinCheck-1 : pinCheck;
@@ -557,6 +565,8 @@ void setPWMPrescalers(int prescalerChoice) {
     // The upper limit to PWM frequency for TLE9201 is 20,000Hz
         prescalerChoice = constrain(prescalerChoice,2,3);
     } else if (TB6643) {
+        prescalerChoice = constrain(prescalerChoice,1,3); // upper limit PWM frequency for TB6643 is 100kHz
+	} else if (TB6643) {
         prescalerChoice = constrain(prescalerChoice,1,3); // upper limit PWM frequency for TB6643 is 100kHz
     }
 // first must erase the bits in each TTCRxB register that control the timers prescaler
