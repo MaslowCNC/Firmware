@@ -314,7 +314,9 @@ void   setupAxes(){
         aux8 = 46;
         aux9 = 47;
     }
-	else if (pcbVersion == 8) { // OSLEAP PCB v1.8 Detected
+	else if (pcbVersion == 8) { // OSLEAP PCB v1.8
+        //OSLEAP PCB v1.8 Detected
+		
         //MP1 - Right Motor
         encoder1A = 20; // INPUT
         encoder1B = 21; // INPUT
@@ -423,7 +425,12 @@ void   setupAxes(){
         SpindlePowerControlPin = aux1;   // output for controlling spindle power
         LaserPowerPin = aux4;            // output for controlling a laser diode
         ProbePin = aux2;                 // use this input for zeroing zAxis with G38.2 gcode
-    } 
+    }
+     if (pcbVersion == 8){
+        SpindlePowerControlPin = aux1;   // output for controlling spindle power
+        LaserPowerPin = aux2;            // output for controlling a laser diode
+        ProbePin = aux4;                 // use this input for zeroing zAxis with G38.2 gcode
+    }
     else {
         SpindlePowerControlPin = aux1;   // output for controlling spindle power
         LaserPowerPin = aux2;            // output for controlling a laser diode
