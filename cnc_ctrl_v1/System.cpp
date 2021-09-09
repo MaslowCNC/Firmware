@@ -314,7 +314,7 @@ void   setupAxes(){
         aux8 = 46;
         aux9 = 47;
     }
-	else if (pcbVersion == 8) { // OSLEAP Detected
+	else if (pcbVersion == 8) { // OSLEAP PCB v1.8 Detected
         //MP1 - Right Motor
         encoder1A = 20; // INPUT
         encoder1B = 21; // INPUT
