@@ -313,8 +313,9 @@ void   setupAxes(){
         aux8 = 46;
         aux9 = 47;
     }
-	else if (pcbVersion == 8) { // MASLOW TB6643 Detected
-        //MP1 - Right Motor
+	else if (pcbVersion == 8) { // MASLOW TB6643 PCB v1.8
+ 
+       //MP1 - Right Motor
         encoder1A = 20; // INPUT
         encoder1B = 21; // INPUT
         in1 = 6;        // OUTPUT
