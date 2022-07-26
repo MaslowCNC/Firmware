@@ -313,33 +313,31 @@ void   setupAxes(){
         aux8 = 46;
         aux9 = 47;
     }
-	else if (pcbVersion == 8) { // CG_PCB TB6643 Detected
-        //MP1 - Right Motor
+	else if (pcbVersion == 8) { // MASLOW TB6643 PCB v1.8
+ 
+       //MP1 - Right Motor
         encoder1A = 20; // INPUT
         encoder1B = 21; // INPUT
         in1 = 6;        // OUTPUT
-        in2 = 4;        // OUTPUT
-        enA = 5;        // errorFlag (not used)
+        in2 = 5;        // OUTPUT
 
         //MP2 - Z-axis
         encoder2A = 19; // INPUT
         encoder2B = 18; // INPUT
-        in3 = 7;        // OUTPUT
-        in4 = 9;        // OUTPUT
-        enB = 8;        // errorFlag (not used)
+        in3 = 8;        // OUTPUT
+        in4 = 7;        // OUTPUT
 
         //MP3 - Left Motor
-        encoder3A = 2;   // INPUT
-        encoder3B = 3;   // INPUT
-        in5 = 11;        // OUTPUT
-        in6 = 10;        // OUTPUT
-        enC = 12;        // errorFlag (not used)
+        encoder3A = 2;  // INPUT
+        encoder3B = 3;  // INPUT
+        in5 = 10;       // OUTPUT
+        in6 = 9;        // OUTPUT
 
         //AUX pins
-        aux1 = 40;
+        aux1 = 40;      // SPINDLE PWR OUTPUT (5v = HIGH = ON)
         aux2 = 41;
         aux3 = 42;
-        aux4 = 43;
+        aux4 = 43;      // Z ZERO PROBE INPUT  (5v = HIGH = TOUCH)
         aux5 = 68;
         aux6 = 69;
         aux7 = 45;
@@ -489,28 +487,28 @@ int getPCBVersion(){
             TB6643 = false;
             break;
         case B110100: case B000100: // some versions of board v1.4 don't strap VERS5-6 low
-            pinCheck &= B000111;    // strip off the unstrapped bits
-            TB6643 = false;            
+            pinCheck &= B000111;    // strip off the unstrapped bits           
             TLE5206 = true;
             TLE9201 = false;
+            TB6643 = false; 
             break;
         case B000110: //  v 5
             pinCheck &= B000110; // 110 for 6 
-            TB6643 = true;
             TLE5206 = false;
             TLE9201 = false;
+            TB6643 = true;
             break;
         case B000111:  //v 1.6 AND V 1.7 (1.7 is a place holder and will not exist because 1.6 uses the same pins)
             pinCheck &= B000111;
-            TB6643 = false;
             TLE5206 = false;
             TLE9201 = true;
+            TB6643 = false;
             break;
-    	case B001000:  //v 1.8
+    	case B001000:  // v 1.8
             pinCheck &= B001000;
-            TB6643 = true;
             TLE5206 = false;
             TLE9201 = false;
+            TB6643 = true;
             break;
 	}
     return pinCheck<8 ? pinCheck-1 : pinCheck;
